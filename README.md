@@ -1,11 +1,17 @@
-# Future Image Viewer - FIVI
+# FIVI360
 
-Este projeto é um visualizador de imagens 360.
+https://fivi360.web.app/
 
-A idéia é fornecer ao usuário final uma interface fácil e amigável para a visualização de fotos panorâmicas.
+O Future Image Viewer, ou FIVI360, é um visualizador de imagens panorâmicas (360°) que permite ao usuário, através de uma interface amigável, visualizar imagens de forma imersiva e intuitiva.
+
+A necessidade deste projeto nasce com a demanda cada vez mais presente de tecnologias que aproximam o cliente do produto final.
 
 
-## PROJETO EM DESENVOLVIMENTO ##
+## Tenologias Utilizadas
+
+- React
+- Material UI
+- Firebase
 
 ## Próximos Passos
 
