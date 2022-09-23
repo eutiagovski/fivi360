@@ -1,18 +1,30 @@
 import "./App.css";
-import ImageViewer from "./components/ImageViewer/ImageViewer";
-import BasicSpeedDial from "./components/BasicSpeedDial/BasicSpeedDial";
+
 import Navbar from "./components/Navbar/Navbar";
-import { Box } from "@mui/material";
-import { useState } from "react";
+
+import { Box, CssBaseline, Toolbar, Typography } from "@mui/material";
+import { Route, Routes } from "react-router-dom";
+
+import Galery from "./layouts/Galery/Galery";
+import Viewer from "./layouts/Viewer/Viewer";
+import ImagesView from "./layouts/Images/ImagesView";
 
 function App() {
-  const [image, setImage] = useState();
-
+  console.log(window.innerHeight)
   return (
-    <Box sx={{ height: "100vh" }}>
+    <Box
+    >
+      <CssBaseline />
       <Navbar />
-      <ImageViewer image={image}/>
-      <BasicSpeedDial setImage={setImage}/>
+      <Toolbar />
+      <Box sx={window.innerHeight <= 700 ? {height: '91vh'} : {height: '92.5vh'}}>
+        <Routes>
+          <Route path="*" element={<Viewer />} />
+          <Route path="ver" element={<Viewer />} />
+          <Route path="galeria" element={<Galery />} />
+          <Route path="imagens" element={<ImagesView />} />
+        </Routes>
+      </Box>
     </Box>
   );
 }
