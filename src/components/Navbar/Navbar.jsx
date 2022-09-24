@@ -11,7 +11,13 @@ import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/Adb";
-import { PanoramaPhotosphere } from "@mui/icons-material";
+import {
+  Collections,
+  Logout,
+  PanoramaPhotosphere,
+  PermMedia,
+  PhotoLibrary,
+} from "@mui/icons-material";
 import { handleSignIn, handleSignOut } from "../../firebase.auth";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../context/AuthContext";
@@ -26,7 +32,6 @@ const Navbar = () => {
   const handleGoogleSignIn = async () => {
     const user = await handleSignIn();
     if (user) {
-      console.log(user);
       dispatch({
         type: "LOGGIN",
         payload: {
@@ -51,8 +56,17 @@ const Navbar = () => {
 
   const pages = ["Perfil", "Galeria", "Sair"];
   const actions = [
-    { label: "Imagens", icon: "", action: () => navigate("galeria") },
-    { label: "Sair", icon: "", action: () => handleGoogleLogout() },
+    {
+      label: "Minha Imagens",
+      icon: <Collections />,
+      action: () => navigate("imagens"),
+    },
+    {
+      label: "Meus Albums",
+      icon: <PermMedia />,
+      action: () => {navigate("albums"); handleCloseNavMenu()},
+    },
+    { label: "Sair", icon: <Logout />, action: () => handleGoogleLogout() },
   ];
 
   const handleOpenNavMenu = (event) => {
@@ -132,90 +146,6 @@ const Navbar = () => {
             </Box>
 
             <Box sx={{ display: "flex", alignItems: "center" }}>
-              {/* <Box sx={{ flexGrow: 0, display: { xs: "none", md: "flex" } }}>
-                {currentUser?.name ? (
-                  <>
-                    {actions.map((page) => (
-                      <Button
-                        key={page.label}
-                        onClick={() => {
-                          handleCloseNavMenu();
-                          page.action();
-                        }}
-                        sx={{ my: 2, color: "white", display: "block" }}
-                      >
-                        {page.label}
-                      </Button>
-                    ))}
-                  </>
-                ) : (
-                  <>
-                    <Button
-                      onClick={handleGoogleSignIn}
-                      sx={{ my: 2, color: "white", display: "block" }}
-                    >
-                      Entrar
-                    </Button>
-                  </>
-                )}
-              </Box> */}
-
-              {/* <Box sx={{ flexGrow: 0, display: { xs: "flex", md: "none" } }}>
-                <IconButton
-                  size="small"
-                  aria-label="account of current user"
-                  aria-controls="menu-appbar"
-                  aria-haspopup="true"
-                  onClick={handleOpenNavMenu}
-                  color="inherit"
-                >
-                  <MenuIcon />
-                </IconButton>
-                <Menu
-                  id="menu-appbar"
-                  anchorEl={anchorElNav}
-                  anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "left",
-                  }}
-                  keepMounted
-                  transformOrigin={{
-                    vertical: "top",
-                    horizontal: "left",
-                  }}
-                  open={Boolean(anchorElNav)}
-                  onClose={handleCloseNavMenu}
-                  sx={{
-                    display: { xs: "block", md: "none" },
-                  }}
-                >
-                  {currentUser?.name ? (
-                    <>
-                      {actions.map((page) => (
-                        <MenuItem
-                          key={page.label}
-                          onClick={() => {
-                            handleCloseNavMenu();
-                            page.action();
-                          }}
-                        >
-                          <Typography textAlign="center">
-                            {page.label}
-                          </Typography>
-                        </MenuItem>
-                      ))}
-                    </>
-                  ) : (
-                    <>
-                      <MenuItem onClick={handleGoogleSignIn}>
-                        <Typography textAlign="center">
-                          Entrar no App
-                        </Typography>
-                      </MenuItem>
-                    </>
-                  )}
-                </Menu>
-              </Box> */}
               <Box sx={{ flexGrow: 0 }}>
                 {currentUser ? (
                   <>
@@ -264,11 +194,25 @@ const Navbar = () => {
                     <MenuItem
                       key={page.label}
                       onClick={() => {
-                        handleCloseNavMenu();
+                        handleCloseUserMenu();
                         page.action();
                       }}
                     >
-                      <Typography textAlign="center">{page.label}</Typography>
+                      <Box
+                        mr={1}
+                        spacing={1}
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          // justifyContent: "space-between",
+                          width: " 100%",
+                        }}
+                      >
+                        {page.icon}
+                        <Typography textAlign="center" ml={2}>
+                          {page.label}
+                        </Typography>
+                      </Box>
                     </MenuItem>
                   ))}
                 </Menu>

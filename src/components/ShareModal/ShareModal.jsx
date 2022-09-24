@@ -20,9 +20,15 @@ const ShareModal = ({
   image,
   open,
   handleClose,
+  type
 }) => {
   const [values, setValues] = useState({share: image.share});
   
+  const shareImageLink = `https://fivi360.web.app/?image=${image.id}`
+  const shareAlbumLink = `https://fivi360.web.app/album?album=${image.id}`
+
+  console.log(image)
+
   const handleSubmit = () => {
     handleUpdateImage(image.id, values);
     handleClose()
@@ -52,16 +58,16 @@ const ShareModal = ({
             autoFocus
             margin="dense"
             id="name"
-            label="Link da imagem"
+            label={type==='album' ? 'Link para o album' : 'Link para a imagem'}
             type="email"
             fullWidth
             variant="standard"
-            value={`https://fivi360.web.app/?image=${image.id}`}
+            value={type === 'album' ? shareAlbumLink :shareImageLink}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="start">
                   <IconButton>
-                    <CopyAll />
+                    <CopyAll onClick={() => {navigator.clipboard.writeText(shareImageLink)}}/>
                   </IconButton>
                 </InputAdornment>
               ),

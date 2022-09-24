@@ -57,6 +57,18 @@ export const handleQueryUserImages = async (userId) => {
   return resultList;
 };
 
+export const handleDeleteUserImage = (docId) => {
+  const docRef = doc(db, "images", docId);
+  deleteDoc(docRef)
+    .then(() => {
+      console.log("Entire Document has been deleted successfully.");
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+};
+
+
 export const handleQueryUserAlbums = async (userId) => {
   const q = query(collection(db, "albums"), where("user", "==", userId));
 
@@ -68,14 +80,20 @@ export const handleQueryUserAlbums = async (userId) => {
   });
   return resultList;
 };
+export const handleAddUserAlbum = async (values) => {
+  console.log(values)
+  try {
+    const docRef = await addDoc(collection(db, "albums"), values);
+    console.log("Document written with ID: ", docRef.id);
+    return docRef.id
+  } catch (e) {
+    console.error("Error adding document: ", e);
+  }
+};
+export const handleQueryAlbum = async (albumId) => {
+  const docRef = doc(db, "albums", albumId);
+  const querySnapshot = await getDoc(docRef);
 
-export const handleDeleteUserImage = (docId) => {
-  const docRef = doc(db, "images", docId);
-  deleteDoc(docRef)
-    .then(() => {
-      console.log("Entire Document has been deleted successfully.");
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+  const albumDoc = {...querySnapshot.data(), id: albumId}
+  return albumDoc;
 };

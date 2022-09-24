@@ -5,28 +5,21 @@ import {
   ImageList,
   ImageListItem,
   ImageListItemBar,
-  ListItemIcon,
-  ListItemText,
-  Menu,
-  MenuItem,
   Typography,
   useMediaQuery,
+  Container,
 } from "@mui/material";
 import {
   DeleteForever,
   MoreVert,
-  PanoramaPhotosphere,
+  Share,
 } from "@mui/icons-material";
 import {
-  handleDeleteUserImage,
   handleQueryUserAlbums,
 } from "../../firebase.firestore";
 import { AuthContext } from "../../context/AuthContext";
-import storage from "../../firebase.storage";
-import { deleteObject, ref } from "firebase/storage";
 import { useNavigate } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
-
 
 const GaleryView = () => {
   const [albums, setAlbums] = useState([]);
@@ -36,7 +29,7 @@ const GaleryView = () => {
   const [pending, setPending] = useState(true);
   const [menuItem, setMenuItem] = useState(null);
   const [shareOpen, setShareOpen] = useState(false);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const open = Boolean(anchorEl);
   const handleClick = (event) => {
@@ -53,91 +46,109 @@ const GaleryView = () => {
   useEffect(() => {
     handleQueryUserAlbums(currentUser.id).then((images) => {
       setAlbums(images);
-      setPending(images.length >= 1 ? false : 'Nenhum item a ser exibido');
-      console.log(images)
+      setPending(images.length >= 1 ? false : "Nenhum item a ser exibido");
+      console.log(images);
     });
   }, [shareOpen]);
 
- 
   const matches = useMediaQuery("(min-width:600px)");
   return (
     <>
-      {pending && (
+      <Container maxWidth="xl">
         <Box
           sx={{
             display: "flex",
+            justifyContent: "space-between",
+            alignItens: "center",
             width: "100%",
-            height: "100%",
-            alignItems: "center",
-            justifyContent: "center",
+            mt: 1,
           }}
         >
-          {pending === true ? <CircularProgress align="center" /> : <Typography>{pending}</Typography>}
+          <Typography
+            variant="h6"
+            noWrap
+            component="a"
+            sx={{
+              mr: 2,
+              display: "flex",
+              fontFamily: "monospace",
+              fontWeight: 700,
+              letterSpacing: ".3rem",
+              color: "inherit",
+              textDecoration: "none",
+              cursor: "pointer",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            ALBUMS
+          </Typography>
+          <Box>
+            <IconButton>
+              <MoreVert />
+            </IconButton>
+          </Box>
         </Box>
-      )}
-      <ImageList
-        sx={{ width: "100%", height: { xs: "71vh", md: "74vh", xl: "80vh" } }}
-      >
-        {albums.map((item) => (
-          <ImageListItem key={item.path} cols={matches ? 1 : 4} gap={18}>
-            <img
-              src={`${item.items[0].path}?w=124&fit=crop&auto=format`}
-              srcSet={`${item.items[0].path}?w=124&fit=crop&auto=format&dpr=2 2x`}
-              alt={item.title}
-              // loading="lazy"
-            />
-            <ImageListItemBar
-              title={item.title}
-              subtitle={item.createdAt}
-              actionIcon={
-                <>
-                  <IconButton
-                    sx={{ color: "rgba(255, 255, 255, 0.54)", mr: 1 }}
-                    aria-label={`info about ${item.title}`}
-                    aria-controls={open ? "long-menu" : undefined}
-                    aria-expanded={open ? "true" : undefined}
-                    aria-haspopup="true"
-                    value={item.id}
-                    onClick={handleClick}
-                  >
-                    <MoreVert />
-                  </IconButton>
-                  <Menu
-                    id="long-menu"
-                    MenuListProps={{
-                      "aria-labelledby": "long-button",
-                    }}
-                    anchorEl={anchorEl}
-                    open={open}
-                    onClose={handleClose}
-                    PaperProps={{
-                      style: {
-                        maxHeight: 48 * 4.5,
-                        width: "20ch",
-                      },
-                    }}
-                  >
-                    <MenuItem
-                      onClick={() => navigate(`/&?image=${menuItem?.id}`)}
+        {pending && (
+          <Box
+            sx={{
+              display: "flex",
+              width: "100%",
+              height: "100%",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {pending === true ? (
+              <CircularProgress align="center" />
+            ) : (
+              <Typography>{pending}</Typography>
+            )}
+          </Box>
+        )}
+        <ImageList
+          sx={{ width: "100%", height: { xs: "71vh", md: "74vh", xl: "80vh" } }}
+        >
+          {albums.map((item) => (
+            <ImageListItem key={item.path} cols={matches ? 1 : 4} gap={18}>
+              <img
+                src={`${item.items[0].path}?w=124&fit=crop&auto=format`}
+                srcSet={`${item.items[0].path}?w=124&fit=crop&auto=format&dpr=2 2x`}
+                alt={item.title}
+                // loading="lazy"
+              />
+              <ImageListItemBar
+                title={<>
+                  <Box sx={{cursor:'pointer'}} onClick={() => navigate(`/album?album=${item.id}`)}>{item.title}</Box>
+                </>}
+                subtitle={item.createdAt}
+                actionIcon={
+                  <>
+                    {/* <IconButton
+                      sx={{ color: "rgba(255, 255, 255, 0.54)", mr: 1 }}
+                      aria-label={`info about ${item.title}`}
+                      aria-controls={open ? "long-menu" : undefined}
+                      aria-expanded={open ? "true" : undefined}
+                      aria-haspopup="true"
                     >
-                      <ListItemIcon>
-                        <PanoramaPhotosphere />
-                      </ListItemIcon>
-                      <ListItemText>Ver em 360°</ListItemText>
-                    </MenuItem>
-                    <MenuItem >
-                      <ListItemIcon>
-                        <DeleteForever />
-                      </ListItemIcon>
-                      <ListItemText>Apagar</ListItemText>
-                    </MenuItem>
-                  </Menu>
-                </>
-              }
-            />
-          </ImageListItem>
-        ))}
-      </ImageList>
+                      <Share />
+                    </IconButton>
+                    <IconButton
+                      sx={{ color: "rgba(255, 255, 255, 0.54)", mr: 1 }}
+                      aria-label={`info about ${item.title}`}
+                      aria-controls={open ? "long-menu" : undefined}
+                      aria-expanded={open ? "true" : undefined}
+                      aria-haspopup="true"
+                    >
+                      <DeleteForever />
+                    </IconButton> */}
+                  </>
+                }
+              />
+            </ImageListItem>
+          ))}
+        </ImageList>
+      </Container>
     </>
   );
 };

@@ -8,9 +8,10 @@ import { Route, Routes } from "react-router-dom";
 import Galery from "./layouts/Galery/Galery";
 import Viewer from "./layouts/Viewer/Viewer";
 import ImagesView from "./layouts/Images/ImagesView";
+import GaleryView from "./layouts/Galery/GaleryView";
+import GaleryDetails from "./layouts/Galery/GaleryDetails";
 
 function App() {
-  console.log(window.innerHeight)
   return (
     <Box
     >
@@ -20,9 +21,9 @@ function App() {
       <Box sx={window.innerHeight <= 700 ? {height: '91vh'} : {height: '92.5vh'}}>
         <Routes>
           <Route path="*" element={<Viewer />} />
-          <Route path="ver" element={<Viewer />} />
-          <Route path="galeria" element={<Galery />} />
           <Route path="imagens" element={<ImagesView />} />
+          <Route path="albums" element={<GaleryView />} />
+          <Route path="album" element={<GaleryDetails />} />
         </Routes>
       </Box>
     </Box>

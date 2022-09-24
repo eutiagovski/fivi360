@@ -14,7 +14,7 @@ import {
   SpeedDialAction,
   Backdrop,
 } from "@mui/material";
-import { Cached, Collections, Save, Share, Upload } from "@mui/icons-material";
+import { Collections, Save, Share, Upload } from "@mui/icons-material";
 
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -23,7 +23,6 @@ import ShareModal from "../../components/ShareModal/ShareModal";
 const queryString = require("query-string");
 
 const Viewer = () => {
-  const [errorMessage, setErrorMessage] = useState(false);
   var { image } = queryString.parse(window.location.search);
   var [image, setImage] = useState({ loadImage: image });
   const navigate = useNavigate();
@@ -182,10 +181,10 @@ const Viewer = () => {
           sx={{ position: "absolute", bottom: 16, right: 16, color: "#000" }}
           icon={<SpeedDialIcon />}
           onClose={handleClose}
-          // onClick={
-          //   !image.imageUrl ? handleClick : currentUser ? null : handleClick
-          // }
-          onOpen={handleOpen}
+          onClick={
+            currentUser ? null : handleClick
+          }
+          onOpen={currentUser ? handleOpen : null}
           open={open}
           FabProps={{
             sx: {
