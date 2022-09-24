@@ -47,7 +47,6 @@ const GaleryView = () => {
     handleQueryUserAlbums(currentUser.id).then((images) => {
       setAlbums(images);
       setPending(images.length >= 1 ? false : "Nenhum item a ser exibido");
-      console.log(images);
     });
   }, [shareOpen]);
 

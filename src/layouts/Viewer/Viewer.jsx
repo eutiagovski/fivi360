@@ -26,7 +26,6 @@ const Viewer = () => {
   var { image } = queryString.parse(window.location.search);
   var [image, setImage] = useState({ loadImage: image });
   const navigate = useNavigate();
-  const { currentUser } = useContext(AuthContext);
 
   const [pending, setPending] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
@@ -35,29 +34,29 @@ const Viewer = () => {
     if (image.loadImage) {
       setPending(true);
       handleQueryImage(image.loadImage).then((result) => {
-        if (result.share || result.user === currentUser?.id) {
-          // This can be downloaded directly:
-          const xhr = new XMLHttpRequest();
-          xhr.responseType = "blob";
-          xhr.onload = (event) => {
-            const blob = xhr.response;
-            var file = URL.createObjectURL(blob);
-            setImage({
-              ...image,
-              imageUrl: file,
-              title: result.title,
-              author: result.author,
-              id: result.id,
-              createdAt: result.createdAt,
-              share: result.share
-            });
-            setPending(false);
-          };
-          xhr.open("GET", result.path);
-          xhr.send();
-        } else {
-          setPending("Desculpe, essa imagem não pode ser exibida.");
-        }
+        // This can be downloaded directly:
+        const xhr = new XMLHttpRequest();
+        xhr.responseType = "blob";
+        xhr.onload = (event) => {
+          const blob = xhr.response;
+          var file = URL.createObjectURL(blob);
+          setImage({
+            ...image,
+            imageUrl: file,
+            title: result.title,
+            author: result.author,
+            id: result.id,
+            createdAt: result.createdAt,
+            share: result.share
+          });
+          setPending(false);
+        };
+        xhr.open("GET", result.path);
+        xhr.send();
+        // if (result.share || result.user === currentUser?.id) {
+        // } else {
+        //   setPending("Desculpe, essa imagem não pode ser exibida.");
+        // }
       });
     }
   }, [shareOpen]);
@@ -188,7 +187,7 @@ const Viewer = () => {
           open={open}
           FabProps={{
             sx: {
-              bgcolor: "#000",
+              bgcolor: "#121212",
               "&:hover": {
                 bgcolor: "#111",
               },
@@ -246,7 +245,7 @@ const Viewer = () => {
             }}
           >
             {pending === true && <CircularProgress align="center" />}
-            {pending != true && <Typography>{pending}</Typography>}
+            {pending !== true && <Typography>{pending}</Typography>}
           </Box>
         ) : (
           <>

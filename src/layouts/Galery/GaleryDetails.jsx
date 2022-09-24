@@ -1,5 +1,3 @@
-import IconButton from "@mui/material/IconButton";
-import { useEffect, useState, useContext } from "react";
 import {
   Box,
   ImageList,
@@ -8,7 +6,9 @@ import {
   Typography,
   useMediaQuery,
   Container,
+  IconButton,
 } from "@mui/material";
+
 import {
   Add,
   DeleteForever,
@@ -16,40 +16,37 @@ import {
   PanoramaPhotosphere,
   Share,
 } from "@mui/icons-material";
-import {
-  handleQueryAlbum,
-  handleQueryUserAlbums,
-} from "../../firebase.firestore";
-import { AuthContext } from "../../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+
+import { handleQueryAlbum } from "../../firebase.firestore";
+
 import CircularProgress from "@mui/material/CircularProgress";
 import ShareModal from "../../components/ShareModal/ShareModal";
-const queryString = require("query-string");
+
+import { AuthContext } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { useContext, useEffect, useState } from "react";
+
+import queryString from "query-string";
 
 const GaleryDetails = () => {
   const [albumDetails, setAlbumDetails] = useState({});
-  const { currentUser } = useContext(AuthContext);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [pending, setPending] = useState(true);
   const navigate = useNavigate();
   var { album } = queryString.parse(window.location.search);
+  const { currentUser } = useContext(AuthContext);
 
-  const [openShare, setOpenShare] = useState(false)
-  const handleShareOpen = () => setOpenShare(true)
-  const handleShareClose = () => setOpenShare(false)
-
-  const open = Boolean(anchorEl);
+  const [openShare, setOpenShare] = useState(false);
+  const handleShareOpen = () => setOpenShare(true);
+  const handleShareClose = () => setOpenShare(false);
 
   useEffect(() => {
     handleQueryAlbum(album).then((album) => {
-      if (album.user === currentUser?.id || album.share) {
-        setAlbumDetails(album);
-        setPending(
-          album.items.length >= 1 ? false : "Nenhum item a ser exibido"
-        );
-      } else {
-        setPending("Este album não está disponível.");
-      }
+      setAlbumDetails(album);
+      setPending(album.items.length >= 1 ? false : "Nenhum item a ser exibido");
+      // if (album.user === currentUser?.id || album.share) {
+      // } else {
+      //   setPending("Este album não está disponível.");
+      // }
     });
   }, []);
 
@@ -85,13 +82,20 @@ const GaleryDetails = () => {
             ALBUM
           </Typography>
           <Box>
-          <IconButton disabled={pending}>
+            <IconButton
+              disabled={pending || currentUser?.id !== albumDetails.user}
+            >
               <Add />
             </IconButton>
-            <IconButton disabled={pending} onClick={handleShareOpen}>
+            <IconButton
+              disabled={pending || currentUser?.id !== albumDetails.user}
+              onClick={handleShareOpen}
+            >
               <Share />
             </IconButton>
-            <IconButton disabled={pending}>
+            <IconButton
+              disabled={pending || currentUser?.id !== albumDetails.user}
+            >
               <MoreVert />
             </IconButton>
           </Box>
@@ -176,15 +180,20 @@ const GaleryDetails = () => {
                 subtitle={item.createdAt}
                 actionIcon={
                   <>
-                    <IconButton 
+                    <IconButton
                       sx={{ color: "rgba(255, 255, 255, 0.54)", mr: 1 }}
                       onClick={() => navigate(`/?image=${item.id}`)}
+                      disabled={
+                        pending || currentUser?.id !== albumDetails.user
+                      }
                     >
                       <PanoramaPhotosphere />
                     </IconButton>
                     <IconButton
                       sx={{ color: "rgba(255, 255, 255, 0.54)", mr: 1 }}
-                      
+                      disabled={
+                        pending || currentUser?.id !== albumDetails.user
+                      }
                     >
                       <DeleteForever />
                     </IconButton>
@@ -193,7 +202,11 @@ const GaleryDetails = () => {
               />
             </ImageListItem>
           ))}
-          <ShareModal open={openShare} image={albumDetails} handleClose={handleShareClose} />
+          <ShareModal
+            open={openShare}
+            image={albumDetails}
+            handleClose={handleShareClose}
+          />
         </ImageList>
       </Container>
     </>
