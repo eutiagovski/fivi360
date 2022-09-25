@@ -2,28 +2,44 @@ import "./App.css";
 
 import Navbar from "./components/Navbar/Navbar";
 
-import { Box, CssBaseline, Toolbar, Typography } from "@mui/material";
+import { Box, CssBaseline, Toolbar } from "@mui/material";
 import { Route, Routes } from "react-router-dom";
 
-import Galery from "./layouts/Galery/Galery";
 import Viewer from "./layouts/Viewer/Viewer";
 import ImagesView from "./layouts/Images/ImagesView";
 import GaleryView from "./layouts/Galery/GaleryView";
 import GaleryDetails from "./layouts/Galery/GaleryDetails";
+import { useContext } from "react";
+import { AuthContext } from "./context/AuthContext";
 
 function App() {
+  const { currentUser } = useContext(AuthContext);
   return (
-    <Box
-    >
+    <Box sx={{ height: "100vh" }}>
       <CssBaseline />
       <Navbar />
-      <Toolbar />
-      <Box sx={window.innerHeight <= 700 ? {height: '91vh'} : {height: '92.5vh'}}>
+      {/* <Toolbar /> */}
+      <Box
+        sx={{
+          height: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          pt: { xs: 7, md: 8 },
+        }}
+        // sx={
+        //   window.innerHeight <= 700 ? { height: "100vh" } : { height: "100vh" }
+
+        // }
+      >
         <Routes>
           <Route path="*" element={<Viewer />} />
-          <Route path="imagens" element={<ImagesView />} />
-          <Route path="albums" element={<GaleryView />} />
           <Route path="album" element={<GaleryDetails />} />
+          {currentUser && (
+            <>
+              <Route path="imagens" element={<ImagesView />} />
+              <Route path="albums" element={<GaleryView />} />
+            </>
+          )}
         </Routes>
       </Box>
     </Box>

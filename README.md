@@ -17,8 +17,3 @@ https://medium.com/swlh/how-to-display-360-images-using-react-and-select-coordin
 - Firebase
 - Pannelum
 
-## Próximos Passos
-
-- Possibilitar ao usuário salvar as fotos enviadas
-- Possibilitar ao usuário a criação de um album de fotos
-- Compartilhar albuns e fotos para outras pessoas

@@ -11,9 +11,12 @@ import {
 
 import {
   Add,
+  Collections,
   DeleteForever,
+  Edit,
   MoreVert,
   PanoramaPhotosphere,
+  PermMedia,
   Share,
 } from "@mui/icons-material";
 
@@ -27,6 +30,8 @@ import { useNavigate } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 
 import queryString from "query-string";
+import DeleteButton from "../../components/DeleteButton/DeleteButton";
+import ActionsButton from "../../components/ActionsButton/ActionsButton";
 
 const GaleryDetails = () => {
   const [albumDetails, setAlbumDetails] = useState({});
@@ -50,94 +55,86 @@ const GaleryDetails = () => {
     });
   }, []);
 
+  // section to handle
+
   const matches = useMediaQuery("(min-width:600px)");
+
+  const pageOptions = [
+    {
+      icon: <PermMedia />,
+      name: "Ir para Albums",
+      action: () => navigate("/albums"),
+      disabled: !currentUser,
+    },
+    {
+      icon: <Collections />,
+      name: "Ir para Galera",
+      action: () => navigate("/imagens"),
+      disabled: !currentUser,
+    },
+    {
+      icon: <DeleteForever />,
+      name: "Deletar Álbum",
+    },
+    {
+      icon: <Share />,
+      name: "Compartilhar Álbum",
+      action: handleShareOpen,
+      disabled: !currentUser || currentUser?.id === albumDetails.id,
+    },
+    {
+      icon: <Edit />,
+      name: "Editar Álbum",
+    },
+    {
+      icon: <PanoramaPhotosphere />,
+      name: "Início",
+      action: () => navigate("/"),
+    },
+  ];
+
   return (
     <>
       <Container maxWidth="xl">
-        <Box
+        <Typography
+          variant="h6"
+          noWrap
+          component="a"
           sx={{
+            mr: 2,
+            pt: 1,
             display: "flex",
-            justifyContent: "space-between",
-            alignItens: "center",
-            width: "100%",
-            mt: 1,
+            fontFamily: "monospace",
+            fontWeight: 700,
+            letterSpacing: ".3rem",
+            color: "inherit",
+            textDecoration: "none",
+            justifyContent: "center",
+            alignItems: "center",
           }}
         >
-          <Typography
-            variant="h6"
-            noWrap
-            component="a"
-            sx={{
-              mr: 2,
-              display: "flex",
-              fontFamily: "monospace",
-              fontWeight: 700,
-              letterSpacing: ".3rem",
-              color: "inherit",
-              textDecoration: "none",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            ALBUM
-          </Typography>
-          <Box>
-            <IconButton
-              disabled={pending || currentUser?.id !== albumDetails.user}
-            >
-              <Add />
-            </IconButton>
-            <IconButton
-              disabled={pending || currentUser?.id !== albumDetails.user}
-              onClick={handleShareOpen}
-            >
-              <Share />
-            </IconButton>
-            <IconButton
-              disabled={pending || currentUser?.id !== albumDetails.user}
-            >
-              <MoreVert />
-            </IconButton>
-          </Box>
-        </Box>
-        <Box
+          ALBUM
+        </Typography>
+        <Typography
+          variant="h6"
+          noWrap
+          component="a"
           sx={{
+            mr: 2,
             display: "flex",
-            justifyContent: "space-between",
-            alignItens: "center",
-            width: "100%",
-            mt: 1,
-          }}
-        ></Box>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItens: "center",
-            width: "100%",
-            mt: 1,
+            fontFamily: "monospace",
+            fontWeight: 500,
+            // letterSpacing: ".3rem",
+            color: "inherit",
+            textDecoration: "none",
+            cursor: "pointer",
+            justifyContent: "center",
+            alignItems: "center",
           }}
         >
-          <Typography
-            variant="h6"
-            noWrap
-            component="a"
-            sx={{
-              mr: 2,
-              display: "flex",
-              fontFamily: "monospace",
-              fontWeight: 500,
-              // letterSpacing: ".3rem",
-              color: "inherit",
-              textDecoration: "none",
-              cursor: "pointer",
-              justifyContent: "flex-start",
-              alignItems: "center",
-            }}
-          >
-            {albumDetails.title}
-          </Typography>
-        </Box>
+          {albumDetails.title}
+        </Typography>
+
         {pending && (
           <Box
             sx={{
@@ -155,9 +152,7 @@ const GaleryDetails = () => {
             )}
           </Box>
         )}
-        <ImageList
-          sx={{ width: "100%", height: { xs: "75vh", md: "74vh", xl: "80vh" } }}
-        >
+        <ImageList sx={{ width: "100%", height: "72vh" }}>
           {albumDetails.items?.map((item) => (
             <ImageListItem key={item.path} cols={matches ? 1 : 4} gap={18}>
               <img
@@ -171,7 +166,9 @@ const GaleryDetails = () => {
                   <>
                     <Box
                       sx={{ cursor: "pointer" }}
-                      onClick={() => navigate(`/?image=${item.id}`)}
+                      onClick={() =>
+                        navigate(`/?image=${item.id}&album=${albumDetails.id}`)
+                      }
                     >
                       {item.title}
                     </Box>
@@ -180,23 +177,7 @@ const GaleryDetails = () => {
                 subtitle={item.createdAt}
                 actionIcon={
                   <>
-                    <IconButton
-                      sx={{ color: "rgba(255, 255, 255, 0.54)", mr: 1 }}
-                      onClick={() => navigate(`/?image=${item.id}`)}
-                      disabled={
-                        pending || currentUser?.id !== albumDetails.user
-                      }
-                    >
-                      <PanoramaPhotosphere />
-                    </IconButton>
-                    <IconButton
-                      sx={{ color: "rgba(255, 255, 255, 0.54)", mr: 1 }}
-                      disabled={
-                        pending || currentUser?.id !== albumDetails.user
-                      }
-                    >
-                      <DeleteForever />
-                    </IconButton>
+                    {currentUser?.id === albumDetails.user && <DeleteButton />}
                   </>
                 }
               />
@@ -208,6 +189,7 @@ const GaleryDetails = () => {
             handleClose={handleShareClose}
           />
         </ImageList>
+        <ActionsButton options={pageOptions} invertColor />
       </Container>
     </>
   );

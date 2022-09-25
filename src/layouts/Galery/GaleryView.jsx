@@ -10,16 +10,17 @@ import {
   Container,
 } from "@mui/material";
 import {
+  Collections,
   DeleteForever,
   MoreVert,
+  PanoramaPhotosphere,
   Share,
 } from "@mui/icons-material";
-import {
-  handleQueryUserAlbums,
-} from "../../firebase.firestore";
+import { handleQueryUserAlbums } from "../../firebase.firestore";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
+import ActionsButton from "../../components/ActionsButton/ActionsButton";
 
 const GaleryView = () => {
   const [albums, setAlbums] = useState([]);
@@ -51,43 +52,42 @@ const GaleryView = () => {
   }, [shareOpen]);
 
   const matches = useMediaQuery("(min-width:600px)");
+
+  const pageOptions = [
+    {
+      icon: <Collections />,
+      name: "Galera",
+      action: () => navigate("/imagens"),
+    },
+    {
+      icon: <PanoramaPhotosphere />,
+      name: "Início",
+      action: () => navigate("/"),
+    },
+  ];
   return (
     <>
       <Container maxWidth="xl">
-        <Box
+        <Typography
+          variant="h6"
+          noWrap
+          component="a"
           sx={{
+            mr: 2,
+            p:1,
             display: "flex",
-            justifyContent: "space-between",
-            alignItens: "center",
-            width: "100%",
-            mt: 1,
+            fontFamily: "monospace",
+            fontWeight: 700,
+            letterSpacing: ".3rem",
+            color: "inherit",
+            textDecoration: "none",
+            cursor: "pointer",
+            justifyContent: "center",
+            alignItems: "center",
           }}
         >
-          <Typography
-            variant="h6"
-            noWrap
-            component="a"
-            sx={{
-              mr: 2,
-              display: "flex",
-              fontFamily: "monospace",
-              fontWeight: 700,
-              letterSpacing: ".3rem",
-              color: "inherit",
-              textDecoration: "none",
-              cursor: "pointer",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            ALBUMS
-          </Typography>
-          <Box>
-            <IconButton>
-              <MoreVert />
-            </IconButton>
-          </Box>
-        </Box>
+          ALBUMS
+        </Typography>
         {pending && (
           <Box
             sx={{
@@ -106,7 +106,7 @@ const GaleryView = () => {
           </Box>
         )}
         <ImageList
-          sx={{ width: "100%", height: { xs: "71vh", md: "74vh", xl: "80vh" } }}
+          sx={{ width: "100%", height: '75vh' }}
         >
           {albums.map((item) => (
             <ImageListItem key={item.path} cols={matches ? 1 : 4} gap={18}>
@@ -117,9 +117,16 @@ const GaleryView = () => {
                 // loading="lazy"
               />
               <ImageListItemBar
-                title={<>
-                  <Box sx={{cursor:'pointer'}} onClick={() => navigate(`/album?album=${item.id}`)}>{item.title}</Box>
-                </>}
+                title={
+                  <>
+                    <Box
+                      sx={{ cursor: "pointer" }}
+                      onClick={() => navigate(`/album?album=${item.id}`)}
+                    >
+                      {item.title}
+                    </Box>
+                  </>
+                }
                 subtitle={item.createdAt}
                 actionIcon={
                   <>
@@ -147,6 +154,7 @@ const GaleryView = () => {
             </ImageListItem>
           ))}
         </ImageList>
+        <ActionsButton options={pageOptions} invertColor />
       </Container>
     </>
   );

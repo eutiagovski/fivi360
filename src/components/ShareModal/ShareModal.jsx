@@ -8,20 +8,17 @@ import { IconButton, InputAdornment } from "@mui/material";
 import { CopyAll } from "@mui/icons-material";
 
 const ShareModal = ({ image, open, handleClose, type }) => {
-  const shareImageLink = `https://fivi360.web.app/?image=${image.id}`;
-  const shareAlbumLink = `https://fivi360.web.app/album?album=${image.id}`;
+  const shareImageLink = window.location.href
+  const shareAlbumLink = window.location.href
 
-  const handleSubmit = () => {
-    // handleUpdateImage(image.id, values);
-    handleClose();
-  };
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle>Compartilhar "{image?.title}"</DialogTitle>
       <DialogContent>
         <TextField
+        size='small'
+          multiline
           autoFocus
-          margin="dense"
           id="name"
           label={image.items ? "Link para o album" : "Link para a imagem"}
           type="email"
@@ -30,7 +27,7 @@ const ShareModal = ({ image, open, handleClose, type }) => {
           value={image.items ? shareAlbumLink : shareImageLink}
           InputProps={{
             endAdornment: (
-              <InputAdornment position="start">
+              <InputAdornment position="end">
                 <IconButton>
                   <CopyAll
                     onClick={() => {
