@@ -1,4 +1,3 @@
-import IconButton from "@mui/material/IconButton";
 import { useEffect, useState, useContext } from "react";
 import {
   Box,
@@ -11,10 +10,7 @@ import {
 } from "@mui/material";
 import {
   Collections,
-  DeleteForever,
-  MoreVert,
   PanoramaPhotosphere,
-  Share,
 } from "@mui/icons-material";
 import { handleQueryUserAlbums } from "../../firebase.firestore";
 import { AuthContext } from "../../context/AuthContext";
@@ -26,23 +22,11 @@ const GaleryView = () => {
   const [albums, setAlbums] = useState([]);
   const { currentUser } = useContext(AuthContext);
 
-  const [anchorEl, setAnchorEl] = useState(null);
   const [pending, setPending] = useState(true);
-  const [menuItem, setMenuItem] = useState(null);
   const [shareOpen, setShareOpen] = useState(false);
   const navigate = useNavigate();
 
-  const open = Boolean(anchorEl);
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-    setMenuItem(
-      albums.filter((image) => image.id === event.currentTarget.value)[0]
-    );
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-    setMenuItem(null);
-  };
+  
 
   useEffect(() => {
     handleQueryUserAlbums(currentUser.id).then((images) => {
@@ -67,7 +51,7 @@ const GaleryView = () => {
   ];
   return (
     <>
-      <Container maxWidth="xl">
+      <Container maxWidth="xxl">
         <Typography
           variant="h6"
           noWrap
@@ -111,8 +95,8 @@ const GaleryView = () => {
           {albums.map((item) => (
             <ImageListItem key={item.path} cols={matches ? 1 : 4} gap={18}>
               <img
-                src={`${item.items[0].path}?w=124&fit=crop&auto=format`}
-                srcSet={`${item.items[0].path}?w=124&fit=crop&auto=format&dpr=2 2x`}
+                src={`${item.items[0]?.path}?w=124&fit=crop&auto=format`}
+                srcSet={`${item.items[0]?.path}?w=124&fit=crop&auto=format&dpr=2 2x`}
                 alt={item.title}
                 // loading="lazy"
               />
@@ -130,24 +114,7 @@ const GaleryView = () => {
                 subtitle={item.createdAt}
                 actionIcon={
                   <>
-                    {/* <IconButton
-                      sx={{ color: "rgba(255, 255, 255, 0.54)", mr: 1 }}
-                      aria-label={`info about ${item.title}`}
-                      aria-controls={open ? "long-menu" : undefined}
-                      aria-expanded={open ? "true" : undefined}
-                      aria-haspopup="true"
-                    >
-                      <Share />
-                    </IconButton>
-                    <IconButton
-                      sx={{ color: "rgba(255, 255, 255, 0.54)", mr: 1 }}
-                      aria-label={`info about ${item.title}`}
-                      aria-controls={open ? "long-menu" : undefined}
-                      aria-expanded={open ? "true" : undefined}
-                      aria-haspopup="true"
-                    >
-                      <DeleteForever />
-                    </IconButton> */}
+                    
                   </>
                 }
               />

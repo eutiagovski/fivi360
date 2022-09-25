@@ -7,111 +7,33 @@ import {
   ImageList,
   ImageListItem,
   ImageListItemBar,
-  Paper,
-  Stack,
   Typography,
   useMediaQuery,
 } from "@mui/material";
 import {
-  Add,
-  Collections,
   CreateNewFolder,
-  DeleteForever,
-  MoreVert,
   PanoramaPhotosphere,
   PermMedia,
-  Workspaces,
 } from "@mui/icons-material";
 import {
-  handleDeleteUserImage,
   handleQueryUserImages,
 } from "../../firebase.firestore";
 import { AuthContext } from "../../context/AuthContext";
-import storage from "../../firebase.storage";
-import { deleteObject, ref } from "firebase/storage";
 import { useNavigate } from "react-router-dom";
-import CircularProgress from "@mui/material/CircularProgress";
 import CreateAlbum from "../../components/CreateAlbum/CreateAlbum";
 import ActionsButton from "../../components/ActionsButton/ActionsButton";
-import DeleteModal from "../../components/DeleteModal/DeleteModal";
 import SnackMessage from "../../components/SnackMessage/SnackMessage";
+import DeleteButton from "../../components/DeleteButton/DeleteButton";
+import EditButton from "../../components/EditButton/EditButton";
+import LoadingBox from "../../components/LoadingBox/LoadingBox";
+import InfoButton from "../../components/InfoButton/InfoButton";
 
 const ImagesView = () => {
   const [images, setImages] = useState([]);
   const { currentUser } = useContext(AuthContext);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [pending, setPending] = useState(true);
-  const [menuItem, setMenuItem] = useState(null);
   const [shareOpen, setShareOpen] = useState(false);
   const navigate = useNavigate();
-
-  const open = Boolean(anchorEl);
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-    setMenuItem(
-      images.filter((image) => image.id === event.currentTarget.value)[0]
-    );
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-    setMenuItem(null);
-  };
-
-  useEffect(() => {
-    handleQueryUserImages(currentUser?.id)
-      .then((images) => {
-        setImages(images);
-        setPending(false);
-      })
-      .catch((e) => setPending("Não foi possível carregar esta galeria."));
-  }, [shareOpen]);
-
-  // section to handle delete image
-  const [deleteConfirm, setDeleteConfirm] = useState(false);
-  const handleOpenDeleteConfirm = () => setDeleteConfirm(true);
-  const handleCloseDeleteConfirm = () => {
-    setDeleteConfirm(false);
-    setImageDelete(null);
-  };
-  const [imageDelete, setImageDelete] = useState(null);
-
-  useEffect(() => {
-    if (imageDelete) handleOpenDeleteConfirm();
-  }, [imageDelete]);
-
-  const handleDeleteImage = async () => {
-    handleCloseDeleteConfirm();
-    setPendingMessage({
-      open: true,
-      message: "Aguarde ...",
-      severity: "warning",
-      handleClose: handleSnackClose,
-    });
-
-    const imageRef = ref(storage, imageDelete.path);
-    deleteObject(imageRef)
-      .then(() => {
-        handleDeleteUserImage(imageDelete.id);
-
-        setImages(images.filter((image) => image.id != imageDelete.id));
-        setImageDelete(null);
-        setPendingMessage({
-          open: true,
-          message: "Deletada com sucesso!",
-          severity: "success",
-          handleClose: handleSnackClose,
-        });
-      })
-      .catch((error) => {
-        setPendingMessage({
-          open: true,
-          message: "Erro ao deletar!",
-          severity: "error",
-          handleClose: handleSnackClose,
-        });
-      });
-  };
-  const matches = useMediaQuery("(min-width:600px)");
 
   // section to handle snackbar messages
   const [pendingMessage, setPendingMessage] = useState({
@@ -128,6 +50,17 @@ const ImagesView = () => {
 
     setPendingMessage(false);
   };
+
+  useEffect(() => {
+    handleQueryUserImages(currentUser?.id)
+      .then((images) => {
+        setImages(images);
+        setPending(images.length >= 1 ? false : "Nenhum item a ser exibido");
+      })
+      .catch((e) => setPending("Não foi possível carregar esta galeria."));
+  }, [shareOpen, pendingMessage.open]);
+
+  const matches = useMediaQuery("(min-width:600px)");
 
   // section to handle album create
   const [albumModal, setAlbumModal] = useState(false);
@@ -148,6 +81,7 @@ const ImagesView = () => {
       disabled:
         Object.values(groupSelect).filter((item) => item === true).length === 0,
     },
+    
     {
       icon: <PanoramaPhotosphere />,
       name: "Início",
@@ -155,7 +89,7 @@ const ImagesView = () => {
     },
   ];
   return (
-    <Container maxWidth="xl" sx={{ height: "100%", overflow: "none" }}>
+    <Container maxWidth="xxl" >
       <Typography
         variant="h6"
         noWrap
@@ -177,19 +111,7 @@ const ImagesView = () => {
         GALERIA
       </Typography>
 
-      {pending && (
-        <Box
-          sx={{
-            display: "flex",
-            width: "100%",
-            height: "100%",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <CircularProgress align="center" />
-        </Box>
-      )}
+      <LoadingBox pending={pending}/>
       <CreateAlbum
         images={groupSelect}
         open={albumModal}
@@ -228,18 +150,15 @@ const ImagesView = () => {
                       }
                     />
                   </IconButton>
-
-                  <IconButton
-                    sx={{ color: "rgba(255, 255, 255, 0.54)", mr: 1 }}
-                    aria-label={`info about ${item.title}`}
-                    aria-controls={open ? "long-menu" : undefined}
-                    aria-expanded={open ? "true" : undefined}
-                    aria-haspopup="true"
-                    value={item.id}
-                    onClick={() => setImageDelete(item)}
-                  >
-                    <DeleteForever />
-                  </IconButton>
+                  <InfoButton item={item} />
+                  <EditButton
+                    item={item}
+                    setPendingMessage={setPendingMessage}
+                  />
+                  <DeleteButton
+                    item={item}
+                    setPendingMessage={setPendingMessage}
+                  />
                 </>
               }
             />
@@ -247,23 +166,8 @@ const ImagesView = () => {
         ))}
       </ImageList>
       <ActionsButton options={pageOptions} invertColor />
-      <DeleteModal
-        title="Deletar imagem"
-        content={
-          <Box sx={{ display: "flex", flexDirection: "column" }}>
-            <Typography variant="span">
-              Você tem certeza de que deseja deletar essa imagem?
-            </Typography>
-            <Typography variant="span">
-              Essa ação não poderá ser desfeita!
-            </Typography>
-          </Box>
-        }
-        open={deleteConfirm}
-        handleClose={handleCloseDeleteConfirm}
-        handleConfirm={handleDeleteImage}
-      />
-      <SnackMessage pendingMessage={pendingMessage} />
+     
+      <SnackMessage pendingMessage={{...pendingMessage, handleClose: handleSnackClose}} />
     </Container>
   );
 };

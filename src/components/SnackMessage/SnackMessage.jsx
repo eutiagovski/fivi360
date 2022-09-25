@@ -14,7 +14,6 @@ const SnackMessage = ({ pendingMessage }) => {
         autoHideDuration={6000}
         onClose={handleClose}
         anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-        size='small'
       >
         <CustomAlert
           onClose={handleClose}

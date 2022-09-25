@@ -86,7 +86,7 @@ const Navbar = () => {
 
   return (
     <AppBar position="fixed">
-      <Container maxWidth="xl">
+      <Container maxWidth="xxl">
         <Toolbar disableGutters>
           <Box
             sx={{

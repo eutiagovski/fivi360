@@ -15,17 +15,12 @@ export const handleAddDoc = async (values) => {
   }
 };
 
-export const handleUpdateImage = async (imageId, values) => {
-  const docRef = doc(db, "images", imageId);
-  const updateFields = {...docRef, ...values};
+export const handleUpdateImage = async (image) => {
+  const docRef = doc(db, "images", image.id);
+  delete image.id;
 
-  console.log(updateFields)
-  
-  updateDoc(docRef, values).then(result => {
-    console.log(result)
-  });
-  return {success: 'Item atualizado com sucesso!'}
-
+  const resp = await updateDoc(docRef, image)
+  return resp
 };
 
 export const handleGetDocuments = async (collectionRef) => {
@@ -57,15 +52,10 @@ export const handleQueryUserImages = async (userId) => {
   return resultList;
 };
 
-export const handleDeleteUserImage = (docId) => {
+export const handleDeleteUserImage = async (docId) => {
   const docRef = doc(db, "images", docId);
-  deleteDoc(docRef)
-    .then(() => {
-      console.log("Entire Document has been deleted successfully.");
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+  const resp = await deleteDoc(docRef);
+  return resp
 };
 
 
@@ -81,9 +71,8 @@ export const handleQueryUserAlbums = async (userId) => {
   return resultList;
 };
 export const handleAddUserAlbum = async (values) => {
-  console.log(values)
+  const docRef = await addDoc(collection(db, "albums"), values);
   try {
-    const docRef = await addDoc(collection(db, "albums"), values);
     console.log("Document written with ID: ", docRef.id);
     return docRef.id
   } catch (e) {
@@ -97,3 +86,18 @@ export const handleQueryAlbum = async (albumId) => {
   const albumDoc = {...querySnapshot.data(), id: albumId}
   return albumDoc;
 };
+export const handleUpdateUserAlbum = async (album) => {
+  const docRef = doc(db, "albums", album.id);
+  delete album.id
+
+  const resp = await updateDoc(docRef, album)
+  return resp
+}
+
+export const handleDeleteUserAlbum = async (album) =>{
+  console.log(album)
+  const docRef = doc(db, "albums", album);
+
+  const resp = await deleteDoc(docRef)
+  return resp
+}

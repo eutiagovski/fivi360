@@ -49,7 +49,7 @@ const CreateAlbum = ({ images, open, handleClose }) => {
         severity: "success",
         handleClose: handleSnackClose,
       });
-      navigate(`/album&album=${id}`);
+      navigate(`/album?album=${id}`);
     });
     handleClose();
 

@@ -1,30 +1,26 @@
 import { useContext, useRef, useState, useEffect } from "react";
 
-import { handleAddDoc, handleQueryAlbum } from "../../firebase.firestore";
-import storage from "../../firebase.storage";
+import { handleQueryAlbum } from "../../firebase.firestore";
 import { handleQueryImage } from "../../firebase.firestore";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 import { Pannellum } from "pannellum-react";
 
-import { Box, CircularProgress, TextField, Typography } from "@mui/material";
+import { Box, CircularProgress, Typography } from "@mui/material";
 import {
   ArrowBack,
   ArrowForward,
   Collections,
-  PanoramaPhotosphere,
   PermMedia,
-  Save,
-  Share,
   Upload,
 } from "@mui/icons-material";
 
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import DialogModal from "../../components/DialogModal/DialogModal";
-import ShareModal from "../../components/ShareModal/ShareModal";
 import ActionsButton from "../../components/ActionsButton/ActionsButton";
 import SnackMessage from "../../components/SnackMessage/SnackMessage";
+import SaveButton from "../../components/SaveButton/SaveButton";
+import ShareButton from "../../components/ShareButton/ShareButton";
+import InfoButton from "../../components/InfoButton/InfoButton";
 const queryString = require("query-string");
 
 const Viewer = () => {
@@ -100,6 +96,10 @@ const Viewer = () => {
       action: handleNavFoward,
       disabled: navIndex === albumItems.length - 1,
     },
+    {
+      icon: <InfoButton item={image} />,
+      name: "Informações da Imagem",
+    },
   ];
 
   useEffect(() => {
@@ -120,6 +120,7 @@ const Viewer = () => {
             id: result.id,
             createdAt: result.createdAt,
             share: result.share,
+            user: result.user,
           });
           setPending(false);
         };
@@ -127,7 +128,7 @@ const Viewer = () => {
         xhr.send();
       });
     }
-  }, [shareOpen, image.id]);
+  }, [pendingMessage]);
 
   // handle image file input
   const hiddenFileInput = useRef(null);
@@ -139,79 +140,6 @@ const Viewer = () => {
     var file = URL.createObjectURL(fileUploaded);
     setImage({ imageUrl: file, imageFile: fileUploaded });
   };
-
-  // section to handle save image to galery
-  const [modalOpen, setModalOpen] = useState(false);
-  const handleModalClose = () => setModalOpen(false);
-  const handleModalOpen = () => setModalOpen(true);
-  const [imageTitle, setImageTitle] = useState(new Date().toISOString());
-
-  const handleSubmit = () => {
-    setPendingMessage({
-      open: true,
-      message: "Aguarde ...",
-      severity: "warning",
-      handleClose: handleSnackClose,
-    });
-    const storageRef = ref(
-      storage,
-      `/${currentUser.id}/${new Date().toISOString()}`
-    );
-
-    // upload image to gc
-    uploadBytes(storageRef, image.imageFile).then((snapshot) => {
-      getDownloadURL(snapshot.ref).then((url) => {
-        const values = {
-          user: currentUser.id,
-          createdAt: new Date().toISOString(),
-          path: `${url}`,
-          author: currentUser.name,
-          title: imageTitle.length >= 1 ? imageTitle : new Date().toISOString(),
-          imageRef: snapshot.metadata.fullPath,
-        };
-
-        handleAddDoc(values).then((resp) =>
-          setImage({ ...image, id: resp, title: imageTitle })
-        );
-        setPendingMessage({
-          open: true,
-          message: "Salvo com sucesso!",
-          severity: "success",
-          handleClose: handleSnackClose,
-        });
-      });
-    });
-    setImageTitle("");
-    setModalOpen(false);
-  };
-
-  const modalContent = () => {
-    const inputs = [{ label: "Título da imagem", type: "text", name: "title" }];
-    return (
-      <>
-        {inputs.map((input) => (
-          <TextField
-            autoFocus
-            id="title"
-            size='small'
-            label="Título da Imagem"
-            type="text"
-            fullWidth
-            variant="standard"
-            size="small"
-            onChange={(e) => setImageTitle(e.target.value)}
-          />
-        ))}
-      </>
-    );
-  };
-
-  // section to handle share button
-  const handleShareClose = () => setShareOpen(false);
-  const handleShareOpen = () => {
-    setShareOpen(true);
-  };
-  const handleShareSubmit = () => {};
 
   // actions in the cta
   const actions = [
@@ -228,17 +156,25 @@ const Viewer = () => {
       disabled: !currentUser,
     },
     {
-      icon: <Share color={image.share ? "success" : "inherit"} />,
+      icon: <ShareButton />,
       name: "Compartilhar Imagem",
-      disabled: !image.id,
-      action: handleShareOpen,
+      disabled: !image.id || currentUser?.id !== image.user,
     },
 
     {
-      icon: <Save />,
+      icon: (
+        <SaveButton
+          item={image}
+          setPendingMessage={setPendingMessage}
+          setImage={setImage}
+        />
+      ),
       name: "Salvar na Galeria",
-      action: handleModalOpen,
       disabled: !image.imageUrl || image.id || !currentUser,
+    },
+    {
+      icon: <InfoButton item={image} />,
+      name: "Informações da Imagem",
     },
     {
       icon: <Upload />,
@@ -249,7 +185,7 @@ const Viewer = () => {
 
   return (
     <>
-      <Box sx={{ height: '100%', mt: 0.2, display: "flex" }}>
+      <Box sx={{ height: "100%", mt: 0.2, display: "flex" }}>
         {pending ? (
           <Box
             sx={{
@@ -273,14 +209,9 @@ const Viewer = () => {
               width="100%"
               height="100%"
               image={image.imageUrl}
-              // haov={180}
-              // vaov={90}
               vOffset={1}
               pitch={0}
               yaw={100}
-              // hfov={100}
-              // maxHfov={120}
-              // minHfov={80}
               autoLoad
               author={image.author && `${image.author}, ${image.createdAt}`}
               title={image.title}
@@ -307,23 +238,10 @@ const Viewer = () => {
         onChange={handleChange}
         style={{ display: "none" }}
       />
-      <DialogModal
-        open={modalOpen}
-        handleClose={handleModalClose}
-        handleSubmit={handleSubmit}
-        title="Salvar Imagem"
-        text="Adicione esta foto a sua galeria."
-        content={modalContent()}
-      />
 
-      <ShareModal
-        open={shareOpen}
-        handleClose={handleShareClose}
-        handleSubmit={handleShareSubmit}
-        image={image}
+      <SnackMessage
+        pendingMessage={{ ...pendingMessage, handleClose: handleSnackClose }}
       />
-
-      <SnackMessage pendingMessage={pendingMessage} />
     </>
   );
 };

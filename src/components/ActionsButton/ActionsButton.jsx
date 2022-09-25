@@ -1,23 +1,15 @@
 import {
-  ArrowBack,
-  ArrowForward,
-  Favorite,
   PanoramaPhotosphere,
-  PermMedia,
 } from "@mui/icons-material";
 import { SpeedDial, SpeedDialAction } from "@mui/material";
 import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 
-const ActionsButton = ({options, invertColor, handleClick}) => {
-  const {currentUser} = useContext(AuthContext)
+const ActionsButton = ({options, invertColor}) => {
 
   const navigate = useNavigate();
-  const handleHomeNavigate = () => {
-    navigate('/')
-  }
-
+  
   // const options = albumNavOptions;
   return (
     <SpeedDial
@@ -33,7 +25,6 @@ const ActionsButton = ({options, invertColor, handleClick}) => {
           color: invertColor ? "#121212" : "#FFF",
         },
       }}
-      // onClick={currentUser ? handleClick : !options ? handleHomeNavigate : null}
     >
       {options?.filter(item => !item.disabled).map((option) => (
         <SpeedDialAction
