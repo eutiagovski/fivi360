@@ -5,11 +5,12 @@ import { handleQueryImage } from "../../firebase.firestore";
 
 import { Pannellum } from "pannellum-react";
 
-import { Box, CircularProgress, Typography } from "@mui/material";
+import { Box, CircularProgress, IconButton, Typography } from "@mui/material";
 import {
   ArrowBack,
   ArrowForward,
   Collections,
+  PanoramaPhotosphere,
   PermMedia,
   Upload,
 } from "@mui/icons-material";
@@ -21,6 +22,8 @@ import SnackMessage from "../../components/SnackMessage/SnackMessage";
 import SaveButton from "../../components/SaveButton/SaveButton";
 import ShareButton from "../../components/ShareButton/ShareButton";
 import InfoButton from "../../components/InfoButton/InfoButton";
+import UploadButton from "../../components/UploadButton/UploadButton";
+import LoveButton from "../../components/LoveButton/LoveButton";
 const queryString = require("query-string");
 
 const Viewer = () => {
@@ -80,25 +83,29 @@ const Viewer = () => {
 
   const albumNavOptions = [
     {
-      name: "Voltar para Galeria",
-      icon: <PermMedia />,
+      icon: <LoveButton />,
+      name: "Sobre",
+    },
+    {
+      name: "Album",
+      icon: <IconButton><PermMedia /></IconButton>,
       action: handleBackToAlbum,
     },
     {
-      name: "Imagem Anterior",
-      icon: <ArrowBack />,
+      name: "Anterior",
+      icon: <IconButton><ArrowBack /></IconButton>,
       action: handleNavBackward,
       disabled: navIndex === 0,
     },
     {
-      name: "Próxima Imagem",
-      icon: <ArrowForward />,
+      name: "Próxima",
+      icon: <IconButton><ArrowForward /></IconButton>,
       action: handleNavFoward,
       disabled: navIndex === albumItems.length - 1,
     },
     {
       icon: <InfoButton item={image} />,
-      name: "Informações da Imagem",
+      name: "Informações",
     },
   ];
 
@@ -128,7 +135,7 @@ const Viewer = () => {
         xhr.send();
       });
     }
-  }, [pendingMessage]);
+  }, [image.id, pendingMessage]);
 
   // handle image file input
   const hiddenFileInput = useRef(null);
@@ -144,20 +151,32 @@ const Viewer = () => {
   // actions in the cta
   const actions = [
     {
-      icon: <PermMedia />,
+      icon: <LoveButton />,
+      name: "Sobre",
+    },
+    {
+      icon: (
+        <IconButton>
+          <PermMedia />
+        </IconButton>
+      ),
       name: "Albums",
       action: () => navigate("/albums"),
       disabled: !currentUser,
     },
     {
-      icon: <Collections />,
+      icon: (
+        <IconButton>
+          <Collections />
+        </IconButton>
+      ),
       name: "Galera",
       action: () => navigate("/imagens"),
       disabled: !currentUser,
     },
     {
       icon: <ShareButton />,
-      name: "Compartilhar Imagem",
+      name: "Compartilhar",
       disabled: !image.id || currentUser?.id !== image.user,
     },
 
@@ -169,17 +188,32 @@ const Viewer = () => {
           setImage={setImage}
         />
       ),
-      name: "Salvar na Galeria",
+      name: "Salvar",
       disabled: !image.imageUrl || image.id || !currentUser,
     },
     {
       icon: <InfoButton item={image} />,
-      name: "Informações da Imagem",
+      name: "Informações",
+      disabled: !image.title,
     },
     {
-      icon: <Upload />,
-      name: "Carregar Imagem",
-      action: handleClick,
+      icon: (
+        <IconButton>
+          <PanoramaPhotosphere
+            onClick={() => {
+              navigate("/");
+              setImage({});
+            }}
+          />
+        </IconButton>
+      ),
+      name: "Início",
+      disabled: !image.id
+    },
+    {
+      icon: <UploadButton setImage={setImage}/>,
+      name: "Carregar",
+      disabled: image.id
     },
   ];
 
@@ -204,6 +238,8 @@ const Viewer = () => {
             <ActionsButton
               options={album ? albumNavOptions : actions}
               handleClick
+              setImage={setImage}
+              album={album}
             />
             <Pannellum
               width="100%"
@@ -231,13 +267,6 @@ const Viewer = () => {
           </>
         )}
       </Box>
-
-      <input
-        type="file"
-        ref={hiddenFileInput}
-        onChange={handleChange}
-        style={{ display: "none" }}
-      />
 
       <SnackMessage
         pendingMessage={{ ...pendingMessage, handleClose: handleSnackClose }}

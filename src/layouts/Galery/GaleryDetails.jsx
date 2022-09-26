@@ -69,13 +69,13 @@ const GaleryDetails = () => {
   const pageOptions = [
     {
       icon: <IconButton><PermMedia /></IconButton>,
-      name: "Ir para Albums",
+      name: "Albums",
       action: () => navigate("/albums"),
       disabled: !currentUser || currentUser?.id !== albumDetails.user,
     },
     {
       icon: <IconButton><Collections /></IconButton>,
-      name: "Ir para Galera",
+      name: "Galera",
       action: () => navigate("/imagens"),
       disabled: !currentUser || currentUser?.id !== albumDetails.user,
     },
@@ -86,26 +86,26 @@ const GaleryDetails = () => {
           setPendingMessage={setPendingMessage}
         />
       ),
-      name: "Deletar Álbum",
+      name: "Deletar",
       disabled: !currentUser || currentUser?.id !== albumDetails.user,
     },
     {
       icon: <ShareButton />,
-      name: "Compartilhar Álbum",
+      name: "Compartilhar",
       disabled: !currentUser || currentUser?.id !== albumDetails.user,
     },
     {
       icon: (
         <EditButton item={albumDetails} setPendingMessage={setPendingMessage} />
       ),
-      name: "Editar Álbum",
+      name: "Editar",
       disabled: !currentUser || currentUser?.id !== albumDetails.user,
     },
     {
       icon: (
         <InfoButton item={albumDetails} />
       ),
-      name: "Informações do Álbum",
+      name: "Informações",
     },
     {
       icon: (
@@ -205,7 +205,7 @@ const GaleryDetails = () => {
             </ImageListItem>
           ))}
         </ImageList>
-        <ActionsButton options={pageOptions} invertColor />
+        <ActionsButton options={pageOptions} invertColor album={album}/>
         <SnackMessage
           pendingMessage={{ ...pendingMessage, handleClose: handleSnackClose }}
         />

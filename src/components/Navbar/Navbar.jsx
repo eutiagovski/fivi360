@@ -22,6 +22,7 @@ import { handleSignIn, handleSignOut } from "../../firebase.auth";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import LoveButton from "../LoveButton/LoveButton";
 
 const Navbar = () => {
   const [anchorElNav, setAnchorElNav] = useState(null);
@@ -54,19 +55,9 @@ const Navbar = () => {
 
   const navigate = useNavigate();
 
-  const pages = ["Perfil", "Galeria", "Sair"];
   const actions = [
-    {
-      label: "Minha Imagens",
-      icon: <Collections />,
-      action: () => navigate("imagens"),
-    },
-    {
-      label: "Meus Albums",
-      icon: <PermMedia />,
-      action: () => {navigate("albums"); handleCloseNavMenu()},
-    },
-    { label: "Sair", icon: <Logout />, action: () => handleGoogleLogout() },
+    // { label: "Coheça o Projeto", icon: <LoveButton /> },
+    { label: "Sair", icon: <Logout />, onClick: () => handleGoogleLogout() },
   ];
 
   const handleOpenNavMenu = (event) => {
@@ -195,7 +186,7 @@ const Navbar = () => {
                       key={page.label}
                       onClick={() => {
                         handleCloseUserMenu();
-                        page.action();
+                        page.onClick();
                       }}
                     >
                       <Box

@@ -1,16 +1,23 @@
-import {
-  PanoramaPhotosphere,
-} from "@mui/icons-material";
+import { PanoramaPhotosphere } from "@mui/icons-material";
 import { SpeedDial, SpeedDialAction } from "@mui/material";
-import React, { useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRef } from "react";
+import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 
-const ActionsButton = ({options, invertColor}) => {
+const ActionsButton = ({ options, invertColor, setImage, album }) => {
+  const { currentUser } = useContext(AuthContext);
 
-  const navigate = useNavigate();
-  
-  // const options = albumNavOptions;
+  // handle image file input
+  const hiddenFileInput = useRef(null);
+  const handleClick = (event) => {
+    hiddenFileInput.current.click();
+  };
+  const handleChange = (event) => {
+    const fileUploaded = event.target.files[0];
+    var file = URL.createObjectURL(fileUploaded);
+    setImage({ imageUrl: file, imageFile: fileUploaded });
+  };
+
   return (
     <SpeedDial
       ariaLabel="SpeedDial basic example"
@@ -25,15 +32,28 @@ const ActionsButton = ({options, invertColor}) => {
           color: invertColor ? "#121212" : "#FFF",
         },
       }}
+      onClick={(currentUser || album) ? null : handleClick}
     >
-      {options?.filter(item => !item.disabled).map((option) => (
-        <SpeedDialAction
-          key={option.name}
-          icon={option.icon}
-          tooltipTitle={option.name}
-          onClick={option.action}
-        />
-      ))}
+
+      {(currentUser || album) &&
+        options
+          ?.filter((item) => !item.disabled)
+          .map((option) => (
+            <SpeedDialAction
+              key={option.name}
+              icon={option.icon}
+              tooltipTitle={option.name}
+              tooltipOpen={option.name}
+              onClick={option.action}
+            />
+          ))}
+
+      <input
+        type="file"
+        ref={hiddenFileInput}
+        onChange={handleChange}
+        style={{ display: "none" }}
+      />
     </SpeedDial>
   );
 };
