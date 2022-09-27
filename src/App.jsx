@@ -18,7 +18,6 @@ function App() {
     <Box sx={{ height: "100vh" }}>
       <CssBaseline />
       <Navbar />
-      {/* <Toolbar /> */}
       <Box
         sx={{
           height: "100vh",
@@ -26,10 +25,7 @@ function App() {
           flexDirection: "column",
           pt: { xs: 7, md: 8 },
         }}
-        // sx={
-        //   window.innerHeight <= 700 ? { height: "100vh" } : { height: "100vh" }
-
-        // }
+        
       >
         <Routes>
           <Route path="*" element={<Viewer />} />

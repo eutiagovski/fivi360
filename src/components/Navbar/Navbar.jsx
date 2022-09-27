@@ -23,6 +23,7 @@ import { useContext, useState } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import LoveButton from "../LoveButton/LoveButton";
+import { Divider } from "@mui/material";
 
 const Navbar = () => {
   const [anchorElNav, setAnchorElNav] = useState(null);
@@ -57,18 +58,19 @@ const Navbar = () => {
 
   const actions = [
     // { label: "Coheça o Projeto", icon: <LoveButton /> },
-    { label: "Sair", icon: <Logout />, onClick: () => handleGoogleLogout() },
+    {
+      label: "Sair",
+      icon: (
+        <IconButton>
+          <Logout />
+        </IconButton>
+      ),
+      onClick: () => handleGoogleLogout(),
+    },
   ];
 
-  const handleOpenNavMenu = (event) => {
-    setAnchorElNav(event.currentTarget);
-  };
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
-  };
-
-  const handleCloseNavMenu = () => {
-    setAnchorElNav(null);
   };
 
   const handleCloseUserMenu = () => {
@@ -181,30 +183,46 @@ const Navbar = () => {
                   open={Boolean(anchorElUser)}
                   onClose={handleCloseUserMenu}
                 >
-                  {actions.map((page) => (
-                    <MenuItem
-                      key={page.label}
-                      onClick={() => {
-                        handleCloseUserMenu();
-                        page.onClick();
+                  <MenuItem>
+                    <Box
+                      mr={1}
+                      spacing={1}
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
                       }}
                     >
-                      <Box
-                        mr={1}
-                        spacing={1}
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          // justifyContent: "space-between",
-                          width: " 100%",
+                      <Avatar src={currentUser?.picture} align="left" />
+                    </Box>
+                    <Typography ml={2}>{currentUser?.name}</Typography>
+                  </MenuItem>
+                  <Divider />
+                  <LoveButton />
+                  {actions.map((page) => (
+                    <>
+                      <MenuItem
+                        key={page.label}
+                        onClick={() => {
+                          handleCloseUserMenu();
+                          page.onClick();
                         }}
                       >
-                        {page.icon}
-                        <Typography textAlign="center" ml={2}>
-                          {page.label}
-                        </Typography>
-                      </Box>
-                    </MenuItem>
+                        <Box
+                          mr={1}
+                          spacing={1}
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            width: " 100%",
+                          }}
+                        >
+                          {page.icon}
+                          <Typography textAlign="center" ml={2}>
+                            {page.label}
+                          </Typography>
+                        </Box>
+                      </MenuItem>
+                    </>
                   ))}
                 </Menu>
               </Box>

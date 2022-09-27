@@ -1,5 +1,6 @@
 import { PanoramaPhotosphere } from "@mui/icons-material";
 import { SpeedDial, SpeedDialAction } from "@mui/material";
+import { useState } from "react";
 import { useRef } from "react";
 import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
@@ -18,6 +19,10 @@ const ActionsButton = ({ options, invertColor, setImage, album }) => {
     setImage({ imageUrl: file, imageFile: fileUploaded });
   };
 
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
   return (
     <SpeedDial
       ariaLabel="SpeedDial basic example"
@@ -32,9 +37,10 @@ const ActionsButton = ({ options, invertColor, setImage, album }) => {
           color: invertColor ? "#121212" : "#FFF",
         },
       }}
-      onClick={(currentUser || album) ? null : handleClick}
+      onClick={currentUser || album ? handleOpen : handleClick}
+      onClose={handleClose}
+      open={open}
     >
-
       {(currentUser || album) &&
         options
           ?.filter((item) => !item.disabled)

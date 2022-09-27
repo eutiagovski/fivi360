@@ -83,10 +83,6 @@ const Viewer = () => {
 
   const albumNavOptions = [
     {
-      icon: <LoveButton />,
-      name: "Sobre",
-    },
-    {
       name: "Album",
       icon: <IconButton><PermMedia /></IconButton>,
       action: handleBackToAlbum,
@@ -150,10 +146,6 @@ const Viewer = () => {
 
   // actions in the cta
   const actions = [
-    {
-      icon: <LoveButton />,
-      name: "Sobre",
-    },
     {
       icon: (
         <IconButton>
