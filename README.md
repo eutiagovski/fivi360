@@ -16,6 +16,7 @@ navegar interativamente na imagem processada de um local-cena baseada em 360 ide
 - Criar sessão "Projeto" o qual poderá conter vários albums
 - Disponibilizar compartilhamento via QRCode e Whatsapp (mensagem pronta)
 
+
 ## Referência do Projeto
 
 https://medium.com/swlh/how-to-display-360-images-using-react-and-select-coordinates-b1467d09fb5c
