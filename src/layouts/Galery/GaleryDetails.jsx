@@ -10,10 +10,12 @@ import {
 } from "@mui/material";
 
 import {
+  AddAPhoto,
   Collections,
   PanoramaPhotosphere,
   PermMedia,
   Share,
+  Upload,
 } from "@mui/icons-material";
 
 import { handleQueryAlbum } from "../../firebase.firestore";
@@ -30,6 +32,7 @@ import SnackMessage from "../../components/SnackMessage/SnackMessage";
 import LoadingBox from "../../components/LoadingBox/LoadingBox";
 import ShareButton from "../../components/ShareButton/ShareButton";
 import InfoButton from "../../components/InfoButton/InfoButton";
+import UploadToAlbum from "../../components/UploadToAlbum/UploadToAlbum";
 
 const GaleryDetails = () => {
   var { album } = queryString.parse(window.location.search);
@@ -68,15 +71,28 @@ const GaleryDetails = () => {
 
   const pageOptions = [
     {
-      icon: <IconButton><PermMedia /></IconButton>,
+      icon: (
+        <IconButton>
+          <PermMedia />
+        </IconButton>
+      ),
       name: "Albums",
       action: () => navigate("/albums"),
       disabled: !currentUser || currentUser?.id !== albumDetails.user,
     },
     {
-      icon: <IconButton><Collections /></IconButton>,
+      icon: (
+        <IconButton>
+          <Collections />
+        </IconButton>
+      ),
       name: "Galera",
       action: () => navigate("/imagens"),
+      disabled: !currentUser || currentUser?.id !== albumDetails.user,
+    },
+    {
+      icon: <ShareButton />,
+      name: "Compartilhar",
       disabled: !currentUser || currentUser?.id !== albumDetails.user,
     },
     {
@@ -90,11 +106,6 @@ const GaleryDetails = () => {
       disabled: !currentUser || currentUser?.id !== albumDetails.user,
     },
     {
-      icon: <ShareButton />,
-      name: "Compartilhar",
-      disabled: !currentUser || currentUser?.id !== albumDetails.user,
-    },
-    {
       icon: (
         <EditButton item={albumDetails} setPendingMessage={setPendingMessage} />
       ),
@@ -103,8 +114,13 @@ const GaleryDetails = () => {
     },
     {
       icon: (
-        <InfoButton item={albumDetails} />
+        <UploadToAlbum album={albumDetails} setPendingMessage={setPendingMessage}/>
       ),
+      name: "Adicionar",
+      disabled: !currentUser || currentUser?.id !== albumDetails.user,
+    },
+    {
+      icon: <InfoButton item={albumDetails} />,
       name: "Informações",
     },
     {
@@ -188,10 +204,14 @@ const GaleryDetails = () => {
                   <>
                     {currentUser?.id === albumDetails.user && (
                       <>
-                      <InfoButton item={item} />
+                        <InfoButton item={item} />
                         <EditButton
                           item={{ album: albumDetails.id, item: item }}
                           setPendingMessage={setPendingMessage}
+                        />
+                        <ShareButton
+                          item={{ album: albumDetails.id, item: item }}
+                          link={`https://fivi360.web.app/?image=${item.id}`}
                         />
                         <DeleteButton
                           item={{ album: albumDetails.id, item: item }}
@@ -205,7 +225,7 @@ const GaleryDetails = () => {
             </ImageListItem>
           ))}
         </ImageList>
-        <ActionsButton options={pageOptions} invertColor album={album}/>
+        <ActionsButton options={pageOptions} invertColor album={album} />
         <SnackMessage
           pendingMessage={{ ...pendingMessage, handleClose: handleSnackClose }}
         />

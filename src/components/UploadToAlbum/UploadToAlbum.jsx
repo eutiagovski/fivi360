@@ -9,39 +9,42 @@ import {
   DialogTitle,
   TextField,
 } from "@mui/material";
-import { Save } from "@mui/icons-material";
-import { useEffect } from "react";
+import { Upload } from "@mui/icons-material";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import storage from "../../firebase.storage";
 import { AuthContext } from "../../context/AuthContext";
-import { handleAddDoc } from "../../firebase.firestore";
+import { handleAddDoc, handleUpdateUserAlbum } from "../../firebase.firestore";
 import { useNavigate } from "react-router-dom";
+import { useRef } from "react";
+import { useEffect } from "react";
 
-const SaveButton = ({ disabled, item, setPendingMessage, setImage }) => {
+const UploadToAlbum = ({ album, setPendingMessage }) => {
+  const [image, setImage] = useState(null);
+
+  // handle image file input
+  const hiddenFileInput = useRef(null);
+  const handleClick = (event) => {
+    hiddenFileInput.current.click();
+  };
+  const handleChange = (event) => {
+    const fileUploaded = event.target.files[0];
+    var file = URL.createObjectURL(fileUploaded);
+    setImage({ imageUrl: file, imageFile: fileUploaded });
+    handleOpen()
+  };
+
+
   const { currentUser } = useContext(AuthContext);
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   const navigate = useNavigate();
 
-
-
   const [values, setValues] = useState({});
   const inputs = [
     { label: "Titulo", type: "text", name: "title" },
     { label: "Descrição", type: "text", name: "text" },
   ];
-
-  useEffect(() => {
-    if (item)
-      setValues({ title: item.title, text: item.text, author: item.author });
-    if (item.item)
-      setValues({
-        title: item.item.title,
-        text: item.item.text,
-        author: item.item.author,
-      });
-  }, [item]);
 
   const handleSubmit = () => {
     handleClose();
@@ -56,7 +59,7 @@ const SaveButton = ({ disabled, item, setPendingMessage, setImage }) => {
     );
 
     // upload image to gc
-    uploadBytes(storageRef, item.imageFile).then((snapshot) => {
+    uploadBytes(storageRef, image.imageFile).then((snapshot) => {
       getDownloadURL(snapshot.ref).then((url) => {
         const details = {
           user: currentUser.id,
@@ -64,6 +67,7 @@ const SaveButton = ({ disabled, item, setPendingMessage, setImage }) => {
           path: `${url}`,
           author: currentUser.name,
           title: values.title?.length >= 1 ? values.title : "Sem título",
+          text: values.text?.length >= 1 ? values.text : "Sem texto",
           imageRef: snapshot.metadata.fullPath,
         };
         handleAddDoc(details).then((id) => {
@@ -72,12 +76,20 @@ const SaveButton = ({ disabled, item, setPendingMessage, setImage }) => {
             message: "Salvo com sucesso!",
             severity: "success",
           });
-          setImage({ ...item, id: id, ...details });
-          navigate(`/?image=${id}`);
+          setImage({ ...image, id: id, ...details });
+          const newItem = {...details, id: id}
+          const newAlbum = {
+            ...album, 
+            items: [...album.items, newItem]
+          }
+
+          handleUpdateUserAlbum(newAlbum)
         });
       });
     });
   };
+
+  
 
   return (
     <IconButton>
@@ -115,9 +127,15 @@ const SaveButton = ({ disabled, item, setPendingMessage, setImage }) => {
           </Button>
         </DialogActions>
       </Dialog>
-      <Save onClick={handleOpen} />
+      <Upload onClick={handleClick} />
+      <input
+        type="file"
+        ref={hiddenFileInput}
+        onChange={handleChange}
+        style={{ display: "none" }}
+      />
     </IconButton>
   );
 };
 
-export default SaveButton;
+export default UploadToAlbum;

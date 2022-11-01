@@ -11,12 +11,14 @@ import {
 import { CopyAll, Share } from "@mui/icons-material";
 import { useState } from "react";
 
-const ShareButton = ({ item }) => {
+const ShareButton = ({ item, link }) => {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const shareLink = window.location.href;
+  const shareLink = link ? link : window.location.href;
+
+  console.log(item)
 
   return (
     <IconButton>
