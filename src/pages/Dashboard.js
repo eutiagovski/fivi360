@@ -59,7 +59,7 @@ export const Dashboard = () => {
         dataTestId="dashboard-title"
       />
 
-      {planId === PLAN_IDS.STARTER ? (
+      {/* {planId === PLAN_IDS.STARTER ? (
         <StarterPlanInfoBanner className="mb-12" />
       ) : (
         <div className="max-w-3xl mb-10">
@@ -68,7 +68,7 @@ export const Dashboard = () => {
             message="A cobrança online ainda não está disponível. Os limites do seu plano atual já estão ativos — em breve você poderá fazer upgrade diretamente por aqui."
           />
         </div>
-      )}
+      )} */}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
