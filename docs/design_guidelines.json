@@ -1,0 +1,108 @@
+{
+  "project_name": "FIVI360",
+  "app_type": "saas_app",
+  "theme": "dark",
+  "archetype": "Archetype 4/5 Hybrid (Swiss & High-Contrast / Jewel & Luxury - Premium Black & Gray)",
+  "color_palette": {
+    "background": "#050505",
+    "surface": "#121212",
+    "surface_secondary": "#1A1A1A",
+    "border": "#27272A",
+    "border_hover": "#3F3F46",
+    "primary": "#FFFFFF",
+    "primary_foreground": "#000000",
+    "text_primary": "#FFFFFF",
+    "text_secondary": "#A1A1AA",
+    "text_muted": "#71717A",
+    "accent": "#3F3F46",
+    "warning": "#F59E0B",
+    "success": "#10B981"
+  },
+  "typography": {
+    "heading_font": "Outfit",
+    "body_font": "Manrope",
+    "heading_styles": {
+      "h1": "text-4xl sm:text-5xl lg:text-6xl font-light tracking-tighter",
+      "h2": "text-2xl sm:text-3xl lg:text-4xl font-light tracking-tight",
+      "h3": "text-xl sm:text-2xl font-medium tracking-tight",
+      "h4": "text-lg sm:text-xl font-medium tracking-tight"
+    },
+    "body_styles": {
+      "base": "text-base font-normal leading-relaxed text-zinc-300",
+      "small": "text-sm font-normal text-zinc-400"
+    }
+  },
+  "layout_and_spacing": {
+    "philosophy": "Generous spacing. Use negative space to create a premium, unhurried feel.",
+    "page_padding": "p-8 md:p-12 lg:p-16",
+    "grid_system": "Bento Grid Protocol / Control Room Grid for dashboards with gap-6 or gap-8. Do not pack items too tightly.",
+    "border_radius": "rounded-2xl for main cards, rounded-xl for inner elements. Soft curves balance the dark/harsh theme.",
+    "borders": "1px solid #27272A (border-zinc-800) for all cards and interactive surfaces."
+  },
+  "components_instructions": {
+    "sidebar": "Minimalist sidebar. Background: transparent or #050505. Use a simple border-r border-zinc-800. Links must have high contrast hover states (text-white, bg-zinc-900).",
+    "dashboard_cards": "Flat cards, bg-zinc-900/50, border border-zinc-800, rounded-2xl. Massive numbers for metrics (e.g., text-5xl font-light).",
+    "project_cards": "Image takes 60% of card height. Minimal text below. Subtle scale-up on image hover. Status badge in absolute position over image.",
+    "immersive_viewer": "Simulated 360 viewer. Full viewport height area or large 16:9 container. Use the panoramic interior image. Controls (zoom, fullscreen) overlay with backdrop-blur-xl bg-black/60 and border-white/10.",
+    "buttons": "Primary: pure white bg, black text, rounded-full or rounded-xl. Hover: scale down slightly (active:scale-95) and bg-zinc-200. Secondary: transparent, white border. NEVER use primary color heavily, keep it monochrome.",
+    "tables_lists": "Clean lists for images. Use Shadcn Table or flexbox rows with border-b border-zinc-800. Padding p-4.",
+    "navigation": "Breadcrumbs or top header with current page title. Simple, unpolluted.",
+    "forms": "Inputs with bg-zinc-900, border-zinc-800, text-white, focus:ring-1 focus:ring-white.",
+    "public_sharing_pages": "Must be 100% clean, immersive. No sidebar, no admin navigation. Just the project title, cover/viewer, and a clean 'Powered by FIVI360' branding.",
+    "settings_and_plans": "Settings page: simple forms with dark inputs. Plans page: High-contrast pricing cards. The selected plan card should have a white border."
+  },
+  "motion_and_interactions": {
+    "hover_states": "Cards border-zinc-700, text brightness increases.",
+    "page_transitions": "Use simple opacity fade-in.",
+    "micro_interactions": "Buttons scale down on click (active:scale-95). Images slightly zoom on card hover."
+  },
+  "icons": {
+    "library": "lucide-react",
+    "style": "Light weight, clean. text-zinc-400 default, text-white on hover."
+  },
+  "media_urls": {
+    "project_covers": [
+      {
+        "url": "https://images.unsplash.com/photo-1771450092348-3185c8fb889a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODB8MHwxfHNlYXJjaHwyfHxtb2Rlcm4lMjBtaW5pbWFsaXN0JTIwaW50ZXJpb3IlMjBhcmNoaXRlY3R1cmV8ZW58MHx8fHwxNzc1OTQwODM0fDA&ixlib=rb-4.1.0&q=85",
+        "category": "project_cover",
+        "description": "Modern building interior with curved balconies"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1651342490186-7d3288f567e5?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODB8MHwxfHNlYXJjaHwzfHxtb2Rlcm4lMjBtaW5pbWFsaXN0JTIwaW50ZXJpb3IlMjBhcmNoaXRlY3R1cmV8ZW58MHx8fHwxNzc1OTQwODM0fDA&ixlib=rb-4.1.0&q=85",
+        "category": "project_cover",
+        "description": "A minimalist staircase in a building"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1515703944563-dbcfbf121b3d?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDJ8MHwxfHNlYXJjaHwyfHxkYXJrJTIwb2ZmaWNlfGVufDB8fHx8MTc3NTk0MDgzOHww&ixlib=rb-4.1.0&q=85",
+        "category": "project_cover",
+        "description": "A dark room with clear glass wall panel"
+      }
+    ],
+    "panoramic_views": [
+      {
+        "url": "https://images.unsplash.com/photo-1698848826079-c33c58f02a1f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODB8MHwxfHNlYXJjaHwyfHxwYW5vcmFtaWMlMjBpbnRlcmlvcnxlbnwwfHx8fDE3NzU5NDA4MzR8MA&ixlib=rb-4.1.0&q=85",
+        "category": "360_viewer_placeholder",
+        "description": "Panoramic living room filled with furniture next to a window"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1635257153190-6313ae8a9fdc?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODB8MHwxfHNlYXJjaHwxfHxwYW5vcmFtaWMlMjBpbnRlcmlvcnxlbnwwfHx8fDE3NzU5NDA4MzR8MA&ixlib=rb-4.1.0&q=85",
+        "category": "360_viewer_placeholder",
+        "description": "Panoramic room with a view of water and clouds"
+      }
+    ],
+    "avatars": [
+      {
+        "url": "https://images.unsplash.com/photo-1510519138101-570d1dca3d66?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDJ8MHwxfHNlYXJjaHwzfHxkYXJrJTIwb2ZmaWNlfGVufDB8fHx8MTc3NTk0MDgzOHww&ixlib=rb-4.1.0&q=85",
+        "category": "workspace_background",
+        "description": "Dark office desk with computer"
+      }
+    ]
+  },
+  "technical_constraints": {
+    "framework": "React JS (Not TSX)",
+    "styling": "Tailwind CSS + Shadcn UI"
+  },
+  "testing": {
+    "requirements": "All interactive and key informational elements MUST include a `data-testid` attribute (e.g., `data-testid=\"create-project-btn\"`)."
+  }
+}

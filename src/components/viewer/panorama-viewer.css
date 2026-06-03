@@ -1,0 +1,28 @@
+.panorama-viewer {
+  width: 100%;
+  height: 100%;
+}
+
+.panorama-viewer.pnlm-container {
+  background: #050505;
+}
+
+.panorama-viewer .pnlm-about-msg,
+.panorama-viewer .pnlm-load-box,
+.panorama-viewer .pnlm-controls,
+.panorama-viewer .pnlm-compass {
+  display: none !important;
+}
+
+.panorama-viewer--placing {
+  cursor: crosshair;
+}
+
+/* Hotspot informativo (tooltip) vs navegação (ícone scene do Pannellum) */
+.panorama-viewer .pnlm-hotspot.pnlm-info {
+  opacity: 0.95;
+}
+
+.panorama-viewer .pnlm-hotspot.pnlm-scene {
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.45));
+}

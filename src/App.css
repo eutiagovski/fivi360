@@ -1,0 +1,41 @@
+.App {
+  min-height: 100vh;
+  background: #050505;
+}
+
+.card-hover {
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.card-hover:hover {
+  border-color: #3F3F46;
+}
+
+.image-zoom-hover {
+  transition: transform 0.3s ease;
+}
+
+.image-zoom-hover:hover {
+  transform: scale(1.05);
+}
+
+.btn-scale {
+  transition: transform 0.15s ease;
+}
+
+.btn-scale:active {
+  transform: scale(0.95);
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

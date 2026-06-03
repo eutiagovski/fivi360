@@ -1,0 +1,307 @@
+rules_version = '2';
+
+// --------------------------------------------------------------------------
+// FIVI360 — Firestore Security Rules
+//
+// Regras escritas a partir da auditoria REAL do app (services + pages):
+//
+// Coleções usadas pelo app:
+//   - users/{userId}
+//       reads:   getDoc(owner), query where publicSlug == slug (anon, limit 1)
+//       writes:  setDoc/updateDoc (owner only)
+//
+//   - slugs/{slug}
+//       reads:   getDoc(slug) — disponibilidade e resolução /u/:slug → uid
+//       writes:  create/delete (owner do slug apenas)
+//
+//   - projects/{projectId}
+//       reads:   getDoc(id) (owner ou anon quando visibility shared)
+//                query where userId == authUid                   (owner)
+//                query where userId == X AND visibility == public (anon)
+//       writes:  create/update/delete (owner)
+//
+//   - images/{imageId}
+//       reads:   getDoc(id) (owner; anon se a imagem é shared
+//                           ou se o projeto dela é shared)
+//                query where userId == authUid AND projectId == null   (owner)
+//                query where userId == authUid AND projectId == X      (owner)
+//                query where projectId == X                            (anon)
+//       writes:  create/update/delete (owner)
+//
+// IMPORTANTE — split get vs list:
+// Para queries (`list`), o Firestore avalia a regra de forma *estática* a
+// partir dos `where(...)` da query. Expressões como `resource.data.userId`
+// só passam no list se a query filtrar por aquele campo. Por isso separamos
+// `allow get` (lógica por documento, pode usar cross-doc lookup) de
+// `allow list` (apenas predicados que a query consegue provar estaticamente).
+//
+// Foi essa falta de split que provocava o erro:
+//   "Property userId is undefined on object. for 'list' @ L104"
+// Quando o app chama `getImagesByProject(projectId)` sem `userId` (rota
+// pública), a query não tem `where('userId', '==', ...)`, então o rule
+// engine não conseguia provar `resource.data.userId` e rejeitava a listagem.
+// --------------------------------------------------------------------------
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- helpers ----------
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidVisibility(value) {
+      return value in ['private', 'shared', 'public'];
+    }
+
+    function isShared(value) {
+      return value == 'shared' || value == 'public';
+    }
+
+    function projectDoc(projectId) {
+      return get(/databases/$(database)/documents/projects/$(projectId));
+    }
+
+    function projectExists(projectId) {
+      return exists(/databases/$(database)/documents/projects/$(projectId));
+    }
+
+    // Usado no create/update de imagens: se a imagem é atribuída a um
+    // projeto, esse projeto precisa pertencer ao mesmo usuário autenticado.
+    // Aceita `projectId == null` (imagem solta).
+    function projectBelongsToCaller(projectId) {
+      return projectId == null
+        || (
+          projectExists(projectId)
+          && projectDoc(projectId).data.userId == request.auth.uid
+        );
+    }
+
+    function isValidSlug(slug) {
+      return slug.matches('^[a-z0-9]+(-[a-z0-9]+)*$');
+    }
+
+    // ---------- slugs ----------
+
+    match /slugs/{slug} {
+
+      // Leitura pública: resolução de /u/:slug e verificação de disponibilidade.
+      allow get: if true;
+
+      // Não permitir listagem de todos os slugs.
+      allow list: if false;
+
+      // Registro imutável — alterações removem o doc antigo e criam um novo.
+      allow create: if isSignedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.createdAt is timestamp
+        && isValidSlug(slug);
+
+      allow update: if false;
+
+      allow delete: if isSignedIn()
+        && resource.data.uid == request.auth.uid;
+    }
+
+    // ---------- users ----------
+
+    match /users/{userId} {
+
+      // Leitura por ID: dono ou visitantes em /share/project e /u/:slug
+      // (o front exibe apenas dados de escritório, não e-mail).
+      allow get: if isOwner(userId) || true;
+
+      // Listagem usada pelo portfólio público: where('publicSlug', '==', X).
+      // O rule engine prova, a partir do where, que resource.data.publicSlug
+      // é igual ao valor do filtro — logo é string. Quem não filtra por
+      // publicSlug não consegue provar o predicado e a listagem é negada.
+      allow list: if resource.data.publicSlug is string
+                   && resource.data.publicSlug != '';
+
+      // Só o próprio usuário cria/atualiza/apaga seu doc.
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if isOwner(userId);
+    }
+
+    // ---------- projects ----------
+
+    match /projects/{projectId} {
+
+      // Get por ID: dono sempre; anônimos quando o projeto é shared/public
+      // (usado em /share/project/:id, /u/:slug/project/:id, Viewer público).
+      allow get: if isOwner(resource.data.userId)
+                  || isShared(resource.data.visibility);
+
+      // Listagens realmente usadas:
+      //   - Dashboard/Projects/Viewer/NewProject: where('userId', '==', authUid)
+      //   - Portfólio público: where('userId', '==', X) AND
+      //                        where('visibility', '==', 'public')
+      // Ambas provam uma das duas branches abaixo.
+      allow list: if
+        (isSignedIn() && resource.data.userId == request.auth.uid)
+        || resource.data.visibility == 'public';
+
+      allow create: if isSignedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.title is string
+        && request.resource.data.description is string
+        && request.resource.data.coverImage is string
+        && isValidVisibility(request.resource.data.visibility);
+
+      allow update: if isOwner(resource.data.userId)
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.title is string
+        && request.resource.data.description is string
+        && request.resource.data.coverImage is string
+        && isValidVisibility(request.resource.data.visibility);
+
+      allow delete: if isOwner(resource.data.userId);
+    }
+
+    // ---------- images ----------
+
+    match /images/{imageId} {
+
+      // Get por ID (Viewer, PublicImage.getImageById, PublicImage resolveStandaloneTargets):
+      //   - dono da imagem; OU
+      //   - imagem com visibility shared/public; OU
+      //   - imagem em projeto shared/public.
+      allow get: if isOwner(resource.data.userId)
+                  || isShared(resource.data.visibility)
+                  || (
+                    resource.data.projectId != null
+                    && projectExists(resource.data.projectId)
+                    && isShared(projectDoc(resource.data.projectId).data.visibility)
+                  );
+
+      // Listagens reais:
+      //   a) Owner (autenticado):
+      //        where('userId', '==', authUid)                (+/- projectId)
+      //      → 1ª branch (userId == authUid).
+      //
+      //   b) Público por projeto (PublicProject, PublicPortfolioProject,
+      //      PublicPortfolio cover fallback):
+      //        where('projectId', '==', <id não-nulo>)
+      //      → 2ª branch (projectId != null).
+      //
+      // Não verificamos a visibility do projeto aqui porque o rules engine
+      // não consegue fazer cross-doc lookup em list. Como projectId é um
+      // Firestore auto-id (não adivinhável) e os gets individuais já são
+      // restritos, expor a listagem por projectId é aceitável e é o que o
+      // front já assume hoje.
+      allow list: if
+        (isSignedIn() && resource.data.userId == request.auth.uid)
+        || resource.data.projectId != null;
+
+      allow create: if isSignedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.title is string
+        && request.resource.data.previewUrl is string
+        && request.resource.data.originalUrl is string
+        && request.resource.data.sizeBytes is number
+        && isValidVisibility(request.resource.data.visibility)
+        && (
+          !request.resource.data.keys().hasAny(['projectId'])
+          || request.resource.data.projectId == null
+          || (
+            request.resource.data.projectId is string
+            && projectBelongsToCaller(request.resource.data.projectId)
+          )
+        );
+
+      // Update cobre: rename (title), share (visibility), move (projectId),
+      // hotspots. Validamos só o que importa para segurança — userId imutável
+      // e, se projectId foi alterado para outro projeto, ele tem que
+      // pertencer ao usuário.
+      allow update: if isOwner(resource.data.userId)
+        && request.resource.data.userId == resource.data.userId
+        && isValidVisibility(request.resource.data.visibility)
+        && (
+          !request.resource.data.keys().hasAny(['projectId'])
+          || request.resource.data.projectId == null
+          || (
+            request.resource.data.projectId is string
+            && projectBelongsToCaller(request.resource.data.projectId)
+          )
+        );
+
+      allow delete: if isOwner(resource.data.userId);
+
+      // ---------- hotspots (subcoleção) ----------
+
+      match /hotspots/{hotspotId} {
+
+        function parentImage() {
+          return get(/databases/$(database)/documents/images/$(imageId));
+        }
+
+        function parentImageIsPublic() {
+          return isShared(parentImage().data.visibility)
+            || (
+              parentImage().data.projectId != null
+              && projectExists(parentImage().data.projectId)
+              && isShared(projectDoc(parentImage().data.projectId).data.visibility)
+            );
+        }
+
+        allow get: if isOwner(parentImage().data.userId)
+                    || parentImageIsPublic();
+
+        allow list: if isOwner(parentImage().data.userId)
+                     || parentImageIsPublic();
+
+        allow create: if isOwner(parentImage().data.userId)
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.imageId == imageId
+          && request.resource.data.pitch is number
+          && request.resource.data.yaw is number
+          && request.resource.data.createdAt is timestamp
+          && request.resource.data.updatedAt is timestamp
+          && (
+            !request.resource.data.keys().hasAny(['projectId'])
+            || request.resource.data.projectId is string
+          )
+          && (
+            (
+              request.resource.data.type == 'info'
+              && request.resource.data.title is string
+              && request.resource.data.description is string
+            )
+            || (
+              request.resource.data.type == 'scene'
+              && request.resource.data.targetImageId is string
+            )
+          );
+
+        allow update: if isOwner(parentImage().data.userId)
+          && resource.data.userId == request.auth.uid
+          && request.resource.data.userId == resource.data.userId
+          && request.resource.data.imageId == imageId
+          && request.resource.data.pitch == resource.data.pitch
+          && request.resource.data.yaw == resource.data.yaw
+          && (
+            (
+              resource.data.type == 'info'
+              && request.resource.data.type == 'info'
+              && request.resource.data.title is string
+              && request.resource.data.description is string
+            )
+            || (
+              resource.data.type == 'scene'
+              && request.resource.data.type == 'scene'
+              && request.resource.data.targetImageId is string
+            )
+          );
+
+        allow delete: if isOwner(parentImage().data.userId)
+          && resource.data.userId == request.auth.uid;
+      }
+    }
+  }
+}

@@ -1,0 +1,135 @@
+import { useEffect, useState } from "react";
+import {
+  getImageById,
+  getImagesByProjectIdPublic,
+} from "@/services/images/imageService";
+import { getProjectById } from "@/services/projects/projectService";
+import { canAccessPublicImage } from "@/utils/publicAccess";
+
+/**
+ * @typedef {'not_found' | 'unavailable' | 'load_failed'} PublicViewerImageError
+ */
+
+/**
+ * Carrega imagem e projeto para o viewer público, validando visibilidade.
+ *
+ * @param {string | undefined} imageId
+ * @returns {{
+ *   image: import("@/services/images/imageService").Image | null,
+ *   project: import("@/services/projects/projectService").Project | null,
+ *   projectImages: import("@/services/images/imageService").Image[],
+ *   previousImage: import("@/services/images/imageService").Image | null,
+ *   nextImage: import("@/services/images/imageService").Image | null,
+ *   loading: boolean,
+ *   error: PublicViewerImageError | null,
+ * }}
+ */
+export function usePublicViewerImage(imageId) {
+  const [image, setImage] = useState(null);
+  const [project, setProject] = useState(null);
+  const [projectImages, setProjectImages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      if (!imageId) {
+        if (!cancelled) {
+          setImage(null);
+          setProject(null);
+          setProjectImages([]);
+          setLoading(false);
+          setError("not_found");
+        }
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+      setImage(null);
+      setProject(null);
+      setProjectImages([]);
+
+      try {
+        const imageData = await getImageById(imageId);
+
+        if (cancelled) {
+          return;
+        }
+
+        if (!imageData) {
+          setError("not_found");
+          return;
+        }
+
+        const projectData = imageData.projectId
+          ? await getProjectById(imageData.projectId)
+          : null;
+
+        if (cancelled) {
+          return;
+        }
+
+        if (!canAccessPublicImage(imageData, projectData)) {
+          setError("unavailable");
+          return;
+        }
+
+        const imagesInProject = imageData.projectId
+          ? await getImagesByProjectIdPublic(imageData.projectId)
+          : [];
+
+        if (cancelled) {
+          return;
+        }
+
+        setImage(imageData);
+        setProject(projectData);
+        setProjectImages(imagesInProject);
+      } catch (err) {
+        if (cancelled) {
+          return;
+        }
+
+        if (
+          err?.code === "permission-denied" ||
+          err?.code === "unauthenticated"
+        ) {
+          setError("unavailable");
+        } else {
+          setError("load_failed");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [imageId]);
+
+  const currentIndex = projectImages.findIndex((img) => img.id === imageId);
+  const previousImage =
+    currentIndex > 0 ? projectImages[currentIndex - 1] : null;
+  const nextImage =
+    currentIndex >= 0 && currentIndex < projectImages.length - 1
+      ? projectImages[currentIndex + 1]
+      : null;
+
+  return {
+    image,
+    project,
+    projectImages,
+    previousImage,
+    nextImage,
+    loading,
+    error,
+  };
+}
