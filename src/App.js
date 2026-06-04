@@ -19,6 +19,10 @@ import { PublicPortfolio } from './pages/PublicPortfolio';
 import { Login } from './pages/Login';
 import { SignUp } from './pages/SignUp';
 import { ForgotPassword } from './pages/ForgotPassword';
+import { Landing } from './pages/Landing';
+import { LandingRoute } from './components/auth/LandingRoute';
+import { TermsOfUse } from './pages/TermsOfUse';
+import { PrivacyPolicy } from './pages/PrivacyPolicy';
 
 function App() {
   return (
@@ -33,9 +37,11 @@ function App() {
           <Route path="/share/project/:id" element={<PublicProject />} />
           <Route path="/share/image/:imageId" element={<PublicImage />} />
           <Route path="/u/:slug" element={<PublicPortfolio />} />
-          
+          <Route path="/termos" element={<TermsOfUse />} />
+          <Route path="/privacidade" element={<PrivacyPolicy />} />
+          <Route path="/" element={<LandingRoute><Landing /></LandingRoute>} />
+
           {/* Private Routes - With Sidebar */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
           <Route path="/projects" element={<ProtectedRoute><Layout><Projects /></Layout></ProtectedRoute>} />
           <Route path="/projects/new" element={<ProtectedRoute><Layout><NewProject /></Layout></ProtectedRoute>} />
