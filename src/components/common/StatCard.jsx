@@ -16,7 +16,10 @@ export const StatCard = ({
     const { valueClassName, barClassName } = getUsageVisualClasses(percentage);
 
     return (
-      <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
+      <div
+        className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6"
+        data-testid={dataTestId}
+      >
         <p className="text-sm text-zinc-400 mb-2">{label}</p>
         <div className="flex items-baseline gap-2">
           <span className={`text-3xl font-light tabular-nums ${valueClassName}`}>

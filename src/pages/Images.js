@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { Plus, Loader2 } from "lucide-react";
-import { PageHeader } from "@/components/common/PageHeader";
-import { SectionHeader } from "@/components/common/SectionHeader";
+import { PageActionHeader } from "@/components/common/PageActionHeader";
+import { EmptyStateCard } from "@/components/common/EmptyStateCard";
 import { ImageCard } from "@/components/common/ImageCard";
 import { UploadImageDialog } from "@/components/images/UploadImageDialog";
 import { EditImageDialog } from "@/components/images/EditImageDialog";
@@ -10,7 +10,6 @@ import { MoveImageToProjectDialog } from "@/components/images/MoveImageToProject
 import { deleteImage } from "@/services/images/imageService";
 import { AuthLoadingScreen } from "@/components/auth/ProtectedRoute";
 import { useAuth } from "@/hooks/useAuth";
-import { PlanLimitButton } from "@/components/plans/PlanLimitButton";
 import { UpgradePrompt } from "@/components/plans/UpgradePrompt";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { useLooseImages } from "@/hooks/useLooseImages";
@@ -54,6 +53,10 @@ export const Images = () => {
   const [showMoveDialog, setShowMoveDialog] = useState(false);
 
   const handleAddImageClick = () => {
+    if (!canUploadImage) {
+      return;
+    }
+
     fileInputRef.current?.click();
   };
 
@@ -61,7 +64,7 @@ export const Images = () => {
     const file = event.target.files?.[0];
     event.target.value = "";
 
-    if (!file) {
+    if (!file || !canUploadImage) {
       return;
     }
 
@@ -251,10 +254,15 @@ export const Images = () => {
 
   return (
     <div className="p-8 md:p-12 lg:p-16 fade-in">
-      <PageHeader
+      <PageActionHeader
         title="Imagens"
-        subtitle="Panoramas 360° sem projeto"
+        subtitle="Gerencie sua galeria de imagens"
+        actionLabel="Adicionar imagem"
+        actionIcon={<Plus size={20} />}
+        onAction={handleAddImageClick}
+        actionDisabled={!canUploadImage}
         dataTestId="images-page-title"
+        actionDataTestId="loose-add-image-btn"
       />
 
       <input
@@ -276,45 +284,21 @@ export const Images = () => {
         </div>
       )}
 
-      <SectionHeader
-        title="Galeria"
-        dataTestId="loose-images-section-title"
-        actions={
-          <PlanLimitButton
-            disabled={!canUploadImage}
-            onClick={handleAddImageClick}
-            dataTestId="loose-add-image-btn"
-          >
-            <Plus size={20} />
-            Adicionar imagem
-          </PlanLimitButton>
-        }
-      />
-
       {imagesLoading ? (
         <div className="flex items-center justify-center py-16 bg-zinc-900/50 border border-zinc-800 rounded-2xl">
           <Loader2 size={24} className="animate-spin text-zinc-400" />
         </div>
       ) : cardImages.length === 0 ? (
-        <div
-          className="text-center py-16 bg-zinc-900/50 border border-zinc-800 rounded-2xl"
-          data-testid="loose-images-empty"
-        >
-          <h3 className="text-lg font-medium text-white mb-2">
-            Nenhuma imagem adicionada
-          </h3>
-          <p className="text-sm text-zinc-400 max-w-md mx-auto mb-6">
-            Envie panoramas 360° sem precisar criar um projeto.
-          </p>
-          <PlanLimitButton
-            disabled={!canUploadImage}
-            onClick={handleAddImageClick}
-            dataTestId="loose-empty-add-image-btn"
-          >
-            <Plus size={20} />
-            Adicionar imagem
-          </PlanLimitButton>
-        </div>
+        <EmptyStateCard
+          dataTestId="loose-images-empty"
+          title="Nenhuma imagem enviada"
+          description="Envie panoramas 360° sem precisar criar um projeto."
+          actionLabel="Adicionar imagem"
+          actionIcon={<Plus size={20} />}
+          actionDisabled={!canUploadImage}
+          onAction={handleAddImageClick}
+          actionDataTestId="loose-empty-add-image-btn"
+        />
       ) : (
         <div
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"

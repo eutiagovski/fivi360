@@ -57,7 +57,7 @@ export function AuthProvider({ children }) {
 
     try {
       const user = await signUpWithEmail(email, password);
-      await createUserProfile(user.uid, { name, email });
+      await createUserProfile(user.uid, { name, email, acceptedSource: "signup" });
     } catch (err) {
       setError(err);
       throw err;

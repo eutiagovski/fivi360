@@ -1,14 +1,21 @@
 import { Lock, Mail } from "lucide-react";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { AuthCard } from "@/components/auth/AuthCard";
 import { AuthLayout } from "@/components/auth/AuthLayout";
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { useAuth } from "@/hooks/useAuth";
 import { getAuthErrorMessage } from "@/utils/authErrors";
+import {
+  appendPlanQueryToPath,
+  getPostAuthRedirectPath,
+} from "@/utils/billingPlanFlow";
 
 export const Login = () => {
   const navigate = useNavigate();
-  const { signIn } = useAuth();
+  const [searchParams] = useSearchParams();
+  const plan = searchParams.get("plan");
+  const { signIn, signInGoogle } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -29,6 +36,20 @@ export const Login = () => {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    setFormError(null);
+    setIsSubmitting(true);
+
+    try {
+      await signInGoogle();
+      navigate(getPostAuthRedirectPath(plan), { replace: true });
+    } catch (err) {
+      setFormError(getAuthErrorMessage(err));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFormError(null);
@@ -36,7 +57,7 @@ export const Login = () => {
 
     try {
       await signIn(email, password);
-      navigate("/dashboard", { replace: true });
+      navigate(getPostAuthRedirectPath(plan), { replace: true });
     } catch (err) {
       setFormError(getAuthErrorMessage(err));
     } finally {
@@ -128,10 +149,25 @@ export const Login = () => {
             {isSubmitting ? "Entrando..." : "Entrar"}
           </button>
 
+          <div className="relative py-2">
+            <div className="absolute inset-0 flex items-center" aria-hidden="true">
+              <div className="w-full border-t border-zinc-800" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-zinc-900/50 px-3 text-zinc-500">ou</span>
+            </div>
+          </div>
+
+          <GoogleSignInButton
+            onClick={handleGoogleSignIn}
+            disabled={isSubmitting}
+            testId="login-google-btn"
+          />
+
           <p className="text-center text-sm text-zinc-400">
             Não tem uma conta?{" "}
             <Link
-              to="/register"
+              to={appendPlanQueryToPath("/register", plan)}
               className="text-white hover:underline"
               data-testid="login-register-link"
             >

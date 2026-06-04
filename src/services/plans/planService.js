@@ -3,6 +3,7 @@
  */
 
 import { collection, getDocs, query, where } from "firebase/firestore";
+import { normalizeBilling } from "@/config/billing";
 import { db } from "@/config/firebase";
 import {
   formatStorageBytes,
@@ -108,7 +109,12 @@ export async function getUserUsage(userId) {
 
 /**
  * @param {string} userId
- * @returns {Promise<{ planId: import("@/config/planLimits").PlanId, limits: import("@/config/planLimits").PlanLimits, usage: UserUsage }>}
+ * @returns {Promise<{
+ *   planId: import("@/config/planLimits").PlanId,
+ *   limits: import("@/config/planLimits").PlanLimits,
+ *   usage: UserUsage,
+ *   billing: import("@/config/billing").UserBilling,
+ * }>}
  */
 export async function getUserPlanContext(userId) {
   const profile = await getUser(userId);
@@ -116,7 +122,12 @@ export async function getUserPlanContext(userId) {
   const limits = getPlanLimits(planId);
   const usage = await getUserUsage(userId);
 
-  return { planId, limits, usage };
+  return {
+    planId,
+    limits,
+    usage,
+    billing: profile?.billing ?? normalizeBilling(null),
+  };
 }
 
 /**

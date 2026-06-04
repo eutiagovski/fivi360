@@ -10,12 +10,14 @@ export const SectionHeader = ({ title, subtitle, actions, dataTestId }) => {
 
   if (actions) {
     return (
-      <div className="flex items-center justify-between mb-6">
-        <div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+        <div className="min-w-0">
           {heading}
           {subtitle && <p className="text-base text-zinc-400 mt-2">{subtitle}</p>}
         </div>
-        {actions}
+        <div className="w-full sm:w-auto shrink-0 [&_button]:w-full sm:[&_button]:w-auto [&_a]:w-full sm:[&_a]:w-auto [&_a]:justify-center sm:[&_a]:inline-flex [&>span]:block [&>span]:w-full sm:[&>span]:w-auto sm:[&>span]:inline-block">
+          {actions}
+        </div>
       </div>
     );
   }

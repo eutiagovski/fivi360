@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { PlanUpgradeHint } from '@/components/plans/PlanUpgradeHint';
 import { usePlanLimits } from '@/hooks/usePlanLimits';
 import { createProject } from '@/services/projects/projectService';
 import { showPlanLimitToast } from '@/utils/planToast';
@@ -16,7 +15,7 @@ import {
 export const NewProject = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { canCreateProject, publicVisibilityEnabled, loading: planLoading } =
+  const { canCreateProject, publicVisibilityEnabled, loading: planLoading, limits } =
     usePlanLimits();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -83,6 +82,53 @@ export const NewProject = () => {
     );
   }
 
+  if (!canCreateProject) {
+    return (
+      <div className="p-8 md:p-12 lg:p-16 fade-in">
+        <Link
+          to="/projects"
+          data-testid="back-to-projects-new"
+          className="inline-flex items-center gap-2 text-zinc-400 hover:text-white transition-colors mb-8"
+        >
+          <ArrowLeft size={20} />
+          Voltar para projetos
+        </Link>
+
+        <div
+          className="max-w-2xl mx-auto text-center py-16 bg-zinc-900/50 border border-zinc-800 rounded-2xl px-8"
+          data-testid="new-project-limit-blocked"
+        >
+          <h2
+            className="text-2xl font-light text-white mb-4 tracking-tight"
+            data-testid="new-project-limit-title"
+          >
+            Limite de projetos atingido
+          </h2>
+          <p className="text-zinc-400 mb-10 leading-relaxed">
+            {`Você atingiu o limite de projetos do plano ${limits.displayName}. Faça upgrade para criar projetos ilimitados.`}
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link
+              to="/plan"
+              data-testid="new-project-view-plans-btn"
+              className="w-full sm:w-auto px-8 py-3 bg-white text-black rounded-full font-medium btn-scale hover:bg-zinc-200 transition-colors"
+            >
+              Ver planos
+            </Link>
+            <Link
+              to="/projects"
+              data-testid="new-project-back-projects-btn"
+              className="w-full sm:w-auto px-8 py-3 bg-zinc-800 border border-zinc-700 text-white rounded-full font-medium btn-scale hover:bg-zinc-700 transition-colors"
+            >
+              Voltar para projetos
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-8 md:p-12 lg:p-16 fade-in">
       <Link
@@ -101,12 +147,6 @@ export const NewProject = () => {
       />
 
       <div className="max-w-3xl">
-        {!canCreateProject && (
-          <div className="mb-6">
-            <PlanUpgradeHint message="Você atingiu o limite de projetos do plano Starter. Faça upgrade para criar mais projetos." />
-          </div>
-        )}
-
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8">
             <div className="mb-6">
@@ -199,7 +239,7 @@ export const NewProject = () => {
           <div className="flex items-center gap-4">
             <button
               type="submit"
-              disabled={isSubmitting || !canCreateProject}
+              disabled={isSubmitting}
               data-testid="create-project-submit-btn"
               className="flex items-center gap-2 px-8 py-3 bg-white text-black rounded-full font-medium btn-scale hover:bg-zinc-200 transition-colors disabled:opacity-50"
             >

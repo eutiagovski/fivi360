@@ -23,6 +23,7 @@ import { Landing } from './pages/Landing';
 import { LandingRoute } from './components/auth/LandingRoute';
 import { TermsOfUse } from './pages/TermsOfUse';
 import { PrivacyPolicy } from './pages/PrivacyPolicy';
+import { NotFound } from './pages/NotFound';
 
 function App() {
   return (
@@ -52,6 +53,7 @@ function App() {
           <Route path="/pricing" element={<Navigate to="/plan" replace />} />
           <Route path="/settings" element={<ProtectedRoute><Layout><Settings /></Layout></ProtectedRoute>} />
           <Route path="/help" element={<ProtectedRoute><Layout><Help /></Layout></ProtectedRoute>} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </div>

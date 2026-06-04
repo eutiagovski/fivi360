@@ -14,8 +14,8 @@ export const Layout = ({ children }) => {
 
   const menuItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Projetos', path: '/projects', icon: FolderOpen },
     { name: 'Imagens', path: '/images', icon: Image },
+    { name: 'Projetos', path: '/projects', icon: FolderOpen },
     { name: 'Plano', path: '/plan', icon: CreditCard },
     { name: 'Configurações', path: '/settings', icon: Settings },
   ];

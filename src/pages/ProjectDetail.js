@@ -2,6 +2,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, Share2, Trash2, Pencil, Loader2, X, Check } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { SectionHeader } from '@/components/common/SectionHeader';
+import { EmptyStateCard } from '@/components/common/EmptyStateCard';
 import { ImageCard } from '@/components/common/ImageCard';
 import { UploadImageDialog } from '@/components/images/UploadImageDialog';
 import { EditImageDialog } from '@/components/images/EditImageDialog';
@@ -139,6 +140,10 @@ export const ProjectDetail = () => {
   };
 
   const handleAddImageClick = () => {
+    if (!canUploadImage) {
+      return;
+    }
+
     fileInputRef.current?.click();
   };
 
@@ -146,7 +151,7 @@ export const ProjectDetail = () => {
     const file = event.target.files?.[0];
     event.target.value = '';
 
-    if (!file) {
+    if (!file || !canUploadImage) {
       return;
     }
 
@@ -617,17 +622,16 @@ export const ProjectDetail = () => {
             <Loader2 size={24} className="animate-spin text-zinc-400" />
           </div>
         ) : cardImages.length === 0 ? (
-          <div
-            className="text-center py-16 bg-zinc-900/50 border border-zinc-800 rounded-2xl"
-            data-testid="images-empty"
-          >
-            <h3 className="text-lg font-medium text-white mb-2">
-              Nenhuma imagem adicionada
-            </h3>
-            <p className="text-sm text-zinc-400 max-w-md mx-auto">
-              Adicione sua primeira imagem 360° para começar a montar este projeto.
-            </p>
-          </div>
+          <EmptyStateCard
+            dataTestId="images-empty"
+            title="Nenhuma imagem adicionada"
+            description="Adicione sua primeira imagem 360° para começar a montar este projeto."
+            actionLabel="Adicionar imagem"
+            actionIcon={<Plus size={20} />}
+            actionDisabled={!canUploadImage}
+            onAction={handleAddImageClick}
+            actionDataTestId="images-empty-add-image-btn"
+          />
         ) : (
           <div
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { normalizeBilling } from "@/config/billing";
 import { getPlanLimits } from "@/config/planLimits";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -23,6 +24,7 @@ export function usePlanLimits() {
     imageCount: 0,
     storageBytes: 0,
   });
+  const [billing, setBilling] = useState(() => normalizeBilling(null));
 
   const load = useCallback(async () => {
     if (!user?.uid) {
@@ -38,6 +40,7 @@ export function usePlanLimits() {
       setPlanId(context.planId);
       setLimits(context.limits);
       setUsage(context.usage);
+      setBilling(context.billing);
     } catch {
       setError("Não foi possível carregar informações do plano.");
 
@@ -46,6 +49,7 @@ export function usePlanLimits() {
         const fallbackLimits = getPlanLimits(profile?.plan);
         setPlanId(fallbackLimits.name);
         setLimits(fallbackLimits);
+        setBilling(profile?.billing ?? normalizeBilling(null));
       } catch {
         setError("Não foi possível carregar informações do plano.");
       }
@@ -66,6 +70,7 @@ export function usePlanLimits() {
     planId,
     limits,
     usage,
+    billing,
     usageStats,
     canCreateProject: canCreateProject(limits, usage),
     canUploadImage: canUploadImage(limits, usage),

@@ -1,12 +1,15 @@
 import { Plus, Image, Link2, HardDrive, FolderOpen } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { PlanLimitButton } from '@/components/plans/PlanLimitButton';
 import { PageHeader } from '@/components/common/PageHeader';
 import { SectionHeader } from '@/components/common/SectionHeader';
+import { EmptyStateCard } from '@/components/common/EmptyStateCard';
 import { StatCard } from '@/components/common/StatCard';
 import { ProjectCard } from '@/components/common/ProjectCard';
 import { ImageCard } from '@/components/common/ImageCard';
 import { AuthLoadingScreen } from '@/components/auth/ProtectedRoute';
 import { PlanUpgradeHint } from '@/components/plans/PlanUpgradeHint';
+import { StarterPlanInfoBanner } from '@/components/plans/StarterPlanInfoBanner';
 import { UpgradePrompt } from '@/components/plans/UpgradePrompt';
 import { PLAN_IDS } from '@/config/planLimits';
 import { usePlanLimits } from '@/hooks/usePlanLimits';
@@ -24,10 +27,18 @@ import {
 } from '@/utils/planUsageAlerts';
 
 export const Dashboard = () => {
+  const navigate = useNavigate();
   const { cardProjects, projects, loading } = useProjects();
   const { cardImages: recentImages, loading: imagesLoading } = useRecentImages(3);
-  const { usageStats, limits, loading: planLoading, planId, usage } =
-    usePlanLimits();
+  const {
+    usageStats,
+    limits,
+    loading: planLoading,
+    planId,
+    usage,
+    canCreateProject,
+    canUploadImage,
+  } = usePlanLimits();
   const recentProjects = cardProjects.slice(0, 3);
 
   const showStarterLimitBanner =
@@ -48,12 +59,16 @@ export const Dashboard = () => {
         dataTestId="dashboard-title"
       />
 
-      <div className="max-w-3xl mb-10">
-        <PlanUpgradeHint
-          compact
-          message="A cobrança online ainda não está disponível. Os limites do seu plano atual já estão ativos — em breve você poderá fazer upgrade diretamente por aqui."
-        />
-      </div>
+      {planId === PLAN_IDS.STARTER ? (
+        <StarterPlanInfoBanner className="mb-12" />
+      ) : (
+        <div className="max-w-3xl mb-10">
+          <PlanUpgradeHint
+            compact
+            message="A cobrança online ainda não está disponível. Os limites do seu plano atual já estão ativos — em breve você poderá fazer upgrade diretamente por aqui."
+          />
+        </div>
+      )}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
@@ -104,22 +119,31 @@ export const Dashboard = () => {
       {/* Recent Images */}
       <div className="mb-12">
         <SectionHeader
-          title="Imagens recentes"
+          title="Imagens Recentes"
           dataTestId="recent-images-title"
+          actions={
+            <PlanLimitButton
+              disabled={!canUploadImage}
+              onClick={() => navigate('/images')}
+              dataTestId="dashboard-add-image-btn"
+            >
+              <Plus size={20} />
+              Adicionar imagem
+            </PlanLimitButton>
+          }
         />
 
         {recentImages.length === 0 ? (
-          <div
-            className="text-center py-16 bg-zinc-900/50 border border-zinc-800 rounded-2xl"
-            data-testid="dashboard-empty-images"
-          >
-            <h3 className="text-lg font-medium text-white mb-2">
-              Nenhuma imagem enviada
-            </h3>
-            <p className="text-sm text-zinc-400 max-w-md mx-auto">
-              Envie sua primeira imagem 360° para começar.
-            </p>
-          </div>
+          <EmptyStateCard
+            dataTestId="dashboard-empty-images"
+            title="Nenhuma imagem enviada"
+            description="Envie sua primeira imagem 360° para começar."
+            actionLabel="Adicionar imagem"
+            actionIcon={<Plus size={20} />}
+            actionDisabled={!canUploadImage}
+            onAction={() => navigate('/images')}
+            actionDataTestId="dashboard-empty-add-image-btn"
+          />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {recentImages.map((image) => (
@@ -138,24 +162,31 @@ export const Dashboard = () => {
       {/* Recent Projects */}
       <div>
         <SectionHeader
-          title="Projetos recentes"
+          title="Projetos Recentes"
           dataTestId="recent-projects-title"
           actions={
-            <Link
-              to="/projects/new"
-              data-testid="create-project-btn"
-              className="flex items-center gap-2 px-6 py-3 bg-white text-black rounded-full font-medium btn-scale hover:bg-zinc-200 transition-colors"
+            <PlanLimitButton
+              disabled={!canCreateProject}
+              onClick={() => navigate('/projects/new')}
+              dataTestId="create-project-btn"
             >
               <Plus size={20} />
               Criar projeto
-            </Link>
+            </PlanLimitButton>
           }
         />
 
         {recentProjects.length === 0 ? (
-          <p className="text-zinc-400" data-testid="dashboard-empty-projects">
-            Nenhum projeto ainda. Crie o primeiro para começar.
-          </p>
+          <EmptyStateCard
+            dataTestId="dashboard-empty-projects"
+            title="Nenhum projeto criado"
+            description="Crie seu primeiro projeto para organizar imagens 360° e compartilhar apresentações completas."
+            actionLabel="Criar projeto"
+            actionIcon={<Plus size={20} />}
+            actionDisabled={!canCreateProject}
+            onAction={() => navigate('/projects/new')}
+            actionDataTestId="dashboard-empty-create-project-btn"
+          />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {recentProjects.map((project) => (

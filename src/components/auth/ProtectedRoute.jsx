@@ -1,5 +1,6 @@
 import { Loader2 } from "lucide-react";
 import { Navigate } from "react-router-dom";
+import { LegalConsentGate } from "@/components/legal/LegalConsentGate";
 import { useAuth } from "@/hooks/useAuth";
 
 export function AuthLoadingScreen() {
@@ -31,5 +32,5 @@ export function ProtectedRoute({ children }) {
     return <Navigate to="/login" replace />;
   }
 
-  return children;
+  return <LegalConsentGate>{children}</LegalConsentGate>;
 }

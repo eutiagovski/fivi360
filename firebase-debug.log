@@ -1,0 +1,85 @@
+[debug] [2026-06-03T23:27:15.905Z] ----------------------------------------------------------------------
+[debug] [2026-06-03T23:27:15.909Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\Tiago Machado\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js emulators:start --export-on-exit --import=./firebase-data
+[debug] [2026-06-03T23:27:15.910Z] CLI Version:   15.19.0
+[debug] [2026-06-03T23:27:15.910Z] Platform:      win32
+[debug] [2026-06-03T23:27:15.910Z] Node Version:  v24.16.0
+[debug] [2026-06-03T23:27:15.910Z] Time:          Wed Jun 03 2026 20:27:15 GMT-0300 (Horário Padrão de Brasília)
+[debug] [2026-06-03T23:27:15.911Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-06-03T23:27:15.915Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2026-06-03T23:27:19.402Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-06-03T23:27:19.403Z] > authorizing via signed-in user (tiagomachadodev@gmail.com)
+[debug] [2026-06-03T23:27:19.744Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2026-06-03T23:27:19.744Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[debug] [2026-06-03T23:27:19.755Z] java version "26.0.1" 2026-04-21
+Java(TM) SE Runtime Environment (build 26.0.1+8-34)
+Java HotSpot(TM) 64-Bit Server VM (build 26.0.1+8-34, mixed mode, sharing)
+
+[debug] [2026-06-03T23:27:19.781Z] Parsed Java major version: 26
+[info] i  emulators: Starting emulators: auth, firestore, hosting, storage {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth, firestore, hosting, storage"}}
+[debug] [2026-06-03T23:27:19.810Z] [logging] Logging Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-06-03T23:27:19.810Z] [auth] Authentication Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-06-03T23:27:19.810Z] [firestore] Firestore Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-06-03T23:27:19.810Z] [firestore.websocket] websocket server for firestore only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-06-03T23:27:19.810Z] [hosting] Hosting Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-06-03T23:27:19.810Z] [storage] Storage Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-06-03T23:27:19.811Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}],"firestore":[{"address":"127.0.0.1","family":"IPv4","port":8080}],"firestore.websocket":[{"address":"127.0.0.1","family":"IPv4","port":9150}],"hosting":[{"address":"127.0.0.1","family":"IPv4","port":5000}],"storage":[{"address":"127.0.0.1","family":"IPv4","port":9199}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[debug] [2026-06-03T23:27:19.818Z] Write emulator hub locator at C:\Users\TIAGOM~1\AppData\Local\Temp\hub-fivi360.json
+[debug] [2026-06-03T23:27:19.836Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2026-06-03T23:27:19.836Z] Ignoring unsupported arg: single_project_mode_error {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: single_project_mode_error"}}
+[debug] [2026-06-03T23:27:19.837Z] Starting Firestore Emulator with command {"binary":"java","args":["-Dgoogle.cloud_firestore.debug_log_level=FINE","-Duser.language=en","-jar","C:\\Users\\Tiago Machado\\.cache\\firebase\\emulators\\cloud-firestore-emulator-v1.21.0.jar","--host","127.0.0.1","--port",8080,"--websocket_port",9150,"--database-edition","standard","--project_id","fivi360","--rules","C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360-v2\\firestore.rules","--single_project_mode",true],"optionalArgs":["port","webchannel_port","host","rules","websocket_port","database-edition","functions_emulator","seed_from_export","project_id","single_project_mode"],"joinArgs":false,"shell":false,"port":8080} {"metadata":{"emulator":{"name":"firestore"},"message":"Starting Firestore Emulator with command {\"binary\":\"java\",\"args\":[\"-Dgoogle.cloud_firestore.debug_log_level=FINE\",\"-Duser.language=en\",\"-jar\",\"C:\\\\Users\\\\Tiago Machado\\\\.cache\\\\firebase\\\\emulators\\\\cloud-firestore-emulator-v1.21.0.jar\",\"--host\",\"127.0.0.1\",\"--port\",8080,\"--websocket_port\",9150,\"--database-edition\",\"standard\",\"--project_id\",\"fivi360\",\"--rules\",\"C:\\\\Users\\\\Tiago Machado\\\\Documents\\\\Dev\\\\Personal\\\\fivi360-v2\\\\firestore.rules\",\"--single_project_mode\",true],\"optionalArgs\":[\"port\",\"webchannel_port\",\"host\",\"rules\",\"websocket_port\",\"database-edition\",\"functions_emulator\",\"seed_from_export\",\"project_id\",\"single_project_mode\"],\"joinArgs\":false,\"shell\":false,\"port\":8080}"}}
+[info] i  firestore: Firestore Emulator logging to firestore-debug.log {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator logging to \u001b[1mfirestore-debug.log\u001b[22m"}}
+[info] +  firestore: Firestore Emulator was started in standard edition. {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator was started in standard edition."}}
+[info] +  firestore: Firestore Emulator UI websocket is running on 9150. {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator UI websocket is running on 9150."}}
+[debug] [2026-06-03T23:27:33.232Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"storage"},"message":"Ignoring unsupported arg: port"}}
+[warn] !  Unexpected rules runtime error: WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::arrayBaseOffset has been called by com.google.protobuf.UnsafeUtil$MemoryAccessor (file:/C:/Users/Tiago%20Machado/.cache/firebase/emulators/cloud-storage-rules-runtime-v1.1.3.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.protobuf.UnsafeUtil$MemoryAccessor
+WARNING: sun.misc.Unsafe::arrayBaseOffset will be removed in a future release
+ {"metadata":{"emulator":{"name":"storage"},"message":"Unexpected rules runtime error: WARNING: A terminally deprecated method in sun.misc.Unsafe has been called\nWARNING: sun.misc.Unsafe::arrayBaseOffset has been called by com.google.protobuf.UnsafeUtil$MemoryAccessor (file:/C:/Users/Tiago%20Machado/.cache/firebase/emulators/cloud-storage-rules-runtime-v1.1.3.jar)\nWARNING: Please consider reporting this to the maintainers of class com.google.protobuf.UnsafeUtil$MemoryAccessor\nWARNING: sun.misc.Unsafe::arrayBaseOffset will be removed in a future release\r\n"}}
+[debug] [2026-06-03T23:27:34.982Z] Temp file directory for storage emulator: C:\Users\TIAGOM~1\AppData\Local\Temp/firebase/storage/blobs {"metadata":{"emulator":{"name":"storage"},"message":"Temp file directory for storage emulator: C:\\Users\\TIAGOM~1\\AppData\\Local\\Temp/firebase/storage/blobs"}}
+[debug] [2026-06-03T23:27:34.989Z] Checked if tokens are valid: false, expires at: 1780437272519
+[debug] [2026-06-03T23:27:34.990Z] Checked if tokens are valid: false, expires at: 1780437272519
+[debug] [2026-06-03T23:27:34.990Z] > refreshing access token with scopes: []
+[debug] [2026-06-03T23:27:34.991Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-06-03T23:27:34.992Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-06-03T23:27:35.177Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-06-03T23:27:35.178Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-06-03T23:27:35.194Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/fivi360/sites 
+[debug] [2026-06-03T23:27:36.590Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/fivi360/sites 200
+[debug] [2026-06-03T23:27:36.591Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/fivi360/sites {"sites":[{"name":"projects/fivi360/sites/fivi360","defaultUrl":"https://fivi360.web.app","type":"DEFAULT_SITE"}]}
+[debug] [2026-06-03T23:27:36.591Z] Checked if tokens are valid: true, expires at: 1780532854178
+[debug] [2026-06-03T23:27:36.591Z] Checked if tokens are valid: true, expires at: 1780532854178
+[debug] [2026-06-03T23:27:36.592Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/fivi360/webApps/-/config [none]
+[debug] [2026-06-03T23:27:37.900Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/fivi360/webApps/-/config 200
+[debug] [2026-06-03T23:27:37.900Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/fivi360/webApps/-/config {"projectId":"fivi360","appId":"1:61026306739:web:c7ecdf4615abf357a1bec6","storageBucket":"fivi360.appspot.com","locationId":"us-west2","apiKey":"AIzaSyAHnGVoqIHc6OkGBOscRJG3sVdeGv5URDA","authDomain":"fivi360.firebaseapp.com","messagingSenderId":"61026306739","measurementId":"G-TZVXFJ54Q6","projectNumber":"61026306739","version":"2"}
+[debug] [2026-06-03T23:27:37.913Z] Checked if tokens are valid: true, expires at: 1780532854178
+[debug] [2026-06-03T23:27:37.913Z] Checked if tokens are valid: true, expires at: 1780532854178
+[debug] [2026-06-03T23:27:37.914Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/fivi360 [none]
+[debug] [2026-06-03T23:27:38.283Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/fivi360 200
+[debug] [2026-06-03T23:27:38.283Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/fivi360 {"projectId":"fivi360","projectNumber":"61026306739","displayName":"FIVI360","name":"projects/fivi360","resources":{"hostingSite":"fivi360","locationId":"us-west2"},"state":"ACTIVE","etag":"1_6ccba432-9b81-4399-8728-7d73cdd7784f"}
+[info] i  hosting[fivi360]: Serving hosting files from: build {"metadata":{"emulator":{"name":"hosting"},"message":"Serving hosting files from: \u001b[1mbuild\u001b[22m"}}
+[info] +  hosting[fivi360]: Local server: http://127.0.0.1:5000 {"metadata":{"emulator":{"name":"hosting"},"message":"Local server: \u001b[4m\u001b[1mhttp://127.0.0.1:5000\u001b[22m\u001b[24m"}}
+[debug] [2026-06-03T23:27:38.352Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: . If you are not running the Firebase SQL Connect VSCode extension, this is expected and not an issue.
+[info] 
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+│ i  View Emulator UI at http://127.0.0.1:4000/               │
+└─────────────────────────────────────────────────────────────┘
+
+┌────────────────┬────────────────┬─────────────────────────────────┐
+│ Emulator       │ Host:Port      │ View in Emulator UI             │
+├────────────────┼────────────────┼─────────────────────────────────┤
+│ Authentication │ 127.0.0.1:9099 │ http://127.0.0.1:4000/auth      │
+├────────────────┼────────────────┼─────────────────────────────────┤
+│ Firestore      │ 127.0.0.1:8080 │ http://127.0.0.1:4000/firestore │
+├────────────────┼────────────────┼─────────────────────────────────┤
+│ Hosting        │ 127.0.0.1:5000 │ n/a                             │
+├────────────────┼────────────────┼─────────────────────────────────┤
+│ Storage        │ 127.0.0.1:9199 │ http://127.0.0.1:4000/storage   │
+└────────────────┴────────────────┴─────────────────────────────────┘
+  Emulator Hub host: 127.0.0.1 port: 4400
+  Other reserved ports: 4500, 9150
+
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 

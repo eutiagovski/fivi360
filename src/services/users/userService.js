@@ -26,16 +26,32 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "@/config/firebase";
+import { LEGAL_VERSIONS } from "@/config/legal";
 import {
   checkSlugAvailability,
   SlugTakenError,
   SlugValidationError,
   syncSlugRegistryInTransaction,
 } from "@/services/slugs/slugService";
+import { DEFAULT_BILLING, normalizeBilling } from "@/config/billing";
 import { assertPublicPortfolioEnabled } from "@/services/plans/planService";
 import { isValidSlugFormat, normalizeSlug } from "@/utils/slug";
 
 export { SlugTakenError, SlugValidationError };
+
+/**
+ * @param {"signup" | "modal_existing_user"} acceptedSource
+ */
+export function buildLegalConsent(acceptedSource) {
+  return {
+    termsAccepted: true,
+    privacyAccepted: true,
+    termsVersion: LEGAL_VERSIONS.termsVersion,
+    privacyVersion: LEGAL_VERSIONS.privacyVersion,
+    acceptedAt: serverTimestamp(),
+    acceptedSource,
+  };
+}
 
 /**
  * @typedef {Object} UserProfile
@@ -53,6 +69,7 @@ export { SlugTakenError, SlugValidationError };
  * @property {string} youtubeUrl
  * @property {string} linkedinUrl
  * @property {string} whatsappUrl
+ * @property {import("@/config/billing").UserBilling} billing
  */
 
 /**
@@ -76,6 +93,7 @@ function mapUserDoc(userId, data) {
     youtubeUrl: data.youtubeUrl ?? "",
     linkedinUrl: data.linkedinUrl ?? "",
     whatsappUrl: data.whatsappUrl ?? "",
+    billing: normalizeBilling(data.billing),
   };
 }
 
@@ -83,12 +101,12 @@ function mapUserDoc(userId, data) {
  * Cria o documento do usuário no Firestore após cadastro no Firebase Auth.
  *
  * @param {string} userId
- * @param {{ name: string, email: string }} data
+ * @param {{ name: string, email: string, acceptedSource?: "signup" | "modal_existing_user" }} data
  */
-export async function createUserProfile(userId, { name, email }) {
+export async function createUserProfile(userId, { name, email, acceptedSource }) {
   const userRef = doc(db, "users", userId);
 
-  await setDoc(userRef, {
+  const payload = {
     name,
     email,
     companyName: "",
@@ -96,9 +114,48 @@ export async function createUserProfile(userId, { name, email }) {
     plan: "starter",
     publicSlug: "",
     portfolioEnabled: false,
+    billing: { ...DEFAULT_BILLING },
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
+  };
+
+  if (acceptedSource) {
+    payload.legalConsent = buildLegalConsent(acceptedSource);
+  }
+
+  await setDoc(userRef, payload);
+}
+
+/**
+ * Registra ou atualiza o aceite legal no documento do usuário.
+ *
+ * @param {string} userId
+ * @param {"signup" | "modal_existing_user"} acceptedSource
+ */
+export async function saveLegalConsent(userId, acceptedSource) {
+  const userRef = doc(db, "users", userId);
+
+  await updateDoc(userRef, {
+    legalConsent: buildLegalConsent(acceptedSource),
+    updatedAt: serverTimestamp(),
   });
+}
+
+/**
+ * Dados brutos do documento users/{uid} (inclui legalConsent).
+ *
+ * @param {string} userId
+ * @returns {Promise<({ id: string } & import("firebase/firestore").DocumentData) | null>}
+ */
+export async function getUserFirestoreData(userId) {
+  const userRef = doc(db, "users", userId);
+  const snapshot = await getDoc(userRef);
+
+  if (!snapshot.exists()) {
+    return null;
+  }
+
+  return { id: userId, ...snapshot.data() };
 }
 
 /**

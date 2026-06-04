@@ -24,6 +24,14 @@ export function getAuthErrorMessage(error) {
       return "Este email já está em uso";
     case "auth/weak-password":
       return "A senha deve ter pelo menos 6 caracteres";
+    case "auth/popup-closed-by-user":
+      return "Login com Google cancelado.";
+    case "auth/popup-blocked":
+      return "O navegador bloqueou a janela do Google. Permita pop-ups e tente novamente.";
+    case "auth/cancelled-popup-request":
+      return "Login com Google cancelado.";
+    case "auth/account-exists-with-different-credential":
+      return "Este email já está cadastrado com outro método de login.";
     default:
       return "Não foi possível concluir a operação. Tente novamente.";
   }

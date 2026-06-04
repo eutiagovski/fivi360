@@ -6,15 +6,31 @@ import {
   LANDING_PRICING_MARKETING,
   LANDING_PRICING_SECTION,
 } from "@/config/landingContent";
-import { PLAN_LIMITS, PLAN_ORDER } from "@/config/planLimits";
+import { PLAN_IDS, PLAN_LIMITS, PLAN_ORDER } from "@/config/planLimits";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  getPlanUpgradePath,
+  getRegisterWithPlanPath,
+} from "@/utils/billingPlanFlow";
 
 const primaryBtnClass =
   "w-full py-3 rounded-full font-medium btn-scale transition-colors bg-white text-black hover:bg-zinc-200";
 
-const disabledBtnClass =
-  "w-full py-3 rounded-full font-medium bg-zinc-800 border border-zinc-700 text-zinc-500 cursor-not-allowed";
+/**
+ * @param {string} planId
+ * @param {boolean} isAuthenticated
+ * @returns {string}
+ */
+function getPaidPlanCtaHref(planId, isAuthenticated) {
+  if (isAuthenticated) {
+    return getPlanUpgradePath(planId);
+  }
+  return getRegisterWithPlanPath(planId);
+}
 
 export function LandingPricing() {
+  const { user } = useAuth();
+
   return (
     <section id="precos" className="scroll-mt-20 py-16 md:py-24">
       <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16">
@@ -31,6 +47,11 @@ export function LandingPricing() {
             const plan = PLAN_LIMITS[id];
             const marketing = LANDING_PRICING_MARKETING[id];
             const isHighlighted = marketing.highlighted;
+            const isPaidPlan =
+              id === PLAN_IDS.PROFESSIONAL || id === PLAN_IDS.ENTERPRISE;
+            const ctaHref = isPaidPlan
+              ? getPaidPlanCtaHref(id, Boolean(user))
+              : marketing.ctaTo;
 
             return (
               <div
@@ -78,25 +99,14 @@ export function LandingPricing() {
                   ))}
                 </ul>
 
-                {marketing.ctaDisabled ? (
-                  <button
-                    type="button"
-                    disabled
+                <Button className={primaryBtnClass} asChild>
+                  <Link
+                    to={ctaHref}
                     data-testid={`landing-pricing-btn-${id}`}
-                    className={disabledBtnClass}
                   >
                     {marketing.ctaLabel}
-                  </button>
-                ) : (
-                  <Button className={primaryBtnClass} asChild>
-                    <Link
-                      to={marketing.ctaTo}
-                      data-testid={`landing-pricing-starter-btn`}
-                    >
-                      {marketing.ctaLabel}
-                    </Link>
-                  </Button>
-                )}
+                  </Link>
+                </Button>
               </div>
             );
           })}

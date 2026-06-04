@@ -1,7 +1,7 @@
 import { Plus, Loader2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import { PageHeader } from '@/components/common/PageHeader';
+import { PageActionHeader } from '@/components/common/PageActionHeader';
+import { EmptyStateCard } from '@/components/common/EmptyStateCard';
 import { ProjectCard } from '@/components/common/ProjectCard';
 import {
   AlertDialog,
@@ -15,7 +15,6 @@ import {
 } from '@/components/ui/alert-dialog';
 import { AuthLoadingScreen } from '@/components/auth/ProtectedRoute';
 import { toast } from '@/hooks/use-toast';
-import { PlanLimitButton } from '@/components/plans/PlanLimitButton';
 import { UpgradePrompt } from '@/components/plans/UpgradePrompt';
 import { usePlanLimits } from '@/hooks/usePlanLimits';
 import { useProjects } from '@/hooks/useProjects';
@@ -61,30 +60,15 @@ export const Projects = () => {
 
   return (
     <div className="p-8 md:p-12 lg:p-16 fade-in">
-      <PageHeader
+      <PageActionHeader
         title="Projetos"
         subtitle="Gerencie seus projetos e imagens"
+        actionLabel="Criar projeto"
+        actionIcon={<Plus size={20} />}
+        actionHref="/projects/new"
+        actionDisabled={!canCreateProject}
         dataTestId="projects-title"
-        actions={
-          canCreateProject ? (
-            <Link
-              to="/projects/new"
-              data-testid="create-project-btn"
-              className="flex items-center gap-2 px-6 py-3 bg-white text-black rounded-full font-medium btn-scale hover:bg-zinc-200 transition-colors"
-            >
-              <Plus size={20} />
-              Criar projeto
-            </Link>
-          ) : (
-            <PlanLimitButton
-              disabled
-              dataTestId="create-project-btn"
-            >
-              <Plus size={20} />
-              Criar projeto
-            </PlanLimitButton>
-          )
-        }
+        actionDataTestId="create-project-btn"
       />
 
       {!canCreateProject && (
@@ -104,25 +88,16 @@ export const Projects = () => {
       )}
 
       {!error && cardProjects.length === 0 && (
-        <div className="text-center py-16" data-testid="projects-empty">
-          <p className="text-zinc-400 mb-6">Você ainda não tem projetos.</p>
-          {canCreateProject ? (
-            <Link
-              to="/projects/new"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-white text-black rounded-full font-medium btn-scale hover:bg-zinc-200 transition-colors"
-            >
-              <Plus size={20} />
-              Criar primeiro projeto
-            </Link>
-          ) : (
-            <Link
-              to="/plan"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-zinc-800 border border-zinc-700 text-white rounded-full font-medium btn-scale hover:bg-zinc-700 transition-colors"
-            >
-              Ver planos
-            </Link>
-          )}
-        </div>
+        <EmptyStateCard
+          dataTestId="projects-empty"
+          title="Nenhum projeto criado"
+          description="Crie seu primeiro projeto para organizar imagens 360° e compartilhar apresentações completas."
+          actionLabel="Criar projeto"
+          actionIcon={<Plus size={20} />}
+          actionHref="/projects/new"
+          actionDisabled={!canCreateProject}
+          actionDataTestId="projects-empty-create-btn"
+        />
       )}
 
       {cardProjects.length > 0 && (
