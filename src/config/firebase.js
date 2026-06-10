@@ -4,7 +4,7 @@
  * Responsabilidade:
  * - Inicializar o app Firebase (Auth, Firestore, Storage)
  * - Ler variáveis de ambiente (REACT_APP_FIREBASE_*)
- * - Conectar emuladores locais quando REACT_APP_USE_FIREBASE_EMULATORS=true
+ * - Conectar emuladores locais quando REACT_APP_USE_FIREBASE_EMULATORS=true (apenas development)
  * - Exportar instâncias singleton usadas pelos services
  *
  * Sprint 1: fundação — SDK configurado, sem consumo pelas páginas.
@@ -17,6 +17,38 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
 import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 import { getStorage, connectStorageEmulator } from "firebase/storage";
+
+const isDevelopment = process.env.NODE_ENV === "development";
+const isProduction = process.env.NODE_ENV === "production";
+
+const REQUIRED_FIREBASE_ENV_VARS = [
+  "REACT_APP_FIREBASE_API_KEY",
+  "REACT_APP_FIREBASE_AUTH_DOMAIN",
+  "REACT_APP_FIREBASE_PROJECT_ID",
+  "REACT_APP_FIREBASE_STORAGE_BUCKET",
+  "REACT_APP_FIREBASE_MESSAGING_SENDER_ID",
+  "REACT_APP_FIREBASE_APP_ID",
+];
+
+const missingFirebaseVars = REQUIRED_FIREBASE_ENV_VARS.filter(
+  (key) => !process.env[key]?.trim()
+);
+
+if (missingFirebaseVars.length > 0) {
+  const message = `[FIVI360] Configuração Firebase incompleta. Variáveis ausentes: ${missingFirebaseVars.join(", ")}. Copie .env.example para .env e preencha os valores.`;
+  if (isDevelopment) {
+    console.error(message);
+  }
+  throw new Error(message);
+}
+
+let useEmulator = process.env.REACT_APP_USE_FIREBASE_EMULATORS === "true";
+
+if (isProduction && useEmulator) {
+  throw new Error(
+    "[FIVI360] REACT_APP_USE_FIREBASE_EMULATORS não pode ser true em produção. Defina false em .env.production ou no ambiente de CI/CD."
+  );
+}
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -33,14 +65,11 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 
-const useEmulator = process.env.REACT_APP_USE_FIREBASE_EMULATORS === "true";
-
-console.log(
-  "REACT_APP_USE_FIREBASE_EMULATORS:",
-  process.env.REACT_APP_USE_FIREBASE_EMULATORS
-);
-
-console.log("Firebase Emulator Enabled:", useEmulator);
+if (isDevelopment && useEmulator) {
+  console.log(
+    "[FIVI360] Firebase emulators enabled (development only)"
+  );
+}
 
 if (useEmulator && !globalThis.__FIVI360_FIREBASE_EMULATORS_CONNECTED__) {
   const authEmulatorUrl =
@@ -61,6 +90,14 @@ if (useEmulator && !globalThis.__FIVI360_FIREBASE_EMULATORS_CONNECTED__) {
   connectStorageEmulator(storage, storageHost, storagePort);
 
   globalThis.__FIVI360_FIREBASE_EMULATORS_CONNECTED__ = true;
+
+  if (isDevelopment) {
+    console.log("[FIVI360] Connected to Firebase emulators:", {
+      auth: authEmulatorUrl,
+      firestore: `${firestoreHost}:${firestorePort}`,
+      storage: `${storageHost}:${storagePort}`,
+    });
+  }
 }
 
 export default app;
