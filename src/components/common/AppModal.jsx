@@ -14,8 +14,22 @@ const SIZE_MAX_WIDTH = {
   lg: "max-w-lg sm:max-w-lg",
 };
 
-const MODAL_CONTENT_BASE =
-  "bg-zinc-900 border-zinc-800 text-white w-[calc(100%-2rem)] max-h-[90dvh] overflow-hidden p-4 sm:p-6 rounded-2xl gap-0";
+/** Largura, margem mobile, padding e radius — referência: EditImageDialog / UploadImageDialog */
+export const APP_MODAL_CONTENT_BASE =
+  "bg-zinc-900 border-zinc-800 text-white w-[calc(100%-2rem)] max-h-[90dvh] overflow-hidden p-4 sm:p-6 rounded-2xl";
+
+/** Footer de ações: centralizado no mobile, à direita no desktop */
+export const APP_MODAL_FOOTER_CLASSES =
+  "shrink-0 mt-4 flex flex-row flex-wrap justify-center items-center gap-2 w-full sm:mt-0 sm:justify-end sm:flex-nowrap sm:gap-2";
+
+export function appModalContentClassName(size = "md", className) {
+  return cn(APP_MODAL_CONTENT_BASE, SIZE_MAX_WIDTH[size], "gap-0", className);
+}
+
+/** Mesmo padrão visual do AppModal para AlertDialog (confirmações) */
+export function appAlertContentClassName(size = "lg", className) {
+  return cn(APP_MODAL_CONTENT_BASE, SIZE_MAX_WIDTH[size], "gap-4", className);
+}
 
 /**
  * Modal padrão do FIVI360 (estrutura, largura, scroll e footer).
@@ -47,8 +61,7 @@ export function AppModal({
       <DialogContent
         {...contentProps}
         className={cn(
-          MODAL_CONTENT_BASE,
-          SIZE_MAX_WIDTH[size],
+          appModalContentClassName(size),
           contentProps?.className,
           className,
         )}
@@ -100,11 +113,7 @@ export function AppModal({
 export function AppModalFooter({ children, className }) {
   return (
     <DialogFooter
-      className={cn(
-        "shrink-0 mt-4 flex flex-row flex-wrap justify-center items-center gap-2 w-full",
-        "sm:mt-0 sm:justify-end sm:flex-nowrap sm:gap-2",
-        className,
-      )}
+      className={cn(APP_MODAL_FOOTER_CLASSES, className)}
     >
       {children}
     </DialogFooter>

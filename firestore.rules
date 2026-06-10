@@ -5,7 +5,8 @@ rules_version = '2';
 //
 // Coleções:
 //   users/{userId}              — privado (owner only)
-//   users/{userId}/public/profile — campos públicos do portfólio
+//   publicProfiles/{userId}       — campos públicos do portfólio (canônico)
+//   users/{userId}/public/profile — legado (descontinuado; não usar)
 //   slugs/{slug}                — resolução /u/:slug
 //   projects/{projectId}
 //   images/{imageId}
@@ -59,13 +60,8 @@ service cloud.firestore {
     // Portfólio /u/:slug — listagem de projetos públicos exige portfolioEnabled.
     // get individual de projeto shared/public (ex.: /share/project) não usa este helper.
     function portfolioEnabledForOwner(userId) {
-      return (
-        exists(/databases/$(database)/documents/publicProfiles/$(userId))
-        && get(/databases/$(database)/documents/publicProfiles/$(userId)).data.portfolioEnabled == true
-      ) || (
-        exists(/databases/$(database)/documents/users/$(userId)/public/profile)
-        && get(/databases/$(database)/documents/users/$(userId)/public/profile).data.portfolioEnabled == true
-      );
+      return exists(/databases/$(database)/documents/publicProfiles/$(userId))
+        && get(/databases/$(database)/documents/publicProfiles/$(userId)).data.portfolioEnabled == true;
     }
 
     // Projeto shared/public — usado em get/list de imagens por projectId.
@@ -132,10 +128,11 @@ service cloud.firestore {
       allow update: if isOwner(userId);
       allow delete: if isOwner(userId);
 
-      // Perfil público para /u/:slug e cabeçalho de /share/project.
+      // Legado (Sprint 13.3): users/{uid}/public/profile — descontinuado.
+      // Documentos existentes não são apagados; o app não lê/escreve mais aqui.
       match /public/profile {
 
-        allow get: if true;
+        allow get: if isOwner(userId);
         allow list: if false;
 
         allow create: if isOwner(userId);

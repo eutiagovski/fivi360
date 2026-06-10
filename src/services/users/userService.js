@@ -3,9 +3,7 @@
  *
  * Responsabilidade:
  * - Leitura e atualização do documento do usuário no Firestore (coleção `users`)
- * - Campos de perfil: name, email, companyName, companyBio, companyLogo, plan, publicSlug,
- *   portfolioEnabled, websiteUrl, instagramUrl, youtubeUrl, linkedinUrl, whatsappUrl
- * - Sincronização pós-cadastro (criação do documento `users/{uid}`)
+ * - Sincronização de campos públicos em publicProfiles/{uid} (portfólio, slug, bio, redes)
  *
  * Modelo de referência: User em docs/architecture.md
  *
@@ -98,19 +96,11 @@ function mapUserDoc(userId, data) {
  * @returns {import("firebase/firestore").DocumentReference}
  */
 function publicProfileRef(userId) {
-  return doc(db, "users", userId, "public", "profile");
-}
-
-/**
- * @param {string} userId
- * @returns {import("firebase/firestore").DocumentReference}
- */
-function publicProfilesCollectionRef(userId) {
   return doc(db, "publicProfiles", userId);
 }
 
 /**
- * Campos expostos em users/{uid}/public/profile (sem email, plan, billing).
+ * Campos expostos em publicProfiles/{uid} (sem email, plan, billing, legalConsent).
  *
  * @param {import("firebase/firestore").DocumentData} data
  */
@@ -162,23 +152,16 @@ function mapPublicProfileDoc(userId, data) {
  */
 async function syncPublicProfile(userId, data) {
   const payload = buildPublicProfilePayload(data);
-
-  await Promise.all([
-    setDoc(publicProfileRef(userId), payload, { merge: true }),
-    setDoc(publicProfilesCollectionRef(userId), payload, { merge: true }),
-  ]);
+  await setDoc(publicProfileRef(userId), payload, { merge: true });
 }
 
 /**
- * Mantém users/{uid}/public/profile e publicProfiles/{uid} em sincronia.
- *
  * @param {import("firebase/firestore").Transaction} transaction
  * @param {string} userId
  * @param {import("firebase/firestore").DocumentData} payload
  */
-function setPublicProfileDocsInTransaction(transaction, userId, payload) {
+function setPublicProfileInTransaction(transaction, userId, payload) {
   transaction.set(publicProfileRef(userId), payload, { merge: true });
-  transaction.set(publicProfilesCollectionRef(userId), payload, { merge: true });
 }
 
 /**
@@ -189,7 +172,7 @@ function setPublicProfileDocsInTransaction(transaction, userId, payload) {
  * @param {import("firebase/firestore").DocumentData} userData
  */
 async function ensurePublicProfile(userId, userData) {
-  const snapshot = await getDoc(publicProfilesCollectionRef(userId));
+  const snapshot = await getDoc(publicProfileRef(userId));
 
   if (!snapshot.exists()) {
     await syncPublicProfile(userId, userData);
@@ -294,7 +277,7 @@ export async function getUser(userId) {
 }
 
 /**
- * Perfil do escritório para páginas públicas (users/{uid}/public/profile).
+ * Perfil do escritório para páginas públicas (publicProfiles/{uid}).
  *
  * @param {string} userId
  * @returns {Promise<UserProfile | null>}
@@ -304,28 +287,13 @@ export async function getPublicUserById(userId) {
     return null;
   }
 
-  const [topLevelSnap, nestedSnap] = await Promise.all([
-    getDoc(publicProfilesCollectionRef(userId)),
-    getDoc(publicProfileRef(userId)),
-  ]);
+  const snapshot = await getDoc(publicProfileRef(userId));
 
-  const topLevelData = topLevelSnap.exists() ? topLevelSnap.data() : null;
-  const nestedData = nestedSnap.exists() ? nestedSnap.data() : null;
-
-  if (!topLevelData && !nestedData) {
+  if (!snapshot.exists()) {
     return null;
   }
 
-  const source = topLevelData ?? nestedData;
-  const portfolioEnabled =
-    topLevelData && nestedData
-      ? topLevelData.portfolioEnabled === true && nestedData.portfolioEnabled === true
-      : source.portfolioEnabled === true;
-
-  return mapPublicProfileDoc(userId, {
-    ...source,
-    portfolioEnabled,
-  });
+  return mapPublicProfileDoc(userId, snapshot.data());
 }
 
 /**
@@ -434,7 +402,7 @@ export async function saveUserSettings(userId, data, previousSlug = "") {
     await runTransaction(db, async (transaction) => {
       await syncSlugRegistryInTransaction(transaction, userId, normalizedSlug, oldSlug);
       transaction.update(userRef, userUpdates);
-      setPublicProfileDocsInTransaction(transaction, userId, publicProfilePayload);
+      setPublicProfileInTransaction(transaction, userId, publicProfilePayload);
     });
   } else if (normalizedSlug) {
     await runTransaction(db, async (transaction) => {
@@ -451,14 +419,11 @@ export async function saveUserSettings(userId, data, previousSlug = "") {
       }
 
       transaction.update(userRef, userUpdates);
-      setPublicProfileDocsInTransaction(transaction, userId, publicProfilePayload);
+      setPublicProfileInTransaction(transaction, userId, publicProfilePayload);
     });
   } else {
     await updateDoc(userRef, userUpdates);
-    await Promise.all([
-      setDoc(publicProfileRef(userId), publicProfilePayload, { merge: true }),
-      setDoc(publicProfilesCollectionRef(userId), publicProfilePayload, { merge: true }),
-    ]);
+    await setDoc(publicProfileRef(userId), publicProfilePayload, { merge: true });
   }
 
   return { publicSlug: normalizedSlug };

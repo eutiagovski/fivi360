@@ -236,7 +236,15 @@ export const NewProject = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 w-full justify-center">
+           
+            <Link
+              to="/projects"
+              data-testid="cancel-create-project-btn"
+              className="px-8 py-3 bg-zinc-800 border border-zinc-700 text-white rounded-full font-medium btn-scale hover:bg-zinc-700 transition-colors"
+            >
+              Cancelar
+            </Link>
             <button
               type="submit"
               disabled={isSubmitting}
@@ -246,13 +254,6 @@ export const NewProject = () => {
               {isSubmitting && <Loader2 size={18} className="animate-spin" />}
               Criar projeto
             </button>
-            <Link
-              to="/projects"
-              data-testid="cancel-create-project-btn"
-              className="px-8 py-3 bg-zinc-800 border border-zinc-700 text-white rounded-full font-medium btn-scale hover:bg-zinc-700 transition-colors"
-            >
-              Cancelar
-            </Link>
           </div>
         </form>
       </div>

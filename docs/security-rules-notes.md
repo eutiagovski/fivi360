@@ -1,6 +1,8 @@
 # Notas de segurança — Firestore & Storage Rules
 
-**Sprint 13.3** — modelo de acesso público vs privado no FIVI360.
+**Sprint 13.3+** — modelo de acesso público vs privado no FIVI360.
+
+Ver também: [public-profile-model.md](./public-profile-model.md)
 
 ---
 
@@ -9,7 +11,7 @@
 | Recurso | Público (anônimo) | Owner autenticado |
 |---------|-------------------|-------------------|
 | `users/{uid}` | ❌ negado | ✅ read/write |
-| `users/{uid}/public/profile` | ✅ read | ✅ write |
+| `users/{uid}/public/profile` | ❌ negado (legado) | ✅ read/write (legado, app não usa) |
 | `publicProfiles/{uid}` | ✅ read | ✅ write (canônico para portfólio) |
 | `slugs/{slug}` | ✅ get (resolução de slug) | ✅ create/delete (próprio slug) |
 | `projects/{id}` | ✅ get/list se `visibility` ∈ `shared`, `public` | ✅ CRUD próprios |
@@ -37,18 +39,19 @@
 ### `/u/:slug`
 
 1. `getDoc(slugs/{slug})` → `uid`.
-2. `getDoc(publicProfiles/{uid})` (fallback: `users/{uid}/public/profile`).
-3. `list projects` com `where userId == uid` e `where visibility == 'public'` (portfólio).
+2. `getDoc(publicProfiles/{uid})` — única fonte pública de perfil.
+3. `list projects` com `where userId == uid` e `where visibility == 'public'` (exige `portfolioEnabled == true` em `publicProfiles/{uid}`).
 
 ---
 
 ## Dados públicos vs privados
 
-### `users/{uid}/public/profile` (público)
+### `publicProfiles/{uid}` (público — canônico)
 
 - `name`, `companyName`, `companyBio`, `companyLogo`
 - `publicSlug`, `portfolioEnabled`
 - `websiteUrl`, `instagramUrl`, `youtubeUrl`, `linkedinUrl`, `whatsappUrl`
+- `updatedAt`
 
 Sincronizado em `createUserProfile` e `saveUserSettings`.
 
@@ -58,6 +61,10 @@ Sincronizado em `createUserProfile` e `saveUserSettings`.
 - `plan`, `billing`
 - `legalConsent`
 - timestamps internos
+
+### `users/{uid}/public/profile` (legado — descontinuado)
+
+Subcoleção da Sprint 13.3 anterior. O app **não lê nem escreve** mais. Rules mantêm acesso owner-only; leitura anônima negada. Documentos existentes não são apagados automaticamente.
 
 ---
 
@@ -71,12 +78,12 @@ Imagens `shared` em projeto `private` são acessíveis via `get` (`/share/image/
 
 ## Migração de perfil público
 
-Contas anteriores à Sprint 13.3 podem não ter `publicProfiles/{uid}`. Backfill automático:
+Contas anteriores podem não ter `publicProfiles/{uid}`. Backfill automático:
 
 - no login (`AuthContext` → `ensurePublicProfileForUser`)
 - em `getUser` (header/settings)
 
-O owner precisa entrar no app uma vez para o portfólio voltar a funcionar.
+O backfill copia campos públicos de `users/{uid}` para `publicProfiles/{uid}`. O owner precisa entrar no app uma vez para o portfólio voltar a funcionar se o doc público top-level estiver ausente.
 
 ---
 
@@ -100,7 +107,7 @@ Paths legados `projects/` e `images/` na raiz do bucket foram **removidos** das 
 
 1. **Limites de plano** — enforcement só no cliente/services; owner pode alterar `plan`/`portfolioEnabled` via SDK (C-03 da auditoria).
 2. **URLs de Storage com token** — vazamento de link = vazamento de arquivo (ver acima).
-3. **Backfill** — `projectVisibility` e `public/profile` em dados legados.
+3. **Backfill** — `projectVisibility` em dados legados; `users/{uid}/public/profile` órfãos até limpeza manual.
 4. **Revogação de share** — URLs já emitidas podem continuar válidas até rotação de token.
 
 ---

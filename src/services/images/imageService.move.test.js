@@ -35,6 +35,7 @@ jest.mock("firebase/storage", () => ({
 jest.mock("../projects/projectService", () => ({
   getProjectById: jest.fn(),
   updateProject: jest.fn(),
+  adjustProjectImageCount: jest.fn(),
 }));
 
 jest.mock("../plans/planService", () => ({
@@ -47,7 +48,7 @@ jest.mock("../storage/storageService", () => ({
   relocateImageFile: jest.fn(),
 }));
 
-const { getProjectById, updateProject } = require("../projects/projectService");
+const { getProjectById, adjustProjectImageCount } = require("../projects/projectService");
 const { relocateImageFile } = require("../storage/storageService");
 
 const userId = "user-1";
@@ -85,9 +86,9 @@ describe("moveImageToProject", () => {
     mockGetDocs.mockReset();
     relocateImageFile.mockReset();
     getProjectById.mockReset();
-    updateProject.mockReset();
+    adjustProjectImageCount.mockReset();
     mockUpdateDoc.mockResolvedValue(undefined);
-    updateProject.mockResolvedValue(undefined);
+    adjustProjectImageCount.mockResolvedValue(undefined);
   });
 
   it("updates only Firestore when moving loose image to project", async () => {
@@ -146,7 +147,7 @@ describe("moveImageToProject", () => {
 
     const result = await moveImageToProject(userId, imageId, projectId);
 
-    expect(updateProject).toHaveBeenCalledWith(projectId, {
+    expect(adjustProjectImageCount).toHaveBeenCalledWith(projectId, 1, {
       coverImage: imageUrl,
     });
     expect(result.coverImage).toBe(imageUrl);
@@ -184,9 +185,9 @@ describe("moveImageToUnassigned", () => {
     mockUpdateDoc.mockReset();
     mockGetDocs.mockReset();
     relocateImageFile.mockReset();
-    updateProject.mockReset();
+    adjustProjectImageCount.mockReset();
     mockUpdateDoc.mockResolvedValue(undefined);
-    updateProject.mockResolvedValue(undefined);
+    adjustProjectImageCount.mockResolvedValue(undefined);
     mockGetDocs.mockResolvedValue({ docs: [] });
   });
 
@@ -258,7 +259,7 @@ describe("moveImageToUnassigned", () => {
 
     const result = await moveImageToUnassigned(userId, imageId, imageUrl);
 
-    expect(updateProject).toHaveBeenCalledWith(projectId, {
+    expect(adjustProjectImageCount).toHaveBeenCalledWith(projectId, -1, {
       coverImage: "https://storage.example/remaining.webp",
     });
     expect(result.coverImage).toBe("https://storage.example/remaining.webp");

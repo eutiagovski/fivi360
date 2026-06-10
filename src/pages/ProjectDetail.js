@@ -33,6 +33,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  APP_MODAL_FOOTER_CLASSES,
+  appAlertContentClassName,
+} from '@/components/common/AppModal';
 import { toast } from '@/hooks/use-toast';
 import { useProject } from '@/hooks/useProject';
 import {
@@ -520,7 +524,7 @@ export const ProjectDetail = () => {
           </div>
         )}
 
-      <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8 mb-8">
+      <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8 mb-8 md:p-4">
         <div className="flex flex-col lg:flex-row gap-8">
           <div className="w-full lg:w-1/3">
             {hasCover ? (
@@ -902,18 +906,18 @@ export const ProjectDetail = () => {
           }
         }}
       >
-        <AlertDialogContent className="bg-zinc-900 border-zinc-800 text-white">
-          <AlertDialogHeader>
+        <AlertDialogContent className={appAlertContentClassName('lg')}>
+          <AlertDialogHeader className="text-left">
             <AlertDialogTitle>Mover para imagens soltas</AlertDialogTitle>
-            <AlertDialogDescription className="text-zinc-400">
+            <AlertDialogDescription className="text-zinc-400 break-words">
               Esta imagem será removida deste projeto e ficará disponível na
               galeria de imagens soltas.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
+          <AlertDialogFooter className={APP_MODAL_FOOTER_CLASSES}>
             <AlertDialogCancel
               disabled={isMovingToLoose}
-              className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 disabled:opacity-50"
+              className="mt-0 bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 disabled:opacity-50"
             >
               Cancelar
             </AlertDialogCancel>
@@ -942,15 +946,15 @@ export const ProjectDetail = () => {
           }
         }}
       >
-        <AlertDialogContent className="bg-zinc-900 border-zinc-800 text-white">
-          <AlertDialogHeader>
+        <AlertDialogContent className={appAlertContentClassName('lg')}>
+          <AlertDialogHeader className="text-left">
             <AlertDialogTitle>Excluir imagem</AlertDialogTitle>
-            <AlertDialogDescription className="text-zinc-400">
+            <AlertDialogDescription className="text-zinc-400 break-words">
               Tem certeza que deseja excluir esta imagem? Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700">
+          <AlertDialogFooter className={APP_MODAL_FOOTER_CLASSES}>
+            <AlertDialogCancel className="mt-0 bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700">
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction
@@ -981,16 +985,16 @@ export const ProjectDetail = () => {
       />
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="bg-zinc-900 border-zinc-800 text-white">
-          <AlertDialogHeader>
+        <AlertDialogContent className={appAlertContentClassName('lg')}>
+          <AlertDialogHeader className="text-left">
             <AlertDialogTitle>Excluir projeto?</AlertDialogTitle>
-            <AlertDialogDescription className="text-zinc-400">
+            <AlertDialogDescription className="text-zinc-400 break-words">
               Esta ação removerá permanentemente o projeto, suas imagens, hotspots e arquivos
               armazenados. Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700">
+          <AlertDialogFooter className={APP_MODAL_FOOTER_CLASSES}>
+            <AlertDialogCancel className="mt-0 bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700">
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction

@@ -370,7 +370,7 @@ export const Viewer = () => {
         data-testid="viewer-loading"
       >
         <Loader2 size={32} className="animate-spin text-zinc-400" />
-        <p className="text-sm text-zinc-400">Carregando panorama...</p>
+        <p className="text-sm text-zinc-400">Carregando imagem...</p>
       </div>
     );
   }

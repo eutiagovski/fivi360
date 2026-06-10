@@ -13,18 +13,36 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  APP_MODAL_FOOTER_CLASSES,
+  appAlertContentClassName,
+} from '@/components/common/AppModal';
 import { AuthLoadingScreen } from '@/components/auth/ProtectedRoute';
 import { toast } from '@/hooks/use-toast';
 import { UpgradePrompt } from '@/components/plans/UpgradePrompt';
 import { useAuth } from '@/hooks/useAuth';
 import { usePlanLimits } from '@/hooks/usePlanLimits';
-import { useProjects } from '@/hooks/useProjects';
+import { useProjectsPage } from '@/hooks/useProjectsPage';
+import { useInfiniteScrollSentinel } from '@/hooks/useInfiniteScrollSentinel';
 import { deleteProjectCascade } from '@/services/projects/projectService';
 import { emitProjectDeleted } from '@/utils/dataSyncEvents';
 
 export const Projects = () => {
   const { user } = useAuth();
-  const { cardProjects, loading, error, refetch } = useProjects();
+  const {
+    cardProjects,
+    loadingInitial,
+    loadingMore,
+    hasMore,
+    error,
+    loadMore,
+    removeProject,
+  } = useProjectsPage();
+  const sentinelRef = useInfiniteScrollSentinel({
+    hasMore,
+    loadingMore,
+    onLoadMore: loadMore,
+  });
   const { canCreateProject, limits, applyUsageDelta, refreshUsage } = usePlanLimits();
   const [openMenu, setOpenMenu] = useState(null);
   const [projectToDelete, setProjectToDelete] = useState(null);
@@ -45,6 +63,8 @@ export const Projects = () => {
         imageIds: result.imageIds,
       });
 
+      removeProject(projectToDelete.id);
+
       applyUsageDelta({
         projectCount: -1,
         imageCount: -result.deletedImageCount,
@@ -58,7 +78,6 @@ export const Projects = () => {
       });
       setProjectToDelete(null);
       setOpenMenu(null);
-      await refetch();
     } catch (error) {
       toast({
         title: 'Erro ao excluir',
@@ -73,7 +92,7 @@ export const Projects = () => {
     }
   };
 
-  if (loading) {
+  if (loadingInitial) {
     return <AuthLoadingScreen />;
   }
 
@@ -106,7 +125,7 @@ export const Projects = () => {
         </p>
       )}
 
-      {!error && cardProjects.length === 0 && (
+      {!error && cardProjects.length === 0 && !loadingInitial && (
         <EmptyStateCard
           dataTestId="projects-empty"
           title="Nenhum projeto criado"
@@ -120,33 +139,55 @@ export const Projects = () => {
       )}
 
       {cardProjects.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {cardProjects.map((project) => (
-            <ProjectCard
-              key={project.id}
-              project={project}
-              href={`/projects/${project.id}`}
-              showMenu
-              isMenuOpen={openMenu === project.id}
-              onMenuToggle={() => setOpenMenu(openMenu === project.id ? null : project.id)}
-              onDelete={() => setProjectToDelete(project)}
-              dataTestId={`project-card-${project.id}`}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {cardProjects.map((project) => (
+              <ProjectCard
+                key={project.id}
+                project={project}
+                href={`/projects/${project.id}`}
+                showMenu
+                isMenuOpen={openMenu === project.id}
+                onMenuToggle={() => setOpenMenu(openMenu === project.id ? null : project.id)}
+                onDelete={() => setProjectToDelete(project)}
+                dataTestId={`project-card-${project.id}`}
+              />
+            ))}
+          </div>
+
+          <div ref={sentinelRef} className="h-1" aria-hidden="true" />
+
+          {loadingMore && (
+            <div
+              className="flex items-center justify-center py-8"
+              data-testid="projects-loading-more"
+            >
+              <Loader2 size={20} className="animate-spin text-zinc-400" />
+            </div>
+          )}
+
+          {!hasMore && !loadingMore && (
+            <p
+              className="text-center text-sm text-zinc-500 py-8"
+              data-testid="projects-all-loaded"
+            >
+              Todos os itens foram carregados.
+            </p>
+          )}
+        </>
       )}
 
       <AlertDialog open={Boolean(projectToDelete)} onOpenChange={(open) => !open && setProjectToDelete(null)}>
-        <AlertDialogContent className="bg-zinc-900 border-zinc-800 text-white">
-          <AlertDialogHeader>
+        <AlertDialogContent className={appAlertContentClassName('lg')}>
+          <AlertDialogHeader className="text-left">
             <AlertDialogTitle>Excluir projeto?</AlertDialogTitle>
-            <AlertDialogDescription className="text-zinc-400">
+            <AlertDialogDescription className="text-zinc-400 break-words">
               Esta ação removerá permanentemente o projeto, suas imagens, hotspots e arquivos
               armazenados. Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700">
+          <AlertDialogFooter className={APP_MODAL_FOOTER_CLASSES}>
+            <AlertDialogCancel className="mt-0 bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700">
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction

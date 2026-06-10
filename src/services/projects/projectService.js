@@ -20,8 +20,12 @@ import {
   doc,
   getDoc,
   getDocs,
+  increment,
+  limit,
+  orderBy,
   query,
   serverTimestamp,
+  startAfter,
   updateDoc,
   where,
 } from "firebase/firestore";
@@ -48,6 +52,7 @@ import { visibilityToLabel } from "@/utils/visibility";
  * @property {string} clientName
  * @property {'private' | 'shared' | 'public'} visibility
  * @property {string} coverImage
+ * @property {number} imageCount
  * @property {import("firebase/firestore").Timestamp | null} [createdAt]
  * @property {import("firebase/firestore").Timestamp | null} [updatedAt]
  */
@@ -66,6 +71,7 @@ function mapProjectDoc(projectId, data) {
     clientName: data.clientName ?? "",
     visibility: data.visibility ?? "private",
     coverImage: data.coverImage ?? "",
+    imageCount: data.imageCount ?? 0,
     createdAt: data.createdAt ?? null,
     updatedAt: data.updatedAt ?? null,
   };
@@ -87,6 +93,65 @@ export async function getProjectsByUserId(userId) {
   return sortByRecency(
     snapshot.docs.map((docSnap) => mapProjectDoc(docSnap.id, docSnap.data())),
   );
+}
+
+/**
+ * @typedef {Object} ProjectsPageResult
+ * @property {Project[]} items
+ * @property {import("firebase/firestore").QueryDocumentSnapshot | null} lastDoc
+ * @property {boolean} hasMore
+ */
+
+/**
+ * Lista projetos paginados por updatedAt DESC (fallback createdAt na ordenação local).
+ * Requer índice composto: projects — userId ASC, updatedAt DESC.
+ *
+ * @param {string} userId
+ * @param {{ limitCount: number, startAfterDoc?: import("firebase/firestore").QueryDocumentSnapshot | null }} options
+ * @returns {Promise<ProjectsPageResult>}
+ */
+export async function getProjectsPageByUserId(
+  userId,
+  { limitCount, startAfterDoc = null },
+) {
+  const constraints = [
+    where("userId", "==", userId),
+    orderBy("updatedAt", "desc"),
+  ];
+
+  if (startAfterDoc) {
+    constraints.push(startAfter(startAfterDoc));
+  }
+
+  constraints.push(limit(limitCount + 1));
+
+  const projectsQuery = query(collection(db, "projects"), ...constraints);
+
+  try {
+    const snapshot = await getDocs(projectsQuery);
+    const docs = snapshot.docs;
+    const hasMore = docs.length > limitCount;
+    const pageDocs = hasMore ? docs.slice(0, limitCount) : docs;
+
+    const items = sortByRecency(
+      pageDocs.map((docSnap) => mapProjectDoc(docSnap.id, docSnap.data())),
+    );
+
+    return {
+      items,
+      lastDoc: pageDocs.at(-1) ?? null,
+      hasMore,
+    };
+  } catch (error) {
+    if (error?.code === "failed-precondition") {
+      console.error(
+        "[getProjectsPageByUserId] Índice Firestore necessário: collection(projects) where userId ==, orderBy updatedAt desc",
+        error,
+      );
+    }
+
+    throw error;
+  }
 }
 
 /**
@@ -133,6 +198,7 @@ export async function createProject(userId, data) {
     clientName: data.clientName?.trim() ?? "",
     visibility: data.visibility ?? "private",
     coverImage: "",
+    imageCount: 0,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
@@ -171,6 +237,26 @@ export async function updateProject(projectId, data) {
   }
   if (data.coverImage !== undefined) {
     updates.coverImage = data.coverImage.trim();
+  }
+
+  await updateDoc(doc(db, "projects", projectId), updates);
+}
+
+/**
+ * Ajusta o contador agregado de imagens do projeto (incremento atômico no Firestore).
+ *
+ * @param {string} projectId
+ * @param {number} delta
+ * @param {Partial<Pick<Project, 'coverImage'>>} [extraUpdates]
+ */
+export async function adjustProjectImageCount(projectId, delta, extraUpdates = {}) {
+  const updates = {
+    updatedAt: serverTimestamp(),
+    imageCount: increment(delta),
+  };
+
+  if (extraUpdates.coverImage !== undefined) {
+    updates.coverImage = extraUpdates.coverImage.trim();
   }
 
   await updateDoc(doc(db, "projects", projectId), updates);
@@ -284,6 +370,53 @@ export async function getPublicProjectsByUserId(userId) {
 }
 
 /**
+ * Sincroniza imageCount de todos os projetos do usuário a partir das imagens existentes.
+ * Utilitário para backfill manual (projetos legados sem imageCount).
+ * Não chamar na listagem paginada — usa 1 query de imagens + 1 de projetos.
+ *
+ * @param {string} userId
+ * @returns {Promise<void>}
+ */
+export async function backfillProjectImageCounts(userId) {
+  const imagesQuery = query(
+    collection(db, "images"),
+    where("userId", "==", userId),
+  );
+  const imagesSnapshot = await getDocs(imagesQuery);
+
+  /** @type {Map<string, number>} */
+  const countsByProjectId = new Map();
+
+  for (const docSnap of imagesSnapshot.docs) {
+    const rawProjectId = docSnap.data().projectId;
+
+    if (rawProjectId === undefined || rawProjectId === null || rawProjectId === "") {
+      continue;
+    }
+
+    countsByProjectId.set(
+      rawProjectId,
+      (countsByProjectId.get(rawProjectId) ?? 0) + 1,
+    );
+  }
+
+  const projects = await getProjectsByUserId(userId);
+
+  await Promise.all(
+    projects
+      .filter((project) => {
+        const expectedCount = countsByProjectId.get(project.id) ?? 0;
+        return project.imageCount !== expectedCount;
+      })
+      .map((project) =>
+        updateDoc(doc(db, "projects", project.id), {
+          imageCount: countsByProjectId.get(project.id) ?? 0,
+        }),
+      ),
+  );
+}
+
+/**
  * Adapta um projeto Firestore para o formato do ProjectCard.
  *
  * @param {Project} project
@@ -294,7 +427,7 @@ export function mapProjectToCard(project) {
     id: project.id,
     name: project.title || "Sem título",
     cover: project.coverImage ?? "",
-    images: 0,
+    images: project.imageCount ?? 0,
     status: visibilityToLabel(project.visibility),
   };
 }

@@ -12,7 +12,8 @@ import { AuthLoadingScreen } from "@/components/auth/ProtectedRoute";
 import { useAuth } from "@/hooks/useAuth";
 import { UpgradePrompt } from "@/components/plans/UpgradePrompt";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
-import { useLooseImages } from "@/hooks/useLooseImages";
+import { useLooseImagesPage } from "@/hooks/useLooseImagesPage";
+import { useInfiniteScrollSentinel } from "@/hooks/useInfiniteScrollSentinel";
 import { IMAGE_ACCEPT } from "@/utils/imageConstants";
 import { validateImageFile } from "@/utils/imageValidation";
 import {
@@ -25,6 +26,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  APP_MODAL_FOOTER_CLASSES,
+  appAlertContentClassName,
+} from "@/components/common/AppModal";
 import { toast } from "@/hooks/use-toast";
 import { showImageUploadBlockedToast } from "@/utils/planToast";
 
@@ -35,11 +40,20 @@ export const Images = () => {
   const {
     cardImages,
     images,
-    loading: imagesLoading,
+    loadingInitial,
+    loadingMore,
+    hasMore,
+    error,
+    loadMore,
     addImage,
     updateImage,
     removeImage,
-  } = useLooseImages();
+  } = useLooseImagesPage();
+  const sentinelRef = useInfiniteScrollSentinel({
+    hasMore,
+    loadingMore,
+    onLoadMore: loadMore,
+  });
   const fileInputRef = useRef(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
@@ -274,7 +288,7 @@ export const Images = () => {
     );
   };
 
-  if (imagesLoading && images.length === 0) {
+  if (loadingInitial && images.length === 0) {
     return <AuthLoadingScreen />;
   }
 
@@ -310,11 +324,13 @@ export const Images = () => {
         </div>
       )}
 
-      {imagesLoading ? (
-        <div className="flex items-center justify-center py-16 bg-zinc-900/50 border border-zinc-800 rounded-2xl">
-          <Loader2 size={24} className="animate-spin text-zinc-400" />
-        </div>
-      ) : cardImages.length === 0 ? (
+      {error && (
+        <p className="text-sm text-red-400 mb-6" data-testid="images-error">
+          Não foi possível carregar as imagens. Tente recarregar a página.
+        </p>
+      )}
+
+      {!error && !loadingInitial && cardImages.length === 0 ? (
         <EmptyStateCard
           dataTestId="loose-images-empty"
           title="Nenhuma imagem enviada"
@@ -325,33 +341,55 @@ export const Images = () => {
           onAction={handleAddImageClick}
           actionDataTestId="loose-empty-add-image-btn"
         />
-      ) : (
-        <div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-          data-testid="loose-images-grid"
-        >
-          {cardImages.map((image) => (
-            <ImageCard
-              key={image.id}
-              image={image}
-              href={`/viewer/${image.id}`}
-              variant="private"
-              isMenuOpen={openImageMenu === image.id}
-              onMenuToggle={() =>
-                setOpenImageMenu((current) =>
-                  current === image.id ? null : image.id,
-                )
-              }
-              onEdit={() => handleEditImage(image.id)}
-              onReplace={() => handleReplaceImageClick(image.id)}
-              onShare={() => handleShareImageClick(image.id)}
-              onAddToProject={() => handleAddToProjectClick(image.id)}
-              onDelete={() => handleDeleteImageClick(image.id)}
-              dataTestId={`loose-image-card-${image.id}`}
-            />
-          ))}
-        </div>
-      )}
+      ) : cardImages.length > 0 ? (
+        <>
+          <div
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            data-testid="loose-images-grid"
+          >
+            {cardImages.map((image) => (
+              <ImageCard
+                key={image.id}
+                image={image}
+                href={`/viewer/${image.id}`}
+                variant="private"
+                isMenuOpen={openImageMenu === image.id}
+                onMenuToggle={() =>
+                  setOpenImageMenu((current) =>
+                    current === image.id ? null : image.id,
+                  )
+                }
+                onEdit={() => handleEditImage(image.id)}
+                onReplace={() => handleReplaceImageClick(image.id)}
+                onShare={() => handleShareImageClick(image.id)}
+                onAddToProject={() => handleAddToProjectClick(image.id)}
+                onDelete={() => handleDeleteImageClick(image.id)}
+                dataTestId={`loose-image-card-${image.id}`}
+              />
+            ))}
+          </div>
+
+          <div ref={sentinelRef} className="h-1" aria-hidden="true" />
+
+          {loadingMore && (
+            <div
+              className="flex items-center justify-center py-8"
+              data-testid="images-loading-more"
+            >
+              <Loader2 size={20} className="animate-spin text-zinc-400" />
+            </div>
+          )}
+
+          {!hasMore && !loadingMore && (
+            <p
+              className="text-center text-sm text-zinc-500 py-8"
+              data-testid="images-all-loaded"
+            >
+              Todos os itens foram carregados.
+            </p>
+          )}
+        </>
+      ) : null}
 
       <UploadImageDialog
         open={showUploadDialog}
@@ -408,16 +446,16 @@ export const Images = () => {
           }
         }}
       >
-        <AlertDialogContent className="bg-zinc-900 border-zinc-800 text-white">
-          <AlertDialogHeader>
+        <AlertDialogContent className={appAlertContentClassName("lg")}>
+          <AlertDialogHeader className="text-left">
             <AlertDialogTitle>Excluir imagem</AlertDialogTitle>
-            <AlertDialogDescription className="text-zinc-400">
+            <AlertDialogDescription className="text-zinc-400 break-words">
               Tem certeza que deseja excluir esta imagem? Esta ação não pode ser
               desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700">
+          <AlertDialogFooter className={APP_MODAL_FOOTER_CLASSES}>
+            <AlertDialogCancel className="mt-0 bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700">
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction

@@ -20,9 +20,12 @@ import {
   deleteDoc,
   getDoc,
   getDocs,
+  limit,
+  orderBy,
   query,
   serverTimestamp,
   setDoc,
+  startAfter,
   updateDoc,
   where,
 } from "firebase/firestore";
@@ -31,6 +34,7 @@ import { db, storage } from "@/config/firebase";
 import { convertToWebp } from "@/utils/imageConversion";
 import {
   getProjectById,
+  adjustProjectImageCount,
   updateProject,
 } from "@/services/projects/projectService";
 import {
@@ -222,6 +226,66 @@ export async function getLooseImagesByUserId(userId) {
 }
 
 /**
+ * @typedef {Object} LooseImagesPageResult
+ * @property {Image[]} items
+ * @property {import("firebase/firestore").QueryDocumentSnapshot | null} lastDoc
+ * @property {boolean} hasMore
+ */
+
+/**
+ * Lista imagens soltas paginadas por updatedAt DESC (fallback createdAt na ordenação local).
+ * Requer índice composto: images — userId ASC, projectId ASC, updatedAt DESC.
+ *
+ * @param {string} userId
+ * @param {{ limitCount: number, startAfterDoc?: import("firebase/firestore").QueryDocumentSnapshot | null }} options
+ * @returns {Promise<LooseImagesPageResult>}
+ */
+export async function getLooseImagesPageByUserId(
+  userId,
+  { limitCount, startAfterDoc = null },
+) {
+  const constraints = [
+    where("userId", "==", userId),
+    where("projectId", "==", null),
+    orderBy("updatedAt", "desc"),
+  ];
+
+  if (startAfterDoc) {
+    constraints.push(startAfter(startAfterDoc));
+  }
+
+  constraints.push(limit(limitCount + 1));
+
+  const imagesQuery = query(collection(db, "images"), ...constraints);
+
+  try {
+    const snapshot = await getDocs(imagesQuery);
+    const docs = snapshot.docs;
+    const hasMore = docs.length > limitCount;
+    const pageDocs = hasMore ? docs.slice(0, limitCount) : docs;
+
+    const items = sortImagesByRecency(
+      pageDocs.map((docSnap) => mapImageDoc(docSnap.id, docSnap.data())),
+    );
+
+    return {
+      items,
+      lastDoc: pageDocs.at(-1) ?? null,
+      hasMore,
+    };
+  } catch (error) {
+    if (error?.code === "failed-precondition") {
+      console.error(
+        "[getLooseImagesPageByUserId] Índice Firestore necessário: collection(images) where userId ==, projectId == null, orderBy updatedAt desc",
+        error,
+      );
+    }
+
+    throw error;
+  }
+}
+
+/**
  * Lista as imagens mais recentes do usuário (com ou sem projeto).
  *
  * @param {string} userId
@@ -370,7 +434,7 @@ export async function deleteImage(
 
   if (projectId) {
     if (!wasCover) {
-      await updateProject(projectId, {});
+      await adjustProjectImageCount(projectId, -1);
       return { coverImage: null };
     }
   } else {
@@ -383,7 +447,7 @@ export async function deleteImage(
     ? oldestRemaining.previewUrl || oldestRemaining.originalUrl
     : "";
 
-  await updateProject(projectId, { coverImage: newCover });
+  await adjustProjectImageCount(projectId, -1, { coverImage: newCover });
 
   return { coverImage: newCover };
 }
@@ -452,9 +516,11 @@ export async function uploadImage(userId, projectId, file, title, options = {}) 
 
   if (normalizedProjectId) {
     if (isFirstImage) {
-      await updateProject(normalizedProjectId, { coverImage: downloadUrl });
+      await adjustProjectImageCount(normalizedProjectId, 1, {
+        coverImage: downloadUrl,
+      });
     } else {
-      await updateProject(normalizedProjectId, {});
+      await adjustProjectImageCount(normalizedProjectId, 1);
     }
   }
 
@@ -646,11 +712,11 @@ export async function moveImageToProject(userId, imageId, targetProjectId) {
   const projectHasCover = Boolean(project.coverImage?.trim());
 
   if (!projectHasCover) {
-    await updateProject(targetProjectId, { coverImage: sourceUrl });
+    await adjustProjectImageCount(targetProjectId, 1, { coverImage: sourceUrl });
     return { image: updatedImage, coverImage: sourceUrl };
   }
 
-  await updateProject(targetProjectId, {});
+  await adjustProjectImageCount(targetProjectId, 1);
   return { image: updatedImage, coverImage: null };
 }
 
@@ -712,7 +778,7 @@ export async function moveImageToUnassigned(
   );
 
   if (!wasCover) {
-    await updateProject(sourceProjectId, {});
+    await adjustProjectImageCount(sourceProjectId, -1);
     return { image: updatedImage, coverImage: null };
   }
 
@@ -722,7 +788,7 @@ export async function moveImageToUnassigned(
     ? oldestRemaining.previewUrl || oldestRemaining.originalUrl
     : "";
 
-  await updateProject(sourceProjectId, { coverImage: newCover });
+  await adjustProjectImageCount(sourceProjectId, -1, { coverImage: newCover });
 
   return { image: updatedImage, coverImage: newCover };
 }
