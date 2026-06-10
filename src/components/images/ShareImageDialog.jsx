@@ -7,24 +7,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { PlanUpgradeHint } from "@/components/plans/PlanUpgradeHint";
-import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { toast } from "@/hooks/use-toast";
 import { updateImageVisibility } from "@/services/images/imageService";
 import { buildShareImageUrl } from "@/utils/publicAccess";
-import { showPlanLimitToast } from "@/utils/planToast";
-import { getVisibilityOptionsForPlan } from "@/utils/visibility";
-
-function buildImageVisibilityOptions(publicVisibilityEnabled) {
-  return getVisibilityOptionsForPlan(publicVisibilityEnabled).map((option) =>
-    option.value === "public"
-      ? {
-          ...option,
-          description: "Acessível por link (não aparece no portfólio)",
-        }
-      : option,
-  );
-}
+import { getImageVisibilityOptions } from "@/utils/visibility";
 
 /**
  * @param {{
@@ -42,16 +28,14 @@ export function ShareImageDialog({
   userId,
   onVisibilitySaved,
 }) {
-  const { publicVisibilityEnabled } = usePlanLimits();
   const [visibility, setVisibility] = useState("private");
   const [isSaving, setIsSaving] = useState(false);
-  const imageVisibilityOptions = buildImageVisibilityOptions(
-    publicVisibilityEnabled,
-  );
+  const imageVisibilityOptions = getImageVisibilityOptions();
 
   useEffect(() => {
     if (image && open) {
-      setVisibility(image.visibility ?? "private");
+      const savedVisibility = image.visibility ?? "private";
+      setVisibility(savedVisibility === "public" ? "shared" : savedVisibility);
     }
   }, [image, open]);
 
@@ -59,6 +43,8 @@ export function ShareImageDialog({
     return null;
   }
 
+  const savedVisibility =
+    image.visibility === "public" ? "shared" : (image.visibility ?? "private");
   const shareUrl = buildShareImageUrl(image.id);
   const selectedOption = imageVisibilityOptions.find(
     (o) => o.value === visibility,
@@ -80,7 +66,7 @@ export function ShareImageDialog({
   };
 
   const handleSaveVisibility = async () => {
-    if (!userId || visibility === image.visibility) {
+    if (!userId || visibility === savedVisibility) {
       return;
     }
 
@@ -93,14 +79,12 @@ export function ShareImageDialog({
         title: "Visibilidade atualizada",
         description: selectedOption?.description ?? "",
       });
-    } catch (error) {
-      if (!showPlanLimitToast(error, toast)) {
-        toast({
-          title: "Erro ao salvar",
-          description: "Não foi possível atualizar a visibilidade.",
-          variant: "destructive",
-        });
-      }
+    } catch {
+      toast({
+        title: "Erro ao salvar",
+        description: "Não foi possível atualizar a visibilidade.",
+        variant: "destructive",
+      });
     } finally {
       setIsSaving(false);
     }
@@ -118,21 +102,13 @@ export function ShareImageDialog({
           </DialogTitle>
           <DialogDescription className="text-zinc-400">
             Defina quem pode ver &quot;{image.title || "Sem título"}&quot; e
-            copie o link público.
+            copie o link de compartilhamento.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-5">
           <div>
             <p className="text-xs text-zinc-500 mb-2">Visibilidade</p>
-            {!publicVisibilityEnabled && (
-              <div className="mb-3">
-                <PlanUpgradeHint
-                  compact
-                  message="Visibilidade pública avançada está disponível no plano Professional."
-                />
-              </div>
-            )}
             <div className="grid grid-cols-1 gap-2">
               {imageVisibilityOptions.map((option) => (
                 <label
@@ -167,7 +143,7 @@ export function ShareImageDialog({
                 </label>
               ))}
             </div>
-            {visibility !== image.visibility && (
+            {visibility !== savedVisibility && (
               <button
                 type="button"
                 onClick={handleSaveVisibility}

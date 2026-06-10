@@ -6,6 +6,7 @@ import {
   MessageCircle,
   Youtube,
 } from "lucide-react";
+import { resolveSocialLinkHref } from "@/utils/socialLinks";
 
 const SOCIAL_LINKS = [
   { key: "websiteUrl", icon: Globe, label: "Site" },
@@ -25,7 +26,7 @@ export function PublicSocialLinks({ user, testIdPrefix = "public-social" }) {
         const url = user[key]?.trim();
         return Boolean(url);
       }).map(({ key, icon: Icon, label }) => ({
-        url: user[key].trim(),
+        url: resolveSocialLinkHref(key, user[key]),
         Icon,
         label,
         key,

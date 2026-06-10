@@ -9,6 +9,7 @@ import {
   Youtube,
   Linkedin,
   MessageCircle,
+  Copy,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { PageHeader } from '@/components/common/PageHeader';
@@ -25,7 +26,22 @@ import {
   SlugTakenError,
   SlugValidationError,
 } from '@/services/users/userService';
+import { SocialPrefixedInput } from '@/components/settings/SocialPrefixedInput';
 import { showPlanLimitToast } from '@/utils/planToast';
+import {
+  isBrazilWhatsappStored,
+  normalizeInstagramForSave,
+  normalizeLinkedinForSave,
+  normalizeWebsiteForSave,
+  normalizeWhatsappForSave,
+  normalizeYoutubeForSave,
+  parseInstagramForDisplay,
+  parseLinkedinForDisplay,
+  parseWebsiteForDisplay,
+  parseWhatsappForDisplay,
+  parseYoutubeForDisplay,
+  SOCIAL_LINK_PREFIXES,
+} from '@/utils/socialLinks';
 import { buildPortfolioUrl, normalizeSlug } from '@/utils/slug';
 
 const initialFormData = {
@@ -54,6 +70,7 @@ export const Settings = () => {
   const [loadError, setLoadError] = useState(null);
   const [slugAvailability, setSlugAvailability] = useState(null);
   const [portfolioPremiumModalOpen, setPortfolioPremiumModalOpen] = useState(false);
+  const [whatsappBrazilLocal, setWhatsappBrazilLocal] = useState(true);
 
   const normalizedSlugPreview = useMemo(
     () => normalizeSlug(formData.publicSlug),
@@ -84,17 +101,19 @@ export const Settings = () => {
         }
 
         const publicSlug = profile?.publicSlug ?? '';
+        const storedWhatsappUrl = profile?.whatsappUrl ?? '';
 
+        setWhatsappBrazilLocal(isBrazilWhatsappStored(storedWhatsappUrl));
         setFormData({
           name: profile?.name ?? user.displayName ?? '',
           email: profile?.email ?? user.email ?? '',
           companyName: profile?.companyName ?? '',
           companyBio: profile?.companyBio ?? '',
-          websiteUrl: profile?.websiteUrl ?? '',
-          instagramUrl: profile?.instagramUrl ?? '',
-          youtubeUrl: profile?.youtubeUrl ?? '',
-          linkedinUrl: profile?.linkedinUrl ?? '',
-          whatsappUrl: profile?.whatsappUrl ?? '',
+          websiteUrl: parseWebsiteForDisplay(profile?.websiteUrl),
+          instagramUrl: parseInstagramForDisplay(profile?.instagramUrl),
+          youtubeUrl: parseYoutubeForDisplay(profile?.youtubeUrl),
+          linkedinUrl: parseLinkedinForDisplay(profile?.linkedinUrl),
+          whatsappUrl: parseWhatsappForDisplay(storedWhatsappUrl),
           publicSlug,
           portfolioEnabled: profile?.portfolioEnabled ?? false,
         });
@@ -171,6 +190,21 @@ export const Settings = () => {
     }));
   };
 
+  const handleCopyPortfolioUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(portfolioPreviewUrl);
+      toast({
+        title: 'Link copiado',
+        description: 'O link do portfólio foi copiado.',
+      });
+    } catch {
+      toast({
+        title: 'Link do portfólio',
+        description: portfolioPreviewUrl,
+      });
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -190,6 +224,10 @@ export const Settings = () => {
     setIsSaving(true);
 
     try {
+      const normalizedWhatsappUrl = normalizeWhatsappForSave(formData.whatsappUrl, {
+        assumeBrazilLocal: whatsappBrazilLocal,
+      });
+
       const { publicSlug } = await saveUserSettings(
         user.uid,
         {
@@ -198,14 +236,16 @@ export const Settings = () => {
           companyBio: formData.companyBio,
           publicSlug: formData.publicSlug,
           portfolioEnabled: formData.portfolioEnabled,
-          websiteUrl: formData.websiteUrl,
-          instagramUrl: formData.instagramUrl,
-          youtubeUrl: formData.youtubeUrl,
-          linkedinUrl: formData.linkedinUrl,
-          whatsappUrl: formData.whatsappUrl,
+          websiteUrl: normalizeWebsiteForSave(formData.websiteUrl),
+          instagramUrl: normalizeInstagramForSave(formData.instagramUrl),
+          youtubeUrl: normalizeYoutubeForSave(formData.youtubeUrl),
+          linkedinUrl: normalizeLinkedinForSave(formData.linkedinUrl),
+          whatsappUrl: normalizedWhatsappUrl,
         },
         savedSlug,
       );
+
+      setWhatsappBrazilLocal(isBrazilWhatsappStored(normalizedWhatsappUrl));
 
       setFormData((current) => ({
         ...current,
@@ -402,16 +442,15 @@ export const Settings = () => {
                       Site
                     </div>
                   </label>
-                  <input
-                    type="url"
+                  <SocialPrefixedInput
                     id="websiteUrl"
                     name="websiteUrl"
-                    data-testid="input-website-url"
+                    testId="input-website-url"
                     value={formData.websiteUrl}
                     onChange={handleChange}
-                    placeholder="https://"
+                    prefix={SOCIAL_LINK_PREFIXES.websiteUrl}
+                    placeholder="seusite.com.br"
                     disabled={isSaving}
-                    className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-white focus:outline-none focus:ring-1 focus:ring-white transition-all disabled:opacity-50"
                   />
                 </div>
 
@@ -425,16 +464,15 @@ export const Settings = () => {
                       Instagram
                     </div>
                   </label>
-                  <input
-                    type="url"
+                  <SocialPrefixedInput
                     id="instagramUrl"
                     name="instagramUrl"
-                    data-testid="input-instagram-url"
+                    testId="input-instagram-url"
                     value={formData.instagramUrl}
                     onChange={handleChange}
-                    placeholder="https://instagram.com/..."
+                    prefix={SOCIAL_LINK_PREFIXES.instagramUrl}
+                    placeholder="seuusuario"
                     disabled={isSaving}
-                    className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-white focus:outline-none focus:ring-1 focus:ring-white transition-all disabled:opacity-50"
                   />
                 </div>
 
@@ -448,16 +486,15 @@ export const Settings = () => {
                       YouTube
                     </div>
                   </label>
-                  <input
-                    type="url"
+                  <SocialPrefixedInput
                     id="youtubeUrl"
                     name="youtubeUrl"
-                    data-testid="input-youtube-url"
+                    testId="input-youtube-url"
                     value={formData.youtubeUrl}
                     onChange={handleChange}
-                    placeholder="https://youtube.com/..."
+                    prefix={SOCIAL_LINK_PREFIXES.youtubeUrl}
+                    placeholder="@seucanal"
                     disabled={isSaving}
-                    className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-white focus:outline-none focus:ring-1 focus:ring-white transition-all disabled:opacity-50"
                   />
                 </div>
 
@@ -471,16 +508,15 @@ export const Settings = () => {
                       LinkedIn
                     </div>
                   </label>
-                  <input
-                    type="url"
+                  <SocialPrefixedInput
                     id="linkedinUrl"
                     name="linkedinUrl"
-                    data-testid="input-linkedin-url"
+                    testId="input-linkedin-url"
                     value={formData.linkedinUrl}
                     onChange={handleChange}
-                    placeholder="https://linkedin.com/in/..."
+                    prefix={SOCIAL_LINK_PREFIXES.linkedinUrl}
+                    placeholder="seu-perfil"
                     disabled={isSaving}
-                    className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-white focus:outline-none focus:ring-1 focus:ring-white transition-all disabled:opacity-50"
                   />
                 </div>
 
@@ -494,16 +530,25 @@ export const Settings = () => {
                       WhatsApp
                     </div>
                   </label>
-                  <input
-                    type="url"
+                  <SocialPrefixedInput
                     id="whatsappUrl"
                     name="whatsappUrl"
-                    data-testid="input-whatsapp-url"
+                    testId="input-whatsapp-url"
                     value={formData.whatsappUrl}
                     onChange={handleChange}
-                    placeholder="https://wa.me/..."
+                    prefix={
+                      whatsappBrazilLocal ? (
+                        <span className="inline-flex items-center gap-1.5">
+                          <span aria-hidden="true">🇧🇷</span>
+                          <span>+55</span>
+                        </span>
+                      ) : (
+                        '+'
+                      )
+                    }
+                    placeholder={whatsappBrazilLocal ? '11987654321' : '14155551234'}
+                    inputMode="tel"
                     disabled={isSaving}
-                    className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-white focus:outline-none focus:ring-1 focus:ring-white transition-all disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -557,10 +602,29 @@ export const Settings = () => {
                     Indisponível
                   </p>
                 )}
-                <p className="mt-2 text-sm text-zinc-500" data-testid="slug-preview-url">
-                  Seu portfólio ficará disponível em:
-                  <span className="block mt-1 text-zinc-400">{portfolioPreviewUrl}</span>
-                </p>
+                <div className="mt-2" data-testid="slug-preview-url">
+                  <p className="text-sm text-zinc-500 mb-2">
+                    Seu portfólio ficará disponível em:
+                  </p>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      readOnly
+                      value={portfolioPreviewUrl}
+                      data-testid="slug-preview-url-input"
+                      className="flex-1 min-w-0 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-xl text-sm text-zinc-300 focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleCopyPortfolioUrl}
+                      data-testid="slug-copy-url"
+                      className="flex items-center gap-2 px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-xl text-sm text-white hover:bg-zinc-700 transition-colors shrink-0"
+                    >
+                      <Copy size={16} />
+                      Copiar
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {!publicPortfolioEnabled && (

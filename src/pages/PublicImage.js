@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { PanoramaViewer } from "@/components/viewer/PanoramaViewer";
@@ -24,6 +24,7 @@ export const PublicImage = () => {
     projectImages,
     previousImage,
     nextImage,
+    isProjectContext,
     loading,
     error,
   } = usePublicViewerImage(imageId);
@@ -32,14 +33,21 @@ export const PublicImage = () => {
   const [infoHotspot, setInfoHotspot] = useState(null);
 
   const panoramaUrl = image?.originalUrl || image?.previewUrl || "";
-  const hasProject = Boolean(image?.projectId ?? project?.id);
-  const backHref = hasProject
+  const backHref = isProjectContext
     ? `/share/project/${image?.projectId ?? project.id}`
-    : "/";
-  const backLabel = hasProject ? "Voltar ao projeto" : "Voltar para o início";
-  const subtitle = hasProject
+    : undefined;
+  const backLabel = isProjectContext ? "Voltar ao projeto" : undefined;
+  const subtitle = isProjectContext
     ? project?.title || "Projeto"
     : "Imagem compartilhada";
+
+  const visibleHotspots = useMemo(
+    () =>
+      isProjectContext
+        ? hotspots
+        : hotspots.filter((hotspot) => hotspot.type !== HOTSPOT_TYPE_SCENE),
+    [hotspots, isProjectContext],
+  );
 
   const getSceneHotspotLabel = useCallback(
     (hotspot) => {
@@ -83,13 +91,15 @@ export const PublicImage = () => {
         <p className="text-lg text-white text-center">
           {ERROR_MESSAGES[error] ?? ERROR_MESSAGES.load_failed}
         </p>
-        <Link
-          to={backHref}
-          className="flex items-center gap-2 px-4 py-2 bg-black/60 backdrop-blur-xl border border-white/10 rounded-xl text-white hover:bg-black/80 transition-colors"
-        >
-          <ArrowLeft size={20} />
-          {backLabel}
-        </Link>
+        {isProjectContext ? (
+          <Link
+            to={backHref}
+            className="flex items-center gap-2 px-4 py-2 bg-black/60 backdrop-blur-xl border border-white/10 rounded-xl text-white hover:bg-black/80 transition-colors"
+          >
+            <ArrowLeft size={20} />
+            {backLabel}
+          </Link>
+        ) : null}
       </div>
     );
   }
@@ -100,19 +110,22 @@ export const PublicImage = () => {
       data-testid="public-viewer-page"
     >
       <ViewerPageHeader
+        showBack={isProjectContext}
         backHref={backHref}
         backLabel={backLabel}
-        subtitle={hasProject ? subtitle : undefined}
+        subtitle={subtitle}
         title={image?.title}
         backTestId="public-back-to-project"
         subtitleTestId="public-viewer-project-name"
         titleTestId="public-image-name"
       >
-        <ViewerNavControls
-          previousImage={previousImage}
-          nextImage={nextImage}
-          imageBasePath="/share/image"
-        />
+        {isProjectContext ? (
+          <ViewerNavControls
+            previousImage={previousImage}
+            nextImage={nextImage}
+            imageBasePath="/share/image"
+          />
+        ) : null}
       </ViewerPageHeader>
 
       <div
@@ -123,10 +136,14 @@ export const PublicImage = () => {
           <PanoramaViewer
             panoramaUrl={panoramaUrl}
             className="absolute inset-0"
-            hotspots={hotspots}
+            hotspots={visibleHotspots}
             onInfoHotspotClick={setInfoHotspot}
-            onSceneHotspotClick={handleSceneHotspotClick}
-            getSceneHotspotLabel={getSceneHotspotLabel}
+            onSceneHotspotClick={
+              isProjectContext ? handleSceneHotspotClick : undefined
+            }
+            getSceneHotspotLabel={
+              isProjectContext ? getSceneHotspotLabel : undefined
+            }
           />
         ) : (
           <div className="flex items-center justify-center h-full">

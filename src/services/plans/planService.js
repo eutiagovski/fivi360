@@ -297,11 +297,53 @@ export function canCreateProject(limits, usage) {
  * @returns {boolean}
  */
 export function canUploadImage(limits, usage) {
-  if (!isUnlimited(limits.maxTotalImages) && usage.imageCount >= limits.maxTotalImages) {
+  if (
+    !isUnlimited(limits.maxTotalImages) &&
+    usage.imageCount >= limits.maxTotalImages
+  ) {
     return false;
   }
 
   return usage.storageBytes < limits.maxStorageBytes;
+}
+
+/**
+ * @param {import("@/config/planLimits").PlanLimits} limits
+ * @param {UserUsage} usage
+ * @param {number} [additionalBytes=0]
+ * @returns {string | null} PLAN_LIMIT_CODES ou null se permitido
+ */
+export function getImageUploadBlockCode(limits, usage, additionalBytes = 0) {
+  if (
+    !isUnlimited(limits.maxTotalImages) &&
+    usage.imageCount >= limits.maxTotalImages
+  ) {
+    return PLAN_LIMIT_CODES.IMAGE_LIMIT;
+  }
+
+  if (usage.storageBytes + additionalBytes > limits.maxStorageBytes) {
+    return PLAN_LIMIT_CODES.STORAGE_LIMIT;
+  }
+
+  return null;
+}
+
+/**
+ * @param {import("@/config/planLimits").PlanLimits} limits
+ * @param {UserUsage} usage
+ * @param {number} [additionalBytes=0]
+ * @returns {boolean}
+ */
+export function canUploadImageWithSize(limits, usage, additionalBytes = 0) {
+  return getImageUploadBlockCode(limits, usage, additionalBytes) === null;
+}
+
+/**
+ * @param {string} code
+ * @returns {string}
+ */
+export function getPlanLimitMessage(code) {
+  return FRIENDLY_MESSAGES[code] ?? "Limite do plano atingido.";
 }
 
 export { formatStorageBytes, usagePercentage };

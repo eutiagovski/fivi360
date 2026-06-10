@@ -47,7 +47,7 @@ import { ShareImageDialog } from '@/components/images/ShareImageDialog';
 import { ShareProjectDialog } from '@/components/projects/ShareProjectDialog';
 import { PlanLimitButton } from '@/components/plans/PlanLimitButton';
 import { UpgradePrompt } from '@/components/plans/UpgradePrompt';
-import { showPlanLimitToast } from '@/utils/planToast';
+import { showImageUploadBlockedToast, showPlanLimitToast } from '@/utils/planToast';
 import {
   getVisibilityOptionsForPlan,
   visibilityToLabel,
@@ -67,7 +67,14 @@ export const ProjectDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { canUploadImage, limits, publicVisibilityEnabled } = usePlanLimits();
+  const {
+    canUploadImage,
+    limits,
+    usage,
+    publicVisibilityEnabled,
+    refreshUsage,
+    applyUsageDelta,
+  } = usePlanLimits();
   const { project, loading, notFound, refetch, patchProject } = useProject(id);
   const visibilityOptions = getVisibilityOptionsForPlan(publicVisibilityEnabled);
   const {
@@ -173,7 +180,14 @@ export const ProjectDetail = () => {
     const file = event.target.files?.[0];
     event.target.value = '';
 
-    if (!file || !canUploadImage) {
+    if (!file) {
+      return;
+    }
+
+    if (
+      showImageUploadBlockedToast(limits, usage, file.size, toast)
+    ) {
+      void refreshUsage();
       return;
     }
 
@@ -194,6 +208,11 @@ export const ProjectDetail = () => {
   const handleUploadComplete = async (uploadedImage) => {
     const wasFirstImage = images.length === 0;
     addImage(uploadedImage);
+    applyUsageDelta({
+      imageCount: 1,
+      storageBytes: uploadedImage.sizeBytes ?? 0,
+    });
+    void refreshUsage();
 
     if (wasFirstImage) {
       await refetch();
@@ -284,6 +303,13 @@ export const ProjectDetail = () => {
 
     setImageToEdit(null);
     setEditOpenFilePicker(false);
+
+    if (image) {
+      const previousSizeBytes = imageToEdit.sizeBytes ?? 0;
+      const nextSizeBytes = image.sizeBytes ?? 0;
+      applyUsageDelta({ storageBytes: nextSizeBytes - previousSizeBytes });
+      void refreshUsage();
+    }
 
     toast({
       title: 'Imagem atualizada',
@@ -376,6 +402,11 @@ export const ProjectDetail = () => {
       );
 
       removeImage(imageToDelete.id);
+      applyUsageDelta({
+        imageCount: -1,
+        storageBytes: -(imageToDelete.sizeBytes ?? 0),
+      });
+      void refreshUsage();
 
       if (coverImage !== null) {
         patchProject({ coverImage });
@@ -818,6 +849,7 @@ export const ProjectDetail = () => {
         userId={user?.uid}
         projectId={id}
         onUploadComplete={handleUploadComplete}
+        onPlanLimitReached={refreshUsage}
       />
 
       <EditImageDialog

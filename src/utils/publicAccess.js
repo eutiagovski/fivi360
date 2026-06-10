@@ -1,4 +1,26 @@
-import { isPubliclyAccessible } from "@/utils/visibility";
+import {
+  isImageShared,
+  isPubliclyAccessible,
+} from "@/utils/visibility";
+
+/**
+ * Acesso via link do projeto compartilhado (não compartilhamento individual da imagem).
+ *
+ * @param {import("@/services/images/imageService").Image | null} image
+ * @param {import("@/services/projects/projectService").Project | null} project
+ * @returns {boolean}
+ */
+export function isProjectContextImageAccess(image, project) {
+  if (!image?.projectId || !project) {
+    return false;
+  }
+
+  if (isImageShared(image.visibility)) {
+    return false;
+  }
+
+  return isPubliclyAccessible(project.visibility);
+}
 
 /**
  * @param {import("@/services/images/imageService").Image | null} image
@@ -10,15 +32,11 @@ export function canAccessPublicImage(image, project) {
     return false;
   }
 
-  if (isPubliclyAccessible(image.visibility)) {
+  if (isImageShared(image.visibility)) {
     return true;
   }
 
-  if (project && isPubliclyAccessible(project.visibility)) {
-    return true;
-  }
-
-  return false;
+  return isProjectContextImageAccess(image, project);
 }
 
 /**

@@ -42,18 +42,11 @@ export function isValidSlugFormat(slug) {
 }
 
 /**
- * Monta a URL de preview do portfólio público.
+ * Monta a URL completa de preview do portfólio público.
  *
  * @param {string} slug — slug normalizado (ou vazio)
  * @returns {string}
  */
 export function buildPortfolioUrl(slug) {
-  const path = `/u/${slug || "seu-slug"}`;
-  const publicOrigin = process.env.REACT_APP_PUBLIC_URL?.replace(/\/$/, "");
-
-  if (publicOrigin) {
-    return `${publicOrigin}${path}`;
-  }
-
-  return path;
+  return `${window.location.origin}/u/${slug || "seu-slug"}`;
 }

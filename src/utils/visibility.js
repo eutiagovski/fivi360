@@ -44,6 +44,18 @@ export function isPubliclyAccessible(visibility) {
   return visibility === "shared" || visibility === "public";
 }
 
+/** Opções de visibilidade para imagens (sem "public"). */
+export const IMAGE_VISIBILITY_OPTIONS = VISIBILITY_OPTIONS.filter(
+  (option) => option.value !== "public",
+);
+
+/**
+ * @returns {typeof IMAGE_VISIBILITY_OPTIONS}
+ */
+export function getImageVisibilityOptions() {
+  return IMAGE_VISIBILITY_OPTIONS;
+}
+
 /**
  * Opções de visibilidade conforme o plano (Starter oculta "public").
  *
@@ -56,4 +68,12 @@ export function getVisibilityOptionsForPlan(publicVisibilityEnabled) {
   }
 
   return VISIBILITY_OPTIONS.filter((option) => option.value !== "public");
+}
+
+/**
+ * @param {ProjectVisibility | string} visibility
+ * @returns {boolean}
+ */
+export function isImageShared(visibility) {
+  return visibility === "shared" || visibility === "public";
 }

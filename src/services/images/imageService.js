@@ -34,7 +34,6 @@ import {
 import {
   assertCanReplaceImageStorage,
   assertCanUploadImage,
-  assertPublicVisibilityEnabled,
 } from "@/services/plans/planService";
 import { deleteImageFile } from "@/services/storage/storageService";
 import { sortImagesByRecency, toMillis } from "@/utils/imageRecencySort";
@@ -288,10 +287,14 @@ export async function updateImageTitle(imageId, userId, title) {
  *
  * @param {string} imageId
  * @param {string} userId
- * @param {'private' | 'shared' | 'public'} visibility
+ * @param {'private' | 'shared'} visibility
  * @returns {Promise<void>}
  */
 export async function updateImageVisibility(imageId, userId, visibility) {
+  if (visibility !== "private" && visibility !== "shared") {
+    throw new Error("Visibilidade inválida para imagens.");
+  }
+
   const imageRef = doc(db, "images", imageId);
   const snapshot = await getDoc(imageRef);
 
@@ -302,10 +305,6 @@ export async function updateImageVisibility(imageId, userId, visibility) {
   const data = snapshot.data();
   if (data.userId !== userId) {
     throw new Error("Sem permissão para editar esta imagem.");
-  }
-
-  if (visibility === "public") {
-    await assertPublicVisibilityEnabled(userId);
   }
 
   await updateDoc(imageRef, {

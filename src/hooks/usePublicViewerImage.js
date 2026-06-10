@@ -4,7 +4,10 @@ import {
   getImagesByProjectIdPublic,
 } from "@/services/images/imageService";
 import { getProjectById } from "@/services/projects/projectService";
-import { canAccessPublicImage } from "@/utils/publicAccess";
+import {
+  canAccessPublicImage,
+  isProjectContextImageAccess,
+} from "@/utils/publicAccess";
 
 /**
  * @typedef {'not_found' | 'unavailable' | 'load_failed'} PublicViewerImageError
@@ -20,6 +23,7 @@ import { canAccessPublicImage } from "@/utils/publicAccess";
  *   projectImages: import("@/services/images/imageService").Image[],
  *   previousImage: import("@/services/images/imageService").Image | null,
  *   nextImage: import("@/services/images/imageService").Image | null,
+ *   isProjectContext: boolean,
  *   loading: boolean,
  *   error: PublicViewerImageError | null,
  * }}
@@ -28,6 +32,7 @@ export function usePublicViewerImage(imageId) {
   const [image, setImage] = useState(null);
   const [project, setProject] = useState(null);
   const [projectImages, setProjectImages] = useState([]);
+  const [isProjectContext, setIsProjectContext] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -51,6 +56,7 @@ export function usePublicViewerImage(imageId) {
       setImage(null);
       setProject(null);
       setProjectImages([]);
+      setIsProjectContext(false);
 
       try {
         const imageData = await getImageById(imageId);
@@ -77,7 +83,11 @@ export function usePublicViewerImage(imageId) {
           return;
         }
 
-        const imagesInProject = imageData.projectId
+        const projectContext = isProjectContextImageAccess(
+          imageData,
+          projectData,
+        );
+        const imagesInProject = projectContext
           ? await getImagesByProjectIdPublic(imageData.projectId)
           : [];
 
@@ -88,6 +98,7 @@ export function usePublicViewerImage(imageId) {
         setImage(imageData);
         setProject(projectData);
         setProjectImages(imagesInProject);
+        setIsProjectContext(projectContext);
       } catch (err) {
         if (cancelled) {
           return;
@@ -129,6 +140,7 @@ export function usePublicViewerImage(imageId) {
     projectImages,
     previousImage,
     nextImage,
+    isProjectContext,
     loading,
     error,
   };

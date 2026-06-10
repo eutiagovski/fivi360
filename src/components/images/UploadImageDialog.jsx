@@ -12,6 +12,7 @@ import {
   validateImageFile,
 } from "@/utils/imageValidation";
 import { uploadImage } from "@/services/images/imageService";
+import { isPlanLimitError } from "@/services/plans/planService";
 
 /**
  * Modal de preview e upload de imagem panorâmica.
@@ -25,6 +26,7 @@ export const UploadImageDialog = ({
   userId,
   projectId,
   onUploadComplete,
+  onPlanLimitReached,
 }) => {
   const replaceInputRef = useRef(null);
   const titleCustomizedRef = useRef(false);
@@ -200,6 +202,10 @@ export const UploadImageDialog = ({
       resetState();
       onOpenChange(false);
     } catch (uploadError) {
+      if (isPlanLimitError(uploadError)) {
+        onPlanLimitReached?.();
+      }
+
       setError(
         uploadError instanceof Error
           ? uploadError.message

@@ -26,10 +26,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
+import { showImageUploadBlockedToast } from "@/utils/planToast";
 
 export const Images = () => {
   const { user } = useAuth();
-  const { canUploadImage, limits } = usePlanLimits();
+  const { canUploadImage, limits, usage, refreshUsage, applyUsageDelta } =
+    usePlanLimits();
   const {
     cardImages,
     images,
@@ -64,7 +66,14 @@ export const Images = () => {
     const file = event.target.files?.[0];
     event.target.value = "";
 
-    if (!file || !canUploadImage) {
+    if (!file) {
+      return;
+    }
+
+    if (
+      showImageUploadBlockedToast(limits, usage, file.size, toast)
+    ) {
+      void refreshUsage();
       return;
     }
 
@@ -84,6 +93,11 @@ export const Images = () => {
 
   const handleUploadComplete = async (uploadedImage) => {
     addImage(uploadedImage);
+    applyUsageDelta({
+      imageCount: 1,
+      storageBytes: uploadedImage.sizeBytes ?? 0,
+    });
+    void refreshUsage();
 
     toast({
       title: "Imagem adicionada",
@@ -182,6 +196,13 @@ export const Images = () => {
     setImageToEdit(null);
     setEditOpenFilePicker(false);
 
+    if (image) {
+      const previousSizeBytes = imageToEdit.sizeBytes ?? 0;
+      const nextSizeBytes = image.sizeBytes ?? 0;
+      applyUsageDelta({ storageBytes: nextSizeBytes - previousSizeBytes });
+      void refreshUsage();
+    }
+
     toast({
       title: "Imagem atualizada",
       description: image
@@ -218,6 +239,11 @@ export const Images = () => {
     try {
       await deleteImage(user.uid, null, imageToDelete.id);
       removeImage(imageToDelete.id);
+      applyUsageDelta({
+        imageCount: -1,
+        storageBytes: -(imageToDelete.sizeBytes ?? 0),
+      });
+      void refreshUsage();
 
       toast({
         title: "Imagem excluída",
@@ -334,6 +360,7 @@ export const Images = () => {
         userId={user?.uid}
         projectId={null}
         onUploadComplete={handleUploadComplete}
+        onPlanLimitReached={refreshUsage}
       />
 
       <EditImageDialog
