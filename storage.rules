@@ -4,8 +4,9 @@ rules_version = '2';
 // FIVI360 — Storage Security Rules (Sprint 13.3)
 //
 // Paths usados pelo app (imageService):
-//   users/{userId}/projects/{projectId}/images/{imageId}.webp
-//   users/{userId}/images/{imageId}.webp
+//   Novo padrão: users/{userId}/images/{imageId}.webp (soltas e projeto)
+//   Legado (somente leitura/delete de imagens antigas):
+//     users/{userId}/projects/{projectId}/images/{imageId}.webp
 //
 // Leitura/escrita: apenas o dono autenticado (request.auth.uid == userId).
 //

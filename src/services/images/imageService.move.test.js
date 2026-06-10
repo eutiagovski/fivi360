@@ -53,15 +53,18 @@ const { relocateImageFile } = require("../storage/storageService");
 const userId = "user-1";
 const imageId = "image-1";
 const projectId = "project-1";
+const looseStoragePath = `users/${userId}/images/${imageId}.webp`;
+const legacyStoragePath = `users/${userId}/projects/${projectId}/images/${imageId}.webp`;
+const imageUrl = "https://storage.example/image.webp";
 
 function buildImageDoc(overrides = {}) {
   return {
     userId,
     projectId: null,
     title: "Imagem teste",
-    originalUrl: "https://storage.example/old.webp",
-    previewUrl: "https://storage.example/old.webp",
-    storagePath: `users/${userId}/images/${imageId}.webp`,
+    originalUrl: imageUrl,
+    previewUrl: imageUrl,
+    storagePath: looseStoragePath,
     sizeBytes: 1024,
     width: 4000,
     height: 2000,
@@ -85,13 +88,9 @@ describe("moveImageToProject", () => {
     updateProject.mockReset();
     mockUpdateDoc.mockResolvedValue(undefined);
     updateProject.mockResolvedValue(undefined);
-    relocateImageFile.mockResolvedValue({
-      downloadUrl: "https://storage.example/new-project.webp",
-      storagePath: `users/${userId}/projects/${projectId}/images/${imageId}.webp`,
-    });
   });
 
-  it("relocates storage and updates Firestore when moving loose image to project", async () => {
+  it("updates only Firestore when moving loose image to project", async () => {
     mockGetDoc.mockResolvedValue({
       exists: () => true,
       id: imageId,
@@ -107,29 +106,22 @@ describe("moveImageToProject", () => {
 
     const result = await moveImageToProject(userId, imageId, projectId);
 
-    expect(relocateImageFile).toHaveBeenCalledWith(
-      "https://storage.example/old.webp",
-      `users/${userId}/projects/${projectId}/images/${imageId}.webp`,
-      `users/${userId}/images/${imageId}.webp`,
-    );
+    expect(relocateImageFile).not.toHaveBeenCalled();
 
     expect(mockUpdateDoc).toHaveBeenCalledWith(
       { path: `[object Object]/images/${imageId}` },
       expect.objectContaining({
         projectId,
         projectVisibility: "private",
-        storagePath: `users/${userId}/projects/${projectId}/images/${imageId}.webp`,
-        originalUrl: "https://storage.example/new-project.webp",
-        previewUrl: "https://storage.example/new-project.webp",
       }),
     );
 
     expect(result.image).toMatchObject({
       id: imageId,
       projectId,
-      storagePath: `users/${userId}/projects/${projectId}/images/${imageId}.webp`,
-      originalUrl: "https://storage.example/new-project.webp",
-      previewUrl: "https://storage.example/new-project.webp",
+      storagePath: looseStoragePath,
+      originalUrl: imageUrl,
+      previewUrl: imageUrl,
       title: "Imagem teste",
       sizeBytes: 1024,
       width: 4000,
@@ -138,7 +130,7 @@ describe("moveImageToProject", () => {
     expect(result.coverImage).toBeNull();
   });
 
-  it("sets project cover with new URL when project has no cover", async () => {
+  it("sets project cover with existing URL when project has no cover", async () => {
     mockGetDoc.mockResolvedValue({
       exists: () => true,
       id: imageId,
@@ -155,16 +147,19 @@ describe("moveImageToProject", () => {
     const result = await moveImageToProject(userId, imageId, projectId);
 
     expect(updateProject).toHaveBeenCalledWith(projectId, {
-      coverImage: "https://storage.example/new-project.webp",
+      coverImage: imageUrl,
     });
-    expect(result.coverImage).toBe("https://storage.example/new-project.webp");
+    expect(result.coverImage).toBe(imageUrl);
   });
 
-  it("does not update Firestore when storage relocation fails", async () => {
+  it("keeps legacy storagePath unchanged when moving legacy loose image", async () => {
     mockGetDoc.mockResolvedValue({
       exists: () => true,
       id: imageId,
-      data: () => buildImageDoc(),
+      data: () =>
+        buildImageDoc({
+          storagePath: legacyStoragePath,
+        }),
     });
 
     getProjectById.mockResolvedValue({
@@ -174,13 +169,11 @@ describe("moveImageToProject", () => {
       coverImage: "",
     });
 
-    relocateImageFile.mockRejectedValue(new Error("upload failed"));
+    const result = await moveImageToProject(userId, imageId, projectId);
 
-    await expect(
-      moveImageToProject(userId, imageId, projectId),
-    ).rejects.toThrow("upload failed");
-
-    expect(mockUpdateDoc).not.toHaveBeenCalled();
+    expect(relocateImageFile).not.toHaveBeenCalled();
+    expect(result.image.storagePath).toBe(legacyStoragePath);
+    expect(result.image.originalUrl).toBe(imageUrl);
   });
 });
 
@@ -195,13 +188,9 @@ describe("moveImageToUnassigned", () => {
     mockUpdateDoc.mockResolvedValue(undefined);
     updateProject.mockResolvedValue(undefined);
     mockGetDocs.mockResolvedValue({ docs: [] });
-    relocateImageFile.mockResolvedValue({
-      downloadUrl: "https://storage.example/new-loose.webp",
-      storagePath: `users/${userId}/images/${imageId}.webp`,
-    });
   });
 
-  it("relocates storage and clears projectId when moving to loose gallery", async () => {
+  it("updates only Firestore when moving project image to loose gallery", async () => {
     mockGetDoc.mockResolvedValue({
       exists: () => true,
       id: imageId,
@@ -209,9 +198,7 @@ describe("moveImageToUnassigned", () => {
         buildImageDoc({
           projectId,
           projectVisibility: "private",
-          originalUrl: "https://storage.example/project.webp",
-          previewUrl: "https://storage.example/project.webp",
-          storagePath: `users/${userId}/projects/${projectId}/images/${imageId}.webp`,
+          storagePath: legacyStoragePath,
         }),
     });
 
@@ -221,34 +208,27 @@ describe("moveImageToUnassigned", () => {
       "https://storage.example/other-cover.webp",
     );
 
-    expect(relocateImageFile).toHaveBeenCalledWith(
-      "https://storage.example/project.webp",
-      `users/${userId}/images/${imageId}.webp`,
-      `users/${userId}/projects/${projectId}/images/${imageId}.webp`,
-    );
+    expect(relocateImageFile).not.toHaveBeenCalled();
 
     expect(mockUpdateDoc).toHaveBeenCalledWith(
       { path: `[object Object]/images/${imageId}` },
       expect.objectContaining({
         projectId: null,
-        storagePath: `users/${userId}/images/${imageId}.webp`,
-        originalUrl: "https://storage.example/new-loose.webp",
-        previewUrl: "https://storage.example/new-loose.webp",
       }),
     );
 
     expect(result.image).toMatchObject({
       id: imageId,
       projectId: null,
-      storagePath: `users/${userId}/images/${imageId}.webp`,
+      storagePath: legacyStoragePath,
+      originalUrl: imageUrl,
+      previewUrl: imageUrl,
       title: "Imagem teste",
     });
     expect(result.coverImage).toBeNull();
   });
 
   it("promotes oldest remaining image cover when moved image was cover", async () => {
-    const coverUrl = "https://storage.example/project.webp";
-
     mockGetDoc.mockResolvedValue({
       exists: () => true,
       id: imageId,
@@ -256,9 +236,7 @@ describe("moveImageToUnassigned", () => {
         buildImageDoc({
           projectId,
           projectVisibility: "private",
-          originalUrl: coverUrl,
-          previewUrl: coverUrl,
-          storagePath: `users/${userId}/projects/${projectId}/images/${imageId}.webp`,
+          storagePath: legacyStoragePath,
         }),
     });
 
@@ -278,11 +256,30 @@ describe("moveImageToUnassigned", () => {
       ],
     });
 
-    const result = await moveImageToUnassigned(userId, imageId, coverUrl);
+    const result = await moveImageToUnassigned(userId, imageId, imageUrl);
 
     expect(updateProject).toHaveBeenCalledWith(projectId, {
       coverImage: "https://storage.example/remaining.webp",
     });
     expect(result.coverImage).toBe("https://storage.example/remaining.webp");
+  });
+
+  it("keeps unified storagePath when moving from project to gallery", async () => {
+    mockGetDoc.mockResolvedValue({
+      exists: () => true,
+      id: imageId,
+      data: () =>
+        buildImageDoc({
+          projectId,
+          projectVisibility: "private",
+          storagePath: looseStoragePath,
+        }),
+    });
+
+    const result = await moveImageToUnassigned(userId, imageId, "");
+
+    expect(relocateImageFile).not.toHaveBeenCalled();
+    expect(result.image.storagePath).toBe(looseStoragePath);
+    expect(result.image.projectId).toBeNull();
   });
 });
