@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Timestamp } from "firebase/firestore";
 import { useAuth } from "@/hooks/useAuth";
 import {
   getLooseImagesByUserId,
   mapImageToCard,
 } from "@/services/images/imageService";
+import { sortImagesByCreatedAt } from "@/utils/imageCreatedSort";
 
 /**
  * Carrega imagens soltas (projectId == null) e expõe helpers para atualização local.
@@ -26,7 +28,7 @@ export function useLooseImages() {
 
     try {
       const data = await getLooseImagesByUserId(user.uid);
-      setImages(data);
+      setImages(sortImagesByCreatedAt(data));
     } catch (err) {
       setError(err);
       setImages([]);
@@ -55,7 +57,7 @@ export function useLooseImages() {
       try {
         const data = await getLooseImagesByUserId(user.uid);
         if (!cancelled) {
-          setImages(data);
+          setImages(sortImagesByCreatedAt(data));
         }
       } catch (err) {
         if (!cancelled) {
@@ -77,20 +79,27 @@ export function useLooseImages() {
   }, [user?.uid]);
 
   const addImage = useCallback((image) => {
-    setImages((current) => {
-      const next = [image, ...current.filter((item) => item.id !== image.id)];
-      return next.sort((a, b) => {
-        const aTime = a.createdAt?.toMillis?.() ?? 0;
-        const bTime = b.createdAt?.toMillis?.() ?? 0;
-        return bTime - aTime;
-      });
-    });
+    setImages((current) =>
+      sortImagesByCreatedAt([
+        {
+          ...image,
+          updatedAt: image.updatedAt ?? Timestamp.now(),
+        },
+        ...current.filter((item) => item.id !== image.id),
+      ]),
+    );
   }, []);
 
   const updateImage = useCallback((imageId, updates) => {
     setImages((current) =>
       current.map((image) =>
-        image.id === imageId ? { ...image, ...updates } : image,
+        image.id === imageId
+          ? {
+              ...image,
+              ...updates,
+              updatedAt: updates.updatedAt ?? Timestamp.now(),
+            }
+          : image,
       ),
     );
   }, []);

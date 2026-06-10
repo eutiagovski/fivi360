@@ -23,6 +23,9 @@ import { assertHotspotsEnabled } from "@/services/plans/planService";
 export const HOTSPOT_TYPE_INFO = "info";
 export const HOTSPOT_TYPE_SCENE = "scene";
 
+export const SCENE_HOTSPOT_REQUIRES_PROJECT_MSG =
+  "Hotspots de navegação só estão disponíveis para imagens em um projeto.";
+
 /**
  * @typedef {Object} HotspotBase
  * @property {string} id
@@ -95,6 +98,17 @@ async function assertImageOwnership(imageId, userId) {
   }
 
   return image;
+}
+
+/**
+ * @param {import("@/services/images/imageService").Image} image
+ * @returns {void}
+ */
+function assertSceneHotspotsAllowed(image) {
+  const projectId = image?.projectId;
+  if (projectId === undefined || projectId === null || projectId === "") {
+    throw new Error(SCENE_HOTSPOT_REQUIRES_PROJECT_MSG);
+  }
 }
 
 /**
@@ -252,6 +266,7 @@ export async function createSceneHotspot(data) {
 
   const sourceImage = await assertImageOwnership(imageId, userId);
   await assertHotspotsEnabled(userId);
+  assertSceneHotspotsAllowed(sourceImage);
   const resolvedProjectId = projectId ?? sourceImage.projectId ?? "";
 
   await assertValidSceneTarget(
@@ -365,6 +380,7 @@ export async function updateSceneHotspot(hotspotId, data) {
   }
 
   const sourceImage = await assertImageOwnership(imageId, userId);
+  assertSceneHotspotsAllowed(sourceImage);
   const resolvedProjectId = projectId ?? sourceImage.projectId ?? "";
 
   const hotspotRef = doc(db, "images", imageId, "hotspots", hotspotId);

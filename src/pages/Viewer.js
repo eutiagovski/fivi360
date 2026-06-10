@@ -2,10 +2,12 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Loader2, MapPin } from "lucide-react";
 import { PanoramaViewer } from "@/components/viewer/PanoramaViewer";
+import { ViewerPageHeader } from "@/components/viewer/ViewerPageHeader";
 import { ViewerNavControls } from "@/components/viewer/ViewerNavControls";
 import { HotspotFormDialog } from "@/components/viewer/HotspotFormDialog";
 import { HotspotInfoDialog } from "@/components/viewer/HotspotInfoDialog";
 import { HotspotManagerPanel } from "@/components/viewer/HotspotManagerPanel";
+import { HotspotCreateContextMenu } from "@/components/viewer/HotspotCreateContextMenu";
 import { useViewerImage } from "@/hooks/useViewerImage";
 import { useHotspots } from "@/hooks/useHotspots";
 import { useAuth } from "@/hooks/useAuth";
@@ -15,6 +17,7 @@ import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { useToast } from "@/hooks/use-toast";
 import { isPlanLimitError } from "@/services/plans/planService";
 import {
+  HOTSPOT_TYPE_INFO,
   HOTSPOT_TYPE_SCENE,
   createHotspot,
   createSceneHotspot,
@@ -66,11 +69,18 @@ export const Viewer = () => {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [premiumModalOpen, setPremiumModalOpen] = useState(false);
+  const [contextMenu, setContextMenu] = useState(null);
+  const [createInitialType, setCreateInitialType] = useState(HOTSPOT_TYPE_INFO);
+  const [formTypeLocked, setFormTypeLocked] = useState(false);
 
   const panoramaUrl = image?.originalUrl || image?.previewUrl || "";
+  const sceneHotspotsEnabled = Boolean(image?.projectId);
   const backHref = image?.projectId
     ? `/projects/${image.projectId}`
     : "/images";
+  const viewerSubtitle = image?.projectId
+    ? project?.title || "Projeto"
+    : "Imagens";
 
   const resetFormState = useCallback(() => {
     setFormOpen(false);
@@ -78,6 +88,12 @@ export const Viewer = () => {
     setPendingCoords(null);
     setEditingHotspot(null);
     setPlacingMode(false);
+    setCreateInitialType(HOTSPOT_TYPE_INFO);
+    setFormTypeLocked(false);
+  }, []);
+
+  const closeContextMenu = useCallback(() => {
+    setContextMenu(null);
   }, []);
 
   useEffect(() => {
@@ -88,6 +104,7 @@ export const Viewer = () => {
     setEditingHotspot(null);
     setDeleteTarget(null);
     setInfoHotspot(null);
+    setContextMenu(null);
   }, [imageId]);
 
   const handleToggleManage = () => {
@@ -114,10 +131,13 @@ export const Viewer = () => {
       return;
     }
 
+    closeContextMenu();
     setPlacingMode(true);
     setPendingCoords(null);
     setEditingHotspot(null);
     setFormMode("create");
+    setCreateInitialType(HOTSPOT_TYPE_INFO);
+    setFormTypeLocked(false);
     setFormOpen(false);
   };
 
@@ -127,15 +147,75 @@ export const Viewer = () => {
   };
 
   const handlePlacementClick = useCallback((coords) => {
+    closeContextMenu();
     setPendingCoords(coords);
     setFormMode("create");
     setEditingHotspot(null);
+    setCreateInitialType(HOTSPOT_TYPE_INFO);
+    setFormTypeLocked(false);
     setFormError("");
     setFormOpen(true);
     setPlacingMode(false);
-  }, []);
+  }, [closeContextMenu]);
+
+  const handlePanoramaContextMenu = useCallback(
+    (payload) => {
+      if (!hotspotsEnabled) {
+        setPremiumModalOpen(true);
+        return;
+      }
+
+      setPlacingMode(false);
+      setPendingCoords(null);
+      setFormOpen(false);
+      setContextMenu({
+        x: payload.clientX,
+        y: payload.clientY,
+        pitch: payload.pitch,
+        yaw: payload.yaw,
+      });
+    },
+    [hotspotsEnabled, closeContextMenu],
+  );
+
+  const openCreateFormFromContextMenu = useCallback(
+    (type) => {
+      if (!contextMenu) {
+        return;
+      }
+
+      if (type === HOTSPOT_TYPE_SCENE && !sceneHotspotsEnabled) {
+        toast({
+          variant: "destructive",
+          title: "Navegação indisponível",
+          description:
+            "Hotspots de navegação só podem ser criados em imagens vinculadas a um projeto.",
+        });
+        closeContextMenu();
+        return;
+      }
+
+      setPendingCoords({
+        pitch: contextMenu.pitch,
+        yaw: contextMenu.yaw,
+      });
+      setFormMode("create");
+      setEditingHotspot(null);
+      setCreateInitialType(type);
+      setFormTypeLocked(true);
+      setFormError("");
+      setFormOpen(true);
+      setPlacingMode(false);
+      closeContextMenu();
+    },
+    [contextMenu, sceneHotspotsEnabled, toast, closeContextMenu],
+  );
 
   const handleEditHotspot = (hotspot) => {
+    if (hotspot.type === HOTSPOT_TYPE_SCENE && !sceneHotspotsEnabled) {
+      return;
+    }
+
     setEditingHotspot(hotspot);
     setFormMode("edit");
     setFormError("");
@@ -174,7 +254,10 @@ export const Viewer = () => {
 
     try {
       if (formMode === "edit" && editingHotspot) {
-        if (editingHotspot.type === HOTSPOT_TYPE_SCENE) {
+        if (
+          editingHotspot.type === HOTSPOT_TYPE_SCENE &&
+          sceneHotspotsEnabled
+        ) {
           await updateSceneHotspot(editingHotspot.id, {
             imageId: image.id,
             userId: user.uid,
@@ -199,6 +282,11 @@ export const Viewer = () => {
         }
 
         if (formData.type === HOTSPOT_TYPE_SCENE) {
+          if (!sceneHotspotsEnabled) {
+            throw new Error(
+              "Hotspots de navegação só podem ser criados em imagens vinculadas a um projeto.",
+            );
+          }
           await createSceneHotspot({
             imageId: image.id,
             userId: user.uid,
@@ -313,46 +401,29 @@ export const Viewer = () => {
       className="h-screen flex flex-col bg-[#050505] fade-in overflow-hidden"
       data-testid="viewer-page"
     >
-      <header className="flex-shrink-0 z-50 p-4 md:p-6">
-        <div className="flex items-center gap-3 md:gap-4 flex-wrap">
-          <Link
-            to={backHref}
-            data-testid="back-to-project"
-            className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-black/60 backdrop-blur-xl border border-white/10 rounded-xl text-white hover:bg-black/80 transition-colors"
-          >
-            <ArrowLeft size={20} />
-            <span className="hidden sm:inline">Voltar</span>
-          </Link>
-
-          <div className="min-w-0 flex-1 order-3 sm:order-none w-full sm:w-auto basis-full sm:basis-auto">
-            <p
-              className="text-sm text-zinc-400 truncate"
-              data-testid="viewer-project-name"
-            >
-              {project?.title || "Projeto"}
-            </p>
-            <h1
-              className="text-lg md:text-xl font-light text-white truncate"
-              data-testid="image-name"
-            >
-              {image?.title || "Sem título"}
-            </h1>
-          </div>
-
+      <ViewerPageHeader
+        backHref={backHref}
+        backLabel="Voltar"
+        subtitle={viewerSubtitle}
+        title={image?.title}
+        backTestId="back-to-project"
+        subtitleTestId="viewer-project-name"
+        titleTestId="image-name"
+      >
+        <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
           <button
             type="button"
             onClick={handleToggleManage}
             disabled={planLoading}
             data-testid="manage-hotspots-btn"
-            className={`${HEADER_BUTTON} ${
+            className={`${HEADER_BUTTON} px-2 py-2 md:px-4 ${
               manageMode ? HEADER_BUTTON_ACTIVE : HEADER_BUTTON_IDLE
             }`}
           >
-            <MapPin size={18} />
-            <span className="hidden sm:inline">
+            <MapPin size={16} className="md:w-[18px] md:h-[18px]" />
+            <span className="hidden md:inline">
               {manageMode ? "Fechar gestão" : "Gerenciar hotspots"}
             </span>
-            <span className="sm:hidden">{manageMode ? "Fechar" : "Hotspots"}</span>
           </button>
 
           <ViewerNavControls
@@ -360,7 +431,7 @@ export const Viewer = () => {
             nextImage={nextImage}
           />
         </div>
-      </header>
+      </ViewerPageHeader>
 
       <div
         className="flex-1 min-h-0 relative"
@@ -373,6 +444,7 @@ export const Viewer = () => {
             hotspots={hotspots}
             placementMode={placingMode}
             onPlacementClick={handlePlacementClick}
+            onPanoramaContextMenu={handlePanoramaContextMenu}
             onInfoHotspotClick={setInfoHotspot}
             onSceneHotspotClick={handleSceneHotspotClick}
             getSceneHotspotLabel={getSceneHotspotLabel}
@@ -388,6 +460,7 @@ export const Viewer = () => {
             hotspots={hotspots}
             loading={hotspotsLoading}
             projectImages={projectImages}
+            sceneHotspotsEnabled={sceneHotspotsEnabled}
             placingMode={placingMode}
             onStartPlacing={handleStartPlacing}
             onCancelPlacing={handleCancelPlacing}
@@ -397,9 +470,19 @@ export const Viewer = () => {
             onConfirmDelete={handleConfirmDelete}
             onCancelDelete={() => setDeleteTarget(null)}
             isDeleting={isDeleting}
+            onClose={() => setManageMode(false)}
           />
         )}
       </div>
+
+      <HotspotCreateContextMenu
+        open={Boolean(contextMenu)}
+        position={contextMenu ? { x: contextMenu.x, y: contextMenu.y } : null}
+        sceneHotspotsEnabled={sceneHotspotsEnabled}
+        onSelectInfo={() => openCreateFormFromContextMenu(HOTSPOT_TYPE_INFO)}
+        onSelectScene={() => openCreateFormFromContextMenu(HOTSPOT_TYPE_SCENE)}
+        onClose={closeContextMenu}
+      />
 
       <HotspotFormDialog
         open={formOpen}
@@ -411,7 +494,8 @@ export const Viewer = () => {
           }
         }}
         mode={formMode}
-        initialType={editingHotspot?.type}
+        initialType={editingHotspot?.type ?? createInitialType}
+        lockHotspotType={formTypeLocked}
         initialTitle={editingHotspot?.type !== HOTSPOT_TYPE_SCENE ? editingHotspot?.title ?? "" : ""}
         initialDescription={
           editingHotspot?.type !== HOTSPOT_TYPE_SCENE
@@ -425,6 +509,7 @@ export const Viewer = () => {
         }
         currentImageId={image?.id ?? ""}
         projectImages={projectImages}
+        sceneHotspotsEnabled={sceneHotspotsEnabled}
         isSaving={isSaving}
         error={formError}
         onSubmit={handleFormSubmit}

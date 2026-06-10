@@ -30,6 +30,7 @@ import {
   assertCanCreateProject,
   assertPublicVisibilityEnabled,
 } from "@/services/plans/planService";
+import { sortByRecency } from "@/utils/recencySort";
 import { visibilityToLabel } from "@/utils/visibility";
 
 /**
@@ -65,18 +66,6 @@ function mapProjectDoc(projectId, data) {
 }
 
 /**
- * @param {Project[]} projects
- * @returns {Project[]}
- */
-function sortProjectsByRecency(projects) {
-  return [...projects].sort((a, b) => {
-    const aTime = a.updatedAt?.toMillis?.() ?? a.createdAt?.toMillis?.() ?? 0;
-    const bTime = b.updatedAt?.toMillis?.() ?? b.createdAt?.toMillis?.() ?? 0;
-    return bTime - aTime;
-  });
-}
-
-/**
  * Lista todos os projetos de um usuário (dashboard, /projects).
  *
  * @param {string} userId
@@ -89,7 +78,7 @@ export async function getProjectsByUserId(userId) {
   );
   const snapshot = await getDocs(projectsQuery);
 
-  return sortProjectsByRecency(
+  return sortByRecency(
     snapshot.docs.map((docSnap) => mapProjectDoc(docSnap.id, docSnap.data())),
   );
 }
@@ -204,7 +193,7 @@ export async function getPublicProjectsByUserId(userId) {
   );
   const snapshot = await getDocs(projectsQuery);
 
-  return sortProjectsByRecency(
+  return sortByRecency(
     snapshot.docs.map((docSnap) => mapProjectDoc(docSnap.id, docSnap.data())),
   );
 }

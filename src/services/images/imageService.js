@@ -37,6 +37,7 @@ import {
   assertPublicVisibilityEnabled,
 } from "@/services/plans/planService";
 import { deleteImageFile } from "@/services/storage/storageService";
+import { sortImagesByRecency, toMillis } from "@/utils/imageRecencySort";
 
 /**
  * @typedef {Object} Image
@@ -122,27 +123,24 @@ function mapImageDoc(imageId, data) {
 }
 
 /**
+ * Ordem cronológica de criação (mais antiga primeiro). Usado só para capa do projeto.
+ *
  * @param {Image[]} images
  * @returns {Image[]}
  */
 function sortImagesByCreatedAtAsc(images) {
   return [...images].sort((a, b) => {
-    const aTime = a.createdAt?.toMillis?.() ?? 0;
-    const bTime = b.createdAt?.toMillis?.() ?? 0;
-    return aTime - bTime;
+    return toMillis(a.createdAt) - toMillis(b.createdAt);
   });
 }
 
 /**
  * @param {Image[]} images
- * @returns {Image[]}
+ * @returns {Image | null}
  */
-function sortImagesByCreatedAtDesc(images) {
-  return [...images].sort((a, b) => {
-    const aTime = a.createdAt?.toMillis?.() ?? 0;
-    const bTime = b.createdAt?.toMillis?.() ?? 0;
-    return bTime - aTime;
-  });
+function pickOldestImageForCover(images) {
+  const sorted = sortImagesByCreatedAtAsc(images);
+  return sorted[0] ?? null;
 }
 
 /**
@@ -177,7 +175,7 @@ export async function getImagesByProjectId(projectId, userId) {
     mapImageDoc(docSnap.id, docSnap.data()),
   );
 
-  return sortImagesByCreatedAtAsc(images);
+  return sortImagesByRecency(images);
 }
 
 /**
@@ -218,7 +216,7 @@ export async function getLooseImagesByUserId(userId) {
     mapImageDoc(docSnap.id, docSnap.data()),
   );
 
-  return sortImagesByCreatedAtDesc(images);
+  return sortImagesByRecency(images);
 }
 
 /**
@@ -239,7 +237,7 @@ export async function getRecentImagesByUserId(userId, limit = 3) {
     mapImageDoc(docSnap.id, docSnap.data()),
   );
 
-  return sortImagesByCreatedAtDesc(images).slice(0, limit);
+  return sortImagesByRecency(images).slice(0, limit);
 }
 
 /**
@@ -368,15 +366,20 @@ export async function deleteImage(
     projectId && projectCoverImage && projectCoverImage === imageUrl,
   );
 
-  if (!wasCover || !projectId) {
+  if (projectId) {
+    if (!wasCover) {
+      await updateProject(projectId, {});
+      return { coverImage: null };
+    }
+  } else {
     return { coverImage: null };
   }
 
   const remaining = await getImagesByProjectId(projectId, userId);
-  const newCover =
-    remaining.length > 0
-      ? remaining[0].previewUrl || remaining[0].originalUrl
-      : "";
+  const oldestRemaining = pickOldestImageForCover(remaining);
+  const newCover = oldestRemaining
+    ? oldestRemaining.previewUrl || oldestRemaining.originalUrl
+    : "";
 
   await updateProject(projectId, { coverImage: newCover });
 
@@ -440,8 +443,12 @@ export async function uploadImage(userId, projectId, file, title, options = {}) 
 
   await setDoc(imageRef, imageData);
 
-  if (isFirstImage && normalizedProjectId) {
-    await updateProject(normalizedProjectId, { coverImage: downloadUrl });
+  if (normalizedProjectId) {
+    if (isFirstImage) {
+      await updateProject(normalizedProjectId, { coverImage: downloadUrl });
+    } else {
+      await updateProject(normalizedProjectId, {});
+    }
   }
 
   return mapImageDoc(imageId, imageData);
@@ -562,13 +569,16 @@ export async function replaceImageFile(
       projectCoverImage === previousUrl,
   );
 
-  if (!wasCover || !normalizedProjectId) {
-    return { image: updatedImage, coverImage: null };
+  if (normalizedProjectId) {
+    if (wasCover) {
+      await updateProject(normalizedProjectId, { coverImage: downloadUrl });
+      return { image: updatedImage, coverImage: downloadUrl };
+    }
+
+    await updateProject(normalizedProjectId, {});
   }
 
-  await updateProject(normalizedProjectId, { coverImage: downloadUrl });
-
-  return { image: updatedImage, coverImage: downloadUrl };
+  return { image: updatedImage, coverImage: null };
 }
 
 /**
@@ -625,13 +635,13 @@ export async function moveImageToProject(userId, imageId, targetProjectId) {
   const previewUrl = image.previewUrl || image.originalUrl;
   const projectHasCover = Boolean(project.coverImage?.trim());
 
-  if (projectHasCover) {
-    return { image: updatedImage, coverImage: null };
+  if (!projectHasCover) {
+    await updateProject(targetProjectId, { coverImage: previewUrl });
+    return { image: updatedImage, coverImage: previewUrl };
   }
 
-  await updateProject(targetProjectId, { coverImage: previewUrl });
-
-  return { image: updatedImage, coverImage: previewUrl };
+  await updateProject(targetProjectId, {});
+  return { image: updatedImage, coverImage: null };
 }
 
 /**
@@ -683,14 +693,15 @@ export async function moveImageToUnassigned(
   );
 
   if (!wasCover) {
+    await updateProject(sourceProjectId, {});
     return { image: updatedImage, coverImage: null };
   }
 
   const remaining = await getImagesByProjectId(sourceProjectId, userId);
-  const newCover =
-    remaining.length > 0
-      ? remaining[0].previewUrl || remaining[0].originalUrl
-      : "";
+  const oldestRemaining = pickOldestImageForCover(remaining);
+  const newCover = oldestRemaining
+    ? oldestRemaining.previewUrl || oldestRemaining.originalUrl
+    : "";
 
   await updateProject(sourceProjectId, { coverImage: newCover });
 

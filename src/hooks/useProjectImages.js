@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Timestamp } from "firebase/firestore";
 import { useAuth } from "@/hooks/useAuth";
 import {
   getImagesByProjectId,
   mapImageToCard,
 } from "@/services/images/imageService";
+import { sortImagesByCreatedAt } from "@/utils/imageCreatedSort";
 
 /**
  * Carrega imagens de um projeto e expõe helpers para atualização local.
@@ -28,7 +30,7 @@ export function useProjectImages(projectId) {
 
     try {
       const data = await getImagesByProjectId(projectId, user.uid);
-      setImages(data);
+      setImages(sortImagesByCreatedAt(data));
     } catch (err) {
       setError(err);
       setImages([]);
@@ -57,7 +59,7 @@ export function useProjectImages(projectId) {
       try {
         const data = await getImagesByProjectId(projectId, user.uid);
         if (!cancelled) {
-          setImages(data);
+          setImages(sortImagesByCreatedAt(data));
         }
       } catch (err) {
         if (!cancelled) {
@@ -79,20 +81,27 @@ export function useProjectImages(projectId) {
   }, [projectId, user?.uid]);
 
   const addImage = useCallback((image) => {
-    setImages((current) => {
-      const next = [...current, image];
-      return next.sort((a, b) => {
-        const aTime = a.createdAt?.toMillis?.() ?? 0;
-        const bTime = b.createdAt?.toMillis?.() ?? 0;
-        return aTime - bTime;
-      });
-    });
+    setImages((current) =>
+      sortImagesByCreatedAt([
+        {
+          ...image,
+          updatedAt: image.updatedAt ?? Timestamp.now(),
+        },
+        ...current.filter((item) => item.id !== image.id),
+      ]),
+    );
   }, []);
 
   const updateImage = useCallback((imageId, updates) => {
     setImages((current) =>
       current.map((image) =>
-        image.id === imageId ? { ...image, ...updates } : image,
+        image.id === imageId
+          ? {
+              ...image,
+              ...updates,
+              updatedAt: updates.updatedAt ?? Timestamp.now(),
+            }
+          : image,
       ),
     );
   }, []);

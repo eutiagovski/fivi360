@@ -6,6 +6,7 @@ import {
   Pencil,
   Plus,
   Trash2,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -62,6 +63,7 @@ export function HotspotManagerPanel({
   loading,
   placingMode,
   projectImages = [],
+  sceneHotspotsEnabled = true,
   onStartPlacing,
   onCancelPlacing,
   onEditHotspot,
@@ -70,6 +72,7 @@ export function HotspotManagerPanel({
   onConfirmDelete,
   onCancelDelete,
   isDeleting,
+  onClose,
 }) {
   const [listExpanded, setListExpanded] = useState(true);
 
@@ -92,22 +95,49 @@ export function HotspotManagerPanel({
 
   return (
     <>
+      {onClose && (
+        <button
+          type="button"
+          aria-label="Fechar painel de hotspots"
+          className="md:hidden fixed inset-0 z-30 bg-black/40"
+          data-testid="hotspot-panel-backdrop"
+          onClick={onClose}
+        />
+      )}
+
       <aside
         className={cn(
-          "absolute top-4 right-4 z-40 flex w-72 max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-xl border border-white/10 bg-black/70 backdrop-blur-xl",
-          listExpanded && "max-h-[calc(100%-2rem)]",
+          "z-40 flex flex-col overflow-hidden rounded-xl border border-white/10 bg-black/70 backdrop-blur-xl",
+          "max-md:fixed max-md:inset-x-3 max-md:bottom-3 max-md:w-auto max-md:max-h-[min(55vh,28rem)] max-md:rounded-2xl max-md:shadow-2xl",
+          "md:absolute md:top-4 md:right-4 md:w-72 md:max-w-[calc(100vw-2rem)]",
+          listExpanded && "max-h-[min(55vh,28rem)] md:max-h-[calc(100%-2rem)]",
         )}
         data-testid="hotspot-manager-panel"
       >
         <div className="p-4 border-b border-white/10 shrink-0">
-          <h2 className="text-sm font-medium text-white flex items-center gap-2">
-            <MapPin size={16} className="shrink-0" aria-hidden />
-            <span>Hotspots ({hotspotCount})</span>
-          </h2>
+          <div className="flex items-start justify-between gap-2">
+            <h2 className="text-sm font-medium text-white flex items-center gap-2 min-w-0">
+              <MapPin size={16} className="shrink-0" aria-hidden />
+              <span className="truncate">Hotspots ({hotspotCount})</span>
+            </h2>
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Fechar gestão de hotspots"
+                data-testid="hotspot-panel-close"
+                className="md:hidden shrink-0 p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            )}
+          </div>
           <p className="text-xs text-zinc-400 mt-1">
             {placingMode
               ? "Clique no panorama para posicionar o hotspot."
-              : "Gerencie marcadores informativos e de navegação nesta imagem."}
+              : sceneHotspotsEnabled
+                ? "Gerencie marcadores informativos e de navegação nesta imagem."
+                : "Gerencie marcadores informativos nesta imagem."}
           </p>
         </div>
 
@@ -186,15 +216,18 @@ export function HotspotManagerPanel({
                   </div>
                 </div>
                 <div className="flex gap-2 mt-3">
-                  <button
-                    type="button"
-                    onClick={() => onEditHotspot?.(hotspot)}
-                    className={`${PANEL_BUTTON} ${PANEL_BUTTON_SECONDARY} flex-1 py-1.5 text-xs`}
-                    data-testid={`hotspot-edit-${hotspot.id}`}
-                  >
-                    <Pencil size={14} />
-                    Editar
-                  </button>
+                  {(sceneHotspotsEnabled ||
+                    hotspot.type !== HOTSPOT_TYPE_SCENE) && (
+                    <button
+                      type="button"
+                      onClick={() => onEditHotspot?.(hotspot)}
+                      className={`${PANEL_BUTTON} ${PANEL_BUTTON_SECONDARY} flex-1 py-1.5 text-xs`}
+                      data-testid={`hotspot-edit-${hotspot.id}`}
+                    >
+                      <Pencil size={14} />
+                      Editar
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => onDeleteHotspot?.(hotspot)}

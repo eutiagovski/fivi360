@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { PanoramaViewer } from "@/components/viewer/PanoramaViewer";
+import { ViewerPageHeader } from "@/components/viewer/ViewerPageHeader";
 import { ViewerNavControls } from "@/components/viewer/ViewerNavControls";
 import { HotspotInfoDialog } from "@/components/viewer/HotspotInfoDialog";
 import { usePublicViewerImage } from "@/hooks/usePublicViewerImage";
@@ -31,9 +32,14 @@ export const PublicImage = () => {
   const [infoHotspot, setInfoHotspot] = useState(null);
 
   const panoramaUrl = image?.originalUrl || image?.previewUrl || "";
-  const backHref = project?.id
-    ? `/share/project/${project.id}`
+  const hasProject = Boolean(image?.projectId ?? project?.id);
+  const backHref = hasProject
+    ? `/share/project/${image?.projectId ?? project.id}`
     : "/";
+  const backLabel = hasProject ? "Voltar ao projeto" : "Voltar para o início";
+  const subtitle = hasProject
+    ? project?.title || "Projeto"
+    : "Imagem compartilhada";
 
   const getSceneHotspotLabel = useCallback(
     (hotspot) => {
@@ -77,15 +83,13 @@ export const PublicImage = () => {
         <p className="text-lg text-white text-center">
           {ERROR_MESSAGES[error] ?? ERROR_MESSAGES.load_failed}
         </p>
-        {project?.id && (
-          <Link
-            to={backHref}
-            className="flex items-center gap-2 px-4 py-2 bg-black/60 backdrop-blur-xl border border-white/10 rounded-xl text-white hover:bg-black/80 transition-colors"
-          >
-            <ArrowLeft size={20} />
-            Voltar ao projeto
-          </Link>
-        )}
+        <Link
+          to={backHref}
+          className="flex items-center gap-2 px-4 py-2 bg-black/60 backdrop-blur-xl border border-white/10 rounded-xl text-white hover:bg-black/80 transition-colors"
+        >
+          <ArrowLeft size={20} />
+          {backLabel}
+        </Link>
       </div>
     );
   }
@@ -95,39 +99,21 @@ export const PublicImage = () => {
       className="h-screen flex flex-col bg-[#050505] fade-in overflow-hidden"
       data-testid="public-viewer-page"
     >
-      <header className="flex-shrink-0 z-50 p-4 md:p-6">
-        <div className="flex items-center gap-3 md:gap-4 flex-wrap">
-          <Link
-            to={backHref}
-            data-testid="public-back-to-project"
-            className="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-black/60 backdrop-blur-xl border border-white/10 rounded-xl text-white hover:bg-black/80 transition-colors"
-          >
-            <ArrowLeft size={20} />
-            <span className="hidden sm:inline">Voltar ao projeto</span>
-          </Link>
-
-          <div className="min-w-0 flex-1 order-3 sm:order-none w-full sm:w-auto basis-full sm:basis-auto">
-            <p
-              className="text-sm text-zinc-400 truncate"
-              data-testid="public-viewer-project-name"
-            >
-              {project?.title || "Projeto"}
-            </p>
-            <h1
-              className="text-lg md:text-xl font-light text-white truncate"
-              data-testid="public-image-name"
-            >
-              {image?.title || "Sem título"}
-            </h1>
-          </div>
-
-          <ViewerNavControls
-            previousImage={previousImage}
-            nextImage={nextImage}
-            imageBasePath="/share/image"
-          />
-        </div>
-      </header>
+      <ViewerPageHeader
+        backHref={backHref}
+        backLabel={backLabel}
+        subtitle={hasProject ? subtitle : undefined}
+        title={image?.title}
+        backTestId="public-back-to-project"
+        subtitleTestId="public-viewer-project-name"
+        titleTestId="public-image-name"
+      >
+        <ViewerNavControls
+          previousImage={previousImage}
+          nextImage={nextImage}
+          imageBasePath="/share/image"
+        />
+      </ViewerPageHeader>
 
       <div
         className="flex-1 min-h-0 relative"

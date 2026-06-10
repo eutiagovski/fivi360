@@ -1,5 +1,15 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Share2, Trash2, Pencil, Loader2, X, Check } from 'lucide-react';
+import {
+  ArrowLeft,
+  Plus,
+  Share2,
+  Trash2,
+  Pencil,
+  Loader2,
+  X,
+  Check,
+  MoreHorizontal,
+} from 'lucide-react';
 import { useRef, useState } from 'react';
 import { SectionHeader } from '@/components/common/SectionHeader';
 import { EmptyStateCard } from '@/components/common/EmptyStateCard';
@@ -33,6 +43,7 @@ import {
   hasProjectCover,
   ProjectCoverPlaceholder,
 } from '@/components/common/ProjectCoverPlaceholder';
+import { ShareImageDialog } from '@/components/images/ShareImageDialog';
 import { ShareProjectDialog } from '@/components/projects/ShareProjectDialog';
 import { PlanLimitButton } from '@/components/plans/PlanLimitButton';
 import { UpgradePrompt } from '@/components/plans/UpgradePrompt';
@@ -42,6 +53,15 @@ import {
   visibilityToLabel,
   VISIBILITY_OPTIONS,
 } from '@/utils/visibility';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+const PROJECT_MENU_ITEM_CLASS =
+  'gap-3 rounded-lg px-4 py-3 text-sm text-zinc-300 cursor-pointer focus:bg-zinc-800 focus:text-white';
 
 export const ProjectDetail = () => {
   const { id } = useParams();
@@ -73,6 +93,8 @@ export const ProjectDetail = () => {
   const [showDeleteImageDialog, setShowDeleteImageDialog] = useState(false);
   const [isDeletingImage, setIsDeletingImage] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
+  const [imageToShare, setImageToShare] = useState(null);
+  const [showShareImageDialog, setShowShareImageDialog] = useState(false);
   const [imageToMoveToLoose, setImageToMoveToLoose] = useState(null);
   const [showMoveToLooseDialog, setShowMoveToLooseDialog] = useState(false);
   const [isMovingToLoose, setIsMovingToLoose] = useState(false);
@@ -212,6 +234,28 @@ export const ProjectDetail = () => {
     setOpenImageMenu(null);
     setEditOpenFilePicker(true);
     setImageToEdit(image);
+  };
+
+  const handleShareImageClick = (imageId) => {
+    const image = images.find((item) => item.id === imageId);
+    if (!image) {
+      return;
+    }
+
+    setOpenImageMenu(null);
+    setImageToShare(image);
+    setShowShareImageDialog(true);
+  };
+
+  const handleImageVisibilitySaved = (visibility) => {
+    if (!imageToShare) {
+      return;
+    }
+
+    updateImage(imageToShare.id, { visibility });
+    setImageToShare((current) =>
+      current ? { ...current, visibility } : current,
+    );
   };
 
   const handleEditComplete = ({ title, image, coverImage }) => {
@@ -418,6 +462,15 @@ export const ProjectDetail = () => {
         <ArrowLeft size={20} />
         Voltar para projetos
       </Link>
+      {!canUploadImage && (
+          <div className="mb-6">
+            <UpgradePrompt
+              variant="warning"
+              message={`Você atingiu os limites do plano ${limits.displayName}.`}
+              secondaryMessage="Faça upgrade para continuar enviando imagens."
+            />
+          </div>
+        )}
 
       <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8 mb-8">
         <div className="flex flex-col lg:flex-row gap-8">
@@ -434,8 +487,8 @@ export const ProjectDetail = () => {
             )}
           </div>
           <div className="flex-1">
-            <div className="flex items-start justify-between mb-4 gap-4">
-              <div className="flex-1">
+            <div className="flex flex-col gap-4 mb-4 lg:flex-row lg:items-start lg:justify-between lg:gap-4 min-w-0">
+              <div className="min-w-0 flex-1 w-full">
                 {isEditing ? (
                   <input
                     type="text"
@@ -446,7 +499,10 @@ export const ProjectDetail = () => {
                     className="w-full text-4xl sm:text-5xl font-light tracking-tighter text-white mb-2 bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2 focus:outline-none focus:ring-1 focus:ring-white"
                   />
                 ) : (
-                  <h1 className="text-4xl sm:text-5xl font-light tracking-tighter text-white mb-2" data-testid="project-name">
+                  <h1
+                    className="text-4xl sm:text-5xl font-light tracking-tighter text-white mb-2 break-words"
+                    data-testid="project-name"
+                  >
                     {project.title || 'Sem título'}
                   </h1>
                 )}
@@ -479,9 +535,27 @@ export const ProjectDetail = () => {
                     {visibilityToLabel(project.visibility)}
                   </div>
                 )}
+
+                {!isEditing && (
+                  <div className="lg:hidden mt-2 space-y-1">
+                    {project.clientName && (
+                      <p className="text-sm text-zinc-400" data-testid="project-client-mobile">
+                        Cliente: {project.clientName}
+                      </p>
+                    )}
+                    {project.description && (
+                      <p
+                        className="text-sm text-zinc-400 line-clamp-2"
+                        data-testid="project-description-mobile-short"
+                      >
+                        {project.description}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="hidden lg:flex items-center gap-2 shrink-0">
                 {isEditing ? (
                   <>
                     <button
@@ -530,10 +604,83 @@ export const ProjectDetail = () => {
                   </>
                 )}
               </div>
+
+              {isEditing ? (
+                <div className="flex lg:hidden items-center gap-2 w-full min-w-0">
+                  <button
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    data-testid="save-project-btn-mobile"
+                    className="flex flex-1 min-w-0 items-center justify-center gap-2 px-4 py-2 bg-white text-black rounded-xl font-medium btn-scale hover:bg-zinc-200 transition-colors disabled:opacity-50"
+                  >
+                    {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Check size={18} />}
+                    Salvar
+                  </button>
+                  <button
+                    onClick={cancelEditing}
+                    data-testid="cancel-edit-project-btn-mobile"
+                    className="flex flex-1 min-w-0 items-center justify-center gap-2 px-4 py-2 bg-zinc-800 border border-zinc-700 text-white rounded-xl font-medium btn-scale hover:bg-zinc-700 transition-colors"
+                  >
+                    <X size={18} />
+                    Cancelar
+                  </button>
+                </div>
+              ) : (
+                <div className="flex lg:hidden items-center gap-2 w-full min-w-0">
+                  <button
+                    onClick={() => setShowShareDialog(true)}
+                    data-testid="share-project-btn-mobile"
+                    className="flex flex-1 min-w-0 items-center justify-center gap-2 px-4 py-2 bg-white text-black rounded-xl font-medium btn-scale hover:bg-zinc-200 transition-colors"
+                  >
+                    <Share2 size={18} className="shrink-0" />
+                    Compartilhar
+                  </button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        type="button"
+                        data-testid="project-more-menu-btn"
+                        aria-label="Mais opções do projeto"
+                        className="flex shrink-0 items-center justify-center p-2 px-3 bg-zinc-800 border border-zinc-700 text-white rounded-xl font-medium btn-scale hover:bg-zinc-700 transition-colors"
+                      >
+                        <MoreHorizontal size={20} />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="end"
+                      side="bottom"
+                      sideOffset={8}
+                      collisionPadding={16}
+                      className="w-52 min-w-0 max-w-[min(13rem,calc(100vw-2rem))] rounded-xl border-zinc-800 bg-zinc-900 p-1 text-zinc-300 shadow-xl z-50"
+                      data-testid="project-more-menu-content"
+                    >
+                      <DropdownMenuItem
+                        className={PROJECT_MENU_ITEM_CLASS}
+                        onSelect={startEditing}
+                        data-testid="edit-project-menu-item"
+                      >
+                        <Pencil size={16} />
+                        Editar projeto
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className={`${PROJECT_MENU_ITEM_CLASS} text-red-400 focus:text-red-300`}
+                        onSelect={() => setShowDeleteDialog(true)}
+                        data-testid="delete-project-menu-item"
+                      >
+                        <Trash2 size={16} />
+                        Excluir projeto
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
             </div>
 
             {project.clientName && !isEditing && (
-              <p className="text-sm text-zinc-400 mb-3" data-testid="project-client">
+              <p
+                className="hidden lg:block text-sm text-zinc-400 mb-3"
+                data-testid="project-client"
+              >
                 Cliente: {project.clientName}
               </p>
             )}
@@ -565,7 +712,10 @@ export const ProjectDetail = () => {
                 className="w-full px-4 py-3 bg-zinc-900 border border-zinc-700 rounded-xl text-white focus:outline-none focus:ring-1 focus:ring-white resize-none"
               />
             ) : (
-              <p className="text-base text-zinc-300 leading-relaxed" data-testid="project-description">
+              <p
+                className="hidden lg:block text-base text-zinc-300 leading-relaxed"
+                data-testid="project-description"
+              >
                 {project.description || 'Sem descrição.'}
               </p>
             )}
@@ -592,7 +742,7 @@ export const ProjectDetail = () => {
           className="sr-only"
           data-testid="add-image-input"
         />
-        {!canUploadImage && (
+        {/* {!canUploadImage && (
           <div className="mb-6">
             <UpgradePrompt
               variant="limit"
@@ -600,7 +750,7 @@ export const ProjectDetail = () => {
               secondaryMessage="Faça upgrade para continuar enviando imagens."
             />
           </div>
-        )}
+        )} */}
 
         <SectionHeader
           title="Imagens panorâmicas"
@@ -651,6 +801,7 @@ export const ProjectDetail = () => {
                 }
                 onEdit={() => handleEditImage(image.id)}
                 onReplace={() => handleReplaceImageClick(image.id)}
+                onShare={() => handleShareImageClick(image.id)}
                 onMoveToLoose={() => handleMoveToLooseClick(image.id)}
                 onDelete={() => handleDeleteImageClick(image.id)}
                 dataTestId={`image-card-${image.id}`}
@@ -764,6 +915,14 @@ export const ProjectDetail = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ShareImageDialog
+        open={showShareImageDialog}
+        onOpenChange={setShowShareImageDialog}
+        image={imageToShare}
+        userId={user?.uid}
+        onVisibilitySaved={handleImageVisibilitySaved}
+      />
 
       <ShareProjectDialog
         open={showShareDialog}

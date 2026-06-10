@@ -277,7 +277,7 @@ export const Images = () => {
       {!canUploadImage && (
         <div className="mb-6">
           <UpgradePrompt
-            variant="limit"
+            variant="warning"
             message={`Você atingiu os limites do plano ${limits.displayName}.`}
             secondaryMessage="Faça upgrade para continuar enviando imagens."
           />

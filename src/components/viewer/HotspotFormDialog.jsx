@@ -46,6 +46,8 @@ export function HotspotFormDialog({
   initialTargetImageId = "",
   currentImageId = "",
   projectImages = [],
+  sceneHotspotsEnabled = true,
+  lockHotspotType = false,
   isSaving = false,
   error = "",
   onSubmit,
@@ -61,12 +63,18 @@ export function HotspotFormDialog({
     [projectImages, currentImageId],
   );
 
-  const isScene = hotspotType === HOTSPOT_TYPE_SCENE;
+  const isScene =
+    sceneHotspotsEnabled && hotspotType === HOTSPOT_TYPE_SCENE;
   const isEdit = mode === "edit";
+  const showTypeSelect = !isEdit && sceneHotspotsEnabled && !lockHotspotType;
 
   useEffect(() => {
     if (open) {
-      setHotspotType(initialType === HOTSPOT_TYPE_SCENE ? HOTSPOT_TYPE_SCENE : HOTSPOT_TYPE_INFO);
+      const resolvedType =
+        sceneHotspotsEnabled && initialType === HOTSPOT_TYPE_SCENE
+          ? HOTSPOT_TYPE_SCENE
+          : HOTSPOT_TYPE_INFO;
+      setHotspotType(resolvedType);
       setTitle(initialTitle);
       setDescription(initialDescription);
       setTargetImageId(initialTargetImageId);
@@ -77,6 +85,7 @@ export function HotspotFormDialog({
     initialTitle,
     initialDescription,
     initialTargetImageId,
+    sceneHotspotsEnabled,
   ]);
 
   const handleOpenChange = (nextOpen) => {
@@ -141,7 +150,7 @@ export function HotspotFormDialog({
           </DialogHeader>
 
           <div className="min-w-0 flex-1 space-y-4 overflow-x-hidden overflow-y-auto py-2">
-            {!isEdit && (
+            {showTypeSelect && (
               <div className="min-w-0 w-full">
                 <label
                   htmlFor="hotspot-type"

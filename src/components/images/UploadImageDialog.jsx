@@ -1,12 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AlertTriangle, ImagePlus, Loader2 } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { AppModal } from "@/components/common/AppModal";
 import { IMAGE_ACCEPT, LOW_QUALITY_WARNING_MESSAGE } from "@/utils/imageConstants";
 import {
   formatFileSize,
@@ -225,27 +219,39 @@ export const UploadImageDialog = ({
     !error;
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent
-        className="bg-zinc-900 border-zinc-800 text-white sm:max-w-lg"
-        data-testid="upload-image-dialog"
-        onPointerDownOutside={(event) => {
-          if (isProcessing) {
-            event.preventDefault();
-          }
-        }}
-        onEscapeKeyDown={(event) => {
-          if (isProcessing) {
-            event.preventDefault();
-          }
-        }}
-      >
-        <DialogHeader>
-          <DialogTitle className="text-white">Nova imagem</DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-4">
-          <div className="space-y-2">
+    <AppModal
+      open={open}
+      onOpenChange={handleOpenChange}
+      title="Nova imagem"
+      size="lg"
+      testId="upload-image-dialog"
+      dismissLocked={isProcessing}
+      bodyClassName="space-y-4 min-w-0"
+      footer={
+        <>
+          <button
+            type="button"
+            onClick={handleCancel}
+            disabled={isProcessing}
+            data-testid="upload-image-cancel-btn"
+            className="px-4 py-2 bg-zinc-800 border border-zinc-700 text-white rounded-xl font-medium btn-scale hover:bg-zinc-700 transition-colors disabled:opacity-50"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={!canSave}
+            data-testid="upload-image-save-btn"
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-white text-black rounded-xl font-medium btn-scale hover:bg-zinc-200 transition-colors disabled:opacity-50"
+          >
+            {isProcessing && <Loader2 size={16} className="animate-spin" />}
+            {isProcessing ? "Processando..." : "Salvar"}
+          </button>
+        </>
+      }
+    >
+          <div className="space-y-2 min-w-0">
             <div className="relative w-full h-48 bg-zinc-800 border border-zinc-700 rounded-xl overflow-hidden">
               {isLoadingPreview ? (
                 <div className="flex items-center justify-center h-full">
@@ -297,20 +303,20 @@ export const UploadImageDialog = ({
 
           {imageMeta && !isLoadingPreview && (
             <dl
-              className="grid grid-cols-3 gap-3 text-xs"
+              className="grid grid-cols-3 gap-3 text-xs min-w-0"
               data-testid="upload-image-meta"
             >
-              <div>
+              <div className="min-w-0">
                 <dt className="text-zinc-500 mb-0.5">Formato</dt>
                 <dd className="text-zinc-300">{imageMeta.format}</dd>
               </div>
-              <div>
+              <div className="min-w-0">
                 <dt className="text-zinc-500 mb-0.5">Tamanho</dt>
                 <dd className="text-zinc-300">
                   {formatFileSize(imageMeta.sizeBytes)}
                 </dd>
               </div>
-              <div>
+              <div className="min-w-0">
                 <dt className="text-zinc-500 mb-0.5">Resolução</dt>
                 <dd className="text-zinc-300">
                   {imageMeta.width} × {imageMeta.height}
@@ -369,34 +375,10 @@ export const UploadImageDialog = ({
           )}
 
           {error && (
-            <p className="text-sm text-red-400" data-testid="upload-image-error">
+            <p className="text-sm text-red-400 break-words" data-testid="upload-image-error">
               {error}
             </p>
           )}
-        </div>
-
-        <DialogFooter className="gap-2 sm:gap-0">
-          <button
-            type="button"
-            onClick={handleCancel}
-            disabled={isProcessing}
-            data-testid="upload-image-cancel-btn"
-            className="px-4 py-2 bg-zinc-800 border border-zinc-700 text-white rounded-xl font-medium btn-scale hover:bg-zinc-700 transition-colors disabled:opacity-50"
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={!canSave}
-            data-testid="upload-image-save-btn"
-            className="flex items-center gap-2 px-4 py-2 bg-white text-black rounded-xl font-medium btn-scale hover:bg-zinc-200 transition-colors disabled:opacity-50"
-          >
-            {isProcessing && <Loader2 size={16} className="animate-spin" />}
-            {isProcessing ? "Processando..." : "Salvar"}
-          </button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    </AppModal>
   );
 };

@@ -1,6 +1,6 @@
 /** Resolução mínima recomendada para imagens panorâmicas 360° (equirectangular 2:1). */
-export const MIN_RECOMMENDED_WIDTH = 4096;
-export const MIN_RECOMMENDED_HEIGHT = 2048;
+export const MIN_RECOMMENDED_WIDTH = 3000;
+export const MIN_RECOMMENDED_HEIGHT = 1500;
 
 export const ALLOWED_IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "webp"];
 

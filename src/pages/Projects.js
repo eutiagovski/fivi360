@@ -74,7 +74,7 @@ export const Projects = () => {
       {!canCreateProject && (
         <div className="mb-6">
           <UpgradePrompt
-            variant="limit"
+            variant="warning"
             message={`Você atingiu o limite de projetos do plano ${limits.displayName}.`}
             secondaryMessage="Faça upgrade para criar projetos ilimitados."
           />

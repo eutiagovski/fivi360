@@ -1,12 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AlertTriangle, Loader2, RefreshCw } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { AppModal } from "@/components/common/AppModal";
 import { IMAGE_ACCEPT, LOW_QUALITY_WARNING_MESSAGE } from "@/utils/imageConstants";
 import {
   formatFileSize,
@@ -304,27 +298,39 @@ export const EditImageDialog = ({
   const displayMeta = hasNewFile && imageMeta ? imageMeta : showExistingMeta ? existingMeta : null;
 
   return (
-    <Dialog open={open} onOpenChange={handleDialogOpenChange}>
-      <DialogContent
-        className="bg-zinc-900 border-zinc-800 text-white w-[calc(100%-2rem)] max-w-lg max-h-[90vh] overflow-y-auto"
-        data-testid="edit-image-dialog"
-        onPointerDownOutside={(event) => {
-          if (isProcessing) {
-            event.preventDefault();
-          }
-        }}
-        onEscapeKeyDown={(event) => {
-          if (isProcessing) {
-            event.preventDefault();
-          }
-        }}
-      >
-        <DialogHeader>
-          <DialogTitle className="text-white">Editar imagem</DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-4 min-w-0">
-          <div className="space-y-2">
+    <AppModal
+      open={open}
+      onOpenChange={handleDialogOpenChange}
+      title="Editar imagem"
+      size="lg"
+      testId="edit-image-dialog"
+      dismissLocked={isProcessing}
+      bodyClassName="space-y-4 min-w-0"
+      footer={
+        <>
+          <button
+            type="button"
+            onClick={handleCancel}
+            disabled={isProcessing}
+            data-testid="edit-image-cancel-btn"
+            className="px-4 py-2 bg-zinc-800 border border-zinc-700 text-white rounded-xl font-medium btn-scale hover:bg-zinc-700 transition-colors disabled:opacity-50"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={!canSave}
+            data-testid="edit-image-save-btn"
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-white text-black rounded-xl font-medium btn-scale hover:bg-zinc-200 transition-colors disabled:opacity-50"
+          >
+            {isProcessing && <Loader2 size={16} className="animate-spin" />}
+            {isProcessing ? "Salvando..." : "Salvar alterações"}
+          </button>
+        </>
+      }
+    >
+          <div className="space-y-2 min-w-0">
             <div className="relative w-full h-48 bg-zinc-800 border border-zinc-700 rounded-xl overflow-hidden">
               {isLoadingPreview ? (
                 <div className="flex items-center justify-center h-full">
@@ -462,34 +468,10 @@ export const EditImageDialog = ({
           )}
 
           {error && (
-            <p className="text-sm text-red-400" data-testid="edit-image-error">
+            <p className="text-sm text-red-400 break-words" data-testid="edit-image-error">
               {error}
             </p>
           )}
-        </div>
-
-        <DialogFooter className="gap-2 sm:gap-0">
-          <button
-            type="button"
-            onClick={handleCancel}
-            disabled={isProcessing}
-            data-testid="edit-image-cancel-btn"
-            className="px-4 py-2 bg-zinc-800 border border-zinc-700 text-white rounded-xl font-medium btn-scale hover:bg-zinc-700 transition-colors disabled:opacity-50"
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={!canSave}
-            data-testid="edit-image-save-btn"
-            className="flex items-center gap-2 px-4 py-2 bg-white text-black rounded-xl font-medium btn-scale hover:bg-zinc-200 transition-colors disabled:opacity-50"
-          >
-            {isProcessing && <Loader2 size={16} className="animate-spin" />}
-            {isProcessing ? "Salvando..." : "Salvar alterações"}
-          </button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    </AppModal>
   );
 };

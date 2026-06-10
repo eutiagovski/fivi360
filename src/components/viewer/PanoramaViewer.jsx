@@ -1,7 +1,9 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import "pannellum/build/pannellum.css";
 import "@/components/viewer/panorama-viewer.css";
 import { mapHotspotsToPannellum } from "@/utils/hotspotPannellum";
+
+const CONTEXT_MENU_DEBUG = process.env.NODE_ENV === "development";
 
 /**
  * Viewer 360° com Pannellum (equirectangular) e hotspots (info e scene).
@@ -12,6 +14,7 @@ import { mapHotspotsToPannellum } from "@/utils/hotspotPannellum";
  *   hotspots?: import("@/services/hotspots/hotspotService").Hotspot[],
  *   placementMode?: boolean,
  *   onPlacementClick?: (coords: { pitch: number, yaw: number }) => void,
+ *   onPanoramaContextMenu?: (payload: { pitch: number, yaw: number, clientX: number, clientY: number }) => void,
  *   onInfoHotspotClick?: (hotspot: import("@/services/hotspots/hotspotService").InfoHotspot) => void,
  *   onSceneHotspotClick?: (hotspot: import("@/services/hotspots/hotspotService").SceneHotspot) => void,
  *   getSceneHotspotLabel?: (hotspot: import("@/services/hotspots/hotspotService").SceneHotspot) => string,
@@ -23,22 +26,34 @@ export function PanoramaViewer({
   hotspots = [],
   placementMode = false,
   onPlacementClick,
+  onPanoramaContextMenu,
   onInfoHotspotClick,
   onSceneHotspotClick,
   getSceneHotspotLabel,
 }) {
   const containerRef = useRef(null);
   const viewerRef = useRef(null);
+  const [viewerReady, setViewerReady] = useState(false);
   const renderedHotspotIdsRef = useRef([]);
   const onInfoHotspotClickRef = useRef(onInfoHotspotClick);
   const onSceneHotspotClickRef = useRef(onSceneHotspotClick);
   const getSceneHotspotLabelRef = useRef(getSceneHotspotLabel);
   const onPlacementClickRef = useRef(onPlacementClick);
+  const onPanoramaContextMenuRef = useRef(onPanoramaContextMenu);
 
   onInfoHotspotClickRef.current = onInfoHotspotClick;
   onSceneHotspotClickRef.current = onSceneHotspotClick;
   getSceneHotspotLabelRef.current = getSceneHotspotLabel;
   onPlacementClickRef.current = onPlacementClick;
+  onPanoramaContextMenuRef.current = onPanoramaContextMenu;
+
+  const mouseEventToCoords = useCallback((viewer, event) => {
+    const coords = viewer?.mouseEventToCoords?.(event);
+    if (!coords || coords.length < 2) {
+      return null;
+    }
+    return { pitch: coords[0], yaw: coords[1] };
+  }, []);
 
   const mapToPannellum = useCallback(
     (hotspotList) =>
@@ -80,6 +95,7 @@ export function PanoramaViewer({
     }
 
     let cancelled = false;
+    setViewerReady(false);
 
     async function initViewer() {
       await import("pannellum/build/pannellum.js");
@@ -116,6 +132,10 @@ export function PanoramaViewer({
         .filter(Boolean);
 
       viewerRef.current.on("load", () => {
+        if (cancelled) {
+          return;
+        }
+        setViewerReady(true);
         syncHotspots(viewerRef.current, hotspots);
       });
     }
@@ -124,6 +144,7 @@ export function PanoramaViewer({
 
     return () => {
       cancelled = true;
+      setViewerReady(false);
       viewerRef.current?.destroy?.();
       viewerRef.current = null;
       renderedHotspotIdsRef.current = [];
@@ -171,15 +192,12 @@ export function PanoramaViewer({
         return;
       }
 
-      const coords = viewer.mouseEventToCoords?.(event);
-      if (!coords || coords.length < 2) {
+      const coords = mouseEventToCoords(viewer, event);
+      if (!coords) {
         return;
       }
 
-      onPlacementClickRef.current({
-        pitch: coords[0],
-        yaw: coords[1],
-      });
+      onPlacementClickRef.current(coords);
     };
 
     viewer.on("mousedown", handleMouseDown);
@@ -189,7 +207,53 @@ export function PanoramaViewer({
       viewer.off?.("mousedown", handleMouseDown);
       viewer.off?.("mouseup", handleMouseUp);
     };
-  }, [placementMode, panoramaUrl]);
+  }, [placementMode, panoramaUrl, mouseEventToCoords]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    const viewer = viewerRef.current;
+    if (!container || !viewer || !viewerReady) {
+      return undefined;
+    }
+
+    const handleContextMenu = (event) => {
+      if (!onPanoramaContextMenuRef.current) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (CONTEXT_MENU_DEBUG) {
+        console.log("[contextmenu] right click detected");
+      }
+
+      const coords = mouseEventToCoords(viewer, event);
+      if (!coords) {
+        if (CONTEXT_MENU_DEBUG) {
+          console.log("[contextmenu] coords unavailable");
+        }
+        return;
+      }
+
+      if (CONTEXT_MENU_DEBUG) {
+        console.log("[contextmenu] coords", coords);
+      }
+
+      onPanoramaContextMenuRef.current({
+        ...coords,
+        clientX: event.clientX,
+        clientY: event.clientY,
+      });
+    };
+
+    // Capture no container raiz (.pnlm-container) antes do handler do Pannellum em .pnlm-dragfix
+    container.addEventListener("contextmenu", handleContextMenu, true);
+
+    return () => {
+      container.removeEventListener("contextmenu", handleContextMenu, true);
+    };
+  }, [panoramaUrl, viewerReady, mouseEventToCoords]);
 
   return (
     <div
