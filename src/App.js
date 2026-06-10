@@ -13,9 +13,13 @@ import { Settings } from './pages/Settings';
 import { Plan } from './pages/Plan';
 import { Help } from './pages/Help';
 import { Images } from './pages/Images';
-import { PublicProject } from './pages/PublicProject';
-import { PublicImage } from './pages/PublicImage';
+import { PublicSharedProject } from './pages/PublicSharedProject';
+import { PublicSharedProjectImage } from './pages/PublicSharedProjectImage';
+import { PublicStandaloneImage } from './pages/PublicStandaloneImage';
+import { LegacyShareImageRedirect } from './pages/LegacyShareImageRedirect';
 import { PublicPortfolio } from './pages/PublicPortfolio';
+import { PublicPortfolioProject } from './pages/PublicPortfolioProject';
+import { PublicPortfolioImage } from './pages/PublicPortfolioImage';
 import { Login } from './pages/Login';
 import { SignUp } from './pages/SignUp';
 import { ForgotPassword } from './pages/ForgotPassword';
@@ -35,9 +39,20 @@ function App() {
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
           <Route path="/register" element={<PublicRoute><SignUp /></PublicRoute>} />
           <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
-          <Route path="/share/project/:id" element={<PublicProject />} />
-          <Route path="/share/image/:imageId" element={<PublicImage />} />
+
+          {/* Portfólio público */}
           <Route path="/u/:slug" element={<PublicPortfolio />} />
+          <Route path="/u/:slug/project/:projectId" element={<PublicPortfolioProject />} />
+          <Route path="/u/:slug/project/:projectId/image/:imageId" element={<PublicPortfolioImage />} />
+
+          {/* Compartilhamento direto */}
+          <Route path="/share/project/:projectId" element={<PublicSharedProject />} />
+          <Route path="/share/project/:projectId/image/:imageId" element={<PublicSharedProjectImage />} />
+          <Route path="/share/standalone/:imageId" element={<PublicStandaloneImage />} />
+
+          {/* Compatibilidade com rotas antigas */}
+          <Route path="/share/image/:imageId" element={<LegacyShareImageRedirect />} />
+
           <Route path="/termos" element={<TermsOfUse />} />
           <Route path="/privacidade" element={<PrivacyPolicy />} />
           <Route path="/" element={<LandingRoute><Landing /></LandingRoute>} />

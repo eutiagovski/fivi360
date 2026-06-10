@@ -45,7 +45,7 @@ export function ShareImageDialog({
 
   const savedVisibility =
     image.visibility === "public" ? "shared" : (image.visibility ?? "private");
-  const shareUrl = buildShareImageUrl(image.id);
+  const shareUrl = buildShareImageUrl(image);
   const selectedOption = imageVisibilityOptions.find(
     (o) => o.value === visibility,
   );

@@ -1,79 +1,48 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
-import { Loader2 } from "lucide-react";
+import { Link, useParams } from "react-router-dom";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { SectionHeader } from "@/components/common/SectionHeader";
 import { ImageCard } from "@/components/common/ImageCard";
 import {
   hasProjectCover,
   ProjectCoverPlaceholder,
 } from "@/components/common/ProjectCoverPlaceholder";
+import {
+  PublicPageMessage,
+  PublicPageShell,
+} from "@/components/public/PublicPageShell";
 import { PublicSocialLinks } from "@/components/public/PublicSocialLinks";
 import { getProjectById } from "@/services/projects/projectService";
 import {
   getImagesByProjectIdPublic,
   mapImageToCard,
 } from "@/services/images/imageService";
-import { getPublicUserById } from "@/services/users/userService";
-import { isPubliclyAccessible } from "@/utils/visibility";
+import { resolveSlugToUid } from "@/services/slugs/slugService";
+import { getPublicUserBySlug } from "@/services/users/userService";
+import {
+  canAccessPortfolioProject,
+} from "@/utils/publicAccess";
+import { isPortfolioPubliclyAvailable } from "@/utils/portfolio";
+import { isValidSlugFormat, normalizeSlug } from "@/utils/slug";
 
-function PublicPageShell({ children }) {
-  return (
-    <div className="min-h-screen bg-[#050505] fade-in">
-      <header className="border-b border-zinc-800 p-6">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <h1
-            className="text-2xl font-light tracking-tighter text-white"
-            data-testid="public-logo"
-          >
-            FIVI<span className="font-medium">360</span>
-          </h1>
-        </div>
-      </header>
-      <main className="max-w-7xl mx-auto p-8 md:p-12 lg:p-16">{children}</main>
-      <footer className="border-t border-zinc-800 mt-16 p-6">
-        <div className="max-w-7xl mx-auto text-center">
-          <p className="text-sm text-zinc-500">
-            Powered by <span className="text-white font-medium">FIVI360</span>
-          </p>
-        </div>
-      </footer>
-    </div>
-  );
-}
-
-function PublicMessage({ title, description, dataTestId }) {
-  return (
-    <PublicPageShell>
-      <div className="flex flex-col items-center justify-center py-24 text-center">
-        <h1
-          className="text-3xl sm:text-4xl font-light tracking-tighter text-white mb-4"
-          data-testid={dataTestId}
-        >
-          {title}
-        </h1>
-        {description && (
-          <p className="text-base text-zinc-400 max-w-md">{description}</p>
-        )}
-      </div>
-    </PublicPageShell>
-  );
-}
-
-export const PublicProject = () => {
-  const { id } = useParams();
+export const PublicPortfolioProject = () => {
+  const { slug: rawSlug, projectId } = useParams();
   const [state, setState] = useState({
     loading: true,
     error: null,
     project: null,
     owner: null,
     images: [],
+    slug: "",
   });
 
   useEffect(() => {
     let cancelled = false;
 
     async function load() {
-      if (!id) {
+      const slug = normalizeSlug(rawSlug ?? "");
+
+      if (!projectId || !slug || !isValidSlugFormat(slug)) {
         if (!cancelled) {
           setState({
             loading: false,
@@ -81,6 +50,7 @@ export const PublicProject = () => {
             project: null,
             owner: null,
             images: [],
+            slug,
           });
         }
         return;
@@ -92,10 +62,47 @@ export const PublicProject = () => {
         project: null,
         owner: null,
         images: [],
+        slug,
       });
 
       try {
-        const project = await getProjectById(id);
+        const ownerUserId = await resolveSlugToUid(slug);
+
+        if (!ownerUserId) {
+          if (!cancelled) {
+            setState({
+              loading: false,
+              error: "not_found",
+              project: null,
+              owner: null,
+              images: [],
+              slug,
+            });
+          }
+          return;
+        }
+
+        const owner = await getPublicUserBySlug(slug);
+
+        if (
+          !owner ||
+          owner.id !== ownerUserId ||
+          !isPortfolioPubliclyAvailable(owner)
+        ) {
+          if (!cancelled) {
+            setState({
+              loading: false,
+              error: "unavailable",
+              project: null,
+              owner: null,
+              images: [],
+              slug,
+            });
+          }
+          return;
+        }
+
+        const project = await getProjectById(projectId);
 
         if (cancelled) {
           return;
@@ -108,25 +115,24 @@ export const PublicProject = () => {
             project: null,
             owner: null,
             images: [],
+            slug,
           });
           return;
         }
 
-        if (!isPubliclyAccessible(project.visibility)) {
+        if (!canAccessPortfolioProject(project, ownerUserId)) {
           setState({
             loading: false,
-            error: "private",
+            error: "unavailable",
             project: null,
             owner: null,
             images: [],
+            slug,
           });
           return;
         }
 
-        const [owner, images] = await Promise.all([
-          getPublicUserById(project.userId).catch(() => null),
-          getImagesByProjectIdPublic(project.id),
-        ]);
+        const images = await getImagesByProjectIdPublic(project.id);
 
         if (cancelled) {
           return;
@@ -138,6 +144,7 @@ export const PublicProject = () => {
           project,
           owner,
           images,
+          slug,
         });
       } catch {
         if (!cancelled) {
@@ -147,6 +154,7 @@ export const PublicProject = () => {
             project: null,
             owner: null,
             images: [],
+            slug,
           });
         }
       }
@@ -157,7 +165,7 @@ export const PublicProject = () => {
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [rawSlug, projectId]);
 
   const cardImages = useMemo(
     () => state.images.map(mapImageToCard),
@@ -169,7 +177,7 @@ export const PublicProject = () => {
       <PublicPageShell>
         <div
           className="flex flex-col items-center justify-center py-24 gap-4"
-          data-testid="public-project-loading"
+          data-testid="portfolio-project-loading"
         >
           <Loader2 size={32} className="animate-spin text-zinc-400" />
           <p className="text-sm text-zinc-400">Carregando projeto...</p>
@@ -180,35 +188,35 @@ export const PublicProject = () => {
 
   if (state.error === "not_found") {
     return (
-      <PublicMessage
+      <PublicPageMessage
         title="Projeto não encontrado"
         description="Este link pode estar incorreto ou o projeto foi removido."
-        dataTestId="public-project-not-found"
+        dataTestId="portfolio-project-not-found"
       />
     );
   }
 
-  if (state.error === "private") {
+  if (state.error === "unavailable") {
     return (
-      <PublicMessage
+      <PublicPageMessage
         title="Este projeto não está disponível"
-        description="O proprietário definiu este projeto como privado."
-        dataTestId="public-project-unavailable"
+        description="O projeto não faz parte deste portfólio ou não é público."
+        dataTestId="portfolio-project-unavailable"
       />
     );
   }
 
   if (state.error === "load_failed" || !state.project) {
     return (
-      <PublicMessage
+      <PublicPageMessage
         title="Não foi possível carregar o projeto"
         description="Tente novamente em alguns instantes."
-        dataTestId="public-project-error"
+        dataTestId="portfolio-project-error"
       />
     );
   }
 
-  const { project, owner } = state;
+  const { project, owner, slug } = state;
   const hasCover = hasProjectCover(project.coverImage);
   const officeName =
     owner?.companyName?.trim() || owner?.name?.trim() || "";
@@ -216,6 +224,17 @@ export const PublicProject = () => {
 
   return (
     <PublicPageShell>
+      <div className="mb-8">
+        <Link
+          to={`/u/${slug}`}
+          className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors mb-8"
+          data-testid="portfolio-back-to-list"
+        >
+          <ArrowLeft size={16} />
+          Voltar ao portfólio
+        </Link>
+      </div>
+
       <div className="mb-12">
         <div className="relative mb-8">
           {hasCover ? (
@@ -224,20 +243,20 @@ export const PublicProject = () => {
                 src={project.coverImage}
                 alt={project.title}
                 className="w-full h-full object-cover"
-                data-testid="public-project-cover"
+                data-testid="portfolio-project-cover"
               />
             </div>
           ) : (
             <ProjectCoverPlaceholder
               variant="hero"
-              dataTestId="public-project-cover-empty"
+              dataTestId="portfolio-project-cover-empty"
             />
           )}
         </div>
 
         <h1
           className="text-4xl sm:text-5xl lg:text-6xl font-light tracking-tighter text-white mb-4"
-          data-testid="public-project-name"
+          data-testid="portfolio-project-name"
         >
           {project.title}
         </h1>
@@ -245,7 +264,7 @@ export const PublicProject = () => {
         {project.clientName && (
           <p
             className="text-sm text-zinc-400 mb-2"
-            data-testid="public-project-client"
+            data-testid="portfolio-project-client"
           >
             Cliente: {project.clientName}
           </p>
@@ -253,7 +272,7 @@ export const PublicProject = () => {
 
         <p
           className="text-lg text-zinc-300 leading-relaxed max-w-3xl"
-          data-testid="public-project-description"
+          data-testid="portfolio-project-description"
         >
           {project.description || "Sem descrição."}
         </p>
@@ -262,20 +281,20 @@ export const PublicProject = () => {
           <div className="mt-8 pt-8 border-t border-zinc-800 max-w-2xl">
             <p
               className="text-sm text-zinc-500 mb-1"
-              data-testid="public-project-office-label"
+              data-testid="portfolio-project-office-label"
             >
               Escritório
             </p>
             <h2
               className="text-xl font-light text-white mb-2"
-              data-testid="public-project-office-name"
+              data-testid="portfolio-project-office-name"
             >
               {officeName}
             </h2>
             {officeBio && (
               <p
                 className="text-base text-zinc-400 leading-relaxed"
-                data-testid="public-project-office-bio"
+                data-testid="portfolio-project-office-bio"
               >
                 {officeBio}
               </p>
@@ -288,13 +307,13 @@ export const PublicProject = () => {
       <div>
         <SectionHeader
           title={`Imagens panorâmicas (${cardImages.length})`}
-          dataTestId="public-project-images-title"
+          dataTestId="portfolio-project-images-title"
         />
 
         {cardImages.length === 0 ? (
           <div
             className="text-center py-16 bg-zinc-900/50 border border-zinc-800 rounded-2xl"
-            data-testid="public-project-images-empty"
+            data-testid="portfolio-project-images-empty"
           >
             <p className="text-zinc-400">
               Nenhuma imagem disponível neste projeto.
@@ -303,15 +322,15 @@ export const PublicProject = () => {
         ) : (
           <div
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-            data-testid="public-project-images-grid"
+            data-testid="portfolio-project-images-grid"
           >
             {cardImages.map((image) => (
               <ImageCard
                 key={image.id}
                 image={image}
-                href={`/share/image/${image.id}`}
+                href={`/u/${slug}/project/${project.id}/image/${image.id}`}
                 variant="public"
-                dataTestId={`public-image-card-${image.id}`}
+                dataTestId={`portfolio-image-card-${image.id}`}
               />
             ))}
           </div>

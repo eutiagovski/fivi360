@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { PanoramaViewer } from "@/components/viewer/PanoramaViewer";
 import { ViewerPageHeader } from "@/components/viewer/ViewerPageHeader";
@@ -15,8 +15,30 @@ const ERROR_MESSAGES = {
   load_failed: "Não foi possível carregar o panorama.",
 };
 
-export const PublicImage = () => {
-  const { imageId } = useParams();
+/**
+ * @param {{
+ *   imageId: string | undefined,
+ *   accessMode: import("@/hooks/usePublicViewerImage").PublicViewerAccessMode | 'shared-project' | 'standalone' | 'portfolio',
+ *   expectedProjectId?: string,
+ *   portfolioSlug?: string,
+ *   backHref?: string,
+ *   backLabel?: string,
+ *   imageNavBasePath?: string,
+ *   buildImagePath?: (targetImageId: string) => string,
+ *   subtitle?: string,
+ * }} props
+ */
+export function PublicImageViewer({
+  imageId,
+  accessMode,
+  expectedProjectId,
+  portfolioSlug,
+  backHref,
+  backLabel = "Voltar ao projeto",
+  imageNavBasePath,
+  buildImagePath,
+  subtitle,
+}) {
   const navigate = useNavigate();
   const {
     image,
@@ -27,19 +49,19 @@ export const PublicImage = () => {
     isProjectContext,
     loading,
     error,
-  } = usePublicViewerImage(imageId);
+  } = usePublicViewerImage(imageId, {
+    accessMode,
+    expectedProjectId,
+    portfolioSlug,
+  });
   const { hotspots } = useHotspots(imageId);
 
   const [infoHotspot, setInfoHotspot] = useState(null);
 
   const panoramaUrl = image?.originalUrl || image?.previewUrl || "";
-  const backHref = isProjectContext
-    ? `/share/project/${image?.projectId ?? project.id}`
-    : undefined;
-  const backLabel = isProjectContext ? "Voltar ao projeto" : undefined;
-  const subtitle = isProjectContext
-    ? project?.title || "Projeto"
-    : "Imagem compartilhada";
+  const resolvedSubtitle =
+    subtitle ??
+    (isProjectContext ? project?.title || "Projeto" : "Imagem compartilhada");
 
   const visibleHotspots = useMemo(
     () =>
@@ -61,13 +83,28 @@ export const PublicImage = () => {
     [projectImages],
   );
 
+  const resolveImagePath = useCallback(
+    (targetImageId) => {
+      if (buildImagePath) {
+        return buildImagePath(targetImageId);
+      }
+
+      if (imageNavBasePath) {
+        return `${imageNavBasePath}/${targetImageId}`;
+      }
+
+      return `/share/standalone/${targetImageId}`;
+    },
+    [buildImagePath, imageNavBasePath],
+  );
+
   const handleSceneHotspotClick = useCallback(
     (hotspot) => {
       if (hotspot.targetImageId) {
-        navigate(`/share/image/${hotspot.targetImageId}`);
+        navigate(resolveImagePath(hotspot.targetImageId));
       }
     },
-    [navigate],
+    [navigate, resolveImagePath],
   );
 
   if (loading) {
@@ -91,7 +128,7 @@ export const PublicImage = () => {
         <p className="text-lg text-white text-center">
           {ERROR_MESSAGES[error] ?? ERROR_MESSAGES.load_failed}
         </p>
-        {isProjectContext ? (
+        {isProjectContext && backHref ? (
           <Link
             to={backHref}
             className="flex items-center gap-2 px-4 py-2 bg-black/60 backdrop-blur-xl border border-white/10 rounded-xl text-white hover:bg-black/80 transition-colors"
@@ -110,20 +147,20 @@ export const PublicImage = () => {
       data-testid="public-viewer-page"
     >
       <ViewerPageHeader
-        showBack={isProjectContext}
+        showBack={isProjectContext && Boolean(backHref)}
         backHref={backHref}
         backLabel={backLabel}
-        subtitle={subtitle}
+        subtitle={resolvedSubtitle}
         title={image?.title}
         backTestId="public-back-to-project"
         subtitleTestId="public-viewer-project-name"
         titleTestId="public-image-name"
       >
-        {isProjectContext ? (
+        {isProjectContext && imageNavBasePath ? (
           <ViewerNavControls
             previousImage={previousImage}
             nextImage={nextImage}
-            imageBasePath="/share/image"
+            imageBasePath={imageNavBasePath}
           />
         ) : null}
       </ViewerPageHeader>
@@ -165,4 +202,4 @@ export const PublicImage = () => {
       />
     </div>
   );
-};
+}

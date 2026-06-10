@@ -4,10 +4,20 @@ import {
   getImagesByProjectIdPublic,
 } from "@/services/images/imageService";
 import { getProjectById } from "@/services/projects/projectService";
+import { getPublicUserBySlug } from "@/services/users/userService";
+import { resolveSlugToUid } from "@/services/slugs/slugService";
+import { isPortfolioPubliclyAvailable } from "@/utils/portfolio";
 import {
-  canAccessPublicImage,
-  isProjectContextImageAccess,
+  canAccessPortfolioImage,
+  canAccessSharedProject,
+  canAccessSharedProjectImage,
+  canAccessStandaloneImage,
 } from "@/utils/publicAccess";
+import { isValidSlugFormat, normalizeSlug } from "@/utils/slug";
+
+/**
+ * @typedef {'shared-project' | 'standalone' | 'portfolio'} PublicViewerAccessMode
+ */
 
 /**
  * @typedef {'not_found' | 'unavailable' | 'load_failed'} PublicViewerImageError
@@ -17,6 +27,11 @@ import {
  * Carrega imagem e projeto para o viewer público, validando visibilidade.
  *
  * @param {string | undefined} imageId
+ * @param {{
+ *   accessMode?: PublicViewerAccessMode,
+ *   expectedProjectId?: string,
+ *   portfolioSlug?: string,
+ * }} [options]
  * @returns {{
  *   image: import("@/services/images/imageService").Image | null,
  *   project: import("@/services/projects/projectService").Project | null,
@@ -28,7 +43,13 @@ import {
  *   error: PublicViewerImageError | null,
  * }}
  */
-export function usePublicViewerImage(imageId) {
+export function usePublicViewerImage(imageId, options = {}) {
+  const {
+    accessMode = "shared-project",
+    expectedProjectId,
+    portfolioSlug,
+  } = options;
+
   const [image, setImage] = useState(null);
   const [project, setProject] = useState(null);
   const [projectImages, setProjectImages] = useState([]);
@@ -70,6 +91,14 @@ export function usePublicViewerImage(imageId) {
           return;
         }
 
+        if (
+          expectedProjectId &&
+          imageData.projectId !== expectedProjectId
+        ) {
+          setError("unavailable");
+          return;
+        }
+
         const projectData = imageData.projectId
           ? await getProjectById(imageData.projectId)
           : null;
@@ -78,15 +107,61 @@ export function usePublicViewerImage(imageId) {
           return;
         }
 
-        if (!canAccessPublicImage(imageData, projectData)) {
+        let hasAccess = false;
+        let projectContext = accessMode !== "standalone";
+
+        if (accessMode === "standalone") {
+          hasAccess = canAccessStandaloneImage(imageData);
+          projectContext = false;
+        } else if (accessMode === "shared-project") {
+          hasAccess =
+            Boolean(projectData) &&
+            canAccessSharedProject(projectData) &&
+            canAccessSharedProjectImage(imageData, projectData);
+          projectContext = hasAccess;
+        } else if (accessMode === "portfolio") {
+          const slug = normalizeSlug(portfolioSlug ?? "");
+
+          if (!slug || !isValidSlugFormat(slug)) {
+            setError("unavailable");
+            return;
+          }
+
+          const ownerUserId = await resolveSlugToUid(slug);
+
+          if (!ownerUserId) {
+            setError("unavailable");
+            return;
+          }
+
+          const owner = await getPublicUserBySlug(slug);
+
+          if (
+            !owner ||
+            owner.id !== ownerUserId ||
+            !isPortfolioPubliclyAvailable(owner)
+          ) {
+            setError("unavailable");
+            return;
+          }
+
+          hasAccess = canAccessPortfolioImage(
+            imageData,
+            projectData,
+            ownerUserId,
+          );
+          projectContext = hasAccess;
+        }
+
+        if (cancelled) {
+          return;
+        }
+
+        if (!hasAccess) {
           setError("unavailable");
           return;
         }
 
-        const projectContext = isProjectContextImageAccess(
-          imageData,
-          projectData,
-        );
         const imagesInProject = projectContext
           ? await getImagesByProjectIdPublic(imageData.projectId)
           : [];
@@ -124,7 +199,7 @@ export function usePublicViewerImage(imageId) {
     return () => {
       cancelled = true;
     };
-  }, [imageId]);
+  }, [imageId, accessMode, expectedProjectId, portfolioSlug]);
 
   const currentIndex = projectImages.findIndex((img) => img.id === imageId);
   const previousImage =

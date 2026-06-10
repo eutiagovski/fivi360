@@ -175,7 +175,7 @@ export const PublicPortfolio = () => {
                     <ProjectCard
                       key={project.id}
                       project={project}
-                      href={`/share/project/${project.id}`}
+                      href={`/u/${normalizeSlug(rawSlug ?? "")}/project/${project.id}`}
                       dataTestId={`portfolio-project-${project.id}`}
                     />
                   ))}
