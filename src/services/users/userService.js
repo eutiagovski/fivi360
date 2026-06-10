@@ -170,6 +170,18 @@ async function syncPublicProfile(userId, data) {
 }
 
 /**
+ * Mantém users/{uid}/public/profile e publicProfiles/{uid} em sincronia.
+ *
+ * @param {import("firebase/firestore").Transaction} transaction
+ * @param {string} userId
+ * @param {import("firebase/firestore").DocumentData} payload
+ */
+function setPublicProfileDocsInTransaction(transaction, userId, payload) {
+  transaction.set(publicProfileRef(userId), payload, { merge: true });
+  transaction.set(publicProfilesCollectionRef(userId), payload, { merge: true });
+}
+
+/**
  * Garante publicProfiles/{uid} para contas criadas antes da Sprint 13.3.
  * Só o owner pode ler users/{uid} — chamado em getUser (sessão autenticada).
  *
@@ -292,19 +304,28 @@ export async function getPublicUserById(userId) {
     return null;
   }
 
-  const topLevel = await getDoc(publicProfilesCollectionRef(userId));
+  const [topLevelSnap, nestedSnap] = await Promise.all([
+    getDoc(publicProfilesCollectionRef(userId)),
+    getDoc(publicProfileRef(userId)),
+  ]);
 
-  if (topLevel.exists()) {
-    return mapPublicProfileDoc(userId, topLevel.data());
+  const topLevelData = topLevelSnap.exists() ? topLevelSnap.data() : null;
+  const nestedData = nestedSnap.exists() ? nestedSnap.data() : null;
+
+  if (!topLevelData && !nestedData) {
+    return null;
   }
 
-  const nested = await getDoc(publicProfileRef(userId));
+  const source = topLevelData ?? nestedData;
+  const portfolioEnabled =
+    topLevelData && nestedData
+      ? topLevelData.portfolioEnabled === true && nestedData.portfolioEnabled === true
+      : source.portfolioEnabled === true;
 
-  if (nested.exists()) {
-    return mapPublicProfileDoc(userId, nested.data());
-  }
-
-  return null;
+  return mapPublicProfileDoc(userId, {
+    ...source,
+    portfolioEnabled,
+  });
 }
 
 /**
@@ -413,7 +434,7 @@ export async function saveUserSettings(userId, data, previousSlug = "") {
     await runTransaction(db, async (transaction) => {
       await syncSlugRegistryInTransaction(transaction, userId, normalizedSlug, oldSlug);
       transaction.update(userRef, userUpdates);
-      transaction.set(publicProfileRef(userId), publicProfilePayload, { merge: true });
+      setPublicProfileDocsInTransaction(transaction, userId, publicProfilePayload);
     });
   } else if (normalizedSlug) {
     await runTransaction(db, async (transaction) => {
@@ -430,11 +451,14 @@ export async function saveUserSettings(userId, data, previousSlug = "") {
       }
 
       transaction.update(userRef, userUpdates);
-      transaction.set(publicProfileRef(userId), publicProfilePayload, { merge: true });
+      setPublicProfileDocsInTransaction(transaction, userId, publicProfilePayload);
     });
   } else {
     await updateDoc(userRef, userUpdates);
-    await setDoc(publicProfileRef(userId), publicProfilePayload, { merge: true });
+    await Promise.all([
+      setDoc(publicProfileRef(userId), publicProfilePayload, { merge: true }),
+      setDoc(publicProfilesCollectionRef(userId), publicProfilePayload, { merge: true }),
+    ]);
   }
 
   return { publicSlug: normalizedSlug };

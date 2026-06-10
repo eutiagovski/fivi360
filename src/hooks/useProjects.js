@@ -4,6 +4,7 @@ import {
   getProjectsByUserId,
   mapProjectToCard,
 } from "@/services/projects/projectService";
+import { PROJECT_DELETED_EVENT } from "@/utils/dataSyncEvents";
 
 /**
  * Lista projetos do usuário autenticado.
@@ -34,6 +35,24 @@ export function useProjects() {
       setLoading(false);
     }
   }, [user?.uid]);
+
+  useEffect(() => {
+    const handleProjectDeleted = (event) => {
+      const { projectId } = event.detail ?? {};
+
+      if (!projectId) {
+        return;
+      }
+
+      setProjects((current) => current.filter((project) => project.id !== projectId));
+    };
+
+    window.addEventListener(PROJECT_DELETED_EVENT, handleProjectDeleted);
+
+    return () => {
+      window.removeEventListener(PROJECT_DELETED_EVENT, handleProjectDeleted);
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;

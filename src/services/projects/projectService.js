@@ -26,10 +26,16 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "@/config/firebase";
+import { getImagesByProjectId } from "@/services/images/imageService";
+import { deleteAllHotspotsForImage } from "@/services/hotspots/hotspotService";
 import {
   assertCanCreateProject,
   assertPublicVisibilityEnabled,
 } from "@/services/plans/planService";
+import {
+  collectImageStoragePaths,
+  deleteImageFilesTolerant,
+} from "@/services/storage/storageService";
 import { sortByRecency } from "@/utils/recencySort";
 import { visibilityToLabel } from "@/utils/visibility";
 
@@ -171,8 +177,87 @@ export async function updateProject(projectId, data) {
 }
 
 /**
- * Remove um projeto.
+ * @typedef {Object} DeleteProjectCascadeResult
+ * @property {number} deletedImageCount
+ * @property {number} deletedStorageBytes
+ * @property {number} deletedHotspotCount
+ * @property {string[]} imageIds
+ */
+
+/**
+ * Exclui projeto e todo o conteúdo vinculado: imagens, hotspots e arquivos no Storage.
  *
+ * Ordem: imagens (hotspots → storage → doc) → documento do projeto.
+ * Falhas no Storage não interrompem o fluxo; falhas no Firestore propagam erro.
+ *
+ * @param {string} projectId
+ * @param {string} userId
+ * @returns {Promise<DeleteProjectCascadeResult>}
+ */
+export async function deleteProjectCascade(projectId, userId) {
+  if (!projectId || !userId) {
+    throw new Error("Dados incompletos para excluir o projeto.");
+  }
+
+  const project = await getProjectById(projectId);
+
+  if (!project) {
+    throw new Error("Projeto não encontrado.");
+  }
+
+  if (project.userId !== userId) {
+    throw new Error("Sem permissão para excluir este projeto.");
+  }
+
+  const images = await getImagesByProjectId(projectId, userId);
+
+  let deletedImageCount = 0;
+  let deletedStorageBytes = 0;
+  let deletedHotspotCount = 0;
+
+  for (const image of images) {
+    deletedHotspotCount += await deleteAllHotspotsForImage(image.id);
+
+    const storagePaths = collectImageStoragePaths(image);
+    await deleteImageFilesTolerant(storagePaths);
+
+    try {
+      await deleteDoc(doc(db, "images", image.id));
+      deletedImageCount += 1;
+      deletedStorageBytes += image.sizeBytes ?? 0;
+    } catch (error) {
+      console.error(
+        "[deleteProjectCascade] Falha ao excluir imagem do Firestore:",
+        image.id,
+        error,
+      );
+      throw new Error(
+        "Não foi possível excluir as imagens do projeto. Tente novamente.",
+      );
+    }
+  }
+
+  try {
+    await deleteDoc(doc(db, "projects", projectId));
+  } catch (error) {
+    console.error(
+      "[deleteProjectCascade] Falha ao excluir projeto do Firestore:",
+      projectId,
+      error,
+    );
+    throw new Error("Não foi possível excluir o projeto. Tente novamente.");
+  }
+
+  return {
+    deletedImageCount,
+    deletedStorageBytes,
+    deletedHotspotCount,
+    imageIds: images.map((image) => image.id),
+  };
+}
+
+/**
+ * @deprecated Use {@link deleteProjectCascade} com `userId` para exclusão completa.
  * @param {string} projectId
  */
 export async function deleteProject(projectId) {

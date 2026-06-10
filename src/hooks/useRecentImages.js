@@ -4,6 +4,7 @@ import {
   getRecentImagesByUserId,
   mapImageToCard,
 } from "@/services/images/imageService";
+import { PROJECT_DELETED_EVENT } from "@/utils/dataSyncEvents";
 
 /**
  * Carrega as imagens mais recentes do usuário (projetos e soltas).
@@ -36,6 +37,32 @@ export function useRecentImages(limit = 3) {
       setLoading(false);
     }
   }, [user?.uid, limit]);
+
+  useEffect(() => {
+    const handleProjectDeleted = (event) => {
+      const { projectId, imageIds } = event.detail ?? {};
+
+      if (!projectId && !imageIds?.length) {
+        return;
+      }
+
+      setImages((current) =>
+        current.filter((image) => {
+          if (imageIds?.length) {
+            return !imageIds.includes(image.id);
+          }
+
+          return image.projectId !== projectId;
+        }),
+      );
+    };
+
+    window.addEventListener(PROJECT_DELETED_EVENT, handleProjectDeleted);
+
+    return () => {
+      window.removeEventListener(PROJECT_DELETED_EVENT, handleProjectDeleted);
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;

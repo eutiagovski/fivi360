@@ -16,37 +16,56 @@ import {
 import { AuthLoadingScreen } from '@/components/auth/ProtectedRoute';
 import { toast } from '@/hooks/use-toast';
 import { UpgradePrompt } from '@/components/plans/UpgradePrompt';
+import { useAuth } from '@/hooks/useAuth';
 import { usePlanLimits } from '@/hooks/usePlanLimits';
 import { useProjects } from '@/hooks/useProjects';
-import { deleteProject } from '@/services/projects/projectService';
+import { deleteProjectCascade } from '@/services/projects/projectService';
+import { emitProjectDeleted } from '@/utils/dataSyncEvents';
 
 export const Projects = () => {
+  const { user } = useAuth();
   const { cardProjects, loading, error, refetch } = useProjects();
-  const { canCreateProject, limits } = usePlanLimits();
+  const { canCreateProject, limits, applyUsageDelta, refreshUsage } = usePlanLimits();
   const [openMenu, setOpenMenu] = useState(null);
   const [projectToDelete, setProjectToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
-    if (!projectToDelete) {
+    if (!projectToDelete || !user?.uid) {
       return;
     }
 
     setIsDeleting(true);
 
     try {
-      await deleteProject(projectToDelete.id);
+      const result = await deleteProjectCascade(projectToDelete.id, user.uid);
+
+      emitProjectDeleted({
+        projectId: projectToDelete.id,
+        imageIds: result.imageIds,
+      });
+
+      applyUsageDelta({
+        projectCount: -1,
+        imageCount: -result.deletedImageCount,
+        storageBytes: -result.deletedStorageBytes,
+      });
+      void refreshUsage();
+
       toast({
         title: 'Projeto excluído',
-        description: `"${projectToDelete.name}" foi removido.`,
+        description: `"${projectToDelete.name}" e todo o seu conteúdo foram removidos.`,
       });
       setProjectToDelete(null);
       setOpenMenu(null);
       await refetch();
-    } catch {
+    } catch (error) {
       toast({
         title: 'Erro ao excluir',
-        description: 'Não foi possível excluir o projeto. Tente novamente.',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Não foi possível excluir o projeto. Tente novamente.',
         variant: 'destructive',
       });
     } finally {
@@ -122,7 +141,8 @@ export const Projects = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Excluir projeto?</AlertDialogTitle>
             <AlertDialogDescription className="text-zinc-400">
-              Esta ação não pode ser desfeita. O projeto &quot;{projectToDelete?.name}&quot; será removido permanentemente.
+              Esta ação removerá permanentemente o projeto, suas imagens, hotspots e arquivos
+              armazenados. Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -135,7 +155,11 @@ export const Projects = () => {
               className="bg-red-600 text-white hover:bg-red-700"
               data-testid="confirm-delete-project-btn"
             >
-              {isDeleting ? <Loader2 size={16} className="animate-spin" /> : 'Excluir'}
+              {isDeleting ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                'Excluir permanentemente'
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

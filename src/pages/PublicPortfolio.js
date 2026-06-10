@@ -10,6 +10,7 @@ import {
 } from "@/services/projects/projectService";
 import { resolveSlugToUid } from "@/services/slugs/slugService";
 import { getPublicUserBySlug } from "@/services/users/userService";
+import { isPortfolioPubliclyAvailable } from "@/utils/portfolio";
 import { isValidSlugFormat, normalizeSlug } from "@/utils/slug";
 
 function PublicMessage({ title, description, dataTestId }) {
@@ -71,9 +72,9 @@ export const PublicPortfolio = () => {
           return;
         }
 
-        if (!user.portfolioEnabled) {
+        if (!isPortfolioPubliclyAvailable(user)) {
           if (!cancelled) {
-            setState({ loading: false, error: "disabled", user, projects: [] });
+            setState({ loading: false, error: "disabled", user: null, projects: [] });
           }
           return;
         }

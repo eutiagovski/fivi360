@@ -7,7 +7,8 @@
  * - Conversão WEBP antes do upload
  * - Atualização automática de coverImage na primeira imagem
  *
- * Storage path: users/{userId}/projects/{projectId}/images/{imageId}.webp
+ * Storage path: users/{userId}/images/{imageId}.webp (soltas)
+ * ou users/{userId}/projects/{projectId}/images/{imageId}.webp (projeto)
  *
  * @see docs/architecture.md
  */
@@ -36,7 +37,10 @@ import {
   assertCanReplaceImageStorage,
   assertCanUploadImage,
 } from "@/services/plans/planService";
-import { deleteImageFile } from "@/services/storage/storageService";
+import {
+  deleteImageFile,
+  relocateImageFile,
+} from "@/services/storage/storageService";
 import { sortImagesByRecency, toMillis } from "@/utils/imageRecencySort";
 
 /**
@@ -591,8 +595,8 @@ export async function replaceImageFile(
 }
 
 /**
- * Move uma imagem solta para um projeto (somente Firestore — Storage inalterado).
- * Se o projeto não tiver capa, define coverImage com previewUrl da imagem.
+ * Move uma imagem solta para um projeto, realocando o arquivo no Storage.
+ * Se o projeto não tiver capa, define coverImage com a nova URL da imagem.
  *
  * @param {string} userId
  * @param {string} imageId
@@ -631,23 +635,42 @@ export async function moveImageToProject(userId, imageId, targetProjectId) {
     throw new Error("A imagem já pertence a este projeto.");
   }
 
+  const sourceUrl = image.originalUrl || image.previewUrl;
+
+  if (!sourceUrl) {
+    throw new Error("URL da imagem ausente.");
+  }
+
+  const oldStoragePath = image.storagePath;
+  const newStoragePath = getImageStoragePath(userId, targetProjectId, imageId);
+  const { downloadUrl } =
+    oldStoragePath === newStoragePath
+      ? { downloadUrl: sourceUrl }
+      : await relocateImageFile(sourceUrl, newStoragePath, oldStoragePath);
+
   await updateDoc(imageRef, {
     projectId: targetProjectId,
     projectVisibility: project.visibility,
+    storagePath: newStoragePath,
+    originalUrl: downloadUrl,
+    previewUrl: downloadUrl,
     updatedAt: serverTimestamp(),
   });
 
   const updatedImage = mapImageDoc(imageId, {
     ...image,
     projectId: targetProjectId,
+    projectVisibility: project.visibility,
+    storagePath: newStoragePath,
+    originalUrl: downloadUrl,
+    previewUrl: downloadUrl,
   });
 
-  const previewUrl = image.previewUrl || image.originalUrl;
   const projectHasCover = Boolean(project.coverImage?.trim());
 
   if (!projectHasCover) {
-    await updateProject(targetProjectId, { coverImage: previewUrl });
-    return { image: updatedImage, coverImage: previewUrl };
+    await updateProject(targetProjectId, { coverImage: downloadUrl });
+    return { image: updatedImage, coverImage: downloadUrl };
   }
 
   await updateProject(targetProjectId, {});
@@ -655,7 +678,7 @@ export async function moveImageToProject(userId, imageId, targetProjectId) {
 }
 
 /**
- * Remove uma imagem de um projeto e envia para imagens soltas (somente Firestore).
+ * Remove uma imagem de um projeto e envia para imagens soltas, realocando o arquivo no Storage.
  * Se era capa do projeto, promove a imagem mais antiga restante ou limpa a capa.
  *
  * @param {string} userId
@@ -687,18 +710,38 @@ export async function moveImageToUnassigned(
     throw new Error("Esta imagem já está nas imagens soltas.");
   }
 
+  const sourceUrl = image.originalUrl || image.previewUrl;
+
+  if (!sourceUrl) {
+    throw new Error("URL da imagem ausente.");
+  }
+
+  const imageUrl = sourceUrl;
+  const oldStoragePath = image.storagePath;
+  const newStoragePath = getImageStoragePath(userId, null, imageId);
+  const { downloadUrl } =
+    oldStoragePath === newStoragePath
+      ? { downloadUrl: sourceUrl }
+      : await relocateImageFile(sourceUrl, newStoragePath, oldStoragePath);
+
   await updateDoc(imageRef, {
     projectId: null,
     projectVisibility: deleteField(),
+    storagePath: newStoragePath,
+    originalUrl: downloadUrl,
+    previewUrl: downloadUrl,
     updatedAt: serverTimestamp(),
   });
 
   const updatedImage = mapImageDoc(imageId, {
     ...image,
     projectId: null,
+    projectVisibility: null,
+    storagePath: newStoragePath,
+    originalUrl: downloadUrl,
+    previewUrl: downloadUrl,
   });
 
-  const imageUrl = image.previewUrl || image.originalUrl;
   const wasCover = Boolean(
     projectCoverImage && projectCoverImage === imageUrl,
   );

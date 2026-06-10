@@ -56,6 +56,18 @@ service cloud.firestore {
       return slug.matches('^[a-z0-9]+(-[a-z0-9]+)*$');
     }
 
+    // Portfólio /u/:slug — listagem de projetos públicos exige portfolioEnabled.
+    // get individual de projeto shared/public (ex.: /share/project) não usa este helper.
+    function portfolioEnabledForOwner(userId) {
+      return (
+        exists(/databases/$(database)/documents/publicProfiles/$(userId))
+        && get(/databases/$(database)/documents/publicProfiles/$(userId)).data.portfolioEnabled == true
+      ) || (
+        exists(/databases/$(database)/documents/users/$(userId)/public/profile)
+        && get(/databases/$(database)/documents/users/$(userId)/public/profile).data.portfolioEnabled == true
+      );
+    }
+
     // Projeto shared/public — usado em get/list de imagens por projectId.
     function isPublicProject(projectId) {
       return projectExists(projectId)
@@ -141,7 +153,10 @@ service cloud.firestore {
 
       allow list: if
         (isSignedIn() && resource.data.userId == request.auth.uid)
-        || isShared(resource.data.visibility);
+        || (
+          isShared(resource.data.visibility)
+          && portfolioEnabledForOwner(resource.data.userId)
+        );
 
       allow create: if isSignedIn()
         && request.resource.data.userId == request.auth.uid

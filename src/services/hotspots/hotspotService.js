@@ -417,6 +417,29 @@ export async function updateSceneHotspot(hotspotId, data) {
 }
 
 /**
+ * Remove todos os hotspots de uma imagem (subcoleção `images/{imageId}/hotspots`).
+ * Usado na exclusão em cascata do projeto; não valida ownership da imagem.
+ *
+ * @param {string} imageId
+ * @returns {Promise<number>} Quantidade de hotspots removidos
+ */
+export async function deleteAllHotspotsForImage(imageId) {
+  if (!imageId) {
+    return 0;
+  }
+
+  const snapshot = await getDocs(hotspotsCollection(imageId));
+
+  if (snapshot.empty) {
+    return 0;
+  }
+
+  await Promise.all(snapshot.docs.map((docSnap) => deleteDoc(docSnap.ref)));
+
+  return snapshot.size;
+}
+
+/**
  * Exclui um hotspot (info ou scene).
  *
  * @param {string} hotspotId

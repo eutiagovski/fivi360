@@ -36,9 +36,10 @@ import {
 import { toast } from '@/hooks/use-toast';
 import { useProject } from '@/hooks/useProject';
 import {
-  deleteProject,
+  deleteProjectCascade,
   updateProject,
 } from '@/services/projects/projectService';
+import { emitProjectDeleted } from '@/utils/dataSyncEvents';
 import {
   hasProjectCover,
   ProjectCoverPlaceholder,
@@ -431,23 +432,39 @@ export const ProjectDetail = () => {
   };
 
   const handleDelete = async () => {
-    if (!project) {
+    if (!project || !user?.uid) {
       return;
     }
 
     setIsDeleting(true);
 
     try {
-      await deleteProject(project.id);
+      const result = await deleteProjectCascade(project.id, user.uid);
+
+      emitProjectDeleted({
+        projectId: project.id,
+        imageIds: result.imageIds,
+      });
+
+      applyUsageDelta({
+        projectCount: -1,
+        imageCount: -result.deletedImageCount,
+        storageBytes: -result.deletedStorageBytes,
+      });
+      void refreshUsage();
+
       toast({
         title: 'Projeto excluído',
-        description: `"${project.title}" foi removido.`,
+        description: `"${project.title}" e todo o seu conteúdo foram removidos.`,
       });
       navigate('/projects');
-    } catch {
+    } catch (error) {
       toast({
         title: 'Erro ao excluir',
-        description: 'Não foi possível excluir o projeto.',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Não foi possível excluir o projeto.',
         variant: 'destructive',
       });
     } finally {
@@ -968,7 +985,8 @@ export const ProjectDetail = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Excluir projeto?</AlertDialogTitle>
             <AlertDialogDescription className="text-zinc-400">
-              Esta ação não pode ser desfeita. &quot;{project.title}&quot; será removido permanentemente.
+              Esta ação removerá permanentemente o projeto, suas imagens, hotspots e arquivos
+              armazenados. Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -981,7 +999,11 @@ export const ProjectDetail = () => {
               className="bg-red-600 text-white hover:bg-red-700"
               data-testid="confirm-delete-project-detail-btn"
             >
-              {isDeleting ? <Loader2 size={16} className="animate-spin" /> : 'Excluir'}
+              {isDeleting ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                'Excluir permanentemente'
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
