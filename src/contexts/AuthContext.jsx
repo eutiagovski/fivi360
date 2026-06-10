@@ -20,7 +20,10 @@ import {
   signUpWithEmail,
   subscribeToAuthChanges,
 } from "@/services/auth/authService";
-import { createUserProfile } from "@/services/users/userService";
+import {
+  createUserProfile,
+  ensurePublicProfileForUser,
+} from "@/services/users/userService";
 
 export const AuthContext = createContext(undefined);
 
@@ -36,6 +39,10 @@ export function AuthProvider({ children }) {
     const unsubscribe = subscribeToAuthChanges((nextUser) => {
       setUser(nextUser);
       setLoading(false);
+
+      if (nextUser?.uid) {
+        ensurePublicProfileForUser(nextUser.uid).catch(() => {});
+      }
     });
 
     return unsubscribe;

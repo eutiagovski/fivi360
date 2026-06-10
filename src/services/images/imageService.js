@@ -14,6 +14,7 @@
 
 import {
   collection,
+  deleteField,
   doc,
   deleteDoc,
   getDoc,
@@ -53,6 +54,7 @@ import { sortImagesByRecency, toMillis } from "@/utils/imageRecencySort";
  * @property {string} originalFileType
  * @property {string} optimizedFileType
  * @property {'private' | 'shared' | 'public'} visibility
+ * @property {'private' | 'shared' | 'public' | null} [projectVisibility]
  * @property {import("firebase/firestore").Timestamp | null} [createdAt]
  * @property {import("firebase/firestore").Timestamp | null} [updatedAt]
  */
@@ -116,6 +118,9 @@ function mapImageDoc(imageId, data) {
     originalFileType: data.originalFileType ?? "",
     optimizedFileType: data.optimizedFileType ?? "image/webp",
     visibility: data.visibility ?? "private",
+    projectVisibility: normalizeProjectId(data.projectId)
+      ? (data.projectVisibility ?? "private")
+      : null,
     createdAt: data.createdAt ?? null,
     updatedAt: data.updatedAt ?? null,
   };
@@ -423,6 +428,10 @@ export async function uploadImage(userId, projectId, file, title, options = {}) 
     : await getLooseImagesByUserId(userId);
   const isFirstImage = normalizedProjectId ? existingImages.length === 0 : false;
 
+  const projectVisibility = normalizedProjectId
+    ? (await getProjectById(normalizedProjectId))?.visibility ?? "private"
+    : null;
+
   const imageData = {
     userId,
     projectId: normalizedProjectId,
@@ -436,6 +445,7 @@ export async function uploadImage(userId, projectId, file, title, options = {}) 
     originalFileType,
     optimizedFileType: "image/webp",
     visibility: "private",
+    ...(normalizedProjectId ? { projectVisibility } : {}),
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   };
@@ -623,6 +633,7 @@ export async function moveImageToProject(userId, imageId, targetProjectId) {
 
   await updateDoc(imageRef, {
     projectId: targetProjectId,
+    projectVisibility: project.visibility,
     updatedAt: serverTimestamp(),
   });
 
@@ -678,6 +689,7 @@ export async function moveImageToUnassigned(
 
   await updateDoc(imageRef, {
     projectId: null,
+    projectVisibility: deleteField(),
     updatedAt: serverTimestamp(),
   });
 

@@ -13,22 +13,18 @@
  */
 
 import {
-  collection,
   doc,
   getDoc,
-  getDocs,
-  limit,
-  query,
   runTransaction,
   serverTimestamp,
   setDoc,
   updateDoc,
-  where,
 } from "firebase/firestore";
 import { db } from "@/config/firebase";
 import { LEGAL_VERSIONS } from "@/config/legal";
 import {
   checkSlugAvailability,
+  resolveSlugToUid,
   SlugTakenError,
   SlugValidationError,
   syncSlugRegistryInTransaction,
@@ -98,6 +94,112 @@ function mapUserDoc(userId, data) {
 }
 
 /**
+ * @param {string} userId
+ * @returns {import("firebase/firestore").DocumentReference}
+ */
+function publicProfileRef(userId) {
+  return doc(db, "users", userId, "public", "profile");
+}
+
+/**
+ * @param {string} userId
+ * @returns {import("firebase/firestore").DocumentReference}
+ */
+function publicProfilesCollectionRef(userId) {
+  return doc(db, "publicProfiles", userId);
+}
+
+/**
+ * Campos expostos em users/{uid}/public/profile (sem email, plan, billing).
+ *
+ * @param {import("firebase/firestore").DocumentData} data
+ */
+function buildPublicProfilePayload(data) {
+  return {
+    name: data.name ?? "",
+    companyName: data.companyName ?? "",
+    companyBio: data.companyBio ?? "",
+    companyLogo: data.companyLogo ?? "",
+    publicSlug: data.publicSlug ?? "",
+    portfolioEnabled: data.portfolioEnabled ?? false,
+    websiteUrl: data.websiteUrl ?? "",
+    instagramUrl: data.instagramUrl ?? "",
+    youtubeUrl: data.youtubeUrl ?? "",
+    linkedinUrl: data.linkedinUrl ?? "",
+    whatsappUrl: data.whatsappUrl ?? "",
+    updatedAt: serverTimestamp(),
+  };
+}
+
+/**
+ * @param {string} userId
+ * @param {import("firebase/firestore").DocumentData} data
+ * @returns {UserProfile}
+ */
+function mapPublicProfileDoc(userId, data) {
+  return {
+    id: userId,
+    name: data.name ?? "",
+    email: "",
+    companyName: data.companyName ?? "",
+    companyBio: data.companyBio ?? "",
+    companyLogo: data.companyLogo ?? "",
+    plan: "starter",
+    publicSlug: data.publicSlug ?? "",
+    portfolioEnabled: data.portfolioEnabled ?? false,
+    websiteUrl: data.websiteUrl ?? "",
+    instagramUrl: data.instagramUrl ?? "",
+    youtubeUrl: data.youtubeUrl ?? "",
+    linkedinUrl: data.linkedinUrl ?? "",
+    whatsappUrl: data.whatsappUrl ?? "",
+    billing: { ...DEFAULT_BILLING },
+  };
+}
+
+/**
+ * @param {string} userId
+ * @param {import("firebase/firestore").DocumentData} data
+ */
+async function syncPublicProfile(userId, data) {
+  const payload = buildPublicProfilePayload(data);
+
+  await Promise.all([
+    setDoc(publicProfileRef(userId), payload, { merge: true }),
+    setDoc(publicProfilesCollectionRef(userId), payload, { merge: true }),
+  ]);
+}
+
+/**
+ * Garante publicProfiles/{uid} para contas criadas antes da Sprint 13.3.
+ * Só o owner pode ler users/{uid} — chamado em getUser (sessão autenticada).
+ *
+ * @param {string} userId
+ * @param {import("firebase/firestore").DocumentData} userData
+ */
+async function ensurePublicProfile(userId, userData) {
+  const snapshot = await getDoc(publicProfilesCollectionRef(userId));
+
+  if (!snapshot.exists()) {
+    await syncPublicProfile(userId, userData);
+  }
+}
+
+/**
+ * Backfill de publicProfiles/{uid} após login (contas anteriores à Sprint 13.3).
+ *
+ * @param {string} userId
+ */
+export async function ensurePublicProfileForUser(userId) {
+  const snapshot = await getDoc(doc(db, "users", userId));
+
+  if (!snapshot.exists()) {
+    return;
+  }
+
+  await ensurePublicProfile(userId, snapshot.data());
+}
+
+/**
  * Cria o documento do usuário no Firestore após cadastro no Firebase Auth.
  *
  * @param {string} userId
@@ -124,6 +226,7 @@ export async function createUserProfile(userId, { name, email, acceptedSource })
   }
 
   await setDoc(userRef, payload);
+  await syncPublicProfile(userId, payload);
 }
 
 /**
@@ -172,17 +275,14 @@ export async function getUser(userId) {
     return null;
   }
 
-  return mapUserDoc(userId, snapshot.data());
+  const data = snapshot.data();
+  await ensurePublicProfile(userId, data);
+
+  return mapUserDoc(userId, data);
 }
 
 /**
- * Carrega perfil público via query por slug (leitura anônima permitida pelas rules).
- *
- * @param {string} slug — slug normalizado
- * @returns {Promise<UserProfile | null>}
- */
-/**
- * Perfil do escritório para páginas públicas de projeto (leitura por userId).
+ * Perfil do escritório para páginas públicas (users/{uid}/public/profile).
  *
  * @param {string} userId
  * @returns {Promise<UserProfile | null>}
@@ -192,16 +292,27 @@ export async function getPublicUserById(userId) {
     return null;
   }
 
-  const userRef = doc(db, "users", userId);
-  const snapshot = await getDoc(userRef);
+  const topLevel = await getDoc(publicProfilesCollectionRef(userId));
 
-  if (!snapshot.exists()) {
-    return null;
+  if (topLevel.exists()) {
+    return mapPublicProfileDoc(userId, topLevel.data());
   }
 
-  return mapUserDoc(userId, snapshot.data());
+  const nested = await getDoc(publicProfileRef(userId));
+
+  if (nested.exists()) {
+    return mapPublicProfileDoc(userId, nested.data());
+  }
+
+  return null;
 }
 
+/**
+ * Perfil público via slug (/u/:slug) — resolve slugs/{slug} → uid.
+ *
+ * @param {string} slug — slug normalizado
+ * @returns {Promise<UserProfile | null>}
+ */
 export async function getPublicUserBySlug(slug) {
   const normalized = normalizeSlug(slug);
 
@@ -209,19 +320,19 @@ export async function getPublicUserBySlug(slug) {
     return null;
   }
 
-  const usersQuery = query(
-    collection(db, "users"),
-    where("publicSlug", "==", normalized),
-    limit(1),
-  );
-  const snapshot = await getDocs(usersQuery);
+  const uid = await resolveSlugToUid(normalized);
 
-  if (snapshot.empty) {
+  if (!uid) {
     return null;
   }
 
-  const userDoc = snapshot.docs[0];
-  return mapUserDoc(userDoc.id, userDoc.data());
+  const profile = await getPublicUserById(uid);
+
+  if (!profile || profile.publicSlug !== normalized) {
+    return null;
+  }
+
+  return profile;
 }
 
 /**
@@ -293,10 +404,16 @@ export async function saveUserSettings(userId, data, previousSlug = "") {
     updatedAt: serverTimestamp(),
   };
 
+  const publicProfilePayload = buildPublicProfilePayload({
+    ...userUpdates,
+    name: data.name,
+  });
+
   if (normalizedSlug !== oldSlug) {
     await runTransaction(db, async (transaction) => {
       await syncSlugRegistryInTransaction(transaction, userId, normalizedSlug, oldSlug);
       transaction.update(userRef, userUpdates);
+      transaction.set(publicProfileRef(userId), publicProfilePayload, { merge: true });
     });
   } else if (normalizedSlug) {
     await runTransaction(db, async (transaction) => {
@@ -313,9 +430,11 @@ export async function saveUserSettings(userId, data, previousSlug = "") {
       }
 
       transaction.update(userRef, userUpdates);
+      transaction.set(publicProfileRef(userId), publicProfilePayload, { merge: true });
     });
   } else {
     await updateDoc(userRef, userUpdates);
+    await setDoc(publicProfileRef(userId), publicProfilePayload, { merge: true });
   }
 
   return { publicSlug: normalizedSlug };
