@@ -59,7 +59,7 @@ service cloud.firestore {
     }
 
     function isAllowedClientEmailType(type) {
-      return type in ['welcome', 'billing_upgrade_requested'];
+      return type in ['welcome', 'verify_email', 'billing_upgrade_requested'];
     }
 
     function isValidEmailQueueCreate() {

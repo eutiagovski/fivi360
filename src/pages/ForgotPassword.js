@@ -4,10 +4,8 @@ import { Link } from "react-router-dom";
 import { AuthCard } from "@/components/auth/AuthCard";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { useAuth } from "@/hooks/useAuth";
+import { PASSWORD_RESET_SUCCESS_MESSAGE } from "@/services/auth/passwordResetService";
 import { getResetPasswordErrorMessage } from "@/utils/authErrors";
-
-const SUCCESS_MESSAGE =
-  "Se existir uma conta associada a este email, um link de redefinição foi enviado.";
 
 export const ForgotPassword = () => {
   const { resetPassword } = useAuth();
@@ -36,8 +34,8 @@ export const ForgotPassword = () => {
     setIsSubmitting(true);
 
     try {
-      await resetPassword(email);
-      setSuccessMessage(SUCCESS_MESSAGE);
+      const result = await resetPassword(email);
+      setSuccessMessage(result?.message || PASSWORD_RESET_SUCCESS_MESSAGE);
     } catch (err) {
       setFormError(getResetPasswordErrorMessage(err));
     } finally {

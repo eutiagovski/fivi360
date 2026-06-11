@@ -1,5 +1,7 @@
 const { EMAIL_TYPES, IMPLEMENTED_EMAIL_TYPES } = require("../config/email");
 const { welcomeEmail } = require("./welcomeEmail");
+const { verifyEmail } = require("./verifyEmail");
+const { passwordResetEmail } = require("./passwordResetEmail");
 const { upgradeRequestedEmail } = require("./upgradeRequestedEmail");
 
 /**
@@ -11,6 +13,10 @@ function resolveEmailTemplate(type, payload) {
   switch (type) {
     case EMAIL_TYPES.WELCOME:
       return welcomeEmail(payload);
+    case EMAIL_TYPES.VERIFY_EMAIL:
+      return verifyEmail(payload);
+    case EMAIL_TYPES.PASSWORD_RESET:
+      return passwordResetEmail(payload);
     case EMAIL_TYPES.BILLING_UPGRADE_REQUESTED:
       return upgradeRequestedEmail(payload);
     default:

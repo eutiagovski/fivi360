@@ -69,7 +69,7 @@ export const SignUp = () => {
 
     try {
       await signUp(email, password, name);
-      navigate(getPostAuthRedirectPath(plan), { replace: true });
+      navigate("/verify-email", { replace: true });
     } catch (err) {
       setFormError(getAuthErrorMessage(err));
     } finally {

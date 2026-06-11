@@ -5,5 +5,7 @@
  */
 
 const { processEmailQueue } = require("./processEmailQueue");
+const { requestPasswordResetEmail } = require("./requestPasswordResetEmail");
 
 exports.processEmailQueue = processEmailQueue;
+exports.requestPasswordResetEmail = requestPasswordResetEmail;

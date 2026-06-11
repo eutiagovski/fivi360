@@ -28,7 +28,7 @@ import {
   syncSlugRegistryInTransaction,
 } from "@/services/slugs/slugService";
 import { DEFAULT_BILLING, normalizeBilling } from "@/config/billing";
-import { enqueueWelcomeEmail } from "@/services/email/emailQueueService";
+import { enqueueVerifyEmail } from "@/services/email/emailQueueService";
 import { assertPublicPortfolioEnabled } from "@/services/plans/planService";
 import { isValidSlugFormat, normalizeSlug } from "@/utils/slug";
 
@@ -226,15 +226,10 @@ export async function createUserProfile(userId, { name, email, acceptedSource })
 
   if (acceptedSource === "signup") {
     try {
-      await enqueueWelcomeEmail({
-        to: email,
-        userId,
-        name,
-        companyName: payload.companyName,
-      });
+      await enqueueVerifyEmail({ to: email, userId, name });
     } catch (err) {
       if (process.env.NODE_ENV === "development") {
-        console.error("[FIVI360] Failed to enqueue welcome email:", err);
+        console.error("[FIVI360] Failed to enqueue verify email:", err);
       }
     }
   }

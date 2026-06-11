@@ -11,6 +11,8 @@ const DEFAULT_FROM =
 /** Tipos processados pela fila (deve espelhar firestore.rules). */
 const EMAIL_TYPES = {
   WELCOME: "welcome",
+  VERIFY_EMAIL: "verify_email",
+  PASSWORD_RESET: "password_reset",
   BILLING_UPGRADE_REQUESTED: "billing_upgrade_requested",
   PAYMENT_SUCCESS: "payment_success",
   PAYMENT_FAILED: "payment_failed",
@@ -20,6 +22,8 @@ const EMAIL_TYPES = {
 /** Tipos com template implementado. */
 const IMPLEMENTED_EMAIL_TYPES = new Set([
   EMAIL_TYPES.WELCOME,
+  EMAIL_TYPES.VERIFY_EMAIL,
+  EMAIL_TYPES.PASSWORD_RESET,
   EMAIL_TYPES.BILLING_UPGRADE_REQUESTED,
 ]);
 

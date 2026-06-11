@@ -18,13 +18,15 @@
  */
 
 import {
+  applyActionCode,
+  confirmPasswordReset,
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
   onAuthStateChanged,
-  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
+  verifyPasswordResetCode,
 } from "firebase/auth";
 import { auth } from "@/config/firebase";
 
@@ -45,7 +47,20 @@ export function mapFirebaseUser(firebaseUser) {
     displayName: firebaseUser.displayName,
     photoURL: firebaseUser.photoURL,
     emailVerified: firebaseUser.emailVerified,
+    usesPasswordAuth: firebaseUser.providerData.some(
+      (provider) => provider.providerId === "password",
+    ),
   };
+}
+
+/**
+ * Usuários e-mail/senha com e-mail não verificado devem confirmar antes do app.
+ *
+ * @param {ReturnType<typeof mapFirebaseUser> | null} user
+ * @returns {boolean}
+ */
+export function needsEmailVerification(user) {
+  return Boolean(user?.usesPasswordAuth && !user.emailVerified);
 }
 
 /**
@@ -76,10 +91,42 @@ export async function logout() {
 }
 
 /**
- * @param {string} email
+ * @param {string} oobCode
  */
-export async function resetPassword(email) {
-  await sendPasswordResetEmail(auth, email);
+export async function applyEmailVerificationCode(oobCode) {
+  await applyActionCode(auth, oobCode);
+}
+
+/**
+ * @param {string} oobCode
+ * @returns {Promise<string>} E-mail associado ao código
+ */
+export async function verifyPasswordResetOobCode(oobCode) {
+  return verifyPasswordResetCode(auth, oobCode);
+}
+
+/**
+ * @param {string} oobCode
+ * @param {string} newPassword
+ */
+export async function completePasswordReset(oobCode, newPassword) {
+  await confirmPasswordReset(auth, oobCode, newPassword);
+}
+
+/**
+ * Recarrega o usuário atual do Firebase Auth (ex.: após verificar e-mail).
+ *
+ * @returns {Promise<ReturnType<typeof mapFirebaseUser> | null>}
+ */
+export async function reloadCurrentUser() {
+  const currentUser = auth.currentUser;
+
+  if (!currentUser) {
+    return null;
+  }
+
+  await currentUser.reload();
+  return mapFirebaseUser(currentUser);
 }
 
 /**

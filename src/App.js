@@ -23,6 +23,10 @@ import { PublicPortfolioImage } from './pages/PublicPortfolioImage';
 import { Login } from './pages/Login';
 import { SignUp } from './pages/SignUp';
 import { ForgotPassword } from './pages/ForgotPassword';
+import { VerifyEmail } from './pages/VerifyEmail';
+import { VerifyEmailAction } from './pages/VerifyEmailAction';
+import { ResetPasswordAction } from './pages/ResetPasswordAction';
+import { VerifyEmailRoute } from './components/auth/VerifyEmailRoute';
 import { Landing } from './pages/Landing';
 import { LandingRoute } from './components/auth/LandingRoute';
 import { TermsOfUse } from './pages/TermsOfUse';
@@ -39,6 +43,9 @@ function App() {
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
           <Route path="/register" element={<PublicRoute><SignUp /></PublicRoute>} />
           <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
+          <Route path="/verify-email" element={<VerifyEmailRoute><VerifyEmail /></VerifyEmailRoute>} />
+          <Route path="/verify-email/action" element={<VerifyEmailAction />} />
+          <Route path="/reset-password/action" element={<ResetPasswordAction />} />
 
           {/* Portfólio público */}
           <Route path="/u/:slug" element={<PublicPortfolio />} />

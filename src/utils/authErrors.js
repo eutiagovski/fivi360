@@ -43,15 +43,39 @@ export function getAuthErrorMessage(error) {
  * @param {unknown} error
  * @returns {string}
  */
+/**
+ * Mensagens amigáveis para códigos de ação do Firebase Auth (verificação de e-mail).
+ *
+ * @param {unknown} error
+ * @returns {string}
+ */
+export function getActionCodeErrorMessage(error) {
+  const code = error?.code;
+
+  switch (code) {
+    case "auth/expired-action-code":
+      return "Este link expirou. Faça login e solicite um novo e-mail de verificação.";
+    case "auth/invalid-action-code":
+      return "Este link é inválido ou já foi utilizado.";
+    case "auth/user-disabled":
+      return "Esta conta foi desativada.";
+    case "auth/network-request-failed":
+      return "Erro de conexão. Verifique sua internet.";
+    default:
+      return "Não foi possível confirmar seu e-mail. Tente novamente.";
+  }
+}
+
 export function getResetPasswordErrorMessage(error) {
   const code = error?.code;
 
   switch (code) {
-    case "auth/user-not-found":
-      return "Usuário não encontrado";
+    case "functions/invalid-argument":
     case "auth/invalid-email":
       return "Email inválido";
     case "auth/network-request-failed":
+    case "functions/unavailable":
+    case "functions/deadline-exceeded":
       return "Falha de conexão";
     default:
       return "Não foi possível enviar o link de redefinição. Tente novamente.";

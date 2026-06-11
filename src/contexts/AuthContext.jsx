@@ -14,12 +14,12 @@
 import { createContext, useCallback, useEffect, useMemo, useState } from "react";
 import {
   logout as authLogout,
-  resetPassword as authResetPassword,
   signInWithEmail,
   signInWithGoogle,
   signUpWithEmail,
   subscribeToAuthChanges,
 } from "@/services/auth/authService";
+import { requestPasswordResetEmail } from "@/services/auth/passwordResetService";
 import {
   createUserProfile,
   ensurePublicProfileForUser,
@@ -97,11 +97,15 @@ export function AuthProvider({ children }) {
     setError(null);
 
     try {
-      await authResetPassword(email);
+      return await requestPasswordResetEmail(email);
     } catch (err) {
       setError(err);
       throw err;
     }
+  }, []);
+
+  const setUserFromReload = useCallback((nextUser) => {
+    setUser(nextUser);
   }, []);
 
   const value = useMemo(
@@ -114,8 +118,9 @@ export function AuthProvider({ children }) {
       signInGoogle,
       signOut,
       resetPassword,
+      setUserFromReload,
     }),
-    [user, loading, error, signIn, signUp, signInGoogle, signOut, resetPassword],
+    [user, loading, error, signIn, signUp, signInGoogle, signOut, resetPassword, setUserFromReload],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

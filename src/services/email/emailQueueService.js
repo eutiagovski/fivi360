@@ -15,6 +15,7 @@ const EMAIL_QUEUE_COLLECTION = "emailQueue";
 /** Tipos que o cliente pode enfileirar (espelha firestore.rules). */
 export const CLIENT_EMAIL_TYPES = {
   WELCOME: "welcome",
+  VERIFY_EMAIL: "verify_email",
   BILLING_UPGRADE_REQUESTED: "billing_upgrade_requested",
 };
 
@@ -38,6 +39,24 @@ export async function enqueueEmail({ type, to, userId, payload = {} }) {
   });
 
   return docRef.id;
+}
+
+/**
+ * Enfileira e-mail de verificação de cadastro.
+ *
+ * @param {{
+ *   to: string,
+ *   userId: string,
+ *   name?: string,
+ * }} params
+ */
+export async function enqueueVerifyEmail({ to, userId, name = "" }) {
+  return enqueueEmail({
+    type: CLIENT_EMAIL_TYPES.VERIFY_EMAIL,
+    to,
+    userId,
+    payload: { name },
+  });
 }
 
 /**

@@ -2,6 +2,7 @@ import { Loader2 } from "lucide-react";
 import { Navigate } from "react-router-dom";
 import { LegalConsentGate } from "@/components/legal/LegalConsentGate";
 import { useAuth } from "@/hooks/useAuth";
+import { needsEmailVerification } from "@/services/auth/authService";
 
 export function AuthLoadingScreen() {
   return (
@@ -30,6 +31,10 @@ export function ProtectedRoute({ children }) {
 
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (needsEmailVerification(user)) {
+    return <Navigate to="/verify-email" replace />;
   }
 
   return <LegalConsentGate>{children}</LegalConsentGate>;
