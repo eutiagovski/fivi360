@@ -9,30 +9,30 @@ import {
 import { resolveSocialLinkHref } from "@/utils/socialLinks";
 
 const SOCIAL_LINKS = [
-  { key: "websiteUrl", icon: Globe, label: "Site" },
-  { key: "instagramUrl", icon: Instagram, label: "Instagram" },
-  { key: "youtubeUrl", icon: Youtube, label: "YouTube" },
-  { key: "linkedinUrl", icon: Linkedin, label: "LinkedIn" },
-  { key: "whatsappUrl", icon: MessageCircle, label: "WhatsApp" },
+  { key: "website", icon: Globe, label: "Site" },
+  { key: "instagram", icon: Instagram, label: "Instagram" },
+  { key: "youtube", icon: Youtube, label: "YouTube" },
+  { key: "linkedin", icon: Linkedin, label: "LinkedIn" },
+  { key: "whatsapp", icon: MessageCircle, label: "WhatsApp" },
 ];
 
 /**
- * @param {{ user: Record<string, string>, testIdPrefix?: string }} props
+ * @param {{ user: { socialLinks?: Record<string, string> }, testIdPrefix?: string }} props
  */
 export function PublicSocialLinks({ user, testIdPrefix = "public-social" }) {
-  const links = useMemo(
-    () =>
-      SOCIAL_LINKS.filter(({ key }) => {
-        const url = user[key]?.trim();
-        return Boolean(url);
-      }).map(({ key, icon: Icon, label }) => ({
-        url: resolveSocialLinkHref(key, user[key]),
-        Icon,
-        label,
-        key,
-      })),
-    [user],
-  );
+  const links = useMemo(() => {
+    const socialLinks = user?.socialLinks ?? {};
+
+    return SOCIAL_LINKS.filter(({ key }) => {
+      const url = socialLinks[key]?.trim();
+      return Boolean(url);
+    }).map(({ key, icon: Icon, label }) => ({
+      url: resolveSocialLinkHref(key, socialLinks[key]),
+      Icon,
+      label,
+      key,
+    }));
+  }, [user]);
 
   if (links.length === 0) {
     return null;

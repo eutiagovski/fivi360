@@ -74,7 +74,7 @@ export const AppHeader = ({ onMenuClick, isMenuOpen = false }) => {
   }, [user?.uid]);
 
   const displayName = useMemo(() => {
-    const fromProfile = profile?.name?.trim();
+    const fromProfile = profile?.displayName?.trim();
     if (fromProfile) {
       return fromProfile;
     }
@@ -86,7 +86,7 @@ export const AppHeader = ({ onMenuClick, isMenuOpen = false }) => {
       return user.email.split('@')[0];
     }
     return 'Usuário';
-  }, [profile?.name, user?.displayName, user?.email]);
+  }, [profile?.displayName, user?.displayName, user?.email]);
 
   const companyDisplay = profile?.companyName?.trim() || 'Meu escritório';
   const avatarImageUrl = profile?.companyLogo?.trim() || '';

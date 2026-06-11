@@ -16,7 +16,7 @@ import { PLAN_IDS, PLAN_LIMITS } from "@/config/planLimits";
 const UPGRADE_PLAN_IDS = [PLAN_IDS.PROFESSIONAL, PLAN_IDS.ENTERPRISE];
 
 /**
- * Modal de upgrade / alteração de plano (agnóstico ao provedor de pagamento).
+ * Modal de upgrade / alteração de plano.
  *
  * @param {{
  *   open: boolean,
@@ -127,7 +127,7 @@ export function UpgradePlanModal({
                     }
                   `}
                 >
-                  Assinar {plan.displayName}
+                  Assinar plano
                 </button>
               </div>
             );

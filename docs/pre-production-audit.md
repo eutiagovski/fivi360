@@ -288,7 +288,7 @@ Os bloqueadores para produção pública concentram-se em **segurança backend**
 | **Categoria** | Planos |
 | **Gravidade** | Médio |
 | **Rota afetada** | `/plan`, `/register?plan=`, landing `#precos` |
-| **Descrição** | `PAYMENTS_COMING_SOON_MESSAGE`; IDs Stripe/MP vazios no `.env.example`. Upgrade altera UX mas não há cobrança. |
+| **Descrição** | `PAYMENTS_COMING_SOON_MESSAGE`; IDs MP vazios no `.env.example`. Upgrade altera UX mas não há cobrança. |
 | **Impacto** | Expectativa de plano pago sem receita; suporte manual se `plan` for editado no console. |
 | **Sugestão** | Deixar explícito “em breve”; bloquear `plan !== starter` exceto via admin até billing. |
 | **Arquivos prováveis** | `src/config/billing.js`, `src/pages/Plan.js`, `src/services/billing/billingService.js` |
@@ -611,7 +611,7 @@ Os bloqueadores para produção pública concentram-se em **segurança backend**
 
 ### Fase 4 — Monetização (pós-beta)
 
-1. Integrar Stripe/Mercado Pago; sincronizar `users.plan` apenas via webhook/admin.
+1. Integrar Mercado Pago; sincronizar `users.plan` apenas via webhook/admin.
 2. Bloquear alteração direta do campo `plan` nas rules.
 
 ---

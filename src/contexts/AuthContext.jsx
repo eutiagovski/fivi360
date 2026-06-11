@@ -20,10 +20,7 @@ import {
   subscribeToAuthChanges,
 } from "@/services/auth/authService";
 import { requestPasswordResetEmail } from "@/services/auth/passwordResetService";
-import {
-  createUserProfile,
-  ensurePublicProfileForUser,
-} from "@/services/users/userService";
+import { createUserProfile } from "@/services/users/userService";
 
 export const AuthContext = createContext(undefined);
 
@@ -40,9 +37,6 @@ export function AuthProvider({ children }) {
       setUser(nextUser);
       setLoading(false);
 
-      if (nextUser?.uid) {
-        ensurePublicProfileForUser(nextUser.uid).catch(() => {});
-      }
     });
 
     return unsubscribe;
@@ -64,7 +58,11 @@ export function AuthProvider({ children }) {
 
     try {
       const user = await signUpWithEmail(email, password);
-      await createUserProfile(user.uid, { name, email, acceptedSource: "signup" });
+      await createUserProfile(user.uid, {
+        displayName: name,
+        email,
+        acceptedSource: "signup",
+      });
     } catch (err) {
       setError(err);
       throw err;

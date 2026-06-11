@@ -4,8 +4,7 @@ rules_version = '2';
 // FIVI360 — Firestore Security Rules (Sprint 13.3)
 //
 // Coleções:
-//   users/{userId}              — privado (owner only)
-//   publicProfiles/{userId}       — campos públicos do portfólio (canônico)
+//   users/{userId}              — fonte única (campos públicos + privados)
 //   users/{userId}/public/profile — legado (descontinuado; não usar)
 //   slugs/{slug}                — resolução /u/:slug
 //   projects/{projectId}
@@ -77,8 +76,28 @@ service cloud.firestore {
     // Portfólio /u/:slug — listagem de projetos públicos exige portfolioEnabled.
     // get individual de projeto shared/public (ex.: /share/project) não usa este helper.
     function portfolioEnabledForOwner(userId) {
-      return exists(/databases/$(database)/documents/publicProfiles/$(userId))
-        && get(/databases/$(database)/documents/publicProfiles/$(userId)).data.portfolioEnabled == true;
+      return exists(/databases/$(database)/documents/users/$(userId))
+        && get(/databases/$(database)/documents/users/$(userId)).data.portfolioEnabled == true;
+    }
+
+    // Leitura pública limitada de users/{uid} (perfil de portfólio / share).
+    function isPubliclyReadableUser() {
+      return resource.data.portfolioEnabled == true
+        || (
+          resource.data.publicSlug is string
+          && resource.data.publicSlug.size() > 0
+          && isValidSlug(resource.data.publicSlug)
+        );
+    }
+
+    // Query users where publicSlug == slug (getPublicUserBySlug).
+    function isPublicSlugListQuery() {
+      return request.query.limit <= 1
+        && request.query.filters.size() == 1
+        && request.query.filters[0].fieldPath == 'publicSlug'
+        && request.query.filters[0].op == '=='
+        && request.query.filters[0].value is string
+        && isValidSlug(request.query.filters[0].value);
     }
 
     // Projeto shared/public — usado em get/list de imagens por projectId.
@@ -116,18 +135,6 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
-    // ---------- publicProfiles ----------
-
-    match /publicProfiles/{userId} {
-
-      allow get: if true;
-      allow list: if false;
-
-      allow create: if isOwner(userId);
-      allow update: if isOwner(userId);
-      allow delete: if isOwner(userId);
-    }
-
     // ---------- slugs ----------
 
     match /slugs/{slug} {
@@ -150,9 +157,13 @@ service cloud.firestore {
 
     match /users/{userId} {
 
-      // Documento principal: privado (email, plan, billing, legalConsent).
-      allow get: if isOwner(userId);
-      allow list: if false;
+      // get: owner ou perfil com slug/portfólio (DTO no cliente — ver userMappers).
+      allow get: if isOwner(userId) || isPubliclyReadableUser();
+
+      // list: apenas query por publicSlug (portfólio /u/:slug).
+      allow list: if isPublicSlugListQuery()
+        && resource.data.portfolioEnabled == true
+        && resource.data.publicSlug == request.query.filters[0].value;
 
       allow create: if isOwner(userId);
       allow update: if isOwner(userId);

@@ -10,6 +10,7 @@ import {
   applyEmailVerificationCode,
   reloadCurrentUser,
 } from "@/services/auth/authService";
+import { maybeEnqueueWelcomeEmail } from "@/services/users/userService";
 import { getActionCodeErrorMessage } from "@/utils/authErrors";
 
 const CONSUMED_ACTION_CODE_ERRORS = new Set([
@@ -49,12 +50,26 @@ export const VerifyEmailAction = () => {
     const mode = searchParams.get("mode");
     const oobCode = searchParams.get("oobCode");
 
+    const finalizeVerifiedEmail = async (refreshedUser) => {
+      setUserFromReload?.(refreshedUser);
+      await syncEmailVerifiedToFirestore(refreshedUser.uid);
+
+      try {
+        await maybeEnqueueWelcomeEmail({
+          userId: refreshedUser.uid,
+          to: refreshedUser.email ?? "",
+          name: refreshedUser.displayName?.trim() || "",
+        });
+      } catch {
+        // Não bloqueia a confirmação de e-mail.
+      }
+    };
+
     const completeSuccess = async () => {
       const refreshedUser = await reloadCurrentUser();
 
       if (refreshedUser) {
-        setUserFromReload?.(refreshedUser);
-        await syncEmailVerifiedToFirestore(refreshedUser.uid);
+        await finalizeVerifiedEmail(refreshedUser);
       }
 
       setStatus("success");
@@ -67,8 +82,7 @@ export const VerifyEmailAction = () => {
         return false;
       }
 
-      setUserFromReload?.(refreshedUser);
-      await syncEmailVerifiedToFirestore(refreshedUser.uid);
+      await finalizeVerifiedEmail(refreshedUser);
       setStatus("success");
       return true;
     };

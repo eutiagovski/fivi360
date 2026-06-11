@@ -104,7 +104,7 @@ Primary Foreground: #000000
 1. **Firebase Storage** - Upload real de imagens
 2. **Firebase Authentication** - Sistema de login
 3. **Pannellum** - Visualizador 360° interativo real
-4. **Stripe** - Integração de pagamento
+4. **Mercado Pago** - Assinaturas recorrentes
 5. **Backend APIs** - CRUD completo de projetos e imagens
 
 ## 📦 Estrutura do Projeto

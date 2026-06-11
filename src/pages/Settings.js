@@ -101,18 +101,19 @@ export const Settings = () => {
         }
 
         const publicSlug = profile?.publicSlug ?? '';
-        const storedWhatsappUrl = profile?.whatsappUrl ?? '';
+        const socialLinks = profile?.socialLinks ?? {};
+        const storedWhatsappUrl = socialLinks.whatsapp ?? '';
 
         setWhatsappBrazilLocal(isBrazilWhatsappStored(storedWhatsappUrl));
         setFormData({
-          name: profile?.name ?? user.displayName ?? '',
+          name: profile?.displayName ?? user.displayName ?? '',
           email: profile?.email ?? user.email ?? '',
           companyName: profile?.companyName ?? '',
-          companyBio: profile?.companyBio ?? '',
-          websiteUrl: parseWebsiteForDisplay(profile?.websiteUrl),
-          instagramUrl: parseInstagramForDisplay(profile?.instagramUrl),
-          youtubeUrl: parseYoutubeForDisplay(profile?.youtubeUrl),
-          linkedinUrl: parseLinkedinForDisplay(profile?.linkedinUrl),
+          companyBio: profile?.bio ?? '',
+          websiteUrl: parseWebsiteForDisplay(socialLinks.website),
+          instagramUrl: parseInstagramForDisplay(socialLinks.instagram),
+          youtubeUrl: parseYoutubeForDisplay(socialLinks.youtube),
+          linkedinUrl: parseLinkedinForDisplay(socialLinks.linkedin),
           whatsappUrl: parseWhatsappForDisplay(storedWhatsappUrl),
           publicSlug,
           portfolioEnabled: profile?.portfolioEnabled ?? false,
@@ -231,16 +232,18 @@ export const Settings = () => {
       const { publicSlug } = await saveUserSettings(
         user.uid,
         {
-          name: formData.name,
+          displayName: formData.name,
           companyName: formData.companyName,
-          companyBio: formData.companyBio,
+          bio: formData.companyBio,
           publicSlug: formData.publicSlug,
           portfolioEnabled: formData.portfolioEnabled,
-          websiteUrl: normalizeWebsiteForSave(formData.websiteUrl),
-          instagramUrl: normalizeInstagramForSave(formData.instagramUrl),
-          youtubeUrl: normalizeYoutubeForSave(formData.youtubeUrl),
-          linkedinUrl: normalizeLinkedinForSave(formData.linkedinUrl),
-          whatsappUrl: normalizedWhatsappUrl,
+          socialLinks: {
+            website: normalizeWebsiteForSave(formData.websiteUrl),
+            instagram: normalizeInstagramForSave(formData.instagramUrl),
+            youtube: normalizeYoutubeForSave(formData.youtubeUrl),
+            linkedin: normalizeLinkedinForSave(formData.linkedinUrl),
+            whatsapp: normalizedWhatsappUrl,
+          },
         },
         savedSlug,
       );
@@ -448,7 +451,7 @@ export const Settings = () => {
                     testId="input-website-url"
                     value={formData.websiteUrl}
                     onChange={handleChange}
-                    prefix={SOCIAL_LINK_PREFIXES.websiteUrl}
+                    prefix={SOCIAL_LINK_PREFIXES.website}
                     placeholder="seusite.com.br"
                     disabled={isSaving}
                   />
@@ -470,7 +473,7 @@ export const Settings = () => {
                     testId="input-instagram-url"
                     value={formData.instagramUrl}
                     onChange={handleChange}
-                    prefix={SOCIAL_LINK_PREFIXES.instagramUrl}
+                    prefix={SOCIAL_LINK_PREFIXES.instagram}
                     placeholder="seuusuario"
                     disabled={isSaving}
                   />
@@ -492,7 +495,7 @@ export const Settings = () => {
                     testId="input-youtube-url"
                     value={formData.youtubeUrl}
                     onChange={handleChange}
-                    prefix={SOCIAL_LINK_PREFIXES.youtubeUrl}
+                    prefix={SOCIAL_LINK_PREFIXES.youtube}
                     placeholder="@seucanal"
                     disabled={isSaving}
                   />
@@ -514,7 +517,7 @@ export const Settings = () => {
                     testId="input-linkedin-url"
                     value={formData.linkedinUrl}
                     onChange={handleChange}
-                    prefix={SOCIAL_LINK_PREFIXES.linkedinUrl}
+                    prefix={SOCIAL_LINK_PREFIXES.linkedin}
                     placeholder="seu-perfil"
                     disabled={isSaving}
                   />

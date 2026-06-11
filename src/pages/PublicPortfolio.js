@@ -8,7 +8,6 @@ import {
   getPublicProjectsByUserId,
   mapProjectToCard,
 } from "@/services/projects/projectService";
-import { resolveSlugToUid } from "@/services/slugs/slugService";
 import { getPublicUserBySlug } from "@/services/users/userService";
 import { isPortfolioPubliclyAvailable } from "@/utils/portfolio";
 import { isValidSlugFormat, normalizeSlug } from "@/utils/slug";
@@ -54,18 +53,9 @@ export const PublicPortfolio = () => {
       }
 
       try {
-        const uid = await resolveSlugToUid(slug);
-
-        if (!uid) {
-          if (!cancelled) {
-            setState({ loading: false, error: "not_found", user: null, projects: [] });
-          }
-          return;
-        }
-
         const user = await getPublicUserBySlug(slug);
 
-        if (!user || user.id !== uid) {
+        if (!user) {
           if (!cancelled) {
             setState({ loading: false, error: "not_found", user: null, projects: [] });
           }
@@ -79,7 +69,7 @@ export const PublicPortfolio = () => {
           return;
         }
 
-        const projects = await getPublicProjectsByUserId(uid);
+        const projects = await getPublicProjectsByUserId(user.id);
 
         if (!cancelled) {
           setState({ loading: false, error: null, user, projects });
@@ -104,8 +94,8 @@ export const PublicPortfolio = () => {
 
   const cardProjects = state.projects.map(mapProjectToCard);
   const displayName =
-    state.user?.companyName?.trim() || state.user?.name?.trim() || "Portfólio";
-  const companyBio = state.user?.companyBio?.trim() ?? "";
+    state.user?.companyName?.trim() || state.user?.displayName?.trim() || "Portfólio";
+  const companyBio = state.user?.bio?.trim() ?? "";
 
   return (
     <div className="min-h-screen bg-[#050505] fade-in">

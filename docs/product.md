@@ -139,7 +139,7 @@ Permite trocar o arquivo sem perder title, description, hotspots, visibility, pr
 
 # Roadmap Futuro
 
-* Stripe
+* Mercado Pago (assinaturas)
 * Analytics
 * IA para melhoria de imagens
 * Tours avançados

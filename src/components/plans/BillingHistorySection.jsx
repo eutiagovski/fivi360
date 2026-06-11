@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/table";
 
 /**
- * Histórico de cobrança (vazio até integração com o provedor de pagamento).
+ * Histórico de cobrança (vazio até integração de billing).
  *
  * @param {{ invoices?: Array<{ date: string, plan: string, status: string, amount: string, invoiceUrl?: string }> }} props
  */

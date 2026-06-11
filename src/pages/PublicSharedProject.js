@@ -172,8 +172,8 @@ export const PublicSharedProject = () => {
   const { project, owner } = state;
   const hasCover = hasProjectCover(project.coverImage);
   const officeName =
-    owner?.companyName?.trim() || owner?.name?.trim() || "";
-  const officeBio = owner?.companyBio?.trim() ?? "";
+    owner?.companyName?.trim() || owner?.displayName?.trim() || "";
+  const officeBio = owner?.bio?.trim() ?? "";
 
   return (
     <PublicPageShell>

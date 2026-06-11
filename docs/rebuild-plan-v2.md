@@ -362,7 +362,7 @@ Alinhamento com `roadmap.md`: Sprints 1–10 mapeiam aos épicos 2–10; Epic 1 
 - [ ] Starter: sem hotspots, sem portfólio público, limite de imagens enforced
 - [ ] Professional: hotspots, portfólio e limite maior habilitados
 - [ ] Consumo exibido corresponde aos dados Firestore/Storage do usuário
-- [ ] Upgrade manual de plano possível até integração Stripe (pós-MVP)
+- [ ] Upgrade manual de plano possível até integração Mercado Pago (pós-MVP)
 
 ---
 
@@ -513,7 +513,7 @@ Checklist final antes da publicação. Todos os itens devem estar marcados.
 
 ## Pós-MVP (fora deste plano)
 
-Conforme `roadmap.md` e `product.md`: Stripe, analytics, IA de imagem, tours avançados, mini mapa, marca branca, domínio personalizado, migração opcional CRA → Vite.
+Conforme `roadmap.md` e `product.md`: Mercado Pago, analytics, IA de imagem, tours avançados, mini mapa, marca branca, domínio personalizado, migração opcional CRA → Vite.
 
 ---
 

@@ -26,9 +26,9 @@ export function ManageSubscriptionSection({
   const { toast } = useToast();
   const isStarter = planId === PLAN_IDS.STARTER;
 
-  const handleManageBilling = () => {
+  const handleManageSubscription = () => {
     toast({
-      title: "Gerenciar cobrança",
+      title: "Gerenciar assinatura",
       description: BILLING_PORTAL_COMING_SOON_MESSAGE,
     });
   };
@@ -41,35 +41,35 @@ export function ManageSubscriptionSection({
       {isStarter ? (
         <StarterSubscriptionView
           onUpgrade={onUpgrade}
-          onManageBilling={handleManageBilling}
+          onManageSubscription={handleManageSubscription}
         />
       ) : (
         <PaidSubscriptionView
           limits={limits}
           planId={planId}
           billing={billing}
-          onManageBilling={handleManageBilling}
+          onManageSubscription={handleManageSubscription}
         />
       )}
     </div>
   );
 }
 
-function ManageBillingButton({ onClick }) {
+function ManageSubscriptionButton({ onClick }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      data-testid="manage-subscription-billing-portal-btn"
+      data-testid="manage-subscription-portal-btn"
       className="px-6 py-2.5 rounded-full text-sm font-medium bg-zinc-800 border border-zinc-700 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-300 transition-colors"
       title={BILLING_PORTAL_COMING_SOON_MESSAGE}
     >
-      Gerenciar cobrança
+      Gerenciar assinatura
     </button>
   );
 }
 
-function StarterSubscriptionView({ onUpgrade, onManageBilling }) {
+function StarterSubscriptionView({ onUpgrade, onManageSubscription }) {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
@@ -95,7 +95,7 @@ function StarterSubscriptionView({ onUpgrade, onManageBilling }) {
         </button>
       </div>
       <div className="flex flex-col sm:flex-row gap-3">
-        <ManageBillingButton onClick={onManageBilling} />
+        <ManageSubscriptionButton onClick={onManageSubscription} />
         <p className="text-xs text-zinc-500 self-center sm:ml-1">
           {BILLING_PORTAL_COMING_SOON_MESSAGE}
         </p>
@@ -104,7 +104,7 @@ function StarterSubscriptionView({ onUpgrade, onManageBilling }) {
   );
 }
 
-function PaidSubscriptionView({ limits, planId, billing, onManageBilling }) {
+function PaidSubscriptionView({ limits, planId, billing, onManageSubscription }) {
   const nextBillingDate =
     billing.nextInvoiceDate ?? billing.currentPeriodEnd;
 
@@ -143,7 +143,7 @@ function PaidSubscriptionView({ limits, planId, billing, onManageBilling }) {
       )}
 
       <div className="flex flex-col sm:flex-row flex-wrap gap-3 items-start sm:items-center">
-        <ManageBillingButton onClick={onManageBilling} />
+        <ManageSubscriptionButton onClick={onManageSubscription} />
         <span className="text-xs text-zinc-500 hidden sm:inline">
           {BILLING_PORTAL_COMING_SOON_MESSAGE}
         </span>

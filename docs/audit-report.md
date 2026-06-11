@@ -345,7 +345,7 @@ index.js
 - **Observações:**
   - Planos divergem do roadmap: docs definem **Starter / Professional**
   - Features não refletem business-rules (hotspots, portfólio por plano)
-  - Botões "Assinar" sem integração Stripe ou backend
+  - Botões "Assinar" sem integração Mercado Pago ou backend
   - Consumo mock: 2/3 projetos, 24/30 imagens, 320/500 MB
 
 ---

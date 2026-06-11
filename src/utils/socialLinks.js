@@ -340,9 +340,9 @@ export function normalizeWhatsappForSave(input, options = {}) {
 }
 
 /**
- * Garante href válido para exibição pública, inclusive perfis legados.
+ * Garante href válido para exibição pública.
  *
- * @param {'websiteUrl' | 'instagramUrl' | 'youtubeUrl' | 'linkedinUrl' | 'whatsappUrl'} field
+ * @param {'website' | 'instagram' | 'youtube' | 'linkedin' | 'whatsapp'} field
  * @param {string} value
  * @returns {string}
  */
@@ -354,15 +354,15 @@ export function resolveSocialLinkHref(field, value) {
   }
 
   switch (field) {
-    case 'websiteUrl':
+    case 'website':
       return normalizeWebsiteForSave(trimmed);
-    case 'instagramUrl':
+    case 'instagram':
       return normalizeInstagramForSave(trimmed);
-    case 'youtubeUrl':
+    case 'youtube':
       return normalizeYoutubeForSave(trimmed);
-    case 'linkedinUrl':
+    case 'linkedin':
       return normalizeLinkedinForSave(trimmed);
-    case 'whatsappUrl':
+    case 'whatsapp':
       if (/^https?:\/\/(?:api\.)?wa\.me\//i.test(trimmed)) {
         return trimmed;
       }
@@ -376,8 +376,8 @@ export function resolveSocialLinkHref(field, value) {
 }
 
 export const SOCIAL_LINK_PREFIXES = {
-  websiteUrl: WEBSITE_PREFIX,
-  instagramUrl: INSTAGRAM_PREFIX,
-  youtubeUrl: YOUTUBE_PREFIX,
-  linkedinUrl: LINKEDIN_PREFIX,
+  website: WEBSITE_PREFIX,
+  instagram: INSTAGRAM_PREFIX,
+  youtube: YOUTUBE_PREFIX,
+  linkedin: LINKEDIN_PREFIX,
 };

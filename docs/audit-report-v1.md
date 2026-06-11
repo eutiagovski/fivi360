@@ -173,7 +173,7 @@ frontend/
 | **Objetivo** | Escolha de plano + consumo atual |
 | **Componentes** | 3 pricing cards, barras de progresso de uso |
 | **Mock** | Sim — array `plans` + stats de consumo hardcoded |
-| **Ações sem função** | Botões "Assinar" (sem checkout/Stripe) |
+| **Ações sem função** | Botões "Assinar" (sem checkout/Mercado Pago) |
 | **Observações** | Planos "Gratuito/Profissional/Enterprise" ≠ roadmap "Starter/Professional"; features não batem com business-rules (hotspots, portfólio) |
 
 ### 3.8 `PublicProject.js` — `/share/project/:id`

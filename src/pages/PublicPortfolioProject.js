@@ -17,7 +17,6 @@ import {
   getImagesByProjectIdPublic,
   mapImageToCard,
 } from "@/services/images/imageService";
-import { resolveSlugToUid } from "@/services/slugs/slugService";
 import { getPublicUserBySlug } from "@/services/users/userService";
 import {
   canAccessPortfolioProject,
@@ -66,29 +65,9 @@ export const PublicPortfolioProject = () => {
       });
 
       try {
-        const ownerUserId = await resolveSlugToUid(slug);
-
-        if (!ownerUserId) {
-          if (!cancelled) {
-            setState({
-              loading: false,
-              error: "not_found",
-              project: null,
-              owner: null,
-              images: [],
-              slug,
-            });
-          }
-          return;
-        }
-
         const owner = await getPublicUserBySlug(slug);
 
-        if (
-          !owner ||
-          owner.id !== ownerUserId ||
-          !isPortfolioPubliclyAvailable(owner)
-        ) {
+        if (!owner || !isPortfolioPubliclyAvailable(owner)) {
           if (!cancelled) {
             setState({
               loading: false,
@@ -120,7 +99,7 @@ export const PublicPortfolioProject = () => {
           return;
         }
 
-        if (!canAccessPortfolioProject(project, ownerUserId)) {
+        if (!canAccessPortfolioProject(project, owner.id)) {
           setState({
             loading: false,
             error: "unavailable",
@@ -219,8 +198,8 @@ export const PublicPortfolioProject = () => {
   const { project, owner, slug } = state;
   const hasCover = hasProjectCover(project.coverImage);
   const officeName =
-    owner?.companyName?.trim() || owner?.name?.trim() || "";
-  const officeBio = owner?.companyBio?.trim() ?? "";
+    owner?.companyName?.trim() || owner?.displayName?.trim() || "";
+  const officeBio = owner?.bio?.trim() ?? "";
 
   return (
     <PublicPageShell>

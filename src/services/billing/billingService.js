@@ -1,18 +1,14 @@
 /**
- * Serviço de billing agnóstico ao provedor — placeholders até integração.
+ * Serviço de billing via Mercado Pago — placeholders até integração.
  *
  * Integração futura (via Cloud Functions / backend):
- *
- * Stripe:
- * - createCheckoutSession → Stripe Checkout
- * - createBillingPortalSession → Stripe Customer Portal
- *
- * Mercado Pago:
- * - createCheckoutSession → assinatura/preapproval ou checkout MP
+ * - createCheckoutSession → assinatura recorrente / preapproval Mercado Pago
  * - createBillingPortalSession → página própria ou link externo de gestão
+ * - cancelSubscription → cancelamento ao final do período
+ * - getBillingSummary / getInvoices → agrega Firestore + Mercado Pago
  *
  * @see src/config/billing.js
- * @see docs/billing-provider-plan.md
+ * @see docs/mercado-pago-billing-plan.md
  */
 
 import { BILLING_NOT_ACTIVE_MESSAGE } from "@/config/billing";
@@ -30,7 +26,7 @@ export async function createCheckoutSession(planId) {
 }
 
 /**
- * Abre portal de gestão de cobrança do provedor ativo.
+ * Abre portal de gestão de assinatura.
  * @returns {Promise<{ ok: false, message: string } | { ok: true, url: string }>}
  */
 export async function createBillingPortalSession() {
@@ -38,7 +34,7 @@ export async function createBillingPortalSession() {
 }
 
 /**
- * Solicita cancelamento ao final do período (ou imediato, conforme provedor).
+ * Solicita cancelamento ao final do período (ou imediato, conforme política MP).
  * @returns {Promise<{ ok: false, message: string }>}
  */
 export async function cancelSubscription() {
@@ -46,7 +42,7 @@ export async function cancelSubscription() {
 }
 
 /**
- * Resumo de billing para a UI (Firestore + provedor quando ativo).
+ * Resumo de billing para a UI (Firestore + Mercado Pago quando ativo).
  * @returns {Promise<{ ok: false, message: string } | { ok: true, summary: object }>}
  */
 export async function getBillingSummary() {

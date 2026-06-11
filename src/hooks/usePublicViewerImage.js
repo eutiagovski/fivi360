@@ -5,7 +5,6 @@ import {
 } from "@/services/images/imageService";
 import { getProjectById } from "@/services/projects/projectService";
 import { getPublicUserBySlug } from "@/services/users/userService";
-import { resolveSlugToUid } from "@/services/slugs/slugService";
 import { isPortfolioPubliclyAvailable } from "@/utils/portfolio";
 import {
   canAccessPortfolioImage,
@@ -127,20 +126,9 @@ export function usePublicViewerImage(imageId, options = {}) {
             return;
           }
 
-          const ownerUserId = await resolveSlugToUid(slug);
-
-          if (!ownerUserId) {
-            setError("unavailable");
-            return;
-          }
-
           const owner = await getPublicUserBySlug(slug);
 
-          if (
-            !owner ||
-            owner.id !== ownerUserId ||
-            !isPortfolioPubliclyAvailable(owner)
-          ) {
+          if (!owner || !isPortfolioPubliclyAvailable(owner)) {
             setError("unavailable");
             return;
           }
@@ -148,7 +136,7 @@ export function usePublicViewerImage(imageId, options = {}) {
           hasAccess = canAccessPortfolioImage(
             imageData,
             projectData,
-            ownerUserId,
+            owner.id,
           );
           projectContext = hasAccess;
         }
