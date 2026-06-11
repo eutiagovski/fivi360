@@ -11,6 +11,7 @@ rules_version = '2';
 //   projects/{projectId}
 //   images/{imageId}
 //   images/{imageId}/hotspots/{hotspotId}
+//   emailQueue/{emailId}          — fila de e-mails transacionais (Resend)
 //
 // Split get vs list: queries precisam provar estaticamente os predicados
 // usados em allow list. Ver docs/security-rules-notes.md.
@@ -57,6 +58,22 @@ service cloud.firestore {
       return slug.matches('^[a-z0-9]+(-[a-z0-9]+)*$');
     }
 
+    function isAllowedClientEmailType(type) {
+      return type in ['welcome', 'billing_upgrade_requested'];
+    }
+
+    function isValidEmailQueueCreate() {
+      return request.resource.data.keys().hasAll(['type', 'to', 'userId', 'payload', 'status', 'createdAt'])
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.to == request.auth.token.email
+        && request.resource.data.status == 'pending'
+        && isAllowedClientEmailType(request.resource.data.type)
+        && request.resource.data.to is string
+        && request.resource.data.payload is map
+        && request.resource.data.createdAt is timestamp
+        && !request.resource.data.keys().hasAny(['sentAt', 'resendId', 'error']);
+    }
+
     // Portfólio /u/:slug — listagem de projetos públicos exige portfolioEnabled.
     // get individual de projeto shared/public (ex.: /share/project) não usa este helper.
     function portfolioEnabledForOwner(userId) {
@@ -84,6 +101,19 @@ service cloud.firestore {
     function imageListableInPublicProject(imageData) {
       return imageData.projectId != null
         && isPublicProject(imageData.projectId);
+    }
+
+    // ---------- emailQueue (transacional — ver docs/resend-email-plan.md) ----------
+    // Fase 1: create restrito no cliente; leitura/update/delete só via Admin SDK (Functions).
+    // Risco: usuário pode enfileirar e-mails repetidos para si — migrar enqueue para Functions.
+
+    match /emailQueue/{emailId} {
+
+      allow get, list: if false;
+
+      allow create: if isSignedIn() && isValidEmailQueueCreate();
+
+      allow update, delete: if false;
     }
 
     // ---------- publicProfiles ----------

@@ -380,14 +380,14 @@ export const Images = () => {
             </div>
           )}
 
-          {!hasMore && !loadingMore && (
+          {/* {!hasMore && !loadingMore && (
             <p
               className="text-center text-sm text-zinc-500 py-8"
               data-testid="images-all-loaded"
             >
               Todos os itens foram carregados.
             </p>
-          )}
+          )} */}
         </>
       ) : null}
 
