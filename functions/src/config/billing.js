@@ -96,6 +96,58 @@ function requireMercadoPagoPlanId(planId) {
   return getMercadoPagoPlanId(planId);
 }
 
+/**
+ * Resolve plano interno a partir do ID do plano Mercado Pago.
+ * @param {string | null | undefined} mpPlanId
+ * @returns {"professional" | "enterprise" | null}
+ */
+function resolvePlanIdFromMpPlanId(mpPlanId) {
+  const normalized = String(mpPlanId || "").trim();
+  if (!normalized) {
+    return null;
+  }
+
+  for (const planId of BILLING_UPGRADE_PLAN_IDS) {
+    if (getMercadoPagoPlanId(planId) === normalized) {
+      return planId;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Status MP de preapproval → status interno de assinatura.
+ * @param {string | null | undefined} mpStatus
+ * @returns {"inactive" | "active" | "trialing" | "past_due" | "canceled" | "unpaid"}
+ */
+function mapMercadoPagoPreapprovalStatus(mpStatus) {
+  const normalized = String(mpStatus || "").trim().toLowerCase();
+
+  switch (normalized) {
+    case "authorized":
+    case "approved":
+      return "active";
+    case "pending":
+      return "inactive";
+    case "paused":
+      return "past_due";
+    case "cancelled":
+    case "canceled":
+      return "canceled";
+    default:
+      return "inactive";
+  }
+}
+
+/**
+ * @param {string | null | undefined} mpStatus
+ * @returns {boolean}
+ */
+function isMercadoPagoPaymentApproved(mpStatus) {
+  return String(mpStatus || "").trim().toLowerCase() === "approved";
+}
+
 module.exports = {
   ACTIVE_SUBSCRIPTION_STATUSES,
   BILLING_UPGRADE_PLAN_IDS,
@@ -104,5 +156,8 @@ module.exports = {
   getMercadoPagoPlanId,
   hasMercadoPagoPlanConfiguration,
   isBillingUpgradePlanId,
+  isMercadoPagoPaymentApproved,
+  mapMercadoPagoPreapprovalStatus,
   requireMercadoPagoPlanId,
+  resolvePlanIdFromMpPlanId,
 };

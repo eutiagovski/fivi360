@@ -2,7 +2,7 @@ const crypto = require("crypto");
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { logger } = require("firebase-functions");
 const { initializeApp, getApps } = require("firebase-admin/app");
-const { getFirestore, FieldValue } = require("firebase-admin/firestore");
+const { getFirestore, FieldValue, Timestamp } = require("firebase-admin/firestore");
 const {
   ACTIVE_SUBSCRIPTION_STATUSES,
   getMercadoPagoPlanConfigError,
@@ -114,14 +114,23 @@ exports.createSubscriptionCheckout = onCall(
     }
 
     const sessionId = crypto.randomUUID();
+    const expiresAt = Timestamp.fromDate(new Date(Date.now() + 24 * 60 * 60 * 1000));
 
     await db.collection("billingCheckoutSessions").doc(sessionId).set({
+      sessionId,
       userId,
+      email: payerEmail,
       planId,
       mpPlanId,
       provider: "mercado_pago",
       status: "created",
+      checkoutUrl,
+      completedAt: null,
+      providerSubscriptionId: null,
+      providerPaymentId: null,
+      expiresAt,
       createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
     });
 
     logger.info("createSubscriptionCheckout: session created", {
@@ -132,10 +141,8 @@ exports.createSubscriptionCheckout = onCall(
     });
 
     return {
+      sessionId,
       checkoutUrl,
-      provider: "mercado_pago",
-      planId,
-      mpPlanId,
     };
   },
 );

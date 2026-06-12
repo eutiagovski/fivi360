@@ -13,6 +13,8 @@ rules_version = '2';
 //   emailQueue/{emailId}          — fila de e-mails transacionais (Resend)
 //   subscriptions/{userId}        — assinatura Mercado Pago (1 doc por usuário)
 //   invoices/{invoiceId}          — faturas/cobranças por usuário
+//   billingCheckoutSessions/{sessionId} — tentativas de checkout antes do redirect MP
+//   billingWebhookEvents/{eventId}      — payloads brutos de webhook MP (diagnóstico)
 //
 // Split get vs list: queries precisam provar estaticamente os predicados
 // usados em allow list. Ver docs/security-rules-notes.md.
@@ -133,6 +135,15 @@ service cloud.firestore {
         && request.query.filters[0].value == request.auth.uid;
     }
 
+    // Query billingCheckoutSessions where userId == auth.uid.
+    function isOwnerCheckoutSessionListQuery() {
+      return request.query.limit <= 50
+        && request.query.filters.size() == 1
+        && request.query.filters[0].fieldPath == 'userId'
+        && request.query.filters[0].op == '=='
+        && request.query.filters[0].value == request.auth.uid;
+    }
+
     // ---------- subscriptions (billing — ver docs/billing-foundation.md) ----------
     // Leitura: owner. Escrita: apenas Admin SDK / Cloud Functions.
 
@@ -157,6 +168,29 @@ service cloud.firestore {
         && resource.data.userId == request.auth.uid;
 
       allow create, update, delete: if false;
+    }
+
+    // ---------- billingCheckoutSessions (billing — rastreio de checkout MP) ----------
+    // Leitura: owner. Escrita: apenas Admin SDK / Cloud Functions.
+
+    match /billingCheckoutSessions/{sessionId} {
+
+      allow get: if isSignedIn()
+        && resource.data.userId == request.auth.uid;
+
+      allow list: if isSignedIn()
+        && isOwnerCheckoutSessionListQuery()
+        && resource.data.userId == request.auth.uid;
+
+      allow create, update, delete: if false;
+    }
+
+    // ---------- billingWebhookEvents (billing — diagnóstico webhook MP) ----------
+    // Somente Admin SDK / Cloud Functions.
+
+    match /billingWebhookEvents/{eventId} {
+
+      allow get, list, create, update, delete: if false;
     }
 
     // ---------- emailQueue (transacional — ver docs/resend-email-plan.md) ----------

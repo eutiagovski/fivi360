@@ -39,6 +39,7 @@
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
     "firebase": "^12.14.0",
+    "firebase-functions": "^7.2.5",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.507.0",
     "next-themes": "^0.4.6",
@@ -62,6 +63,7 @@
     "test": "craco test",
     "dev": "craco start && firebase emulators:start --export-on-exit --import=./firebase-data",
     "emulators": "firebase emulators:start --export-on-exit --import=./firebase-data",
+    "ngrok:webhook": "powershell -ExecutionPolicy Bypass -File ./scripts/start-ngrok-webhook.ps1",
     "deploy": "firebase deploy --only hosting"
   },
   "browserslist": {

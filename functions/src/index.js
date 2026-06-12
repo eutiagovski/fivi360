@@ -10,6 +10,8 @@ const { getMercadoPagoStatus } = require("./getMercadoPagoStatus");
 const { getMercadoPagoAccountInfo } = require("./getMercadoPagoAccountInfo");
 const { createMercadoPagoPlan } = require("./createMercadoPagoPlan");
 const { createSubscriptionCheckout } = require("./createSubscriptionCheckout");
+const { mercadoPagoWebhook } = require("./mercadoPagoWebhook");
+const { syncMercadoPagoSubscription } = require("./syncMercadoPagoSubscription");
 
 exports.processEmailQueue = processEmailQueue;
 exports.requestPasswordResetEmail = requestPasswordResetEmail;
@@ -17,3 +19,5 @@ exports.getMercadoPagoStatus = getMercadoPagoStatus;
 exports.getMercadoPagoAccountInfo = getMercadoPagoAccountInfo;
 exports.createMercadoPagoPlan = createMercadoPagoPlan;
 exports.createSubscriptionCheckout = createSubscriptionCheckout;
+exports.mercadoPagoWebhook = mercadoPagoWebhook;
+exports.syncMercadoPagoSubscription = syncMercadoPagoSubscription;
