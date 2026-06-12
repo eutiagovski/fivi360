@@ -51,6 +51,7 @@ async function mercadoPagoApiRequest(accessToken, path, options = {}) {
  *   planId: string,
  *   payerEmail: string,
  *   backUrl: string,
+ *   sessionId?: string,
  * }} params
  * @returns {Promise<{ checkoutUrl: string, preapprovalId: string }>}
  */
@@ -62,8 +63,16 @@ async function createSubscriptionPreapproval({
   planId,
   payerEmail,
   backUrl,
+  sessionId,
 }) {
+  /** @type {{ userId: string, planId: string, sessionId?: string }} */
   const metadata = { userId, planId };
+  const normalizedSessionId = typeof sessionId === "string" ? sessionId.trim() : "";
+
+  if (normalizedSessionId) {
+    metadata.sessionId = normalizedSessionId;
+  }
+
   const externalReference = JSON.stringify(metadata);
   const reason = `FIVI360 — Plano ${planConfig.name}`;
 

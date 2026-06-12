@@ -24,7 +24,7 @@ if (getApps().length === 0) {
 
 /**
  * Inicia checkout hospedado pelo Mercado Pago (init_point do plano).
- * Não cria assinatura via POST /preapproval — webhook futuro atualiza billing.
+ * Não cria assinatura via POST /preapproval — webhook atualiza billing.
  */
 exports.createSubscriptionCheckout = onCall(
   {

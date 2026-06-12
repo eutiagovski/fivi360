@@ -12,8 +12,68 @@ function normalizeEmail(email) {
 const CHECKOUT_SESSION_STATUSES = new Set(["created", "pending"]);
 
 /**
+ * @param {{ expiresAt?: import("firebase-admin/firestore").Timestamp }} session
+ * @returns {boolean}
+ */
+function isCheckoutSessionExpired(session) {
+  const expiresAt = session.expiresAt;
+
+  if (!expiresAt || typeof expiresAt.toMillis !== "function") {
+    return false;
+  }
+
+  return expiresAt.toMillis() < Date.now();
+}
+
+/**
+ * @param {{ status?: string }} session
+ * @returns {boolean}
+ */
+function isCheckoutSessionStatusEligible(session) {
+  return CHECKOUT_SESSION_STATUSES.has(String(session.status || ""));
+}
+
+/**
+ * @param {{ email?: string, mpPlanId?: string }} session
+ * @param {{ payerEmail: string, mpPlanId: string, requireBoth: boolean }} criteria
+ * @returns {boolean}
+ */
+function sessionMatchesCheckoutCriteria(session, { payerEmail, mpPlanId, requireBoth }) {
+  const sessionEmail = typeof session.email === "string" ? session.email.trim() : "";
+  const sessionMpPlanId = typeof session.mpPlanId === "string" ? session.mpPlanId.trim() : "";
+  const normalizedPayerEmail = normalizeEmail(payerEmail);
+  const normalizedMpPlanId = String(mpPlanId || "").trim();
+
+  if (requireBoth) {
+    const emailMatches =
+      Boolean(normalizedPayerEmail) && normalizeEmail(sessionEmail) === normalizedPayerEmail;
+    const planMatches = Boolean(normalizedMpPlanId) && sessionMpPlanId === normalizedMpPlanId;
+
+    return emailMatches && planMatches;
+  }
+
+  const emailMatches =
+    !normalizedPayerEmail || normalizeEmail(sessionEmail) === normalizedPayerEmail;
+  const planMatches = !normalizedMpPlanId || sessionMpPlanId === normalizedMpPlanId;
+
+  return emailMatches && planMatches;
+}
+
+/**
+ * @param {{ createdAt?: import("firebase-admin/firestore").Timestamp }} left
+ * @param {{ createdAt?: import("firebase-admin/firestore").Timestamp }} right
+ * @returns {number}
+ */
+function compareCheckoutSessionsByRecency(left, right) {
+  const leftTime = left.createdAt?.toMillis?.() ?? 0;
+  const rightTime = right.createdAt?.toMillis?.() ?? 0;
+
+  return rightTime - leftTime;
+}
+
+/**
  * @param {string | null | undefined} externalReference
- * @returns {{ userId: string, planId: string } | null}
+ * @returns {{ userId: string, planId: string, sessionId?: string } | null}
  */
 function parseExternalReference(externalReference) {
   const raw = String(externalReference || "").trim();
@@ -30,12 +90,14 @@ function parseExternalReference(externalReference) {
 
     const userId = typeof parsed.userId === "string" ? parsed.userId.trim() : "";
     const planId = typeof parsed.planId === "string" ? parsed.planId.trim() : "";
+    const sessionId =
+      typeof parsed.sessionId === "string" ? parsed.sessionId.trim() : "";
 
     if (!userId) {
       return null;
     }
 
-    return { userId, planId };
+    return sessionId ? { userId, planId, sessionId } : { userId, planId };
   } catch {
     return null;
   }
@@ -43,7 +105,7 @@ function parseExternalReference(externalReference) {
 
 /**
  * @param {Record<string, unknown> | null | undefined} metadata
- * @returns {{ userId: string, planId: string } | null}
+ * @returns {{ userId: string, planId: string, sessionId?: string } | null}
  */
 function parseMetadata(metadata) {
   if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) {
@@ -52,12 +114,14 @@ function parseMetadata(metadata) {
 
   const userId = typeof metadata.userId === "string" ? metadata.userId.trim() : "";
   const planId = typeof metadata.planId === "string" ? metadata.planId.trim() : "";
+  const sessionId =
+    typeof metadata.sessionId === "string" ? metadata.sessionId.trim() : "";
 
   if (!userId) {
     return null;
   }
 
-  return { userId, planId };
+  return sessionId ? { userId, planId, sessionId } : { userId, planId };
 }
 
 /**
@@ -66,12 +130,14 @@ function parseMetadata(metadata) {
  * @returns {Promise<{ sessionId: string, userId: string, planId: string } | null>}
  */
 async function findCheckoutSession(db, { payerEmail, mpPlanId }) {
-  const email = normalizeEmail(payerEmail);
+  const normalizedPayerEmail = normalizeEmail(payerEmail);
   const normalizedMpPlanId = String(mpPlanId || "").trim();
 
-  if (!email && !normalizedMpPlanId) {
+  if (!normalizedPayerEmail && !normalizedMpPlanId) {
     return null;
   }
+
+  const requireBoth = Boolean(normalizedPayerEmail && normalizedMpPlanId);
 
   let snapshot;
 
@@ -84,7 +150,7 @@ async function findCheckoutSession(db, { payerEmail, mpPlanId }) {
   } else {
     snapshot = await db
       .collection("billingCheckoutSessions")
-      .where("email", "==", payerEmail)
+      .where("email", "==", String(payerEmail || "").trim())
       .limit(50)
       .get();
   }
@@ -95,14 +161,16 @@ async function findCheckoutSession(db, { payerEmail, mpPlanId }) {
 
   const candidates = snapshot.docs
     .map((doc) => ({ sessionId: doc.id, ...doc.data() }))
-    .filter((session) => CHECKOUT_SESSION_STATUSES.has(String(session.status || "")))
-    .filter((session) => !email || normalizeEmail(session.email) === email)
-    .filter((session) => !normalizedMpPlanId || session.mpPlanId === normalizedMpPlanId)
-    .sort((left, right) => {
-      const leftTime = left.createdAt?.toMillis?.() ?? 0;
-      const rightTime = right.createdAt?.toMillis?.() ?? 0;
-      return rightTime - leftTime;
-    });
+    .filter((session) => isCheckoutSessionStatusEligible(session))
+    .filter((session) => !isCheckoutSessionExpired(session))
+    .filter((session) =>
+      sessionMatchesCheckoutCriteria(session, {
+        payerEmail: String(payerEmail || ""),
+        mpPlanId: normalizedMpPlanId,
+        requireBoth,
+      }),
+    )
+    .sort(compareCheckoutSessionsByRecency);
 
   const match = candidates[0];
   if (!match?.userId || !match?.planId) {
@@ -179,7 +247,7 @@ async function resolveUserAndPlan(db, params) {
       userId: fromReference.userId,
       planId: fromReference.planId || resolvePlanIdFromMpPlanId(mpPlanId),
       matchSource: "external_reference",
-      sessionId: null,
+      sessionId: fromReference.sessionId || null,
     };
   }
 
@@ -189,7 +257,7 @@ async function resolveUserAndPlan(db, params) {
       userId: fromMetadata.userId,
       planId: fromMetadata.planId || resolvePlanIdFromMpPlanId(mpPlanId),
       matchSource: "metadata",
-      sessionId: null,
+      sessionId: fromMetadata.sessionId || null,
     };
   }
 
