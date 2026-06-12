@@ -32,10 +32,16 @@ import { LandingRoute } from './components/auth/LandingRoute';
 import { TermsOfUse } from './pages/TermsOfUse';
 import { PrivacyPolicy } from './pages/PrivacyPolicy';
 import { NotFound } from './pages/NotFound';
+import { MercadoPagoStatusDevPanel } from './components/dev/MercadoPagoStatusDevPanel';
+
+const showMercadoPagoDevPanel =
+  process.env.NODE_ENV === "development" &&
+  process.env.REACT_APP_USE_FIREBASE_EMULATORS === "true";
 
 function App() {
   return (
     <div className="App">
+      {showMercadoPagoDevPanel && <MercadoPagoStatusDevPanel />}
       <Toaster />
       <BrowserRouter>
         <Routes>

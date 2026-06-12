@@ -11,6 +11,8 @@ rules_version = '2';
 //   images/{imageId}
 //   images/{imageId}/hotspots/{hotspotId}
 //   emailQueue/{emailId}          — fila de e-mails transacionais (Resend)
+//   subscriptions/{userId}        — assinatura Mercado Pago (1 doc por usuário)
+//   invoices/{invoiceId}          — faturas/cobranças por usuário
 //
 // Split get vs list: queries precisam provar estaticamente os predicados
 // usados em allow list. Ver docs/security-rules-notes.md.
@@ -120,6 +122,41 @@ service cloud.firestore {
     function imageListableInPublicProject(imageData) {
       return imageData.projectId != null
         && isPublicProject(imageData.projectId);
+    }
+
+    // Query invoices where userId == auth.uid (histórico de cobrança).
+    function isOwnerInvoiceListQuery() {
+      return request.query.limit <= 50
+        && request.query.filters.size() == 1
+        && request.query.filters[0].fieldPath == 'userId'
+        && request.query.filters[0].op == '=='
+        && request.query.filters[0].value == request.auth.uid;
+    }
+
+    // ---------- subscriptions (billing — ver docs/billing-foundation.md) ----------
+    // Leitura: owner. Escrita: apenas Admin SDK / Cloud Functions.
+
+    match /subscriptions/{userId} {
+
+      allow get: if isOwner(userId);
+      allow list: if false;
+
+      allow create, update, delete: if false;
+    }
+
+    // ---------- invoices (billing — ver docs/billing-foundation.md) ----------
+    // Leitura: owner. Escrita: apenas Admin SDK / Cloud Functions.
+
+    match /invoices/{invoiceId} {
+
+      allow get: if isSignedIn()
+        && resource.data.userId == request.auth.uid;
+
+      allow list: if isSignedIn()
+        && isOwnerInvoiceListQuery()
+        && resource.data.userId == request.auth.uid;
+
+      allow create, update, delete: if false;
     }
 
     // ---------- emailQueue (transacional — ver docs/resend-email-plan.md) ----------

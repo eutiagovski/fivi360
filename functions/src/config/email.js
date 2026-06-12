@@ -19,7 +19,17 @@ const EMAIL_TYPES = {
   SUBSCRIPTION_CANCELED: "subscription_canceled",
 };
 
-/** Tipos com template implementado. */
+/**
+ * Tipos com template implementado.
+ *
+ * TODO (billing sprint futura — ver docs/billing-foundation.md):
+ * - payment_success   → confirmação de pagamento / fatura paga
+ * - payment_failed    → falha na cobrança recorrente
+ * - subscription_canceled → confirmação de cancelamento
+ *
+ * Disparo previsto via webhook Mercado Pago → Cloud Function → emailQueue.
+ * Não enviar e-mails de billing nesta sprint.
+ */
 const IMPLEMENTED_EMAIL_TYPES = new Set([
   EMAIL_TYPES.WELCOME,
   EMAIL_TYPES.VERIFY_EMAIL,

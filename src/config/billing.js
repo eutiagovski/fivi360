@@ -2,27 +2,56 @@
  * Configuração e modelo de billing — Mercado Pago.
  */
 
-import { PLAN_IDS } from "@/config/planLimits";
+import { PLAN_IDS, normalizePlanId } from "@/config/planLimits";
 
 export const BILLING_PROVIDER = "mercado_pago";
 
-export const BILLING_STATUS = {
-  FREE: "free",
-  TRIALING: "trialing",
+export const PLAN_STATUS = {
   ACTIVE: "active",
+  TRIALING: "trialing",
   PAST_DUE: "past_due",
   CANCELED: "canceled",
   UNPAID: "unpaid",
 };
 
+export const PLAN_SOURCE = {
+  SYSTEM: "system",
+  MERCADO_PAGO: "mercado_pago",
+  MANUAL_ADMIN: "manual_admin",
+};
+
+export const SUBSCRIPTION_STATUS = {
+  INACTIVE: "inactive",
+  ACTIVE: "active",
+  TRIALING: "trialing",
+  PAST_DUE: "past_due",
+  CANCELED: "canceled",
+  UNPAID: "unpaid",
+};
+
+export const INVOICE_STATUS = {
+  PENDING: "pending",
+  PAID: "paid",
+  FAILED: "failed",
+  REFUNDED: "refunded",
+  CANCELED: "canceled",
+};
+
 export const BILLING_PLANS = {
+  starter: {
+    id: "starter",
+    name: "Starter",
+    price: 0,
+    currency: "BRL",
+    interval: "month",
+  },
   professional: {
     id: "professional",
     name: "Professional",
     price: 49,
     currency: "BRL",
     interval: "month",
-    mercadoPagoPlanIdEnv: "REACT_APP_MP_PLAN_PROFESSIONAL",
+    mercadoPagoPlanEnv: "REACT_APP_MP_PLAN_PROFESSIONAL",
   },
   enterprise: {
     id: "enterprise",
@@ -30,40 +59,66 @@ export const BILLING_PLANS = {
     price: 149,
     currency: "BRL",
     interval: "month",
-    mercadoPagoPlanIdEnv: "REACT_APP_MP_PLAN_ENTERPRISE",
+    mercadoPagoPlanEnv: "REACT_APP_MP_PLAN_ENTERPRISE",
   },
 };
 
-/** @typedef {typeof BILLING_STATUS[keyof typeof BILLING_STATUS] | string} SubscriptionStatus */
+/**
+ * @typedef {typeof PLAN_STATUS[keyof typeof PLAN_STATUS]} PlanStatus
+ * @typedef {typeof PLAN_SOURCE[keyof typeof PLAN_SOURCE]} PlanSource
+ * @typedef {typeof SUBSCRIPTION_STATUS[keyof typeof SUBSCRIPTION_STATUS]} SubscriptionStatus
+ * @typedef {typeof INVOICE_STATUS[keyof typeof INVOICE_STATUS]} InvoiceStatus
+ */
 
 /**
- * @typedef {Object} UserBilling
- * @property {string} provider
- * @property {string} customerId
- * @property {string} subscriptionId
- * @property {string} planId
- * @property {SubscriptionStatus} subscriptionStatus
- * @property {import("firebase/firestore").Timestamp | Date | string | null} currentPeriodStart
+ * @typedef {Object} UserPlan
+ * @property {import("@/config/planLimits").PlanId} id
+ * @property {PlanStatus} status
+ * @property {PlanSource} source
+ * @property {import("firebase/firestore").Timestamp | Date | string | null} startedAt
  * @property {import("firebase/firestore").Timestamp | Date | string | null} currentPeriodEnd
- * @property {import("firebase/firestore").Timestamp | Date | string | null} nextInvoiceDate
- * @property {boolean} cancelAtPeriodEnd
- * @property {string} lastInvoiceUrl
- * @property {string} lastPaymentStatus
  * @property {import("firebase/firestore").Timestamp | Date | string | null} updatedAt
  */
 
-export const DEFAULT_BILLING = {
-  provider: BILLING_PROVIDER,
-  customerId: "",
-  subscriptionId: "",
-  planId: "",
-  subscriptionStatus: BILLING_STATUS.FREE,
-  currentPeriodStart: null,
+/**
+ * @typedef {Object} Subscription
+ * @property {string} userId
+ * @property {string} provider
+ * @property {import("@/config/planLimits").PlanId} planId
+ * @property {SubscriptionStatus} status
+ * @property {string | null} providerSubscriptionId
+ * @property {string | null} payerId
+ * @property {import("firebase/firestore").Timestamp | Date | string | null} currentPeriodStart
+ * @property {import("firebase/firestore").Timestamp | Date | string | null} currentPeriodEnd
+ * @property {boolean} cancelAtPeriodEnd
+ * @property {import("firebase/firestore").Timestamp | Date | string | null} canceledAt
+ * @property {import("firebase/firestore").Timestamp | Date | string | null} createdAt
+ * @property {import("firebase/firestore").Timestamp | Date | string | null} updatedAt
+ */
+
+/**
+ * @typedef {Object} Invoice
+ * @property {string} id
+ * @property {string} userId
+ * @property {string | null} subscriptionId
+ * @property {string} provider
+ * @property {string | null} providerPaymentId
+ * @property {import("@/config/planLimits").PlanId} planId
+ * @property {number} amount
+ * @property {string} currency
+ * @property {InvoiceStatus} status
+ * @property {import("firebase/firestore").Timestamp | Date | string | null} paidAt
+ * @property {string | null} invoiceUrl
+ * @property {import("firebase/firestore").Timestamp | Date | string | null} createdAt
+ * @property {import("firebase/firestore").Timestamp | Date | string | null} updatedAt
+ */
+
+export const DEFAULT_USER_PLAN = {
+  id: PLAN_IDS.STARTER,
+  status: PLAN_STATUS.ACTIVE,
+  source: PLAN_SOURCE.SYSTEM,
+  startedAt: null,
   currentPeriodEnd: null,
-  nextInvoiceDate: null,
-  cancelAtPeriodEnd: false,
-  lastInvoiceUrl: "",
-  lastPaymentStatus: "",
   updatedAt: null,
 };
 
@@ -87,15 +142,21 @@ export const PLAN_MONTHLY_PRICE_LABELS = {
 };
 
 export const SUBSCRIPTION_STATUS_LABELS = {
-  [BILLING_STATUS.FREE]: "Sem assinatura ativa",
-  [BILLING_STATUS.ACTIVE]: "Ativa",
-  [BILLING_STATUS.TRIALING]: "Período de teste",
-  [BILLING_STATUS.PAST_DUE]: "Pagamento pendente",
-  [BILLING_STATUS.CANCELED]: "Cancelada",
-  [BILLING_STATUS.UNPAID]: "Não paga",
+  [SUBSCRIPTION_STATUS.INACTIVE]: "Sem assinatura ativa",
+  [SUBSCRIPTION_STATUS.ACTIVE]: "Ativa",
+  [SUBSCRIPTION_STATUS.TRIALING]: "Período de teste",
+  [SUBSCRIPTION_STATUS.PAST_DUE]: "Pagamento pendente",
+  [SUBSCRIPTION_STATUS.CANCELED]: "Cancelada",
+  [SUBSCRIPTION_STATUS.UNPAID]: "Não paga",
 };
 
-export const BILLING_NOT_ACTIVE_MESSAGE = "Billing ainda não está ativo.";
+export const INVOICE_STATUS_LABELS = {
+  [INVOICE_STATUS.PENDING]: "Pendente",
+  [INVOICE_STATUS.PAID]: "Pago",
+  [INVOICE_STATUS.FAILED]: "Falhou",
+  [INVOICE_STATUS.REFUNDED]: "Reembolsado",
+  [INVOICE_STATUS.CANCELED]: "Cancelado",
+};
 
 export const PAYMENTS_COMING_SOON_MESSAGE =
   "Pagamentos serão ativados em breve.";
@@ -122,63 +183,195 @@ export function isBillingUpgradePlanId(planId) {
 }
 
 /**
+ * Normaliza `users.plan` — aceita string legada ou objeto.
+ *
+ * @param {unknown} raw — string ("starter") ou objeto UserPlan
+ * @returns {UserPlan}
+ */
+export function normalizeUserPlan(raw) {
+  if (typeof raw === "string") {
+    return {
+      ...DEFAULT_USER_PLAN,
+      id: normalizePlanId(raw),
+    };
+  }
+
+  if (!raw || typeof raw !== "object") {
+    return { ...DEFAULT_USER_PLAN };
+  }
+
+  const data = /** @type {Record<string, unknown>} */ (raw);
+
+  return {
+    id: normalizePlanId(
+      typeof data.id === "string" ? data.id : DEFAULT_USER_PLAN.id,
+    ),
+    status:
+      typeof data.status === "string" &&
+      Object.values(PLAN_STATUS).includes(
+        /** @type {PlanStatus} */ (data.status),
+      )
+        ? /** @type {PlanStatus} */ (data.status)
+        : DEFAULT_USER_PLAN.status,
+    source:
+      typeof data.source === "string" &&
+      Object.values(PLAN_SOURCE).includes(
+        /** @type {PlanSource} */ (data.source),
+      )
+        ? /** @type {PlanSource} */ (data.source)
+        : DEFAULT_USER_PLAN.source,
+    startedAt: data.startedAt ?? null,
+    currentPeriodEnd: data.currentPeriodEnd ?? null,
+    updatedAt: data.updatedAt ?? null,
+  };
+}
+
+/**
+ * @param {UserPlan | import("@/config/planLimits").PlanId | string | null | undefined} plan
+ * @returns {boolean}
+ */
+export function isPaidPlan(plan) {
+  const planId =
+    typeof plan === "object" && plan !== null && "id" in plan
+      ? plan.id
+      : normalizePlanId(
+          typeof plan === "string" ? plan : DEFAULT_USER_PLAN.id,
+        );
+
+  return planId !== PLAN_IDS.STARTER;
+}
+
+/**
+ * @param {Subscription | null | undefined} subscription
+ * @returns {boolean}
+ */
+export function isSubscriptionActive(subscription) {
+  if (!subscription) {
+    return false;
+  }
+
+  return (
+    subscription.status === SUBSCRIPTION_STATUS.ACTIVE ||
+    subscription.status === SUBSCRIPTION_STATUS.TRIALING
+  );
+}
+
+/**
  * Resolve o ID do plano de assinatura no Mercado Pago (env no build).
  * @param {keyof typeof BILLING_PLANS} planKey
  * @returns {string}
  */
 export function getMercadoPagoPlanId(planKey) {
   const config = BILLING_PLANS[planKey];
-  if (!config) {
+  if (!config || !("mercadoPagoPlanEnv" in config)) {
     return "";
   }
 
-  return process.env[config.mercadoPagoPlanIdEnv] ?? "";
+  return process.env[config.mercadoPagoPlanEnv] ?? "";
 }
 
 /**
  * @param {unknown} raw
- * @returns {UserBilling}
+ * @returns {Subscription | null}
  */
-export function normalizeBilling(raw) {
+export function normalizeSubscription(raw) {
   if (!raw || typeof raw !== "object") {
-    return { ...DEFAULT_BILLING };
+    return null;
   }
 
   const data = /** @type {Record<string, unknown>} */ (raw);
 
   return {
+    userId: typeof data.userId === "string" ? data.userId : "",
     provider:
       typeof data.provider === "string" && data.provider
         ? data.provider
         : BILLING_PROVIDER,
-    customerId: typeof data.customerId === "string" ? data.customerId : "",
-    subscriptionId:
-      typeof data.subscriptionId === "string" ? data.subscriptionId : "",
-    planId: typeof data.planId === "string" ? data.planId : "",
-    subscriptionStatus:
-      typeof data.subscriptionStatus === "string"
-        ? data.subscriptionStatus
-        : DEFAULT_BILLING.subscriptionStatus,
+    planId: normalizePlanId(
+      typeof data.planId === "string" ? data.planId : PLAN_IDS.STARTER,
+    ),
+    status:
+      typeof data.status === "string"
+        ? /** @type {SubscriptionStatus} */ (data.status)
+        : SUBSCRIPTION_STATUS.INACTIVE,
+    providerSubscriptionId:
+      typeof data.providerSubscriptionId === "string"
+        ? data.providerSubscriptionId
+        : null,
+    payerId: typeof data.payerId === "string" ? data.payerId : null,
     currentPeriodStart: data.currentPeriodStart ?? null,
     currentPeriodEnd: data.currentPeriodEnd ?? null,
-    nextInvoiceDate: data.nextInvoiceDate ?? null,
     cancelAtPeriodEnd: Boolean(data.cancelAtPeriodEnd),
-    lastInvoiceUrl:
-      typeof data.lastInvoiceUrl === "string" ? data.lastInvoiceUrl : "",
-    lastPaymentStatus:
-      typeof data.lastPaymentStatus === "string" ? data.lastPaymentStatus : "",
+    canceledAt: data.canceledAt ?? null,
+    createdAt: data.createdAt ?? null,
     updatedAt: data.updatedAt ?? null,
   };
 }
 
 /**
- * @param {SubscriptionStatus | undefined | null} status
+ * @param {string} id
+ * @param {unknown} raw
+ * @returns {Invoice}
+ */
+export function normalizeInvoice(id, raw) {
+  const data =
+    raw && typeof raw === "object"
+      ? /** @type {Record<string, unknown>} */ (raw)
+      : {};
+
+  return {
+    id,
+    userId: typeof data.userId === "string" ? data.userId : "",
+    subscriptionId:
+      typeof data.subscriptionId === "string" ? data.subscriptionId : null,
+    provider:
+      typeof data.provider === "string" && data.provider
+        ? data.provider
+        : BILLING_PROVIDER,
+    providerPaymentId:
+      typeof data.providerPaymentId === "string"
+        ? data.providerPaymentId
+        : null,
+    planId: normalizePlanId(
+      typeof data.planId === "string" ? data.planId : PLAN_IDS.STARTER,
+    ),
+    amount: typeof data.amount === "number" ? data.amount : 0,
+    currency: typeof data.currency === "string" ? data.currency : "BRL",
+    status:
+      typeof data.status === "string"
+        ? /** @type {InvoiceStatus} */ (data.status)
+        : INVOICE_STATUS.PENDING,
+    paidAt: data.paidAt ?? null,
+    invoiceUrl:
+      typeof data.invoiceUrl === "string" ? data.invoiceUrl : null,
+    createdAt: data.createdAt ?? null,
+    updatedAt: data.updatedAt ?? null,
+  };
+}
+
+/**
+ * @param {SubscriptionStatus | PlanStatus | undefined | null} status
  * @returns {string}
  */
 export function getSubscriptionStatusLabel(status) {
-  const key = (status ?? BILLING_STATUS.FREE).toLowerCase();
+  const key = (status ?? SUBSCRIPTION_STATUS.INACTIVE).toLowerCase();
   return (
-    SUBSCRIPTION_STATUS_LABELS[key] ?? status ?? SUBSCRIPTION_STATUS_LABELS.free
+    SUBSCRIPTION_STATUS_LABELS[key] ??
+    status ??
+    SUBSCRIPTION_STATUS_LABELS[SUBSCRIPTION_STATUS.INACTIVE]
+  );
+}
+
+/**
+ * @param {InvoiceStatus | undefined | null} status
+ * @returns {string}
+ */
+export function getInvoiceStatusLabel(status) {
+  const key = (status ?? INVOICE_STATUS.PENDING).toLowerCase();
+  return (
+    INVOICE_STATUS_LABELS[key] ??
+    status ??
+    INVOICE_STATUS_LABELS[INVOICE_STATUS.PENDING]
   );
 }
 
@@ -213,6 +406,19 @@ export function formatBillingDate(value) {
 }
 
 /**
+ * @param {number} amount
+ * @param {string} [currency="BRL"]
+ * @returns {string}
+ */
+export function formatInvoiceAmount(amount, currency = "BRL") {
+  if (currency === "BRL") {
+    return `R$ ${amount.toFixed(2).replace(".", ",")}`;
+  }
+
+  return `${currency} ${amount.toFixed(2)}`;
+}
+
+/**
  * @param {import("@/config/planLimits").PlanId} planId
  * @returns {string}
  */
@@ -232,4 +438,20 @@ export function getBillingPlanChosenMessage(planId) {
     return "Você escolheu o plano Enterprise.";
   }
   return "";
+}
+
+/**
+ * @param {Invoice} invoice
+ * @returns {{ date: string, plan: string, status: string, amount: string, invoiceUrl?: string }}
+ */
+export function mapInvoiceToDisplayRow(invoice) {
+  const planConfig = BILLING_PLANS[invoice.planId];
+
+  return {
+    date: formatBillingDate(invoice.paidAt ?? invoice.createdAt),
+    plan: planConfig?.name ?? invoice.planId,
+    status: getInvoiceStatusLabel(invoice.status),
+    amount: formatInvoiceAmount(invoice.amount, invoice.currency),
+    invoiceUrl: invoice.invoiceUrl ?? undefined,
+  };
 }

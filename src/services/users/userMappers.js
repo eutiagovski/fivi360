@@ -1,4 +1,4 @@
-import { normalizeBilling } from "@/config/billing";
+import { normalizeUserPlan } from "@/config/billing";
 
 export const EMPTY_SOCIAL_LINKS = Object.freeze({
   website: "",
@@ -39,16 +39,15 @@ export function mapUserDoc(userId, data) {
     companyName: data.companyName ?? "",
     companyLogo: data.companyLogo ?? "",
     bio: data.bio ?? data.companyBio ?? "",
-    plan: data.plan ?? "starter",
+    plan: normalizeUserPlan(data.plan),
     publicSlug: data.publicSlug ?? "",
     portfolioEnabled: data.portfolioEnabled ?? false,
     socialLinks: normalizeSocialLinks(data),
-    billing: normalizeBilling(data.billing),
   };
 }
 
 /**
- * DTO público — nunca inclui email, plan, billing ou legalConsent.
+ * DTO público — nunca inclui email, plan ou legalConsent.
  *
  * @param {string} userId
  * @param {import("firebase/firestore").DocumentData} data

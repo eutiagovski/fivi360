@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { normalizeBilling } from "@/config/billing";
+import { DEFAULT_USER_PLAN } from "@/config/billing";
 import { getPlanLimits } from "@/config/planLimits";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -9,6 +9,7 @@ import {
   getUserPlanContext,
 } from "@/services/plans/planService";
 import { getUser } from "@/services/users/userService";
+import { getCurrentPlan } from "@/services/billing/billingService";
 
 /**
  * Carrega plano, limites e consumo do usuário autenticado.
@@ -24,13 +25,13 @@ export function usePlanLimits() {
     imageCount: 0,
     storageBytes: 0,
   });
-  const [billing, setBilling] = useState(() => normalizeBilling(null));
+  const [userPlan, setUserPlan] = useState(() => ({ ...DEFAULT_USER_PLAN }));
 
   const applyContext = useCallback((context) => {
     setPlanId(context.planId);
     setLimits(context.limits);
     setUsage(context.usage);
-    setBilling(context.billing);
+    setUserPlan(context.userPlan);
   }, []);
 
   const load = useCallback(async () => {
@@ -50,10 +51,11 @@ export function usePlanLimits() {
 
       try {
         const profile = await getUser(user.uid);
-        const fallbackLimits = getPlanLimits(profile?.plan);
-        setPlanId(fallbackLimits.name);
+        const normalizedPlan = getCurrentPlan(profile);
+        const fallbackLimits = getPlanLimits(normalizedPlan.id);
+        setPlanId(normalizedPlan.id);
         setLimits(fallbackLimits);
-        setBilling(profile?.billing ?? normalizeBilling(null));
+        setUserPlan(normalizedPlan);
       } catch {
         setError("Não foi possível carregar informações do plano.");
       }
@@ -101,7 +103,7 @@ export function usePlanLimits() {
     planId,
     limits,
     usage,
-    billing,
+    userPlan,
     usageStats,
     canCreateProject: canCreateProject(limits, usage),
     canUploadImage: canUploadImage(limits, usage),

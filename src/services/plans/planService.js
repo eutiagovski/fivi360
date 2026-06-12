@@ -3,13 +3,12 @@
  */
 
 import { collection, getDocs, query, where } from "firebase/firestore";
-import { normalizeBilling } from "@/config/billing";
+import { getCurrentPlan } from "@/services/billing/billingService";
 import { db } from "@/config/firebase";
 import {
   formatStorageBytes,
   getPlanLimits,
   isUnlimited,
-  normalizePlanId,
   usagePercentage,
 } from "@/config/planLimits";
 import { getProjectsByUserId } from "@/services/projects/projectService";
@@ -113,12 +112,13 @@ export async function getUserUsage(userId) {
  *   planId: import("@/config/planLimits").PlanId,
  *   limits: import("@/config/planLimits").PlanLimits,
  *   usage: UserUsage,
- *   billing: import("@/config/billing").UserBilling,
+ *   userPlan: import("@/config/billing").UserPlan,
  * }>}
  */
 export async function getUserPlanContext(userId) {
   const profile = await getUser(userId);
-  const planId = normalizePlanId(profile?.plan);
+  const userPlan = getCurrentPlan(profile);
+  const planId = userPlan.id;
   const limits = getPlanLimits(planId);
   const usage = await getUserUsage(userId);
 
@@ -126,7 +126,7 @@ export async function getUserPlanContext(userId) {
     planId,
     limits,
     usage,
-    billing: profile?.billing ?? normalizeBilling(null),
+    userPlan,
   };
 }
 
@@ -136,7 +136,7 @@ export async function getUserPlanContext(userId) {
  */
 async function getLimitsForUser(userId) {
   const profile = await getUser(userId);
-  return getPlanLimits(profile?.plan);
+  return getPlanLimits(getCurrentPlan(profile).id);
 }
 
 /**

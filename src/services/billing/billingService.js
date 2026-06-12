@@ -1,58 +1,121 @@
 /**
- * Serviço de billing via Mercado Pago — placeholders até integração.
+ * Serviço de billing via Mercado Pago — fundação para integração futura.
  *
- * Integração futura (via Cloud Functions / backend):
- * - createCheckoutSession → assinatura recorrente / preapproval Mercado Pago
- * - createBillingPortalSession → página própria ou link externo de gestão
- * - cancelSubscription → cancelamento ao final do período
- * - getBillingSummary / getInvoices → agrega Firestore + Mercado Pago
+ * Leitura: users.plan, subscriptions/{uid}, invoices (por userId).
+ * Escrita/checkout/webhooks: Cloud Functions (sprint futura).
  *
  * @see src/config/billing.js
- * @see docs/mercado-pago-billing-plan.md
+ * @see docs/billing-foundation.md
  */
 
-import { BILLING_NOT_ACTIVE_MESSAGE } from "@/config/billing";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  orderBy,
+  query,
+  where,
+} from "firebase/firestore";
+import {
+  isPaidPlan,
+  isSubscriptionActive,
+  mapInvoiceToDisplayRow,
+  normalizeInvoice,
+  normalizeSubscription,
+  normalizeUserPlan,
+  PAYMENTS_COMING_SOON_MESSAGE,
+} from "@/config/billing";
+import { db } from "@/config/firebase";
+import { createSubscriptionCheckout } from "@/services/billing/subscriptionCheckoutService";
 
-const NOT_ACTIVE = { ok: false, message: BILLING_NOT_ACTIVE_MESSAGE };
+export {
+  isPaidPlan,
+  isSubscriptionActive,
+  normalizeUserPlan,
+};
 
 /**
- * Inicia checkout para o plano informado.
- * @param {string} planId — ex.: "professional" | "enterprise"
- * @returns {Promise<{ ok: false, message: string } | { ok: true, url: string }>}
+ * Plano atual do usuário a partir de `users/{uid}.plan`.
+ *
+ * @param {{ plan?: unknown } | null | undefined} user
+ * @returns {import("@/config/billing").UserPlan}
  */
-export async function createCheckoutSession(planId) {
-  void planId;
-  return NOT_ACTIVE;
+export function getCurrentPlan(user) {
+  return normalizeUserPlan(user?.plan);
 }
 
 /**
- * Abre portal de gestão de assinatura.
- * @returns {Promise<{ ok: false, message: string } | { ok: true, url: string }>}
+ * Assinatura em `subscriptions/{uid}` — null se não existir (Starter implícito).
+ *
+ * @param {string} userId
+ * @returns {Promise<import("@/config/billing").Subscription | null>}
  */
-export async function createBillingPortalSession() {
-  return NOT_ACTIVE;
+export async function getSubscription(userId) {
+  if (!userId) {
+    return null;
+  }
+
+  const snapshot = await getDoc(doc(db, "subscriptions", userId));
+
+  if (!snapshot.exists()) {
+    return null;
+  }
+
+  return normalizeSubscription(snapshot.data());
 }
 
 /**
- * Solicita cancelamento ao final do período (ou imediato, conforme política MP).
+ * Faturas do usuário em `invoices` (ordenadas por createdAt desc).
+ *
+ * @param {string} userId
+ * @returns {Promise<import("@/config/billing").Invoice[]>}
+ */
+export async function getInvoices(userId) {
+  if (!userId) {
+    return [];
+  }
+
+  const invoicesQuery = query(
+    collection(db, "invoices"),
+    where("userId", "==", userId),
+    orderBy("createdAt", "desc"),
+  );
+
+  const snapshot = await getDocs(invoicesQuery);
+
+  return snapshot.docs.map((docSnap) =>
+    normalizeInvoice(docSnap.id, docSnap.data()),
+  );
+}
+
+/**
+ * Faturas formatadas para a tabela de histórico na UI.
+ *
+ * @param {string} userId
+ * @returns {Promise<Array<{ date: string, plan: string, status: string, amount: string, invoiceUrl?: string }>>}
+ */
+export async function getInvoiceDisplayRows(userId) {
+  const invoices = await getInvoices(userId);
+  return invoices.map(mapInvoiceToDisplayRow);
+}
+
+/**
+ * Inicia checkout de assinatura no Mercado Pago.
+ *
+ * @param {string} planId
+ * @returns {Promise<{ ok: true, checkoutUrl: string }>}
+ */
+export async function requestUpgrade(planId) {
+  const { checkoutUrl } = await createSubscriptionCheckout(planId);
+  return { ok: true, checkoutUrl };
+}
+
+/**
+ * Solicita cancelamento de assinatura — placeholder até integração Mercado Pago.
+ *
  * @returns {Promise<{ ok: false, message: string }>}
  */
-export async function cancelSubscription() {
-  return NOT_ACTIVE;
-}
-
-/**
- * Resumo de billing para a UI (Firestore + Mercado Pago quando ativo).
- * @returns {Promise<{ ok: false, message: string } | { ok: true, summary: object }>}
- */
-export async function getBillingSummary() {
-  return NOT_ACTIVE;
-}
-
-/**
- * Lista faturas/cobranças do usuário.
- * @returns {Promise<{ ok: false, message: string, invoices: [] }>}
- */
-export async function getInvoices() {
-  return { ...NOT_ACTIVE, invoices: [] };
+export async function requestCancelSubscription() {
+  return { ok: false, message: PAYMENTS_COMING_SOON_MESSAGE };
 }

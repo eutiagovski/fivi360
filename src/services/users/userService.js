@@ -28,7 +28,7 @@ import {
   SlugValidationError,
   syncSlugRegistryInTransaction,
 } from "@/services/slugs/slugService";
-import { DEFAULT_BILLING } from "@/config/billing";
+import { DEFAULT_USER_PLAN } from "@/config/billing";
 import {
   enqueueVerifyEmail,
   enqueueWelcomeEmail,
@@ -60,11 +60,10 @@ export { SlugTakenError, SlugValidationError };
  * @property {string} companyName
  * @property {string} companyLogo
  * @property {string} bio
- * @property {string} plan
+ * @property {import("@/config/billing").UserPlan} plan
  * @property {string} publicSlug
  * @property {boolean} portfolioEnabled
  * @property {SocialLinks} socialLinks
- * @property {import("@/config/billing").UserBilling} billing
  */
 
 /**
@@ -109,10 +108,9 @@ export async function createUserProfile(userId, { displayName, email, acceptedSo
     companyLogo: "",
     bio: "",
     socialLinks: buildSocialLinksPayload(),
-    plan: "starter",
+    plan: { ...DEFAULT_USER_PLAN },
     publicSlug: "",
     portfolioEnabled: false,
-    billing: { ...DEFAULT_BILLING },
     welcomeEmailQueuedAt: null,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),

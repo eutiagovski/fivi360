@@ -9,22 +9,32 @@ import { BillingHistorySection } from '@/components/plans/BillingHistorySection'
 import { CurrentPlanBanner } from '@/components/plans/CurrentPlanBanner';
 import { ManageSubscriptionSection } from '@/components/plans/ManageSubscriptionSection';
 import { UpgradePlanModal } from '@/components/plans/UpgradePlanModal';
-import { PAYMENTS_COMING_SOON_MESSAGE } from '@/config/billing';
 import { PLAN_IDS } from '@/config/planLimits';
+import { useAuth } from '@/hooks/useAuth';
 import { usePlanLimits } from '@/hooks/usePlanLimits';
 import { useProjects } from '@/hooks/useProjects';
 import { useToast } from '@/hooks/use-toast';
 import { isBillingUpgradePlanId } from '@/utils/billingPlanFlow';
-import { cancelSubscription } from '@/services/billing/billingService';
+import {
+  getInvoiceDisplayRows,
+  getSubscription,
+  requestCancelSubscription,
+  requestUpgrade,
+} from '@/services/billing/billingService';
 
 export const Plan = () => {
+  const { user } = useAuth();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const upgradeFromQuery = searchParams.get('upgrade');
-  const { loading, planId, limits, usageStats, billing } = usePlanLimits();
+  const { loading, planId, limits, usageStats } = usePlanLimits();
   const { projects, loading: projectsLoading } = useProjects();
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const [highlightedPlanId, setHighlightedPlanId] = useState(null);
+  const [subscription, setSubscription] = useState(null);
+  const [invoiceRows, setInvoiceRows] = useState([]);
+  const [billingDataLoading, setBillingDataLoading] = useState(true);
+  const [subscribingPlanId, setSubscribingPlanId] = useState(null);
 
   const openUpgradeModal = (planToHighlight = null) => {
     if (planToHighlight && isBillingUpgradePlanId(planToHighlight)) {
@@ -40,6 +50,79 @@ export const Plan = () => {
     }
   }, [upgradeFromQuery]);
 
+  useEffect(() => {
+    const checkoutStatus = searchParams.get('checkout');
+
+    if (!checkoutStatus) {
+      return;
+    }
+
+    if (checkoutStatus === 'success') {
+      toast({
+        title: 'Checkout concluído',
+        description:
+          'Seu pagamento foi processado. O plano será atualizado em instantes.',
+      });
+      return;
+    }
+
+    if (checkoutStatus === 'pending') {
+      toast({
+        title: 'Pagamento pendente',
+        description: 'Aguardando confirmação do Mercado Pago.',
+      });
+      return;
+    }
+
+    if (checkoutStatus === 'failure') {
+      toast({
+        title: 'Pagamento não concluído',
+        description: 'Não foi possível concluir a assinatura. Tente novamente.',
+        variant: 'destructive',
+      });
+    }
+  }, [searchParams, toast]);
+
+  useEffect(() => {
+    if (!user?.uid) {
+      setBillingDataLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadBillingData() {
+      setBillingDataLoading(true);
+
+      try {
+        const [sub, invoices] = await Promise.all([
+          getSubscription(user.uid),
+          getInvoiceDisplayRows(user.uid),
+        ]);
+
+        if (!cancelled) {
+          setSubscription(sub);
+          setInvoiceRows(invoices);
+        }
+      } catch {
+        if (!cancelled) {
+          setSubscription(null);
+          setInvoiceRows([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setBillingDataLoading(false);
+        }
+      }
+    }
+
+    loadBillingData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.uid]);
+
   const isEnterprise = planId === PLAN_IDS.ENTERPRISE;
   const isStarter = planId === PLAN_IDS.STARTER;
 
@@ -48,14 +131,39 @@ export const Plan = () => {
   ).length;
 
   const handleCancelSubscription = async () => {
-    const result = await cancelSubscription();
+    const result = await requestCancelSubscription();
     toast({
       title: 'Assinatura',
       description: result.message,
     });
   };
 
-  if (loading || projectsLoading) {
+  const handleSubscribe = async (selectedPlanId) => {
+    setSubscribingPlanId(selectedPlanId);
+
+    try {
+      const result = await requestUpgrade(selectedPlanId);
+
+      if (result.ok && result.checkoutUrl) {
+        window.location.assign(result.checkoutUrl);
+      }
+    } catch (error) {
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : 'Não foi possível iniciar o checkout.';
+
+      toast({
+        title: 'Assinatura',
+        description: message,
+        variant: 'destructive',
+      });
+    } finally {
+      setSubscribingPlanId(null);
+    }
+  };
+
+  if (loading || projectsLoading || billingDataLoading) {
     return <AuthLoadingScreen />;
   }
 
@@ -144,7 +252,7 @@ export const Plan = () => {
         <ManageSubscriptionSection
           planId={planId}
           limits={limits}
-          billing={billing}
+          subscription={subscription}
           onUpgrade={() => openUpgradeModal()}
         />
       </div>
@@ -154,7 +262,7 @@ export const Plan = () => {
           title="Histórico de cobrança"
           dataTestId="billing-history-title"
         />
-        <BillingHistorySection />
+        <BillingHistorySection invoices={invoiceRows} />
       </div>
 
       <UpgradePlanModal
@@ -166,12 +274,8 @@ export const Plan = () => {
           }
         }}
         highlightedPlanId={highlightedPlanId ?? upgradeFromQuery}
-        onSubscribe={() => {
-          toast({
-            title: 'Assinatura',
-            description: PAYMENTS_COMING_SOON_MESSAGE,
-          });
-        }}
+        onSubscribe={handleSubscribe}
+        subscribingPlanId={subscribingPlanId}
       />
     </div>
   );

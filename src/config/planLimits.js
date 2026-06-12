@@ -2,7 +2,7 @@
  * Definição central dos planos e limites do FIVI360.
  * Fonte única de verdade para enforcement e UI.
  *
- * IDs persistidos em `users.plan`: starter | professional | enterprise
+ * IDs de plano em `users.plan.id`: starter | professional | enterprise
  */
 
 export const PLAN_IDS = {

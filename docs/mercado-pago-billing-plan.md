@@ -18,10 +18,18 @@ Este documento descreve a arquitetura de pagamentos do FIVI360. **Mercado Pago �
 | `getMercadoPagoPlanId()` | Resolve ID do plano MP a partir do `.env` |
 | `normalizeBilling()` | Leitura segura do Firestore |
 
-Variáveis de ambiente (ver `.env.example`):
+IDs dos planos Mercado Pago ficam **somente no backend** (Cloud Functions). Não use `REACT_APP_*` para billing.
 
-- `REACT_APP_MP_PLAN_PROFESSIONAL`
-- `REACT_APP_MP_PLAN_ENTERPRISE`
+| Variável | Onde definir (dev) | Onde definir (prod) |
+|----------|-------------------|---------------------|
+| `MP_ACCESS_TOKEN` | `functions/.secret.local` | Firebase Secrets |
+| `MP_PLAN_PROFESSIONAL` | `functions/.secret.local` | Firebase Secrets |
+| `MP_PLAN_ENTERPRISE` | `functions/.secret.local` | Firebase Secrets |
+| `APP_BASE_URL` | `functions/.env` | params / env do Firebase |
+
+> **Nota:** Mercado Pago rejeita Firebase Hosting preview channels como `back_url`. Para testes sandbox, usar domínio live aceito, como `https://fivi360.web.app`. Não use localhost, `127.0.0.1` nem URLs com `--beta-...`.
+
+A callable `createSubscriptionCheckout` declara `secrets: ["MP_PLAN_PROFESSIONAL", "MP_PLAN_ENTERPRISE"]` para que `process.env` receba os IDs no emulador (`.secret.local`) e em produção (Secret Manager). Não chama a API do MP nesta etapa — apenas monta o link de checkout hospedado.
 
 ## Modelo Firestore (`users/{uid}.billing`)
 
@@ -56,7 +64,7 @@ O campo `users.plan` (`starter` | `professional` | `enterprise`) continua sendo 
 
 Todas as chamadas devem passar por **Cloud Functions** autenticadas (nunca expor access token no React).
 
-## Fluxo de checkout (futuro)
+## Fluxo de checkout
 
 ```mermaid
 sequenceDiagram
@@ -67,14 +75,13 @@ sequenceDiagram
   participant FS as Firestore
 
   U->>App: Assinar plano Professional
-  App->>CF: createCheckoutSession(professional)
-  CF->>MP: Criar assinatura/preapproval
-  MP-->>CF: URL de pagamento
-  CF-->>App: { url }
-  App->>MP: Redirect checkout
+  App->>CF: createSubscriptionCheckout(professional)
+  CF->>FS: billingCheckoutSessions (opcional)
+  CF-->>App: { checkoutUrl }
+  App->>MP: Redirect checkout hospedado
   MP-->>U: Pagamento concluído
-  MP->>CF: Webhook
-  CF->>FS: Atualiza billing + plan
+  MP->>CF: Webhook (futuro)
+  CF->>FS: Atualiza billing + plan (futuro)
 ```
 
 ## Fluxo de webhook (futuro)
@@ -134,6 +141,99 @@ Ver também `docs/resend-email-plan.md`.
 3. Preencher `.env` com IDs reais dos planos MP.
 4. Templates Resend para eventos de billing.
 5. Testes E2E do fluxo landing → registro → `/plan?upgrade=`.
+
+## Cloud Function `getMercadoPagoStatus`
+
+Callable function (`onCall`) que valida o `MP_ACCESS_TOKEN` contra a API do Mercado Pago (`GET /users/me`). Retorna `{ connected: false }` ou `{ connected: true, environment: "sandbox" | "production" }`.
+
+Implementação: `functions/src/getMercadoPagoStatus.js`  
+Cliente frontend: `src/services/billing/mercadoPagoStatusService.js`
+
+### Como testar (callable)
+
+**Callable functions não devem ser testadas abrindo a URL no navegador.** Um GET direto em  
+`http://127.0.0.1:5001/.../getMercadoPagoStatus` retorna `"Request has invalid method. GET"` — isso é esperado.
+
+Formas corretas de testar:
+
+1. **Frontend com `httpsCallable`** (recomendado em dev local):
+   - Defina `REACT_APP_USE_FIREBASE_EMULATORS=true` em `.env.local`
+   - Inicie `firebase emulators:start` (Functions na porta 5001)
+   - Inicie o app (`yarn start`)
+   - Use o painel **MP Status (dev)** no canto inferior direito, ou chame:
+
+   ```js
+   import { getMercadoPagoStatus } from "@/services/billing/mercadoPagoStatusService";
+   const status = await getMercadoPagoStatus();
+   ```
+
+2. **Script com Firebase SDK** — mesmo padrão de `httpsCallable(functions, "getMercadoPagoStatus")` com `connectFunctionsEmulator` apontando para `127.0.0.1:5001`.
+
+3. **Emulator UI** — use a aba Functions para inspecionar logs após uma chamada via SDK; não use o link HTTP como teste de callable.
+
+Configure os segredos locais em `functions/.secret.local`:
+
+```env
+MP_ACCESS_TOKEN=TEST-...
+MP_PLAN_PROFESSIONAL=<id do plano Professional no MP>
+MP_PLAN_ENTERPRISE=<id do plano Enterprise no MP>
+```
+
+## Cloud Function `createSubscriptionCheckout`
+
+Callable (`onCall`) que retorna o **checkout hospedado** do Mercado Pago a partir do `init_point` do plano. **Não** chama `POST /preapproval` — o usuário conclui o pagamento na página do MP.
+
+Implementação: `functions/src/createSubscriptionCheckout.js`
+
+Mapeamento de planos (`functions/src/config/billing.js`):
+
+| `planId` (frontend) | Env backend |
+|---------------------|-------------|
+| `professional` | `MP_PLAN_PROFESSIONAL` |
+| `enterprise` | `MP_PLAN_ENTERPRISE` |
+
+URL gerada:
+
+```
+https://www.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id={mpPlanId}
+```
+
+Retorno:
+
+```json
+{
+  "checkoutUrl": "...",
+  "provider": "mercado_pago",
+  "planId": "professional",
+  "mpPlanId": "..."
+}
+```
+
+Validações: usuário autenticado, `planId` permitido, plano MP configurado, sem assinatura ativa em `subscriptions/{userId}`.
+
+Antes de redirecionar, a function grava `billingCheckoutSessions/{sessionId}` com `userId`, `planId`, `mpPlanId`, `provider`, `status: "created"` e `createdAt`. Isso prepara o vínculo assinatura ↔ usuário no webhook.
+
+**Não altera** `users.plan`, `subscriptions` nem billing do usuário nesta etapa.
+
+O frontend envia apenas `{ planId }` via `subscriptionCheckoutService.js` e redireciona para `checkoutUrl`.
+
+### Webhook (pendência: vincular assinatura ao usuário)
+
+O webhook será responsável por:
+
+1. Receber a assinatura criada no Mercado Pago.
+2. Identificar o plano pelo `preapproval_plan_id`.
+3. Identificar o usuário.
+
+Como o checkout via `init_point` do plano **não carrega metadata do usuário** no MP, ainda precisamos decidir o mecanismo de vínculo:
+
+| Opção | Prós / contras |
+|-------|----------------|
+| `payer_email` no webhook | Simples se o e-mail do comprador = e-mail do Firebase Auth |
+| `billingCheckoutSessions` | Sessão interna criada antes do redirect; webhook cruza por sessão/plano/timestamp |
+| `external_reference` no link | Depende de o MP aceitar parâmetros extras na URL do plano |
+
+Por enquanto, `billingCheckoutSessions` é a pista preferida; `payer_email` serve como fallback.
 
 ## O que não foi implementado nesta sprint
 

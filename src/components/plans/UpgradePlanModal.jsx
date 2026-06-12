@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/dialog";
 import {
   getBillingPlanChosenMessage,
-  PAYMENTS_COMING_SOON_MESSAGE,
   UPGRADE_PLAN_PRICES,
 } from "@/config/billing";
 import { PLAN_IDS, PLAN_LIMITS } from "@/config/planLimits";
@@ -23,6 +22,7 @@ const UPGRADE_PLAN_IDS = [PLAN_IDS.PROFESSIONAL, PLAN_IDS.ENTERPRISE];
  *   onOpenChange: (open: boolean) => void,
  *   onSubscribe?: (planId: string) => void,
  *   highlightedPlanId?: string | null,
+ *   subscribingPlanId?: string | null,
  * }} props
  */
 export function UpgradePlanModal({
@@ -30,6 +30,7 @@ export function UpgradePlanModal({
   onOpenChange,
   onSubscribe,
   highlightedPlanId = null,
+  subscribingPlanId = null,
 }) {
   const chosenMessage = highlightedPlanId
     ? getBillingPlanChosenMessage(highlightedPlanId)
@@ -50,7 +51,7 @@ export function UpgradePlanModal({
             Escolha seu plano
           </DialogTitle>
           <DialogDescription className="text-zinc-400 text-left">
-            Compare os benefícios e assine quando os pagamentos estiverem disponíveis.
+            Compare os benefícios e conclua a assinatura no checkout seguro do Mercado Pago.
           </DialogDescription>
         </DialogHeader>
 
@@ -118,8 +119,10 @@ export function UpgradePlanModal({
                   type="button"
                   data-testid={`upgrade-modal-subscribe-${planId}`}
                   onClick={() => handleSubscribe(planId)}
+                  disabled={subscribingPlanId !== null}
                   className={`
                     w-full py-2.5 rounded-full text-sm font-medium btn-scale transition-colors
+                    disabled:opacity-60 disabled:cursor-not-allowed
                     ${
                       isHighlighted
                         ? "bg-white text-black hover:bg-zinc-200"
@@ -127,19 +130,15 @@ export function UpgradePlanModal({
                     }
                   `}
                 >
-                  Assinar plano
+                  {subscribingPlanId === planId
+                    ? "Redirecionando…"
+                    : `Assinar ${plan.displayName}`}
                 </button>
               </div>
             );
           })}
         </div>
 
-        <p
-          className="text-center text-sm text-amber-200/90 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3"
-          data-testid="upgrade-modal-billing-notice"
-        >
-          {PAYMENTS_COMING_SOON_MESSAGE}
-        </p>
       </DialogContent>
     </Dialog>
   );

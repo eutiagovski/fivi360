@@ -19,6 +19,8 @@ function resolveEmailTemplate(type, payload) {
       return passwordResetEmail(payload);
     case EMAIL_TYPES.BILLING_UPGRADE_REQUESTED:
       return upgradeRequestedEmail(payload);
+    // TODO (billing): payment_success, payment_failed, subscription_canceled
+    // — ver docs/billing-foundation.md e functions/src/config/email.js
     default:
       throw new Error(`No template implemented for email type: ${type}`);
   }

@@ -13,14 +13,14 @@ import { useToast } from "@/hooks/use-toast";
  * @param {{
  *   planId: import("@/config/planLimits").PlanId,
  *   limits: import("@/config/planLimits").PlanLimits,
- *   billing: import("@/config/billing").UserBilling,
+ *   subscription: import("@/config/billing").Subscription | null,
  *   onUpgrade: () => void,
  * }} props
  */
 export function ManageSubscriptionSection({
   planId,
   limits,
-  billing,
+  subscription,
   onUpgrade,
 }) {
   const { toast } = useToast();
@@ -47,7 +47,7 @@ export function ManageSubscriptionSection({
         <PaidSubscriptionView
           limits={limits}
           planId={planId}
-          billing={billing}
+          subscription={subscription}
           onManageSubscription={handleManageSubscription}
         />
       )}
@@ -104,9 +104,14 @@ function StarterSubscriptionView({ onUpgrade, onManageSubscription }) {
   );
 }
 
-function PaidSubscriptionView({ limits, planId, billing, onManageSubscription }) {
-  const nextBillingDate =
-    billing.nextInvoiceDate ?? billing.currentPeriodEnd;
+function PaidSubscriptionView({
+  limits,
+  planId,
+  subscription,
+  onManageSubscription,
+}) {
+  const subscriptionStatus = subscription?.status ?? null;
+  const nextBillingDate = subscription?.currentPeriodEnd ?? null;
 
   return (
     <div className="space-y-6">
@@ -118,7 +123,7 @@ function PaidSubscriptionView({ limits, planId, billing, onManageSubscription })
         />
         <SubscriptionInfoItem
           label="Status da assinatura"
-          value={getSubscriptionStatusLabel(billing.subscriptionStatus)}
+          value={getSubscriptionStatusLabel(subscriptionStatus)}
           dataTestId="manage-subscription-status"
         />
         <SubscriptionInfoItem
@@ -133,7 +138,7 @@ function PaidSubscriptionView({ limits, planId, billing, onManageSubscription })
         />
       </div>
 
-      {billing.cancelAtPeriodEnd && (
+      {subscription?.cancelAtPeriodEnd && (
         <p
           className="text-sm text-amber-200/90"
           data-testid="manage-subscription-cancel-pending"

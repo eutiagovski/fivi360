@@ -21,7 +21,7 @@ function wrapEmailHtml({ preheader = "", title, bodyHtml, ctaLabel, ctaUrl }) {
     ctaLabel && ctaUrl
       ? `
         <tr>
-          <td style="padding: 28px 0 8px;">
+          <td style="padding: 28px 0 8px; display: flex; justify-content: center;">
             <a href="${ctaUrl}"
                style="display: inline-block; background-color: #1a1a1a; color: #f5f5f5; text-decoration: none; font-size: 15px; font-weight: 600; padding: 14px 28px; border-radius: 8px; border: 1px solid #333333;">
               ${ctaLabel}
