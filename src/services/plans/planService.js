@@ -118,7 +118,7 @@ export async function getUserUsage(userId) {
  */
 export async function getUserPlanContext(userId) {
   const profile = await getUser(userId);
-  const planId = normalizePlanId(profile?.plan);
+  const planId = normalizePlanId(profile?.planId ?? profile?.plan);
   const limits = getPlanLimits(planId);
   const usage = await getUserUsage(userId);
 
@@ -136,7 +136,8 @@ export async function getUserPlanContext(userId) {
  */
 async function getLimitsForUser(userId) {
   const profile = await getUser(userId);
-  return getPlanLimits(profile?.plan);
+  const planId = normalizePlanId(profile?.planId ?? profile?.plan);
+  return getPlanLimits(planId);
 }
 
 /**

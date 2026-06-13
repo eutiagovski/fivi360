@@ -1,4 +1,5 @@
 import { normalizeBilling } from "@/config/billing";
+import { normalizeUserPlan } from "@/config/planLimits";
 
 export const EMPTY_SOCIAL_LINKS = Object.freeze({
   website: "",
@@ -40,6 +41,7 @@ export function mapUserDoc(userId, data) {
     companyLogo: data.companyLogo ?? "",
     bio: data.bio ?? data.companyBio ?? "",
     plan: data.plan ?? "starter",
+    planId: normalizeUserPlan(data.plan),
     publicSlug: data.publicSlug ?? "",
     portfolioEnabled: data.portfolioEnabled ?? false,
     socialLinks: normalizeSocialLinks(data),

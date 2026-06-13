@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { normalizeBilling } from "@/config/billing";
-import { getPlanLimits } from "@/config/planLimits";
+import { getPlanLimits, normalizePlanId } from "@/config/planLimits";
 import { useAuth } from "@/hooks/useAuth";
 import {
   buildUsageStats,
@@ -50,8 +50,11 @@ export function usePlanLimits() {
 
       try {
         const profile = await getUser(user.uid);
-        const fallbackLimits = getPlanLimits(profile?.plan);
-        setPlanId(fallbackLimits.name);
+        const fallbackPlanId = normalizePlanId(
+          profile?.planId ?? profile?.plan,
+        );
+        const fallbackLimits = getPlanLimits(fallbackPlanId);
+        setPlanId(fallbackPlanId);
         setLimits(fallbackLimits);
         setBilling(profile?.billing ?? normalizeBilling(null));
       } catch {

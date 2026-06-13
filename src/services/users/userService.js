@@ -60,7 +60,8 @@ export { SlugTakenError, SlugValidationError };
  * @property {string} companyName
  * @property {string} companyLogo
  * @property {string} bio
- * @property {string} plan
+ * @property {import("@/config/planLimits").UserPlanRaw} plan
+ * @property {import("@/config/planLimits").PlanId} planId — plano efetivo (limites/UI)
  * @property {string} publicSlug
  * @property {boolean} portfolioEnabled
  * @property {SocialLinks} socialLinks

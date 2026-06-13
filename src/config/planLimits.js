@@ -2,7 +2,11 @@
  * Definição central dos planos e limites do FIVI360.
  * Fonte única de verdade para enforcement e UI.
  *
- * IDs persistidos em `users.plan`: starter | professional | enterprise
+ * Formato persistido em `users.plan` (padrão):
+ *   { id: "starter" | "professional" | "enterprise", status, source, ... }
+ *
+ * Formato legado (compatível):
+ *   "starter" | "professional" | "enterprise"
  */
 
 export const PLAN_IDS = {
@@ -12,6 +16,15 @@ export const PLAN_IDS = {
 };
 
 /** @typedef {'starter' | 'professional' | 'enterprise'} PlanId */
+
+/**
+ * @typedef {Object} UserPlan
+ * @property {string} [id]
+ * @property {string} [status]
+ * @property {string} [source]
+ */
+
+/** @typedef {string | UserPlan | null | undefined} UserPlanRaw */
 
 /**
  * @typedef {Object} PlanLimits
@@ -101,21 +114,65 @@ const LEGACY_PLAN_ALIASES = {
   enterprise: PLAN_IDS.ENTERPRISE,
 };
 
+/** Statuses que mantêm os limites do plano pago (objeto `users.plan`). */
+export const ACTIVE_PLAN_STATUSES = new Set(["active", "trialing"]);
+
 /**
+ * Normaliza um ID de plano bruto (string).
+ *
  * @param {string | undefined | null} planId
  * @returns {PlanId}
  */
-export function normalizePlanId(planId) {
+export function normalizePlanIdFromString(planId) {
   const key = (planId ?? "").toLowerCase().trim();
   return LEGACY_PLAN_ALIASES[key] ?? PLAN_IDS.STARTER;
 }
 
 /**
- * @param {string | undefined | null} planId
+ * Resolve o plano efetivo do usuário a partir de `users.plan`.
+ * Aceita o objeto `{ id, status, source }` (padrão) ou string legada.
+ *
+ * Regras:
+ * - Objeto com `status` diferente de `active` / `trialing` → Starter
+ * - Objeto com `id` válido e status ativo → limites do `id`
+ * - String legada → limites do alias (sem checagem de status)
+ *
+ * @param {UserPlanRaw} raw
+ * @returns {PlanId}
+ */
+export function normalizeUserPlan(raw) {
+  if (typeof raw === "string") {
+    return normalizePlanIdFromString(raw);
+  }
+
+  if (raw && typeof raw === "object") {
+    const status =
+      typeof raw.status === "string" ? raw.status.toLowerCase().trim() : "";
+
+    if (status && !ACTIVE_PLAN_STATUSES.has(status)) {
+      return PLAN_IDS.STARTER;
+    }
+
+    return normalizePlanIdFromString(raw.id);
+  }
+
+  return PLAN_IDS.STARTER;
+}
+
+/**
+ * @param {UserPlanRaw} raw — `users.plan` ou ID legado
+ * @returns {PlanId}
+ */
+export function normalizePlanId(raw) {
+  return normalizeUserPlan(raw);
+}
+
+/**
+ * @param {UserPlanRaw} raw
  * @returns {PlanLimits}
  */
-export function getPlanLimits(planId) {
-  const normalized = normalizePlanId(planId);
+export function getPlanLimits(raw) {
+  const normalized = normalizeUserPlan(raw);
   return PLAN_LIMITS[normalized];
 }
 
