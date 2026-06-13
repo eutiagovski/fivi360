@@ -21,6 +21,10 @@ import {
 } from "@/services/auth/authService";
 import { requestPasswordResetEmail } from "@/services/auth/passwordResetService";
 import { createUserProfile } from "@/services/users/userService";
+import {
+  setAnalyticsUser,
+  trackEvent,
+} from "@/services/analytics/analyticsService";
 
 export const AuthContext = createContext(undefined);
 
@@ -36,7 +40,7 @@ export function AuthProvider({ children }) {
     const unsubscribe = subscribeToAuthChanges((nextUser) => {
       setUser(nextUser);
       setLoading(false);
-
+      setAnalyticsUser(nextUser ? { uid: nextUser.uid } : null);
     });
 
     return unsubscribe;
@@ -47,6 +51,7 @@ export function AuthProvider({ children }) {
 
     try {
       await signInWithEmail(email, password);
+      trackEvent("login", { method: "email" });
     } catch (err) {
       setError(err);
       throw err;
@@ -63,6 +68,7 @@ export function AuthProvider({ children }) {
         email,
         acceptedSource: "signup",
       });
+      trackEvent("sign_up", { method: "email" });
     } catch (err) {
       setError(err);
       throw err;
@@ -73,7 +79,8 @@ export function AuthProvider({ children }) {
     setError(null);
 
     try {
-      await signInWithGoogle();
+      const { isNewUser } = await signInWithGoogle();
+      trackEvent(isNewUser ? "sign_up" : "login", { method: "google" });
     } catch (err) {
       setError(err);
       throw err;

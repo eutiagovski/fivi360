@@ -50,6 +50,8 @@ if (isProduction && useEmulator) {
   );
 }
 
+const measurementId = process.env.REACT_APP_FIREBASE_MEASUREMENT_ID?.trim();
+
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
   authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
@@ -57,7 +59,10 @@ const firebaseConfig = {
   storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  ...(measurementId ? { measurementId } : {}),
 };
+
+export { measurementId, useEmulator };
 
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 

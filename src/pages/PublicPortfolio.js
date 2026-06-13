@@ -4,6 +4,8 @@ import { AuthLoadingScreen } from "@/components/auth/ProtectedRoute";
 import { PublicSocialLinks } from "@/components/public/PublicSocialLinks";
 import { ProjectCard } from "@/components/common/ProjectCard";
 import { SectionHeader } from "@/components/common/SectionHeader";
+import { useAuth } from "@/hooks/useAuth";
+import { recordPortfolioView } from "@/services/stats/publicViewTracking";
 import {
   getPublicProjectsByUserId,
   mapProjectToCard,
@@ -29,6 +31,7 @@ function PublicMessage({ title, description, dataTestId }) {
 
 export const PublicPortfolio = () => {
   const { slug: rawSlug } = useParams();
+  const { user: authUser } = useAuth();
   const [state, setState] = useState({
     loading: true,
     error: null,
@@ -86,6 +89,14 @@ export const PublicPortfolio = () => {
       cancelled = true;
     };
   }, [rawSlug]);
+
+  useEffect(() => {
+    if (state.loading || state.error || !state.user?.id) {
+      return;
+    }
+
+    recordPortfolioView(state.user.id, Boolean(authUser));
+  }, [state.loading, state.error, state.user, authUser]);
 
   if (state.loading) {
     return <AuthLoadingScreen />;

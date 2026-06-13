@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { PanoramaViewer } from "@/components/viewer/PanoramaViewer";
@@ -7,6 +7,8 @@ import { ViewerNavControls } from "@/components/viewer/ViewerNavControls";
 import { HotspotInfoDialog } from "@/components/viewer/HotspotInfoDialog";
 import { usePublicViewerImage } from "@/hooks/usePublicViewerImage";
 import { useHotspots } from "@/hooks/useHotspots";
+import { trackEvent } from "@/services/analytics/analyticsService";
+import { recordPublic360View } from "@/services/stats/publicViewTracking";
 import { HOTSPOT_TYPE_SCENE } from "@/services/hotspots/hotspotService";
 
 const ERROR_MESSAGES = {
@@ -57,6 +59,18 @@ export function PublicImageViewer({
   const { hotspots } = useHotspots(imageId);
 
   const [infoHotspot, setInfoHotspot] = useState(null);
+
+  const viewSource = accessMode === "portfolio" ? "public" : "shared";
+
+  useEffect(() => {
+    if (!loading && !error && image) {
+      trackEvent("view_360_image", { source: viewSource });
+
+      if (accessMode === "portfolio" && imageId) {
+        recordPublic360View(imageId);
+      }
+    }
+  }, [imageId, loading, error, image, viewSource, accessMode]);
 
   const panoramaUrl = image?.originalUrl || image?.previewUrl || "";
   const resolvedSubtitle =

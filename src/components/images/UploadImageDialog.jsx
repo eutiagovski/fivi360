@@ -11,6 +11,7 @@ import {
   loadImagePreview,
   validateImageFile,
 } from "@/utils/imageValidation";
+import { trackEvent } from "@/services/analytics/analyticsService";
 import { uploadImage } from "@/services/images/imageService";
 import { isPlanLimitError } from "@/services/plans/planService";
 
@@ -198,6 +199,12 @@ export const UploadImageDialog = ({
           onProgress: setProcessingStep,
         },
       );
+
+      trackEvent("upload_image", {
+        source: projectId ? "project" : "gallery",
+        has_project: Boolean(projectId),
+      });
+
       onUploadComplete(uploadedImage);
       resetState();
       onOpenChange(false);

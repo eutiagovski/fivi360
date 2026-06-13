@@ -10,6 +10,9 @@ rules_version = '2';
 //   projects/{projectId}
 //   images/{imageId}
 //   images/{imageId}/hotspots/{hotspotId}
+//   portfolioStats/{userId}       — contadores agregados de portfólio
+//   projectStats/{projectId}      — contadores agregados de projeto público
+//   imageStats/{imageId}          — contadores agregados de imagem 360 pública
 //   invoices/{invoiceId}          — faturas Stripe (escrita via webhook / Admin SDK)
 //   emailQueue/{emailId}          — fila de e-mails transacionais (Resend)
 //
@@ -121,6 +124,106 @@ service cloud.firestore {
     function imageListableInPublicProject(imageData) {
       return imageData.projectId != null
         && isPublicProject(imageData.projectId);
+    }
+
+    function imageExists(imageId) {
+      return exists(/databases/$(database)/documents/images/$(imageId));
+    }
+
+    function imageDocData(imageId) {
+      return get(/databases/$(database)/documents/images/$(imageId)).data;
+    }
+
+    // Imagem em projeto público com portfólio ativo do dono (métricas /u/:slug/.../image).
+    function isPortfolioPublicImage(imageId) {
+      return imageExists(imageId)
+        && imageDocData(imageId).projectId is string
+        && isPublicProject(imageDocData(imageId).projectId)
+        && portfolioEnabledForOwner(projectDoc(imageDocData(imageId).projectId).data.userId);
+    }
+
+    // ---------- portfolioStats ----------
+
+    match /portfolioStats/{userId} {
+
+      allow get: if isOwner(userId);
+      allow list: if false;
+
+      function isValidPortfolioStatsMutation() {
+        let data = request.resource.data;
+
+        return portfolioEnabledForOwner(userId)
+          && data.keys().hasOnly(['portfolioViews', 'updatedAt'])
+          && data.portfolioViews is int
+          && data.portfolioViews >= 1
+          && data.updatedAt is timestamp
+          && (
+            !exists(/databases/$(database)/documents/portfolioStats/$(userId))
+              ? data.portfolioViews == 1
+              : data.portfolioViews == resource.data.portfolioViews + 1
+          );
+      }
+
+      allow create, update: if isValidPortfolioStatsMutation();
+      allow delete: if false;
+    }
+
+    // ---------- projectStats ----------
+
+    match /projectStats/{projectId} {
+
+      allow get: if isSignedIn()
+        && projectExists(projectId)
+        && isOwner(projectDoc(projectId).data.userId);
+      allow list: if false;
+
+      function isValidProjectStatsMutation() {
+        let data = request.resource.data;
+
+        return projectExists(projectId)
+          && isShared(projectDoc(projectId).data.visibility)
+          && portfolioEnabledForOwner(projectDoc(projectId).data.userId)
+          && data.keys().hasOnly(['views', 'updatedAt'])
+          && data.views is int
+          && data.views >= 1
+          && data.updatedAt is timestamp
+          && (
+            !exists(/databases/$(database)/documents/projectStats/$(projectId))
+              ? data.views == 1
+              : data.views == resource.data.views + 1
+          );
+      }
+
+      allow create, update: if isValidPortfolioStatsMutation();
+      allow delete: if false;
+    }
+
+    // ---------- imageStats ----------
+
+    match /imageStats/{imageId} {
+
+      allow get: if isSignedIn()
+        && imageExists(imageId)
+        && isOwner(imageDocData(imageId).userId);
+      allow list: if false;
+
+      function isValidImageStatsMutation() {
+        let data = request.resource.data;
+
+        return isPortfolioPublicImage(imageId)
+          && data.keys().hasOnly(['views', 'updatedAt'])
+          && data.views is int
+          && data.views >= 1
+          && data.updatedAt is timestamp
+          && (
+            !exists(/databases/$(database)/documents/imageStats/$(imageId))
+              ? data.views == 1
+              : data.views == resource.data.views + 1
+          );
+      }
+
+      allow create, update: if isValidImageStatsMutation();
+      allow delete: if false;
     }
 
     // ---------- invoices (Stripe — escrita só via Admin SDK / webhook) ----------

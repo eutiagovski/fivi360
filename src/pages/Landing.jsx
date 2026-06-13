@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { LandingLayout } from "@/components/landing/LandingLayout";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { LandingHero } from "@/components/landing/LandingHero";
@@ -9,8 +10,13 @@ import { LandingPricing } from "@/components/landing/LandingPricing";
 import { LandingFaq } from "@/components/landing/LandingFaq";
 import { LandingFinalCta } from "@/components/landing/LandingFinalCta";
 import { LandingFooter } from "@/components/landing/LandingFooter";
+import { trackEvent } from "@/services/analytics/analyticsService";
 
 export function Landing() {
+  useEffect(() => {
+    trackEvent("view_landing");
+  }, []);
+
   return (
     <LandingLayout header={<LandingHeader />} footer={<LandingFooter />}>
       <LandingHero />

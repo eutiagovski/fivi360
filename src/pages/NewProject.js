@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/common/PageHeader';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { usePlanLimits } from '@/hooks/usePlanLimits';
+import { trackEvent } from '@/services/analytics/analyticsService';
 import { createProject } from '@/services/projects/projectService';
 import { showPlanLimitToast } from '@/utils/planToast';
 import {
@@ -47,6 +48,10 @@ export const NewProject = () => {
         clientName: formData.clientName,
         description: formData.description,
         visibility: formData.visibility,
+      });
+
+      trackEvent('create_project', {
+        has_description: Boolean(formData.description.trim()),
       });
 
       toast({

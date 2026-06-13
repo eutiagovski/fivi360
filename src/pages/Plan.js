@@ -30,11 +30,13 @@ import { useProjects } from '@/hooks/useProjects';
 import { useToast } from '@/hooks/use-toast';
 import { isBillingUpgradePlanId } from '@/utils/billingPlanFlow';
 import { cancelSubscription, requestUpgrade } from '@/services/billing/billingService';
+import { trackEvent } from '@/services/analytics/analyticsService';
 
 export const Plan = () => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const upgradeFromQuery = searchParams.get('upgrade');
+  const checkoutStatus = searchParams.get('checkout');
   const { loading, planId, limits, usageStats, billing, refresh } = usePlanLimits();
   const { projects, loading: projectsLoading } = useProjects();
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
@@ -55,6 +57,12 @@ export const Plan = () => {
       setUpgradeModalOpen(true);
     }
   }, [upgradeFromQuery]);
+
+  useEffect(() => {
+    if (checkoutStatus === 'success') {
+      trackEvent('subscription_success');
+    }
+  }, [checkoutStatus]);
 
   const isEnterprise = planId === PLAN_IDS.ENTERPRISE;
   const isStarter = planId === PLAN_IDS.STARTER;
@@ -102,6 +110,7 @@ export const Plan = () => {
       return;
     }
 
+    trackEvent('begin_checkout', { plan_id: planId });
     window.location.assign(result.checkoutUrl);
   };
 

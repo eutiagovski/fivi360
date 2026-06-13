@@ -10,6 +10,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { trackEvent } from "@/services/analytics/analyticsService";
 
 const NAV_LINKS = [
   { label: "Recursos", href: "#recursos" },
@@ -51,7 +52,14 @@ function AuthButtons({ className, onNavigate }) {
         </Link>
       </Button>
       <Button className={primaryBtnClass} asChild>
-        <Link to="/register" onClick={onNavigate} data-testid="landing-header-register-btn">
+        <Link
+          to="/register"
+          onClick={() => {
+            onNavigate?.();
+            trackEvent("click_cta_start", { cta_location: "header" });
+          }}
+          data-testid="landing-header-register-btn"
+        >
           Começar grátis
         </Link>
       </Button>

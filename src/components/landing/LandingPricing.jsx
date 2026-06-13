@@ -12,6 +12,7 @@ import {
   getPlanUpgradePath,
   getRegisterWithPlanPath,
 } from "@/utils/billingPlanFlow";
+import { trackEvent } from "@/services/analytics/analyticsService";
 
 const primaryBtnClass =
   "w-full py-3 rounded-full font-medium btn-scale transition-colors bg-white text-black hover:bg-zinc-200";
@@ -103,6 +104,11 @@ export function LandingPricing() {
                   <Link
                     to={ctaHref}
                     data-testid={`landing-pricing-btn-${id}`}
+                    onClick={() => {
+                      if (id === PLAN_IDS.PROFESSIONAL) {
+                        trackEvent("click_pricing_pro");
+                      }
+                    }}
                   >
                     {marketing.ctaLabel}
                   </Link>

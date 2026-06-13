@@ -1,6 +1,7 @@
 import "@/App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
+import { AnalyticsRouteTracker } from "@/components/analytics/AnalyticsRouteTracker";
 import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { PublicRoute } from './components/auth/PublicRoute';
@@ -38,6 +39,7 @@ function App() {
     <div className="App">
       <Toaster />
       <BrowserRouter>
+        <AnalyticsRouteTracker />
         <Routes>
           {/* Public Routes - No Sidebar */}
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />

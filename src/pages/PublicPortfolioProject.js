@@ -18,6 +18,7 @@ import {
   mapImageToCard,
 } from "@/services/images/imageService";
 import { getPublicUserBySlug } from "@/services/users/userService";
+import { recordPublicProjectView } from "@/services/stats/publicViewTracking";
 import {
   canAccessPortfolioProject,
 } from "@/utils/publicAccess";
@@ -144,6 +145,14 @@ export const PublicPortfolioProject = () => {
       cancelled = true;
     };
   }, [rawSlug, projectId]);
+
+  useEffect(() => {
+    if (state.loading || state.error || !state.project?.id) {
+      return;
+    }
+
+    recordPublicProjectView(state.project.id);
+  }, [state.loading, state.error, state.project]);
 
   const cardImages = useMemo(
     () => state.images.map(mapImageToCard),

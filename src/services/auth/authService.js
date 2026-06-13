@@ -21,6 +21,7 @@ import {
   applyActionCode,
   confirmPasswordReset,
   createUserWithEmailAndPassword,
+  getAdditionalUserInfo,
   GoogleAuthProvider,
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -83,7 +84,12 @@ export async function signUpWithEmail(email, password) {
 
 export async function signInWithGoogle() {
   const credential = await signInWithPopup(auth, googleProvider);
-  return mapFirebaseUser(credential.user);
+  const isNewUser = getAdditionalUserInfo(credential)?.isNewUser ?? false;
+
+  return {
+    user: mapFirebaseUser(credential.user),
+    isNewUser,
+  };
 }
 
 export async function logout() {

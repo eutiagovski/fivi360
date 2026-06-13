@@ -42,6 +42,7 @@ import {
   parseYoutubeForDisplay,
   SOCIAL_LINK_PREFIXES,
 } from '@/utils/socialLinks';
+import { trackEvent } from '@/services/analytics/analyticsService';
 import { buildPortfolioUrl, normalizeSlug } from '@/utils/slug';
 
 const initialFormData = {
@@ -65,6 +66,7 @@ export const Settings = () => {
   const { publicPortfolioEnabled } = usePlanLimits();
   const [formData, setFormData] = useState(initialFormData);
   const [savedSlug, setSavedSlug] = useState('');
+  const [savedPortfolioEnabled, setSavedPortfolioEnabled] = useState(false);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [loadError, setLoadError] = useState(null);
@@ -119,6 +121,7 @@ export const Settings = () => {
           portfolioEnabled: profile?.portfolioEnabled ?? false,
         });
         setSavedSlug(publicSlug);
+        setSavedPortfolioEnabled(profile?.portfolioEnabled ?? false);
       } catch {
         if (!cancelled) {
           setLoadError('Não foi possível carregar suas configurações.');
@@ -255,6 +258,12 @@ export const Settings = () => {
         publicSlug,
       }));
       setSavedSlug(publicSlug);
+
+      if (formData.portfolioEnabled && !savedPortfolioEnabled) {
+        trackEvent('publish_portfolio', { enabled: true });
+      }
+
+      setSavedPortfolioEnabled(formData.portfolioEnabled);
 
       toast({
         title: 'Configurações salvas',

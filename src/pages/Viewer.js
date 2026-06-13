@@ -16,6 +16,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { useToast } from "@/hooks/use-toast";
 import { isPlanLimitError } from "@/services/plans/planService";
+import { trackEvent } from "@/services/analytics/analyticsService";
 import {
   HOTSPOT_TYPE_INFO,
   HOTSPOT_TYPE_SCENE,
@@ -106,6 +107,12 @@ export const Viewer = () => {
     setInfoHotspot(null);
     setContextMenu(null);
   }, [imageId]);
+
+  useEffect(() => {
+    if (!loading && !error && image) {
+      trackEvent("view_360_image", { source: "private" });
+    }
+  }, [imageId, loading, error, image]);
 
   const handleToggleManage = () => {
     if (!hotspotsEnabled) {
@@ -309,6 +316,11 @@ export const Viewer = () => {
         toast({
           title: "Hotspot criado",
           description: "O marcador foi adicionado ao panorama.",
+        });
+
+        trackEvent("create_hotspot", {
+          hotspot_type:
+            formData.type === HOTSPOT_TYPE_SCENE ? "scene" : "info",
         });
       }
 

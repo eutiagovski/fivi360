@@ -2,6 +2,10 @@ import { useEffect, useState } from "react";
 import { Copy, Loader2 } from "lucide-react";
 import { AppModal } from "@/components/common/AppModal";
 import { toast } from "@/hooks/use-toast";
+import {
+  toShareVisibilityParam,
+  trackEvent,
+} from "@/services/analytics/analyticsService";
 import { updateImageVisibility } from "@/services/images/imageService";
 import { buildShareImageUrl } from "@/utils/publicAccess";
 import { getImageVisibilityOptions } from "@/utils/visibility";
@@ -44,6 +48,12 @@ export function ShareImageDialog({
     (o) => o.value === visibility,
   );
 
+  const trackShareImage = () => {
+    trackEvent("share_image", {
+      visibility: toShareVisibilityParam(visibility),
+    });
+  };
+
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
@@ -57,6 +67,8 @@ export function ShareImageDialog({
         description: shareUrl,
       });
     }
+
+    trackShareImage();
   };
 
   const handleSaveVisibility = async () => {
@@ -69,6 +81,9 @@ export function ShareImageDialog({
     try {
       await updateImageVisibility(image.id, userId, visibility);
       await onVisibilitySaved?.(visibility);
+
+      trackShareImage();
+
       toast({
         title: "Visibilidade atualizada",
         description: selectedOption?.description ?? "",

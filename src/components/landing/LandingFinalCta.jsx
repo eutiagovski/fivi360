@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LANDING_FINAL_CTA } from "@/config/landingContent";
+import { trackEvent } from "@/services/analytics/analyticsService";
 
 const primaryBtnClass =
   "bg-white text-black rounded-full px-8 py-3 font-medium btn-scale hover:bg-zinc-200 h-auto text-base";
@@ -21,7 +22,11 @@ export function LandingFinalCta() {
           </p>
 
           <Button className={primaryBtnClass} asChild>
-            <Link to="/register" data-testid="landing-final-register-btn">
+            <Link
+              to="/register"
+              data-testid="landing-final-register-btn"
+              onClick={() => trackEvent("click_cta_start", { cta_location: "final" })}
+            >
               {LANDING_FINAL_CTA.buttonLabel}
             </Link>
           </Button>

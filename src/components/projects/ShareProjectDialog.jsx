@@ -4,6 +4,10 @@ import { AppModal } from "@/components/common/AppModal";
 import { PlanUpgradeHint } from "@/components/plans/PlanUpgradeHint";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { toast } from "@/hooks/use-toast";
+import {
+  toShareVisibilityParam,
+  trackEvent,
+} from "@/services/analytics/analyticsService";
 import { updateProject } from "@/services/projects/projectService";
 import { buildShareProjectUrl } from "@/utils/publicAccess";
 import { showPlanLimitToast } from "@/utils/planToast";
@@ -44,6 +48,12 @@ export function ShareProjectDialog({
   const shareUrl = buildShareProjectUrl(project.id);
   const selectedOption = VISIBILITY_OPTIONS.find((o) => o.value === visibility);
 
+  const trackShareProject = () => {
+    trackEvent("share_project", {
+      visibility: toShareVisibilityParam(visibility),
+    });
+  };
+
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
@@ -57,6 +67,8 @@ export function ShareProjectDialog({
         description: shareUrl,
       });
     }
+
+    trackShareProject();
   };
 
   const handleSaveVisibility = async () => {
@@ -69,6 +81,9 @@ export function ShareProjectDialog({
     try {
       await updateProject(project.id, { visibility });
       await onVisibilitySaved?.();
+
+      trackShareProject();
+
       toast({
         title: "Visibilidade atualizada",
         description: selectedOption?.description ?? "",

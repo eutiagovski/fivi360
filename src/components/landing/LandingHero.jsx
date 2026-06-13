@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Orbit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { trackEvent } from "@/services/analytics/analyticsService";
 
 const primaryBtnClass =
   "bg-white text-black rounded-full px-6 py-3 font-medium btn-scale hover:bg-zinc-200 h-auto text-base";
@@ -36,7 +37,11 @@ export function LandingHero() {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Button className={primaryBtnClass} asChild>
-                <Link to="/register" data-testid="landing-hero-register-btn">
+                <Link
+                  to="/register"
+                  data-testid="landing-hero-register-btn"
+                  onClick={() => trackEvent("click_cta_start", { cta_location: "hero" })}
+                >
                   Começar Gratuitamente
                 </Link>
               </Button>
