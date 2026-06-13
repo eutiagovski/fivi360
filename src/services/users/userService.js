@@ -77,6 +77,7 @@ export { SlugTakenError, SlugValidationError };
  * @property {string} bio
  * @property {string} publicSlug
  * @property {boolean} portfolioEnabled
+ * @property {boolean} portfolioAvailable — `portfolioEnabled` + limites do plano efetivo
  * @property {SocialLinks} socialLinks
  */
 

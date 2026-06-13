@@ -9,7 +9,6 @@ import {
   mapProjectToCard,
 } from "@/services/projects/projectService";
 import { getPublicUserBySlug } from "@/services/users/userService";
-import { isPortfolioPubliclyAvailable } from "@/utils/portfolio";
 import { isValidSlugFormat, normalizeSlug } from "@/utils/slug";
 
 function PublicMessage({ title, description, dataTestId }) {
@@ -62,7 +61,7 @@ export const PublicPortfolio = () => {
           return;
         }
 
-        if (!isPortfolioPubliclyAvailable(user)) {
+        if (!user?.portfolioAvailable) {
           if (!cancelled) {
             setState({ loading: false, error: "disabled", user: null, projects: [] });
           }

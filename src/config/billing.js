@@ -102,6 +102,35 @@ export const PAYMENTS_COMING_SOON_MESSAGE =
 
 export const BILLING_PORTAL_COMING_SOON_MESSAGE = "Disponível em breve.";
 
+export const CANCEL_AT_PERIOD_END_MESSAGE =
+  "Sua assinatura está programada para cancelamento ao fim do período atual.";
+
+export const CANCEL_SUBSCRIPTION_SUCCESS_MESSAGE =
+  "Sua assinatura será cancelada ao fim do período atual.";
+
+export const CANCEL_SUBSCRIPTION_ERROR_MESSAGE =
+  "Não foi possível cancelar a assinatura. Tente novamente.";
+
+const ACTIVE_STRIPE_SUBSCRIPTION_STATUSES = new Set([
+  BILLING_STATUS.ACTIVE,
+  BILLING_STATUS.TRIALING,
+]);
+
+/**
+ * Indica se o usuário pode cancelar uma assinatura Stripe ativa.
+ * @param {UserBilling} billing
+ * @returns {boolean}
+ */
+export function canCancelStripeSubscription(billing) {
+  const status = (billing.subscriptionStatus ?? "").toLowerCase();
+
+  return (
+    billing.provider === "stripe" &&
+    ACTIVE_STRIPE_SUBSCRIPTION_STATUSES.has(status) &&
+    !billing.cancelAtPeriodEnd
+  );
+}
+
 /**
  * IDs de plano pagos usados no fluxo de upgrade/checkout.
  * @type {import("@/config/planLimits").PlanId[]}
@@ -180,6 +209,50 @@ export function getSubscriptionStatusLabel(status) {
   return (
     SUBSCRIPTION_STATUS_LABELS[key] ?? status ?? SUBSCRIPTION_STATUS_LABELS.free
   );
+}
+
+export const INVOICE_STATUS_LABELS = {
+  paid: "Pago",
+  failed: "Falhou",
+};
+
+/**
+ * @param {string | null | undefined} status
+ * @returns {string}
+ */
+export function getInvoiceStatusLabel(status) {
+  if (!status) {
+    return "—";
+  }
+
+  const key = status.toLowerCase();
+  const label = INVOICE_STATUS_LABELS[key];
+
+  if (label) {
+    return label;
+  }
+
+  return status.charAt(0).toUpperCase() + status.slice(1);
+}
+
+/**
+ * Converte centavos Stripe para moeda legível (padrão BRL).
+ *
+ * @param {number | null | undefined} amountCents
+ * @param {string | null | undefined} currency
+ * @returns {string}
+ */
+export function formatInvoiceAmount(amountCents, currency = "brl") {
+  if (typeof amountCents !== "number" || !Number.isFinite(amountCents)) {
+    return "—";
+  }
+
+  const normalizedCurrency = (currency ?? "brl").toUpperCase();
+
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: normalizedCurrency === "BRL" ? "BRL" : normalizedCurrency,
+  }).format(amountCents / 100);
 }
 
 /**

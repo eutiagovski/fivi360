@@ -21,7 +21,6 @@ import { getPublicUserBySlug } from "@/services/users/userService";
 import {
   canAccessPortfolioProject,
 } from "@/utils/publicAccess";
-import { isPortfolioPubliclyAvailable } from "@/utils/portfolio";
 import { isValidSlugFormat, normalizeSlug } from "@/utils/slug";
 
 export const PublicPortfolioProject = () => {
@@ -67,7 +66,7 @@ export const PublicPortfolioProject = () => {
       try {
         const owner = await getPublicUserBySlug(slug);
 
-        if (!owner || !isPortfolioPubliclyAvailable(owner)) {
+        if (!owner?.portfolioAvailable) {
           if (!cancelled) {
             setState({
               loading: false,

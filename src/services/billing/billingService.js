@@ -7,8 +7,16 @@
 
 import { getFunctions, httpsCallable, connectFunctionsEmulator } from "firebase/functions";
 import app from "@/config/firebase";
-import { PAYMENTS_COMING_SOON_MESSAGE } from "@/config/billing";
+import {
+  CANCEL_SUBSCRIPTION_ERROR_MESSAGE,
+  CANCEL_SUBSCRIPTION_SUCCESS_MESSAGE,
+  PAYMENTS_COMING_SOON_MESSAGE,
+} from "@/config/billing";
 import { PLAN_IDS } from "@/config/planLimits";
+import {
+  getInvoicesByUserId,
+  mapInvoicesToBillingRows,
+} from "@/services/billing/invoiceService";
 
 const functions = getFunctions(app, "southamerica-east1");
 
@@ -26,6 +34,11 @@ if (
 const createStripeCheckoutSessionCallable = httpsCallable(
   functions,
   "createStripeCheckoutSession",
+);
+
+const cancelStripeSubscriptionCallable = httpsCallable(
+  functions,
+  "cancelStripeSubscription",
 );
 
 const NOT_ACTIVE = { ok: false, message: "Billing ainda não está ativo." };
@@ -92,11 +105,20 @@ export async function createBillingPortalSession() {
 }
 
 /**
- * Solicita cancelamento ao final do período.
- * @returns {Promise<{ ok: false, message: string }>}
+ * Agenda cancelamento da assinatura Stripe ao fim do período atual.
+ * @returns {Promise<{ ok: false, message: string } | { ok: true, message: string }>}
  */
 export async function cancelSubscription() {
-  return NOT_ACTIVE;
+  try {
+    const result = await cancelStripeSubscriptionCallable();
+    if (result.data?.ok === true) {
+      return { ok: true, message: CANCEL_SUBSCRIPTION_SUCCESS_MESSAGE };
+    }
+
+    return { ok: false, message: CANCEL_SUBSCRIPTION_ERROR_MESSAGE };
+  } catch {
+    return { ok: false, message: CANCEL_SUBSCRIPTION_ERROR_MESSAGE };
+  }
 }
 
 /**
@@ -108,9 +130,23 @@ export async function getBillingSummary() {
 }
 
 /**
- * Lista faturas/cobranças do usuário.
- * @returns {Promise<{ ok: false, message: string, invoices: [] }>}
+ * Lista faturas/cobranças do usuário (Firestore `invoices`).
+ * @param {string} userId
+ * @returns {Promise<{ ok: true, invoices: import("@/services/billing/invoiceService").BillingInvoiceRow[] } | { ok: false, message: string, invoices: [] }>}
  */
-export async function getInvoices() {
-  return { ...NOT_ACTIVE, invoices: [] };
+export async function getInvoices(userId) {
+  if (!userId) {
+    return { ok: true, invoices: [] };
+  }
+
+  try {
+    const invoices = await getInvoicesByUserId(userId);
+    return { ok: true, invoices: mapInvoicesToBillingRows(invoices) };
+  } catch {
+    return {
+      ok: false,
+      message: "Não foi possível carregar as cobranças.",
+      invoices: [],
+    };
+  }
 }

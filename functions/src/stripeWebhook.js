@@ -1,9 +1,9 @@
 const { onRequest } = require("firebase-functions/v2/https");
 const { logger } = require("firebase-functions");
 const { initializeApp, getApps } = require("firebase-admin/app");
-const { getFirestore, FieldValue } = require("firebase-admin/firestore");
+const { getFirestore, FieldValue, Timestamp } = require("firebase-admin/firestore");
 const Stripe = require("stripe");
-const { STRIPE_WEBHOOK_SECRET } = require("./stripe/client");
+const { STRIPE_WEBHOOK_SECRET, STRIPE_SECRET_KEY, getStripeClient } = require("./stripe/client");
 
 if (getApps().length === 0) {
   initializeApp();
@@ -124,12 +124,363 @@ async function handleCheckoutSessionCompleted(db, session) {
 }
 
 /**
- * Webhook público Stripe — Sprint 4A: apenas checkout.session.completed.
+ * @param {string | import("stripe").Stripe.Subscription | null | undefined} subscription
+ * @returns {string | null}
+ */
+function getStripeSubscriptionId(subscription) {
+  if (!subscription) {
+    return null;
+  }
+
+  return typeof subscription === "string" ? subscription : subscription.id;
+}
+
+/**
+ * @param {string | import("stripe").Stripe.Customer | null | undefined} customer
+ * @returns {string | null}
+ */
+function getStripeCustomerId(customer) {
+  if (!customer) {
+    return null;
+  }
+
+  return typeof customer === "string" ? customer : customer.id;
+}
+
+/**
+ * @param {import("stripe").Stripe.Subscription | string | null | undefined} subscription
+ * @returns {{ userId?: string, planId?: string }}
+ */
+function getSubscriptionMetadata(subscription) {
+  if (!subscription || typeof subscription === "string") {
+    return {};
+  }
+
+  const userId = subscription.metadata?.userId?.trim();
+  const planId = subscription.metadata?.planId?.trim();
+
+  return {
+    ...(userId ? { userId } : {}),
+    ...(planId ? { planId } : {}),
+  };
+}
+
+/**
+ * @param {import("firebase-admin/firestore").Firestore} db
+ * @param {string | null} subscriptionId
+ * @param {string | null} customerId
+ * @param {import("stripe").Stripe.Subscription | string | null | undefined} subscriptionRef
+ * @returns {Promise<{ userId: string | null, planId: string | null }>}
+ */
+async function resolveInvoiceUserContext(db, subscriptionId, customerId, subscriptionRef) {
+  const inlineMetadata = getSubscriptionMetadata(subscriptionRef);
+  if (inlineMetadata.userId) {
+    return {
+      userId: inlineMetadata.userId,
+      planId: inlineMetadata.planId || null,
+    };
+  }
+
+  if (subscriptionId) {
+    const subscriptionSnap = await db
+      .collection("subscriptions")
+      .where("providerSubscriptionId", "==", subscriptionId)
+      .limit(1)
+      .get();
+
+    if (!subscriptionSnap.empty) {
+      const subscriptionDoc = subscriptionSnap.docs[0];
+      const subscriptionData = subscriptionDoc.data();
+
+      return {
+        userId: subscriptionDoc.id,
+        planId:
+          typeof subscriptionData.planId === "string" ? subscriptionData.planId : null,
+      };
+    }
+
+    const stripe = getStripeClient();
+    if (stripe) {
+      try {
+        const stripeSubscription = await stripe.subscriptions.retrieve(subscriptionId);
+        const metadata = getSubscriptionMetadata(stripeSubscription);
+
+        if (metadata.userId) {
+          return {
+            userId: metadata.userId,
+            planId: metadata.planId || null,
+          };
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        logger.warn("stripeWebhook: failed to retrieve subscription metadata", {
+          subscriptionId,
+          error: message,
+        });
+      }
+    }
+  }
+
+  if (customerId) {
+    const userSnap = await db
+      .collection("users")
+      .where("billing.stripe.customerId", "==", customerId)
+      .limit(1)
+      .get();
+
+    if (!userSnap.empty) {
+      const userDoc = userSnap.docs[0];
+      const userData = userDoc.data();
+      const planId =
+        typeof userData.plan?.id === "string"
+          ? userData.plan.id
+          : typeof userData.plan === "string"
+            ? userData.plan
+            : null;
+
+      return {
+        userId: userDoc.id,
+        planId,
+      };
+    }
+  }
+
+  return { userId: null, planId: inlineMetadata.planId || null };
+}
+
+/**
+ * @param {import("firebase-admin/firestore").Firestore} db
+ * @param {import("stripe").Stripe.Subscription} subscription
+ * @returns {Promise<string | null>}
+ */
+async function resolveSubscriptionDeletedUserId(db, subscription) {
+  const metadataUserId = subscription.metadata?.userId?.trim();
+  if (metadataUserId) {
+    return metadataUserId;
+  }
+
+  const subscriptionId = subscription.id;
+
+  if (subscriptionId) {
+    const subscriptionSnap = await db
+      .collection("subscriptions")
+      .where("providerSubscriptionId", "==", subscriptionId)
+      .limit(1)
+      .get();
+
+    if (!subscriptionSnap.empty) {
+      return subscriptionSnap.docs[0].id;
+    }
+
+    const userSnap = await db
+      .collection("users")
+      .where("billing.stripe.subscriptionId", "==", subscriptionId)
+      .limit(1)
+      .get();
+
+    if (!userSnap.empty) {
+      return userSnap.docs[0].id;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * @param {import("firebase-admin/firestore").Firestore} db
+ * @param {import("stripe").Stripe.Subscription} subscription
+ *
+ * Downgrade para Starter via `users.plan` apenas — nenhum dado (projetos, imagens,
+ * hotspots, links, billing, invoices) é removido.
+ */
+async function handleSubscriptionDeleted(db, subscription) {
+  const userId = await resolveSubscriptionDeletedUserId(db, subscription);
+
+  if (!userId) {
+    logger.warn("stripeWebhook: customer.subscription.deleted without resolvable userId", {
+      subscriptionId: subscription.id,
+      customerId: getStripeCustomerId(subscription.customer),
+      metadata: subscription.metadata,
+    });
+    return;
+  }
+
+  const subscriptionRef = db.collection("subscriptions").doc(userId);
+  const userRef = db.collection("users").doc(userId);
+
+  const [subscriptionSnap, userSnap] = await Promise.all([
+    subscriptionRef.get(),
+    userRef.get(),
+  ]);
+
+  const existingSubscription = subscriptionSnap.data();
+  const existingPlan = userSnap.data()?.plan;
+
+  if (
+    existingSubscription?.status === "canceled" &&
+    existingPlan &&
+    typeof existingPlan === "object" &&
+    existingPlan.id === "starter" &&
+    existingPlan.source === "system"
+  ) {
+    logger.info("stripeWebhook: customer.subscription.deleted already processed", {
+      userId,
+      subscriptionId: subscription.id,
+    });
+    return;
+  }
+
+  const canceledAt =
+    toFirestoreTimestamp(subscription.canceled_at) ??
+    toFirestoreTimestamp(subscription.ended_at) ??
+    FieldValue.serverTimestamp();
+
+  const updatedAt = FieldValue.serverTimestamp();
+
+  await subscriptionRef.set(
+    {
+      status: "canceled",
+      cancelAtPeriodEnd: false,
+      canceledAt,
+      updatedAt,
+    },
+    { merge: true },
+  );
+
+  await userRef.set(
+    {
+      plan: {
+        id: "starter",
+        status: "active",
+        source: "system",
+        cancelAtPeriodEnd: false,
+        updatedAt,
+      },
+      updatedAt,
+    },
+    { merge: true },
+  );
+
+  logger.info("stripeWebhook: customer.subscription.deleted processed", {
+    userId,
+    subscriptionId: subscription.id,
+  });
+}
+
+/**
+ * @param {number | null | undefined} unixSeconds
+ * @returns {FirebaseFirestore.Timestamp | null}
+ */
+function toFirestoreTimestamp(unixSeconds) {
+  if (typeof unixSeconds !== "number" || !Number.isFinite(unixSeconds)) {
+    return null;
+  }
+
+  return new Timestamp(unixSeconds, 0);
+}
+
+/**
+ * @param {import("firebase-admin/firestore").Firestore} db
+ * @param {import("stripe").Stripe.Invoice} invoice
+ * @param {"paid" | "failed"} status
+ * @returns {Promise<void>}
+ */
+async function upsertInvoiceDoc(db, invoice, status) {
+  const providerInvoiceId = invoice.id;
+  const providerSubscriptionId = getStripeSubscriptionId(invoice.subscription);
+  const providerCustomerId = getStripeCustomerId(invoice.customer);
+  const { userId, planId } = await resolveInvoiceUserContext(
+    db,
+    providerSubscriptionId,
+    providerCustomerId,
+    invoice.subscription,
+  );
+
+  const amount =
+    status === "paid"
+      ? invoice.amount_paid ?? invoice.total ?? null
+      : invoice.amount_due ?? invoice.total ?? null;
+
+  const invoiceRef = db.collection("invoices").doc(providerInvoiceId);
+  const existingSnap = await invoiceRef.get();
+
+  /** @type {Record<string, unknown>} */
+  const payload = {
+    userId,
+    provider: "stripe",
+    providerInvoiceId,
+    providerSubscriptionId,
+    providerCustomerId,
+    planId,
+    status,
+    amount,
+    currency: invoice.currency ?? null,
+    hostedInvoiceUrl: invoice.hosted_invoice_url ?? null,
+    invoicePdf: invoice.invoice_pdf ?? null,
+    updatedAt: FieldValue.serverTimestamp(),
+  };
+
+  if (status === "paid") {
+    payload.paidAt =
+      toFirestoreTimestamp(invoice.status_transitions?.paid_at) ??
+      FieldValue.serverTimestamp();
+  } else {
+    payload.failedAt = FieldValue.serverTimestamp();
+  }
+
+  if (!existingSnap.exists) {
+    payload.createdAt = FieldValue.serverTimestamp();
+  }
+
+  await invoiceRef.set(payload, { merge: true });
+
+  if (!userId) {
+    logger.warn("stripeWebhook: invoice persisted without userId", {
+      providerInvoiceId,
+      status,
+      providerSubscriptionId,
+      providerCustomerId,
+    });
+  }
+
+  logger.info("stripeWebhook: invoice persisted", {
+    providerInvoiceId,
+    status,
+    userId,
+    planId,
+  });
+}
+
+/**
+ * @param {import("firebase-admin/firestore").Firestore} db
+ * @param {import("stripe").Stripe.Invoice} invoice
+ */
+async function handleInvoicePaid(db, invoice) {
+  await upsertInvoiceDoc(db, invoice, "paid");
+}
+
+/**
+ * @param {import("firebase-admin/firestore").Firestore} db
+ * @param {import("stripe").Stripe.Invoice} invoice
+ */
+async function handleInvoicePaymentFailed(db, invoice) {
+  await upsertInvoiceDoc(db, invoice, "failed");
+}
+
+const HANDLED_STRIPE_EVENTS = new Set([
+  "checkout.session.completed",
+  "customer.subscription.deleted",
+  "invoice.paid",
+  "invoice.payment_failed",
+]);
+
+/**
+ * Webhook público Stripe — checkout, assinatura encerrada, invoice.paid e invoice.payment_failed.
  */
 exports.stripeWebhook = onRequest(
   {
     region: "southamerica-east1",
-    secrets: [STRIPE_WEBHOOK_SECRET],
+    secrets: [STRIPE_WEBHOOK_SECRET, STRIPE_SECRET_KEY],
   },
   async (req, res) => {
     if (req.method !== "POST") {
@@ -169,7 +520,7 @@ exports.stripeWebhook = onRequest(
       return;
     }
 
-    if (event.type !== "checkout.session.completed") {
+    if (!HANDLED_STRIPE_EVENTS.has(event.type)) {
       logger.info("stripeWebhook: event ignored", { type: event.type });
       res.status(200).json({ received: true, ignored: true });
       return;
@@ -178,10 +529,34 @@ exports.stripeWebhook = onRequest(
     const db = getFirestore();
 
     try {
-      await handleCheckoutSessionCompleted(
-        db,
-        /** @type {import("stripe").Stripe.Checkout.Session} */ (event.data.object),
-      );
+      switch (event.type) {
+        case "checkout.session.completed":
+          await handleCheckoutSessionCompleted(
+            db,
+            /** @type {import("stripe").Stripe.Checkout.Session} */ (event.data.object),
+          );
+          break;
+        case "customer.subscription.deleted":
+          await handleSubscriptionDeleted(
+            db,
+            /** @type {import("stripe").Stripe.Subscription} */ (event.data.object),
+          );
+          break;
+        case "invoice.paid":
+          await handleInvoicePaid(
+            db,
+            /** @type {import("stripe").Stripe.Invoice} */ (event.data.object),
+          );
+          break;
+        case "invoice.payment_failed":
+          await handleInvoicePaymentFailed(
+            db,
+            /** @type {import("stripe").Stripe.Invoice} */ (event.data.object),
+          );
+          break;
+        default:
+          break;
+      }
 
       res.status(200).json({ received: true });
     } catch (err) {

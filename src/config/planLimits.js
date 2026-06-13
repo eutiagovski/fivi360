@@ -22,6 +22,8 @@ export const PLAN_IDS = {
  * @property {string} [id]
  * @property {string} [status]
  * @property {string} [source]
+ * @property {boolean} [cancelAtPeriodEnd]
+ * @property {import("firebase/firestore").Timestamp | null} [updatedAt]
  */
 
 /** @typedef {string | UserPlan | null | undefined} UserPlanRaw */

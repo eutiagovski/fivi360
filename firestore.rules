@@ -10,6 +10,7 @@ rules_version = '2';
 //   projects/{projectId}
 //   images/{imageId}
 //   images/{imageId}/hotspots/{hotspotId}
+//   invoices/{invoiceId}          — faturas Stripe (escrita via webhook / Admin SDK)
 //   emailQueue/{emailId}          — fila de e-mails transacionais (Resend)
 //
 // Split get vs list: queries precisam provar estaticamente os predicados
@@ -120,6 +121,19 @@ service cloud.firestore {
     function imageListableInPublicProject(imageData) {
       return imageData.projectId != null
         && isPublicProject(imageData.projectId);
+    }
+
+    // ---------- invoices (Stripe — escrita só via Admin SDK / webhook) ----------
+
+    match /invoices/{invoiceId} {
+
+      allow get: if isSignedIn()
+        && resource.data.userId == request.auth.uid;
+
+      allow list: if isSignedIn()
+        && resource.data.userId == request.auth.uid;
+
+      allow create, update, delete: if false;
     }
 
     // ---------- emailQueue (transacional — ver docs/resend-email-plan.md) ----------

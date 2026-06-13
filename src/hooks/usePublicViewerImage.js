@@ -5,7 +5,6 @@ import {
 } from "@/services/images/imageService";
 import { getProjectById } from "@/services/projects/projectService";
 import { getPublicUserBySlug } from "@/services/users/userService";
-import { isPortfolioPubliclyAvailable } from "@/utils/portfolio";
 import {
   canAccessPortfolioImage,
   canAccessSharedProject,
@@ -128,7 +127,7 @@ export function usePublicViewerImage(imageId, options = {}) {
 
           const owner = await getPublicUserBySlug(slug);
 
-          if (!owner || !isPortfolioPubliclyAvailable(owner)) {
+          if (!owner?.portfolioAvailable) {
             setError("unavailable");
             return;
           }

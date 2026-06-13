@@ -5,10 +5,25 @@ import { PageActionHeader } from '@/components/common/PageActionHeader';
 import { SectionHeader } from '@/components/common/SectionHeader';
 import { StatCard } from '@/components/common/StatCard';
 import { AuthLoadingScreen } from '@/components/auth/ProtectedRoute';
+import {
+  appAlertContentClassName,
+  APP_MODAL_FOOTER_CLASSES,
+} from '@/components/common/AppModal';
 import { BillingHistorySection } from '@/components/plans/BillingHistorySection';
 import { CurrentPlanBanner } from '@/components/plans/CurrentPlanBanner';
 import { ManageSubscriptionSection } from '@/components/plans/ManageSubscriptionSection';
 import { UpgradePlanModal } from '@/components/plans/UpgradePlanModal';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { canCancelStripeSubscription } from '@/config/billing';
 import { PLAN_IDS } from '@/config/planLimits';
 import { usePlanLimits } from '@/hooks/usePlanLimits';
 import { useProjects } from '@/hooks/useProjects';
@@ -20,10 +35,12 @@ export const Plan = () => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const upgradeFromQuery = searchParams.get('upgrade');
-  const { loading, planId, limits, usageStats, billing } = usePlanLimits();
+  const { loading, planId, limits, usageStats, billing, refresh } = usePlanLimits();
   const { projects, loading: projectsLoading } = useProjects();
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const [highlightedPlanId, setHighlightedPlanId] = useState(null);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [cancelingSubscription, setCancelingSubscription] = useState(false);
 
   const openUpgradeModal = (planToHighlight = null) => {
     if (planToHighlight && isBillingUpgradePlanId(planToHighlight)) {
@@ -41,17 +58,36 @@ export const Plan = () => {
 
   const isEnterprise = planId === PLAN_IDS.ENTERPRISE;
   const isStarter = planId === PLAN_IDS.STARTER;
+  const showCancelSubscriptionButton = canCancelStripeSubscription(billing);
 
   const sharedLinksCount = projects.filter(
     (p) => p.visibility !== 'private',
   ).length;
 
   const handleCancelSubscription = async () => {
-    const result = await cancelSubscription();
-    toast({
-      title: 'Assinatura',
-      description: result.message,
-    });
+    setCancelingSubscription(true);
+
+    try {
+      const result = await cancelSubscription();
+
+      if (!result.ok) {
+        toast({
+          title: 'Assinatura',
+          description: result.message,
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      await refresh();
+      setCancelDialogOpen(false);
+      toast({
+        title: 'Assinatura',
+        description: result.message,
+      });
+    } finally {
+      setCancelingSubscription(false);
+    }
   };
 
   const handleSubscribe = async (planId) => {
@@ -143,14 +179,16 @@ export const Plan = () => {
                 >
                   Alterar plano
                 </button>
-                <button
-                  type="button"
-                  onClick={handleCancelSubscription}
-                  data-testid="manage-subscription-cancel-btn"
-                  className="inline-flex items-center justify-center px-6 py-2.5 rounded-full text-sm font-medium border border-zinc-700 bg-transparent text-zinc-400 transition-colors hover:bg-red-950/25 hover:border-red-900/40 hover:text-red-300/90"
-                >
-                  Cancelar assinatura
-                </button>
+                {showCancelSubscriptionButton && (
+                  <button
+                    type="button"
+                    onClick={() => setCancelDialogOpen(true)}
+                    data-testid="manage-subscription-cancel-btn"
+                    className="inline-flex items-center justify-center px-6 py-2.5 rounded-full text-sm font-medium border border-zinc-700 bg-transparent text-zinc-400 transition-colors hover:bg-red-950/25 hover:border-red-900/40 hover:text-red-300/90"
+                  >
+                    Cancelar assinatura
+                  </button>
+                )}
               </div>
             ) : undefined
           }
@@ -182,6 +220,37 @@ export const Plan = () => {
         highlightedPlanId={highlightedPlanId ?? upgradeFromQuery}
         onSubscribe={handleSubscribe}
       />
+
+      <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <AlertDialogContent className={appAlertContentClassName('md')}>
+          <AlertDialogHeader className="text-left">
+            <AlertDialogTitle>Cancelar assinatura</AlertDialogTitle>
+            <AlertDialogDescription className="text-zinc-400">
+              Sua assinatura permanecerá ativa até o fim do período atual. Depois
+              disso, sua conta voltará ao plano Starter.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className={APP_MODAL_FOOTER_CLASSES}>
+            <AlertDialogCancel
+              disabled={cancelingSubscription}
+              className="rounded-full border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white"
+            >
+              Manter assinatura
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={cancelingSubscription}
+              onClick={(event) => {
+                event.preventDefault();
+                handleCancelSubscription();
+              }}
+              data-testid="manage-subscription-cancel-confirm-btn"
+              className="rounded-full bg-red-600 text-white hover:bg-red-500"
+            >
+              {cancelingSubscription ? 'Cancelando...' : 'Confirmar cancelamento'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

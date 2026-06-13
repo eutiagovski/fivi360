@@ -1,6 +1,7 @@
 import { PLAN_IDS } from "@/config/planLimits";
 import {
   BILLING_PORTAL_COMING_SOON_MESSAGE,
+  CANCEL_AT_PERIOD_END_MESSAGE,
   formatBillingDate,
   getPlanMonthlyPriceLabel,
   getSubscriptionStatusLabel,
@@ -138,7 +139,7 @@ function PaidSubscriptionView({ limits, planId, billing, onManageSubscription })
           className="text-sm text-amber-200/90"
           data-testid="manage-subscription-cancel-pending"
         >
-          O cancelamento será aplicado ao final do período atual.
+          {CANCEL_AT_PERIOD_END_MESSAGE}
         </p>
       )}
 
