@@ -9,13 +9,12 @@ import { BillingHistorySection } from '@/components/plans/BillingHistorySection'
 import { CurrentPlanBanner } from '@/components/plans/CurrentPlanBanner';
 import { ManageSubscriptionSection } from '@/components/plans/ManageSubscriptionSection';
 import { UpgradePlanModal } from '@/components/plans/UpgradePlanModal';
-import { PAYMENTS_COMING_SOON_MESSAGE } from '@/config/billing';
 import { PLAN_IDS } from '@/config/planLimits';
 import { usePlanLimits } from '@/hooks/usePlanLimits';
 import { useProjects } from '@/hooks/useProjects';
 import { useToast } from '@/hooks/use-toast';
 import { isBillingUpgradePlanId } from '@/utils/billingPlanFlow';
-import { cancelSubscription } from '@/services/billing/billingService';
+import { cancelSubscription, requestUpgrade } from '@/services/billing/billingService';
 
 export const Plan = () => {
   const { toast } = useToast();
@@ -53,6 +52,21 @@ export const Plan = () => {
       title: 'Assinatura',
       description: result.message,
     });
+  };
+
+  const handleSubscribe = async (planId) => {
+    const result = await requestUpgrade(planId);
+
+    if (!result.ok) {
+      toast({
+        title: 'Assinatura',
+        description: result.message,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    window.location.assign(result.checkoutUrl);
   };
 
   if (loading || projectsLoading) {
@@ -166,12 +180,7 @@ export const Plan = () => {
           }
         }}
         highlightedPlanId={highlightedPlanId ?? upgradeFromQuery}
-        onSubscribe={() => {
-          toast({
-            title: 'Assinatura',
-            description: PAYMENTS_COMING_SOON_MESSAGE,
-          });
-        }}
+        onSubscribe={handleSubscribe}
       />
     </div>
   );

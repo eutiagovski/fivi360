@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Check } from "lucide-react";
 import {
   Dialog,
@@ -8,7 +9,6 @@ import {
 } from "@/components/ui/dialog";
 import {
   getBillingPlanChosenMessage,
-  PAYMENTS_COMING_SOON_MESSAGE,
   UPGRADE_PLAN_PRICES,
 } from "@/config/billing";
 import { PLAN_IDS, PLAN_LIMITS } from "@/config/planLimits";
@@ -21,7 +21,7 @@ const UPGRADE_PLAN_IDS = [PLAN_IDS.PROFESSIONAL, PLAN_IDS.ENTERPRISE];
  * @param {{
  *   open: boolean,
  *   onOpenChange: (open: boolean) => void,
- *   onSubscribe?: (planId: string) => void,
+ *   onSubscribe?: (planId: string) => void | Promise<void>,
  *   highlightedPlanId?: string | null,
  * }} props
  */
@@ -31,12 +31,24 @@ export function UpgradePlanModal({
   onSubscribe,
   highlightedPlanId = null,
 }) {
+  const [subscribingPlanId, setSubscribingPlanId] = useState(null);
+
   const chosenMessage = highlightedPlanId
     ? getBillingPlanChosenMessage(highlightedPlanId)
     : "";
 
-  const handleSubscribe = (planId) => {
-    onSubscribe?.(planId);
+  const handleSubscribe = async (planId) => {
+    if (subscribingPlanId) {
+      return;
+    }
+
+    setSubscribingPlanId(planId);
+
+    try {
+      await onSubscribe?.(planId);
+    } finally {
+      setSubscribingPlanId(null);
+    }
   };
 
   return (
@@ -50,7 +62,7 @@ export function UpgradePlanModal({
             Escolha seu plano
           </DialogTitle>
           <DialogDescription className="text-zinc-400 text-left">
-            Compare os benefícios e assine quando os pagamentos estiverem disponíveis.
+            Compare os benefícios e assine o plano Professional via checkout seguro.
           </DialogDescription>
         </DialogHeader>
 
@@ -70,6 +82,9 @@ export function UpgradePlanModal({
             const isHighlighted =
               highlightedPlanId === planId ||
               (highlightedPlanId == null && planId === PLAN_IDS.PROFESSIONAL);
+
+            const isSubscribing = subscribingPlanId === planId;
+            const isBusy = subscribingPlanId != null;
 
             return (
               <div
@@ -118,8 +133,10 @@ export function UpgradePlanModal({
                   type="button"
                   data-testid={`upgrade-modal-subscribe-${planId}`}
                   onClick={() => handleSubscribe(planId)}
+                  disabled={isBusy}
                   className={`
                     w-full py-2.5 rounded-full text-sm font-medium btn-scale transition-colors
+                    disabled:opacity-60 disabled:cursor-not-allowed
                     ${
                       isHighlighted
                         ? "bg-white text-black hover:bg-zinc-200"
@@ -127,7 +144,7 @@ export function UpgradePlanModal({
                     }
                   `}
                 >
-                  Assinar plano
+                  {isSubscribing ? "Redirecionando..." : "Assinar plano"}
                 </button>
               </div>
             );
@@ -138,7 +155,7 @@ export function UpgradePlanModal({
           className="text-center text-sm text-amber-200/90 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3"
           data-testid="upgrade-modal-billing-notice"
         >
-          {PAYMENTS_COMING_SOON_MESSAGE}
+          O plano Professional usa checkout seguro (Stripe). Enterprise em breve.
         </p>
       </DialogContent>
     </Dialog>
