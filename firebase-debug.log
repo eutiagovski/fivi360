@@ -2117,3 +2117,733 @@ Issues? Report them at https://github.com/firebase/firebase-tools/issues and att
 [debug] [2026-06-13T15:47:04.149Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
 [debug] [2026-06-13T15:47:04.150Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
 [info] +  functions: Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook."}}
+[debug] [2026-06-13T15:52:35.681Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\stripeWebhook.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\stripeWebhook.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:52:36.361Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\stripeWebhook.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\stripeWebhook.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:52:36.918Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\stripeWebhook.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\stripeWebhook.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:52:37.682Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\stripeWebhook.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\stripeWebhook.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:52:38.252Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\stripeWebhook.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\stripeWebhook.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:52:39.301Z] Validating nodejs source
+[warn] !  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] !  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2026-06-13T15:52:42.901Z] > [functions] package.json contents: {
+  "name": "fivi360-functions",
+  "description": "Cloud Functions for FIVI360 transactional email (Resend)",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^6.3.2",
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
+  }
+}
+[debug] [2026-06-13T15:52:42.901Z] Building nodejs source
+[debug] [2026-06-13T15:52:42.901Z] Failed to find version of module node: reached end of search path C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules
+[warn] !  functions: Your requested "node" version "20" doesn't match your global version "24". Using node@24 from host. 
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-06-13T15:52:42.905Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-06-13T15:52:42.918Z] Found firebase-functions binary at 'C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules\.bin\firebase-functions'
+[info] Serving at port 8347
+
+[debug] [2026-06-13T15:52:45.103Z] Got response from /__/functions.yaml {"endpoints":{"processEmailQueue":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"RESEND_API_KEY"}],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"emailQueue/{emailId}"},"retry":false},"entryPoint":"processEmailQueue"},"requestPasswordResetEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"requestPasswordResetEmail"},"createStripeCheckoutSession":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"createStripeCheckoutSession"},"cancelStripeSubscription":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"cancelStripeSubscription"},"stripeWebhook":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_WEBHOOK_SECRET"},{"key":"STRIPE_SECRET_KEY"},{"key":"RESEND_API_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"stripeWebhook"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{},"params":[{"type":"secret","name":"RESEND_API_KEY"},{"type":"secret","name":"STRIPE_SECRET_KEY"},{"type":"secret","name":"STRIPE_WEBHOOK_SECRET"},{"name":"STRIPE_PRICE_PROFESSIONAL","type":"string"}]}
+[debug] [2026-06-13T15:52:49.162Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
+[debug] [2026-06-13T15:52:49.163Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
+[info] +  functions: Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook."}}
+[debug] [2026-06-13T15:53:56.592Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\email\templates\paymentSuccess.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\email\\templates\\paymentSuccess.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:53:57.144Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\email\templates\paymentSuccess.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\email\\templates\\paymentSuccess.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:53:58.156Z] Validating nodejs source
+[warn] !  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] !  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2026-06-13T15:54:00.575Z] > [functions] package.json contents: {
+  "name": "fivi360-functions",
+  "description": "Cloud Functions for FIVI360 transactional email (Resend)",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^6.3.2",
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
+  }
+}
+[debug] [2026-06-13T15:54:00.575Z] Building nodejs source
+[debug] [2026-06-13T15:54:00.575Z] Failed to find version of module node: reached end of search path C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules
+[warn] !  functions: Your requested "node" version "20" doesn't match your global version "24". Using node@24 from host. 
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-06-13T15:54:00.581Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-06-13T15:54:00.593Z] Found firebase-functions binary at 'C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules\.bin\firebase-functions'
+[info] Serving at port 8674
+
+[debug] [2026-06-13T15:54:02.619Z] Got response from /__/functions.yaml {"endpoints":{"processEmailQueue":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"RESEND_API_KEY"}],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"emailQueue/{emailId}"},"retry":false},"entryPoint":"processEmailQueue"},"requestPasswordResetEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"requestPasswordResetEmail"},"createStripeCheckoutSession":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"createStripeCheckoutSession"},"cancelStripeSubscription":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"cancelStripeSubscription"},"stripeWebhook":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_WEBHOOK_SECRET"},{"key":"STRIPE_SECRET_KEY"},{"key":"RESEND_API_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"stripeWebhook"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{},"params":[{"type":"secret","name":"RESEND_API_KEY"},{"type":"secret","name":"STRIPE_SECRET_KEY"},{"type":"secret","name":"STRIPE_WEBHOOK_SECRET"},{"name":"STRIPE_PRICE_PROFESSIONAL","type":"string"}]}
+[debug] [2026-06-13T15:54:06.677Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
+[debug] [2026-06-13T15:54:06.680Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
+[info] +  functions: Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook."}}
+[debug] [2026-06-13T14:59:03.698Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\stripeWebhook.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\stripeWebhook.js changed, reloading triggers"}}
+[info] i  firestore: Change detected, updating rules... 
+[debug] [2026-06-13T14:59:03.739Z] >>> [apiv2][query] PUT http://127.0.0.1:8080/emulator/v1/projects/fivi360:securityRules [none]
+[debug] [2026-06-13T14:59:03.741Z] >>> [apiv2][body] PUT http://127.0.0.1:8080/emulator/v1/projects/fivi360:securityRules {"ignore_errors":true,"rules":{"files":[{"name":"security.rules","content":"rules_version = '2';\r\n\r\n// --------------------------------------------------------------------------\r\n// FIVI360 — Firestore Security Rules (Sprint 13.3)\r\n//\r\n// Coleções:\r\n//   users/{userId}              — fonte única (campos públicos + privados)\r\n//   users/{userId}/public/profile — legado (descontinuado; não usar)\r\n//   slugs/{slug}                — resolução /u/:slug\r\n//   projects/{projectId}\r\n//   images/{imageId}\r\n//   images/{imageId}/hotspots/{hotspotId}\r\n//   invoices/{invoiceId}          — faturas Stripe (escrita via webhook / Admin SDK)\r\n//   emailQueue/{emailId}          — fila de e-mails transacionais (Resend)\r\n//\r\n// Split get vs list: queries precisam provar estaticamente os predicados\r\n// usados em allow list. Ver docs/security-rules-notes.md.\r\n// --------------------------------------------------------------------------\r\n\r\nservice cloud.firestore {\r\n  match /databases/{database}/documents {\r\n\r\n    // ---------- helpers ----------\r\n\r\n    function isSignedIn() {\r\n      return request.auth != null;\r\n    }\r\n\r\n    function isOwner(userId) {\r\n      return isSignedIn() && request.auth.uid == userId;\r\n    }\r\n\r\n    function isValidVisibility(value) {\r\n      return value in ['private', 'shared', 'public'];\r\n    }\r\n\r\n    function isShared(value) {\r\n      return value == 'shared' || value == 'public';\r\n    }\r\n\r\n    function projectDoc(projectId) {\r\n      return get(/databases/$(database)/documents/projects/$(projectId));\r\n    }\r\n\r\n    function projectExists(projectId) {\r\n      return exists(/databases/$(database)/documents/projects/$(projectId));\r\n    }\r\n\r\n    function projectBelongsToCaller(projectId) {\r\n      return projectId == null\r\n        || (\r\n          projectExists(projectId)\r\n          && projectDoc(projectId).data.userId == request.auth.uid\r\n        );\r\n    }\r\n\r\n    function isValidSlug(slug) {\r\n      return slug.matches('^[a-z0-9]+(-[a-z0-9]+)*$');\r\n    }\r\n\r\n    function isAllowedClientEmailType(type) {\r\n      return type in ['welcome', 'verify_email', 'billing_upgrade_requested'];\r\n    }\r\n\r\n    function isValidEmailQueueCreate() {\r\n      return request.resource.data.keys().hasAll(['type', 'to', 'userId', 'payload', 'status', 'createdAt'])\r\n        && request.resource.data.userId == request.auth.uid\r\n        && request.resource.data.to == request.auth.token.email\r\n        && request.resource.data.status == 'pending'\r\n        && isAllowedClientEmailType(request.resource.data.type)\r\n        && request.resource.data.to is string\r\n        && request.resource.data.payload is map\r\n        && request.resource.data.createdAt is timestamp\r\n        && !request.resource.data.keys().hasAny(['sentAt', 'resendId', 'error']);\r\n    }\r\n\r\n    // Portfólio /u/:slug — listagem de projetos públicos exige portfolioEnabled.\r\n    // get individual de projeto shared/public (ex.: /share/project) não usa este helper.\r\n    function portfolioEnabledForOwner(userId) {\r\n      return exists(/databases/$(database)/documents/users/$(userId))\r\n        && get(/databases/$(database)/documents/users/$(userId)).data.portfolioEnabled == true;\r\n    }\r\n\r\n    // Leitura pública limitada de users/{uid} (perfil de portfólio / share).\r\n    function isPubliclyReadableUser() {\r\n      return resource.data.portfolioEnabled == true\r\n        || (\r\n          resource.data.publicSlug is string\r\n          && resource.data.publicSlug.size() > 0\r\n          && isValidSlug(resource.data.publicSlug)\r\n        );\r\n    }\r\n\r\n    // Query users where publicSlug == slug (getPublicUserBySlug).\r\n    function isPublicSlugListQuery() {\r\n      return request.query.limit <= 1\r\n        && request.query.filters.size() == 1\r\n        && request.query.filters[0].fieldPath == 'publicSlug'\r\n        && request.query.filters[0].op == '=='\r\n        && request.query.filters[0].value is string\r\n        && isValidSlug(request.query.filters[0].value);\r\n    }\r\n\r\n    // Projeto shared/public — usado em get/list de imagens por projectId.\r\n    function isPublicProject(projectId) {\r\n      return projectExists(projectId)\r\n        && isShared(projectDoc(projectId).data.visibility);\r\n    }\r\n\r\n    // Get individual: imagem shared OU projeto pai shared/public.\r\n    function imageIsPubliclyReadable(imageData) {\r\n      return isShared(imageData.visibility)\r\n        || (\r\n          imageData.projectId != null\r\n          && isPublicProject(imageData.projectId)\r\n        );\r\n    }\r\n\r\n    // List por projectId: só quando o projeto pai é shared/public.\r\n    // Imagens shared em projeto private são acessíveis via get, não via list.\r\n    function imageListableInPublicProject(imageData) {\r\n      return imageData.projectId != null\r\n        && isPublicProject(imageData.projectId);\r\n    }\r\n\r\n    // ---------- invoices (Stripe — escrita só via Admin SDK / webhook) ----------\r\n\r\n    match /invoices/{invoiceId} {\r\n\r\n      allow get: if isSignedIn()\r\n        && resource.data.userId == request.auth.uid;\r\n\r\n      allow list: if isSignedIn()\r\n        && resource.data.userId == request.auth.uid;\r\n\r\n      allow create, update, delete: if false;\r\n    }\r\n\r\n    // ---------- emailQueue (transacional — ver docs/resend-email-plan.md) ----------\r\n    // Fase 1: create restrito no cliente; leitura/update/delete só via Admin SDK (Functions).\r\n    // Risco: usuário pode enfileirar e-mails repetidos para si — migrar enqueue para Functions.\r\n\r\n    match /emailQueue/{emailId} {\r\n\r\n      allow get, list: if false;\r\n\r\n      allow create: if isSignedIn() && isValidEmailQueueCreate();\r\n\r\n      allow update, delete: if false;\r\n    }\r\n\r\n    // ---------- slugs ----------\r\n\r\n    match /slugs/{slug} {\r\n\r\n      allow get: if true;\r\n      allow list: if false;\r\n\r\n      allow create: if isSignedIn()\r\n        && request.resource.data.uid == request.auth.uid\r\n        && request.resource.data.createdAt is timestamp\r\n        && isValidSlug(slug);\r\n\r\n      allow update: if false;\r\n\r\n      allow delete: if isSignedIn()\r\n        && resource.data.uid == request.auth.uid;\r\n    }\r\n\r\n    // ---------- users ----------\r\n\r\n    match /users/{userId} {\r\n\r\n      // get: owner ou perfil com slug/portfólio (DTO no cliente — ver userMappers).\r\n      allow get: if isOwner(userId) || isPubliclyReadableUser();\r\n\r\n      // list: apenas query por publicSlug (portfólio /u/:slug).\r\n      allow list: if isPublicSlugListQuery()\r\n        && resource.data.portfolioEnabled == true\r\n        && resource.data.publicSlug == request.query.filters[0].value;\r\n\r\n      allow create: if isOwner(userId);\r\n      allow update: if isOwner(userId);\r\n      allow delete: if isOwner(userId);\r\n\r\n      // Legado (Sprint 13.3): users/{uid}/public/profile — descontinuado.\r\n      // Documentos existentes não são apagados; o app não lê/escreve mais aqui.\r\n      match /public/profile {\r\n\r\n        allow get: if isOwner(userId);\r\n        allow list: if false;\r\n\r\n        allow create: if isOwner(userId);\r\n        allow update: if isOwner(userId);\r\n        allow delete: if isOwner(userId);\r\n      }\r\n    }\r\n\r\n    // ---------- projects ----------\r\n\r\n    match /projects/{projectId} {\r\n\r\n      allow get: if isOwner(resource.data.userId)\r\n                  || isShared(resource.data.visibility);\r\n\r\n      allow list: if\r\n        (isSignedIn() && resource.data.userId == request.auth.uid)\r\n        || (\r\n          isShared(resource.data.visibility)\r\n          && portfolioEnabledForOwner(resource.data.userId)\r\n        );\r\n\r\n      allow create: if isSignedIn()\r\n        && request.resource.data.userId == request.auth.uid\r\n        && request.resource.data.title is string\r\n        && request.resource.data.description is string\r\n        && request.resource.data.coverImage is string\r\n        && isValidVisibility(request.resource.data.visibility);\r\n\r\n      allow update: if isOwner(resource.data.userId)\r\n        && request.resource.data.userId == resource.data.userId\r\n        && request.resource.data.title is string\r\n        && request.resource.data.description is string\r\n        && request.resource.data.coverImage is string\r\n        && isValidVisibility(request.resource.data.visibility);\r\n\r\n      allow delete: if isOwner(resource.data.userId);\r\n    }\r\n\r\n    // ---------- images ----------\r\n\r\n    match /images/{imageId} {\r\n\r\n      allow get: if isOwner(resource.data.userId)\r\n                  || imageIsPubliclyReadable(resource.data);\r\n\r\n      // Owner: where('userId', '==', authUid) [+ projectId].\r\n      // Público: where('projectId', '==', X) — permitido só se projeto X é shared/public.\r\n      allow list: if\r\n        (isSignedIn() && resource.data.userId == request.auth.uid)\r\n        || imageListableInPublicProject(resource.data);\r\n\r\n      allow create: if isSignedIn()\r\n        && request.resource.data.userId == request.auth.uid\r\n        && request.resource.data.title is string\r\n        && request.resource.data.previewUrl is string\r\n        && request.resource.data.originalUrl is string\r\n        && request.resource.data.sizeBytes is number\r\n        && isValidVisibility(request.resource.data.visibility)\r\n        && (\r\n          !request.resource.data.keys().hasAny(['projectId'])\r\n          || request.resource.data.projectId == null\r\n          || (\r\n            request.resource.data.projectId is string\r\n            && projectBelongsToCaller(request.resource.data.projectId)\r\n          )\r\n        )\r\n        && (\r\n          !request.resource.data.keys().hasAny(['projectVisibility'])\r\n          || request.resource.data.projectVisibility == null\r\n          || isValidVisibility(request.resource.data.projectVisibility)\r\n        );\r\n\r\n      allow update: if isOwner(resource.data.userId)\r\n        && request.resource.data.userId == resource.data.userId\r\n        && isValidVisibility(request.resource.data.visibility)\r\n        && (\r\n          !request.resource.data.keys().hasAny(['projectId'])\r\n          || request.resource.data.projectId == null\r\n          || (\r\n            request.resource.data.projectId is string\r\n            && projectBelongsToCaller(request.resource.data.projectId)\r\n          )\r\n        )\r\n        && (\r\n          !request.resource.data.keys().hasAny(['projectVisibility'])\r\n          || request.resource.data.projectVisibility == null\r\n          || isValidVisibility(request.resource.data.projectVisibility)\r\n        );\r\n\r\n      allow delete: if isOwner(resource.data.userId);\r\n\r\n      // ---------- hotspots (subcoleção) ----------\r\n\r\n      match /hotspots/{hotspotId} {\r\n\r\n        function parentImage() {\r\n          return get(/databases/$(database)/documents/images/$(imageId));\r\n        }\r\n\r\n        function parentImageIsPublic() {\r\n          return imageIsPubliclyReadable(parentImage().data);\r\n        }\r\n\r\n        allow get: if isOwner(parentImage().data.userId)\r\n                    || parentImageIsPublic();\r\n\r\n        allow list: if isOwner(parentImage().data.userId)\r\n                     || parentImageIsPublic();\r\n\r\n        allow create: if isOwner(parentImage().data.userId)\r\n          && request.resource.data.userId == request.auth.uid\r\n          && request.resource.data.imageId == imageId\r\n          && request.resource.data.pitch is number\r\n          && request.resource.data.yaw is number\r\n          && request.resource.data.createdAt is timestamp\r\n          && request.resource.data.updatedAt is timestamp\r\n          && (\r\n            !request.resource.data.keys().hasAny(['projectId'])\r\n            || request.resource.data.projectId is string\r\n          )\r\n          && (\r\n            (\r\n              request.resource.data.type == 'info'\r\n              && request.resource.data.title is string\r\n              && request.resource.data.description is string\r\n            )\r\n            || (\r\n              request.resource.data.type == 'scene'\r\n              && request.resource.data.targetImageId is string\r\n            )\r\n          );\r\n\r\n        allow update: if isOwner(parentImage().data.userId)\r\n          && resource.data.userId == request.auth.uid\r\n          && request.resource.data.userId == resource.data.userId\r\n          && request.resource.data.imageId == imageId\r\n          && request.resource.data.pitch == resource.data.pitch\r\n          && request.resource.data.yaw == resource.data.yaw\r\n          && (\r\n            (\r\n              resource.data.type == 'info'\r\n              && request.resource.data.type == 'info'\r\n              && request.resource.data.title is string\r\n              && request.resource.data.description is string\r\n            )\r\n            || (\r\n              resource.data.type == 'scene'\r\n              && request.resource.data.type == 'scene'\r\n              && request.resource.data.targetImageId is string\r\n            )\r\n          );\r\n\r\n        allow delete: if isOwner(parentImage().data.userId)\r\n          && resource.data.userId == request.auth.uid;\r\n      }\r\n    }\r\n  }\r\n}\r\n"}]}}
+[debug] [2026-06-13T14:59:03.749Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\stripe\client.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\stripe\\client.js changed, reloading triggers"}}
+[debug] [2026-06-13T14:59:03.752Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\index.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\index.js changed, reloading triggers"}}
+[debug] [2026-06-13T14:59:03.821Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\email\templates\paymentSuccess.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\email\\templates\\paymentSuccess.js changed, reloading triggers"}}
+[debug] [2026-06-13T14:59:03.822Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\config\stripeBilling.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\config\\stripeBilling.js changed, reloading triggers"}}
+[debug] [2026-06-13T14:59:03.822Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\createStripeCheckoutSession.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\createStripeCheckoutSession.js changed, reloading triggers"}}
+[debug] [2026-06-13T14:59:03.822Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\cancelStripeSubscription.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\cancelStripeSubscription.js changed, reloading triggers"}}
+[debug] [2026-06-13T14:59:03.839Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\email\sendBillingEmail.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\email\\sendBillingEmail.js changed, reloading triggers"}}
+[debug] [2026-06-13T14:59:04.885Z] Validating nodejs source
+[warn] !  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] !  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2026-06-13T14:59:07.303Z] > [functions] package.json contents: {
+  "name": "fivi360-functions",
+  "description": "Cloud Functions for FIVI360 transactional email (Resend)",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^6.3.2",
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
+  }
+}
+[debug] [2026-06-13T14:59:07.303Z] Building nodejs source
+[debug] [2026-06-13T14:59:07.304Z] Failed to find version of module node: reached end of search path C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules
+[warn] !  functions: Your requested "node" version "20" doesn't match your global version "24". Using node@24 from host. 
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-06-13T14:59:07.308Z] <<< [apiv2][status] PUT http://127.0.0.1:8080/emulator/v1/projects/fivi360:securityRules 200
+[debug] [2026-06-13T14:59:07.308Z] <<< [apiv2][body] PUT http://127.0.0.1:8080/emulator/v1/projects/fivi360:securityRules {}
+[info] +  firestore: Rules updated. 
+[debug] [2026-06-13T14:59:07.311Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-06-13T14:59:07.323Z] Found firebase-functions binary at 'C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules\.bin\firebase-functions'
+[debug] [2026-06-13T14:59:07.330Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\package.json changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\package.json changed, reloading triggers"}}
+[info] Serving at port 8921
+
+[debug] [2026-06-13T14:59:08.344Z] Validating nodejs source
+[warn] !  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] !  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2026-06-13T14:59:11.079Z] > [functions] package.json contents: {
+  "name": "fivi360-functions",
+  "description": "Cloud Functions for FIVI360 transactional email (Resend)",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^6.3.2",
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
+  }
+}
+[debug] [2026-06-13T14:59:11.079Z] Building nodejs source
+[debug] [2026-06-13T14:59:11.079Z] Failed to find version of module node: reached end of search path C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules
+[warn] !  functions: Your requested "node" version "20" doesn't match your global version "24". Using node@24 from host. 
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-06-13T14:59:11.094Z] Got response from /__/functions.yaml {"endpoints":{"processEmailQueue":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"RESEND_API_KEY"}],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"emailQueue/{emailId}"},"retry":false},"entryPoint":"processEmailQueue"},"requestPasswordResetEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"requestPasswordResetEmail"},"createStripeCheckoutSession":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"createStripeCheckoutSession"},"cancelStripeSubscription":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"cancelStripeSubscription"},"stripeWebhook":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_WEBHOOK_SECRET"},{"key":"STRIPE_SECRET_KEY"},{"key":"RESEND_API_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"stripeWebhook"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{},"params":[{"type":"secret","name":"RESEND_API_KEY"},{"type":"secret","name":"STRIPE_SECRET_KEY"},{"type":"secret","name":"STRIPE_WEBHOOK_SECRET"},{"name":"STRIPE_PRICE_PROFESSIONAL","type":"string"}]}
+[debug] [2026-06-13T14:59:11.110Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-06-13T14:59:11.122Z] Found firebase-functions binary at 'C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules\.bin\firebase-functions'
+[debug] [2026-06-13T14:59:11.765Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\Untitled changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\Untitled changed, reloading triggers"}}
+[debug] [2026-06-13T14:59:11.801Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\package-lock.json changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\package-lock.json changed, reloading triggers"}}
+[info] Serving at port 8058
+
+[debug] [2026-06-13T14:59:12.848Z] Validating nodejs source
+[warn] !  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] !  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2026-06-13T14:59:15.093Z] > [functions] package.json contents: {
+  "name": "fivi360-functions",
+  "description": "Cloud Functions for FIVI360 transactional email (Resend)",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^6.3.2",
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
+  }
+}
+[debug] [2026-06-13T14:59:15.093Z] Building nodejs source
+[debug] [2026-06-13T14:59:15.093Z] Failed to find version of module node: reached end of search path C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules
+[warn] !  functions: Your requested "node" version "20" doesn't match your global version "24". Using node@24 from host. 
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-06-13T14:59:15.096Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-06-13T14:59:15.107Z] Found firebase-functions binary at 'C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules\.bin\firebase-functions'
+[debug] [2026-06-13T14:59:15.328Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
+[debug] [2026-06-13T14:59:15.335Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
+[info] +  functions: Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook."}}
+[info] Serving at port 8177
+
+[debug] [2026-06-13T14:59:16.820Z] Got response from /__/functions.yaml {"endpoints":{"processEmailQueue":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"RESEND_API_KEY"}],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"emailQueue/{emailId}"},"retry":false},"entryPoint":"processEmailQueue"},"requestPasswordResetEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"requestPasswordResetEmail"},"createStripeCheckoutSession":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"createStripeCheckoutSession"},"cancelStripeSubscription":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"cancelStripeSubscription"},"stripeWebhook":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_WEBHOOK_SECRET"},{"key":"STRIPE_SECRET_KEY"},{"key":"RESEND_API_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"stripeWebhook"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{},"params":[{"type":"secret","name":"RESEND_API_KEY"},{"type":"secret","name":"STRIPE_SECRET_KEY"},{"type":"secret","name":"STRIPE_WEBHOOK_SECRET"},{"name":"STRIPE_PRICE_PROFESSIONAL","type":"string"}]}
+[debug] [2026-06-13T14:59:17.364Z] Got response from /__/functions.yaml {"endpoints":{"processEmailQueue":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"RESEND_API_KEY"}],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"emailQueue/{emailId}"},"retry":false},"entryPoint":"processEmailQueue"},"requestPasswordResetEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"requestPasswordResetEmail"},"createStripeCheckoutSession":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"createStripeCheckoutSession"},"cancelStripeSubscription":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"cancelStripeSubscription"},"stripeWebhook":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_WEBHOOK_SECRET"},{"key":"STRIPE_SECRET_KEY"},{"key":"RESEND_API_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"stripeWebhook"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{},"params":[{"type":"secret","name":"RESEND_API_KEY"},{"type":"secret","name":"STRIPE_SECRET_KEY"},{"type":"secret","name":"STRIPE_WEBHOOK_SECRET"},{"name":"STRIPE_PRICE_PROFESSIONAL","type":"string"}]}
+[debug] [2026-06-13T14:59:20.876Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
+[debug] [2026-06-13T14:59:20.877Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
+[info] +  functions: Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook."}}
+[debug] [2026-06-13T14:59:21.414Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
+[debug] [2026-06-13T14:59:21.417Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
+[info] +  functions: Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook."}}
+[debug] [2026-06-13T15:02:19.677Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\config\email.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\config\\email.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:02:19.928Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\emailTemplates\index.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\emailTemplates\\index.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:02:20.576Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\emailTemplates\index.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\emailTemplates\\index.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:02:21.431Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\email\templates\paymentSuccess.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\email\\templates\\paymentSuccess.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:02:22.262Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\email\templates\paymentSuccess.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\email\\templates\\paymentSuccess.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:02:23.277Z] Validating nodejs source
+[warn] !  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] !  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2026-06-13T15:02:25.513Z] > [functions] package.json contents: {
+  "name": "fivi360-functions",
+  "description": "Cloud Functions for FIVI360 transactional email (Resend)",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^6.3.2",
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
+  }
+}
+[debug] [2026-06-13T15:02:25.513Z] Building nodejs source
+[debug] [2026-06-13T15:02:25.514Z] Failed to find version of module node: reached end of search path C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules
+[warn] !  functions: Your requested "node" version "20" doesn't match your global version "24". Using node@24 from host. 
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-06-13T15:02:25.518Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-06-13T15:02:25.530Z] Found firebase-functions binary at 'C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules\.bin\firebase-functions'
+[debug] [2026-06-13T15:02:25.539Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\email\templates\paymentSuccess.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\email\\templates\\paymentSuccess.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:02:25.709Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\processEmailQueue.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\processEmailQueue.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:02:26.283Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\processEmailQueue.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\processEmailQueue.js changed, reloading triggers"}}
+[info] Serving at port 8834
+
+[debug] [2026-06-13T15:02:27.310Z] Validating nodejs source
+[warn] !  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] !  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2026-06-13T15:02:30.084Z] > [functions] package.json contents: {
+  "name": "fivi360-functions",
+  "description": "Cloud Functions for FIVI360 transactional email (Resend)",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^6.3.2",
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
+  }
+}
+[debug] [2026-06-13T15:02:30.085Z] Building nodejs source
+[debug] [2026-06-13T15:02:30.085Z] Failed to find version of module node: reached end of search path C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules
+[warn] !  functions: Your requested "node" version "20" doesn't match your global version "24". Using node@24 from host. 
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[error] ReferenceError: resendApiKey is not defined
+    at Object.<anonymous> (C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\stripeWebhook.js:523:57)
+    at Module._compile (node:internal/modules/cjs/loader:1854:14)
+    at Object..js (node:internal/modules/cjs/loader:1985:10)
+    at Module.load (node:internal/modules/cjs/loader:1577:32)
+    at Module._load (node:internal/modules/cjs/loader:1379:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.require (node:internal/modules/cjs/loader:1600:12)
+    at require (node:internal/modules/helpers:153:16)
+    at Object.<anonymous> (C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\index.js:11:27)
+    at Module._compile (node:internal/modules/cjs/loader:1854:14)
+
+[debug] [2026-06-13T15:02:30.095Z] Got response code 400; body Failed to generate manifest from function source: resendApiKey is not defined
+[debug] [2026-06-13T15:02:30.096Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-06-13T15:02:30.105Z] Found firebase-functions binary at 'C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules\.bin\firebase-functions'
+[debug] [2026-06-13T15:02:30.110Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\email\sendBillingEmail.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\email\\sendBillingEmail.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:02:30.111Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\stripeWebhook.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\stripeWebhook.js changed, reloading triggers"}}
+[info] Serving at port 8881
+
+[debug] [2026-06-13T15:02:31.130Z] Validating nodejs source
+[warn] !  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] !  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2026-06-13T15:02:33.971Z] > [functions] package.json contents: {
+  "name": "fivi360-functions",
+  "description": "Cloud Functions for FIVI360 transactional email (Resend)",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^6.3.2",
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
+  }
+}
+[debug] [2026-06-13T15:02:33.971Z] Building nodejs source
+[debug] [2026-06-13T15:02:33.971Z] Failed to find version of module node: reached end of search path C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules
+[warn] !  functions: Your requested "node" version "20" doesn't match your global version "24". Using node@24 from host. 
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-06-13T15:02:33.977Z] Got response from /__/functions.yaml {"endpoints":{"processEmailQueue":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"RESEND_API_KEY"}],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"emailQueue/{emailId}"},"retry":false},"entryPoint":"processEmailQueue"},"requestPasswordResetEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"requestPasswordResetEmail"},"createStripeCheckoutSession":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"createStripeCheckoutSession"},"cancelStripeSubscription":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"cancelStripeSubscription"},"stripeWebhook":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_WEBHOOK_SECRET"},{"key":"STRIPE_SECRET_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"stripeWebhook"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{},"params":[{"type":"secret","name":"RESEND_API_KEY"},{"type":"secret","name":"STRIPE_SECRET_KEY"},{"type":"secret","name":"STRIPE_WEBHOOK_SECRET"},{"name":"STRIPE_PRICE_PROFESSIONAL","type":"string"}]}
+[debug] [2026-06-13T15:02:33.986Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-06-13T15:02:33.996Z] Found firebase-functions binary at 'C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules\.bin\firebase-functions'
+[debug] [2026-06-13T15:02:34.003Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\stripeWebhook.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\stripeWebhook.js changed, reloading triggers"}}
+[error] !!  functions: Failed to load function definition from source: FirebaseError: Functions codebase could not be analyzed successfully. It may have a syntax or runtime error {"metadata":{"emulator":{"name":"functions"},"message":"Failed to load function definition from source: FirebaseError: Functions codebase could not be analyzed successfully. It may have a syntax or runtime error"}}
+[info] Serving at port 8563
+
+[debug] [2026-06-13T15:02:35.005Z] Validating nodejs source
+[warn] !  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] !  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2026-06-13T15:02:36.577Z] > [functions] package.json contents: {
+  "name": "fivi360-functions",
+  "description": "Cloud Functions for FIVI360 transactional email (Resend)",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^6.3.2",
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
+  }
+}
+[debug] [2026-06-13T15:02:36.577Z] Building nodejs source
+[debug] [2026-06-13T15:02:36.577Z] Failed to find version of module node: reached end of search path C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules
+[warn] !  functions: Your requested "node" version "20" doesn't match your global version "24". Using node@24 from host. 
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-06-13T15:02:36.579Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-06-13T15:02:36.587Z] Found firebase-functions binary at 'C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules\.bin\firebase-functions'
+[debug] [2026-06-13T15:02:36.593Z] Got response from /__/functions.yaml {"endpoints":{"processEmailQueue":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"RESEND_API_KEY"}],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"emailQueue/{emailId}"},"retry":false},"entryPoint":"processEmailQueue"},"requestPasswordResetEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"requestPasswordResetEmail"},"createStripeCheckoutSession":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"createStripeCheckoutSession"},"cancelStripeSubscription":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"cancelStripeSubscription"},"stripeWebhook":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_WEBHOOK_SECRET"},{"key":"STRIPE_SECRET_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"stripeWebhook"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{},"params":[{"type":"secret","name":"RESEND_API_KEY"},{"type":"secret","name":"STRIPE_SECRET_KEY"},{"type":"secret","name":"STRIPE_WEBHOOK_SECRET"},{"name":"STRIPE_PRICE_PROFESSIONAL","type":"string"}]}
+[info] Serving at port 8328
+
+[debug] [2026-06-13T15:02:38.086Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
+[debug] [2026-06-13T15:02:38.087Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
+[info] +  functions: Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook."}}
+[debug] [2026-06-13T15:02:38.197Z] Got response from /__/functions.yaml {"endpoints":{"processEmailQueue":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"RESEND_API_KEY"}],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"emailQueue/{emailId}"},"retry":false},"entryPoint":"processEmailQueue"},"requestPasswordResetEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"requestPasswordResetEmail"},"createStripeCheckoutSession":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"createStripeCheckoutSession"},"cancelStripeSubscription":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"cancelStripeSubscription"},"stripeWebhook":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_WEBHOOK_SECRET"},{"key":"STRIPE_SECRET_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"stripeWebhook"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{},"params":[{"type":"secret","name":"RESEND_API_KEY"},{"type":"secret","name":"STRIPE_SECRET_KEY"},{"type":"secret","name":"STRIPE_WEBHOOK_SECRET"},{"name":"STRIPE_PRICE_PROFESSIONAL","type":"string"}]}
+[debug] [2026-06-13T15:02:40.642Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
+[debug] [2026-06-13T15:02:40.642Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
+[info] +  functions: Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook."}}
+[debug] [2026-06-13T15:02:42.262Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
+[debug] [2026-06-13T15:02:42.263Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
+[info] +  functions: Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook."}}
+[debug] [2026-06-13T15:06:39.362Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\config\email.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\config\\email.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:06:40.365Z] Validating nodejs source
+[warn] !  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] !  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2026-06-13T15:06:41.953Z] > [functions] package.json contents: {
+  "name": "fivi360-functions",
+  "description": "Cloud Functions for FIVI360 transactional email (Resend)",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^6.3.2",
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
+  }
+}
+[debug] [2026-06-13T15:06:41.953Z] Building nodejs source
+[debug] [2026-06-13T15:06:41.954Z] Failed to find version of module node: reached end of search path C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules
+[warn] !  functions: Your requested "node" version "20" doesn't match your global version "24". Using node@24 from host. 
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-06-13T15:06:41.956Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-06-13T15:06:41.970Z] Found firebase-functions binary at 'C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules\.bin\firebase-functions'
+[info] Serving at port 8129
+
+[debug] [2026-06-13T15:06:43.688Z] Got response from /__/functions.yaml {"endpoints":{"processEmailQueue":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"RESEND_API_KEY"}],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"emailQueue/{emailId}"},"retry":false},"entryPoint":"processEmailQueue"},"requestPasswordResetEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"requestPasswordResetEmail"},"createStripeCheckoutSession":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"createStripeCheckoutSession"},"cancelStripeSubscription":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"cancelStripeSubscription"},"stripeWebhook":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_WEBHOOK_SECRET"},{"key":"STRIPE_SECRET_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"stripeWebhook"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{},"params":[{"type":"secret","name":"RESEND_API_KEY"},{"type":"secret","name":"STRIPE_SECRET_KEY"},{"type":"secret","name":"STRIPE_WEBHOOK_SECRET"},{"name":"STRIPE_PRICE_PROFESSIONAL","type":"string"}]}
+[debug] [2026-06-13T15:06:46.986Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\emailTemplates\index.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\emailTemplates\\index.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:06:47.244Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\processEmailQueue.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\processEmailQueue.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:06:47.787Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\emailTemplates\index.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\emailTemplates\\index.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:06:48.671Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
+[debug] [2026-06-13T15:06:48.672Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
+[info] +  functions: Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook."}}
+[debug] [2026-06-13T15:06:48.829Z] Validating nodejs source
+[warn] !  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] !  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2026-06-13T15:06:52.091Z] > [functions] package.json contents: {
+  "name": "fivi360-functions",
+  "description": "Cloud Functions for FIVI360 transactional email (Resend)",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^6.3.2",
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
+  }
+}
+[debug] [2026-06-13T15:06:52.091Z] Building nodejs source
+[debug] [2026-06-13T15:06:52.091Z] Failed to find version of module node: reached end of search path C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules
+[warn] !  functions: Your requested "node" version "20" doesn't match your global version "24". Using node@24 from host. 
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-06-13T15:06:52.094Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-06-13T15:06:52.102Z] Found firebase-functions binary at 'C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules\.bin\firebase-functions'
+[info] Serving at port 8613
+
+[debug] [2026-06-13T15:06:54.265Z] Got response from /__/functions.yaml {"endpoints":{"processEmailQueue":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"RESEND_API_KEY"}],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"emailQueue/{emailId}"},"retry":false},"entryPoint":"processEmailQueue"},"requestPasswordResetEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"requestPasswordResetEmail"},"createStripeCheckoutSession":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"createStripeCheckoutSession"},"cancelStripeSubscription":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"cancelStripeSubscription"},"stripeWebhook":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_WEBHOOK_SECRET"},{"key":"STRIPE_SECRET_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"stripeWebhook"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{},"params":[{"type":"secret","name":"RESEND_API_KEY"},{"type":"secret","name":"STRIPE_SECRET_KEY"},{"type":"secret","name":"STRIPE_WEBHOOK_SECRET"},{"name":"STRIPE_PRICE_PROFESSIONAL","type":"string"}]}
+[debug] [2026-06-13T15:06:58.317Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
+[debug] [2026-06-13T15:06:58.318Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
+[info] +  functions: Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook."}}
+[debug] [2026-06-13T15:06:59.594Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\stripeWebhook.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\stripeWebhook.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:07:00.606Z] Validating nodejs source
+[warn] !  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] !  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2026-06-13T15:07:02.605Z] > [functions] package.json contents: {
+  "name": "fivi360-functions",
+  "description": "Cloud Functions for FIVI360 transactional email (Resend)",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^6.3.2",
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
+  }
+}
+[debug] [2026-06-13T15:07:02.605Z] Building nodejs source
+[debug] [2026-06-13T15:07:02.605Z] Failed to find version of module node: reached end of search path C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules
+[warn] !  functions: Your requested "node" version "20" doesn't match your global version "24". Using node@24 from host. 
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-06-13T15:07:02.608Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-06-13T15:07:02.616Z] Found firebase-functions binary at 'C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules\.bin\firebase-functions'
+[info] Serving at port 8905
+
+[debug] [2026-06-13T15:07:04.278Z] Got response from /__/functions.yaml {"endpoints":{"processEmailQueue":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"RESEND_API_KEY"}],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"emailQueue/{emailId}"},"retry":false},"entryPoint":"processEmailQueue"},"requestPasswordResetEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"requestPasswordResetEmail"},"createStripeCheckoutSession":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"createStripeCheckoutSession"},"cancelStripeSubscription":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"cancelStripeSubscription"},"stripeWebhook":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_WEBHOOK_SECRET"},{"key":"STRIPE_SECRET_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"stripeWebhook"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{},"params":[{"type":"secret","name":"RESEND_API_KEY"},{"type":"secret","name":"STRIPE_SECRET_KEY"},{"type":"secret","name":"STRIPE_WEBHOOK_SECRET"},{"name":"STRIPE_PRICE_PROFESSIONAL","type":"string"}]}
+[debug] [2026-06-13T15:07:06.214Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\stripeWebhook.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\stripeWebhook.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:07:07.229Z] Validating nodejs source
+[warn] !  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] !  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2026-06-13T15:07:09.030Z] > [functions] package.json contents: {
+  "name": "fivi360-functions",
+  "description": "Cloud Functions for FIVI360 transactional email (Resend)",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^6.3.2",
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
+  }
+}
+[debug] [2026-06-13T15:07:09.030Z] Building nodejs source
+[debug] [2026-06-13T15:07:09.030Z] Failed to find version of module node: reached end of search path C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules
+[warn] !  functions: Your requested "node" version "20" doesn't match your global version "24". Using node@24 from host. 
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-06-13T15:07:09.033Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-06-13T15:07:09.045Z] Found firebase-functions binary at 'C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules\.bin\firebase-functions'
+[debug] [2026-06-13T15:07:09.086Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
+[debug] [2026-06-13T15:07:09.092Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
+[info] +  functions: Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook."}}
+[info] Serving at port 8720
+
+[debug] [2026-06-13T15:07:11.100Z] Got response from /__/functions.yaml {"endpoints":{"processEmailQueue":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"RESEND_API_KEY"}],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"emailQueue/{emailId}"},"retry":false},"entryPoint":"processEmailQueue"},"requestPasswordResetEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"requestPasswordResetEmail"},"createStripeCheckoutSession":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"createStripeCheckoutSession"},"cancelStripeSubscription":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"cancelStripeSubscription"},"stripeWebhook":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_WEBHOOK_SECRET"},{"key":"STRIPE_SECRET_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"stripeWebhook"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{},"params":[{"type":"secret","name":"RESEND_API_KEY"},{"type":"secret","name":"STRIPE_SECRET_KEY"},{"type":"secret","name":"STRIPE_WEBHOOK_SECRET"},{"name":"STRIPE_PRICE_PROFESSIONAL","type":"string"}]}
+[debug] [2026-06-13T15:07:15.152Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
+[debug] [2026-06-13T15:07:15.153Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
+[info] +  functions: Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook."}}
+[debug] [2026-06-13T15:10:51.309Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\config\email.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\config\\email.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:10:51.739Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\emailTemplates\index.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\emailTemplates\\index.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:10:52.365Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\emailTemplates\index.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\emailTemplates\\index.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:10:53.379Z] Validating nodejs source
+[warn] !  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] !  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2026-06-13T15:10:56.536Z] > [functions] package.json contents: {
+  "name": "fivi360-functions",
+  "description": "Cloud Functions for FIVI360 transactional email (Resend)",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^6.3.2",
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
+  }
+}
+[debug] [2026-06-13T15:10:56.536Z] Building nodejs source
+[debug] [2026-06-13T15:10:56.537Z] Failed to find version of module node: reached end of search path C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules
+[warn] !  functions: Your requested "node" version "20" doesn't match your global version "24". Using node@24 from host. 
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-06-13T15:10:56.543Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-06-13T15:10:56.553Z] Found firebase-functions binary at 'C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules\.bin\firebase-functions'
+[debug] [2026-06-13T15:10:56.565Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\stripeWebhook.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\stripeWebhook.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:10:56.577Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\processEmailQueue.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\processEmailQueue.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:10:57.584Z] Validating nodejs source
+[warn] !  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] !  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2026-06-13T15:10:59.447Z] > [functions] package.json contents: {
+  "name": "fivi360-functions",
+  "description": "Cloud Functions for FIVI360 transactional email (Resend)",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^6.3.2",
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
+  }
+}
+[debug] [2026-06-13T15:10:59.448Z] Building nodejs source
+[debug] [2026-06-13T15:10:59.448Z] Failed to find version of module node: reached end of search path C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules
+[warn] !  functions: Your requested "node" version "20" doesn't match your global version "24". Using node@24 from host. 
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-06-13T15:10:59.451Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-06-13T15:10:59.462Z] Found firebase-functions binary at 'C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules\.bin\firebase-functions'
+[info] Serving at port 8521
+
+[info] Serving at port 8872
+
+[debug] [2026-06-13T15:11:01.073Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\stripeWebhook.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\stripeWebhook.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:11:02.140Z] Validating nodejs source
+[warn] !  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] !  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2026-06-13T15:11:04.948Z] > [functions] package.json contents: {
+  "name": "fivi360-functions",
+  "description": "Cloud Functions for FIVI360 transactional email (Resend)",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^6.3.2",
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
+  }
+}
+[debug] [2026-06-13T15:11:04.949Z] Building nodejs source
+[debug] [2026-06-13T15:11:04.949Z] Failed to find version of module node: reached end of search path C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules
+[warn] !  functions: Your requested "node" version "20" doesn't match your global version "24". Using node@24 from host. 
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-06-13T15:11:04.956Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-06-13T15:11:04.968Z] Found firebase-functions binary at 'C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules\.bin\firebase-functions'
+[debug] [2026-06-13T15:11:04.975Z] Got response from /__/functions.yaml {"endpoints":{"processEmailQueue":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"RESEND_API_KEY"}],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"emailQueue/{emailId}"},"retry":false},"entryPoint":"processEmailQueue"},"requestPasswordResetEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"requestPasswordResetEmail"},"createStripeCheckoutSession":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"createStripeCheckoutSession"},"cancelStripeSubscription":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"cancelStripeSubscription"},"stripeWebhook":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_WEBHOOK_SECRET"},{"key":"STRIPE_SECRET_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"stripeWebhook"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{},"params":[{"type":"secret","name":"RESEND_API_KEY"},{"type":"secret","name":"STRIPE_SECRET_KEY"},{"type":"secret","name":"STRIPE_WEBHOOK_SECRET"},{"name":"STRIPE_PRICE_PROFESSIONAL","type":"string"}]}
+[debug] [2026-06-13T15:11:04.989Z] Got response from /__/functions.yaml {"endpoints":{"processEmailQueue":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"RESEND_API_KEY"}],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"emailQueue/{emailId}"},"retry":false},"entryPoint":"processEmailQueue"},"requestPasswordResetEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"requestPasswordResetEmail"},"createStripeCheckoutSession":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"createStripeCheckoutSession"},"cancelStripeSubscription":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"cancelStripeSubscription"},"stripeWebhook":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_WEBHOOK_SECRET"},{"key":"STRIPE_SECRET_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"stripeWebhook"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{},"params":[{"type":"secret","name":"RESEND_API_KEY"},{"type":"secret","name":"STRIPE_SECRET_KEY"},{"type":"secret","name":"STRIPE_WEBHOOK_SECRET"},{"name":"STRIPE_PRICE_PROFESSIONAL","type":"string"}]}
+[info] Serving at port 8119
+
+[debug] [2026-06-13T15:11:06.798Z] Got response from /__/functions.yaml {"endpoints":{"processEmailQueue":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"RESEND_API_KEY"}],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"emailQueue/{emailId}"},"retry":false},"entryPoint":"processEmailQueue"},"requestPasswordResetEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"requestPasswordResetEmail"},"createStripeCheckoutSession":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"createStripeCheckoutSession"},"cancelStripeSubscription":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"cancelStripeSubscription"},"stripeWebhook":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_WEBHOOK_SECRET"},{"key":"STRIPE_SECRET_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"stripeWebhook"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{},"params":[{"type":"secret","name":"RESEND_API_KEY"},{"type":"secret","name":"STRIPE_SECRET_KEY"},{"type":"secret","name":"STRIPE_WEBHOOK_SECRET"},{"name":"STRIPE_PRICE_PROFESSIONAL","type":"string"}]}
+[debug] [2026-06-13T15:11:09.042Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
+[debug] [2026-06-13T15:11:09.043Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
+[info] +  functions: Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook."}}
+[debug] [2026-06-13T15:11:09.065Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
+[debug] [2026-06-13T15:11:09.066Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
+[info] +  functions: Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook."}}
+[debug] [2026-06-13T15:11:10.859Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
+[debug] [2026-06-13T15:11:10.860Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
+[info] +  functions: Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook."}}
+[debug] [2026-06-13T15:17:17.551Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\config\email.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\config\\email.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:17:18.302Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\emailTemplates\index.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\emailTemplates\\index.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:17:18.686Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\config\email.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\config\\email.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:17:18.722Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\processEmailQueue.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\processEmailQueue.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:17:19.296Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\emailTemplates\index.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\emailTemplates\\index.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:17:20.306Z] Validating nodejs source
+[warn] !  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] !  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2026-06-13T15:17:23.085Z] > [functions] package.json contents: {
+  "name": "fivi360-functions",
+  "description": "Cloud Functions for FIVI360 transactional email (Resend)",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^6.3.2",
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
+  }
+}
+[debug] [2026-06-13T15:17:23.085Z] Building nodejs source
+[debug] [2026-06-13T15:17:23.086Z] Failed to find version of module node: reached end of search path C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules
+[warn] !  functions: Your requested "node" version "20" doesn't match your global version "24". Using node@24 from host. 
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-06-13T15:17:23.092Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-06-13T15:17:23.099Z] Found firebase-functions binary at 'C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules\.bin\firebase-functions'
+[debug] [2026-06-13T15:17:23.105Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\cancelStripeSubscription.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\cancelStripeSubscription.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:17:23.238Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\cancelStripeSubscription.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\cancelStripeSubscription.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:17:24.241Z] Validating nodejs source
+[warn] !  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] !  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2026-06-13T15:17:26.746Z] > [functions] package.json contents: {
+  "name": "fivi360-functions",
+  "description": "Cloud Functions for FIVI360 transactional email (Resend)",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^6.3.2",
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
+  }
+}
+[debug] [2026-06-13T15:17:26.746Z] Building nodejs source
+[debug] [2026-06-13T15:17:26.746Z] Failed to find version of module node: reached end of search path C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules
+[warn] !  functions: Your requested "node" version "20" doesn't match your global version "24". Using node@24 from host. 
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-06-13T15:17:26.752Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-06-13T15:17:26.763Z] Found firebase-functions binary at 'C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules\.bin\firebase-functions'
+[info] Serving at port 8019
+
+[debug] [2026-06-13T15:17:26.779Z] File C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\src\cancelStripeSubscription.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Users\\Tiago Machado\\Documents\\Dev\\Personal\\fivi360\\functions\\src\\cancelStripeSubscription.js changed, reloading triggers"}}
+[debug] [2026-06-13T15:17:27.787Z] Validating nodejs source
+[warn] !  functions: package.json indicates an outdated version of firebase-functions. Please upgrade using npm install --save firebase-functions@latest in your functions directory. 
+[warn] !  functions: Please note that there will be breaking changes when you upgrade. 
+[debug] [2026-06-13T15:17:29.789Z] > [functions] package.json contents: {
+  "name": "fivi360-functions",
+  "description": "Cloud Functions for FIVI360 transactional email (Resend)",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^6.3.2",
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
+  }
+}
+[debug] [2026-06-13T15:17:29.789Z] Building nodejs source
+[debug] [2026-06-13T15:17:29.790Z] Failed to find version of module node: reached end of search path C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules
+[warn] !  functions: Your requested "node" version "20" doesn't match your global version "24". Using node@24 from host. 
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-06-13T15:17:29.795Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-06-13T15:17:29.804Z] Found firebase-functions binary at 'C:\Users\Tiago Machado\Documents\Dev\Personal\fivi360\functions\node_modules\.bin\firebase-functions'
+[info] Serving at port 8470
+
+[debug] [2026-06-13T15:17:29.812Z] Got response from /__/functions.yaml {"endpoints":{"processEmailQueue":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"RESEND_API_KEY"}],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"emailQueue/{emailId}"},"retry":false},"entryPoint":"processEmailQueue"},"requestPasswordResetEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"requestPasswordResetEmail"},"createStripeCheckoutSession":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"createStripeCheckoutSession"},"cancelStripeSubscription":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"cancelStripeSubscription"},"stripeWebhook":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_WEBHOOK_SECRET"},{"key":"STRIPE_SECRET_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"stripeWebhook"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{},"params":[{"type":"secret","name":"RESEND_API_KEY"},{"type":"secret","name":"STRIPE_SECRET_KEY"},{"type":"secret","name":"STRIPE_WEBHOOK_SECRET"},{"name":"STRIPE_PRICE_PROFESSIONAL","type":"string"}]}
+[info] Serving at port 8423
+
+[debug] [2026-06-13T15:17:31.171Z] Got response from /__/functions.yaml {"endpoints":{"processEmailQueue":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"RESEND_API_KEY"}],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"emailQueue/{emailId}"},"retry":false},"entryPoint":"processEmailQueue"},"requestPasswordResetEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"requestPasswordResetEmail"},"createStripeCheckoutSession":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"createStripeCheckoutSession"},"cancelStripeSubscription":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"cancelStripeSubscription"},"stripeWebhook":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_WEBHOOK_SECRET"},{"key":"STRIPE_SECRET_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"stripeWebhook"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{},"params":[{"type":"secret","name":"RESEND_API_KEY"},{"type":"secret","name":"STRIPE_SECRET_KEY"},{"type":"secret","name":"STRIPE_WEBHOOK_SECRET"},{"name":"STRIPE_PRICE_PROFESSIONAL","type":"string"}]}
+[debug] [2026-06-13T15:17:31.549Z] Got response from /__/functions.yaml {"endpoints":{"processEmailQueue":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"RESEND_API_KEY"}],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"emailQueue/{emailId}"},"retry":false},"entryPoint":"processEmailQueue"},"requestPasswordResetEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"requestPasswordResetEmail"},"createStripeCheckoutSession":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"createStripeCheckoutSession"},"cancelStripeSubscription":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"cancelStripeSubscription"},"stripeWebhook":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_WEBHOOK_SECRET"},{"key":"STRIPE_SECRET_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"stripeWebhook"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{},"params":[{"type":"secret","name":"RESEND_API_KEY"},{"type":"secret","name":"STRIPE_SECRET_KEY"},{"type":"secret","name":"STRIPE_WEBHOOK_SECRET"},{"name":"STRIPE_PRICE_PROFESSIONAL","type":"string"}]}
+[debug] [2026-06-13T15:17:33.873Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
+[debug] [2026-06-13T15:17:33.874Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
+[info] +  functions: Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook."}}
+[debug] [2026-06-13T15:17:35.216Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
+[debug] [2026-06-13T15:17:35.217Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
+[info] +  functions: Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook."}}
+[debug] [2026-06-13T15:17:35.590Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
+[debug] [2026-06-13T15:17:35.591Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
+[info] +  functions: Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook."}}

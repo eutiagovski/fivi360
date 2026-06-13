@@ -7,6 +7,7 @@ const { resendApiKey, sendTransactionalEmail } = require("./email/resendClient")
 const { IMPLEMENTED_EMAIL_TYPES, resolveEmailTemplate } = require("./emailTemplates");
 const { generateVerificationLink } = require("./services/verificationLink");
 const { generatePasswordResetLink } = require("./services/passwordResetLink");
+const { resolveUserDisplayName } = require("./email/sendBillingEmail");
 
 initializeApp();
 
@@ -69,6 +70,16 @@ exports.processEmailQueue = onDocumentCreated(
       if (type === EMAIL_TYPES.PASSWORD_RESET) {
         const resetLink = await generatePasswordResetLink(to);
         templatePayload = { ...payload, resetLink };
+      }
+
+      if (
+        type === EMAIL_TYPES.PAYMENT_SUCCESS ||
+        type === EMAIL_TYPES.PAYMENT_FAILED ||
+        type === EMAIL_TYPES.SUBSCRIPTION_CANCELED ||
+        type === EMAIL_TYPES.SUBSCRIPTION_CANCELLATION_SCHEDULED
+      ) {
+        const name = await resolveUserDisplayName(getFirestore(), data.userId);
+        templatePayload = { ...payload, ...(name ? { name } : {}) };
       }
 
       const template = resolveEmailTemplate(type, templatePayload);

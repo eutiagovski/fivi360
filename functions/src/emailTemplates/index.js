@@ -3,6 +3,12 @@ const { welcomeEmail } = require("./welcomeEmail");
 const { verifyEmail } = require("./verifyEmail");
 const { passwordResetEmail } = require("./passwordResetEmail");
 const { upgradeRequestedEmail } = require("./upgradeRequestedEmail");
+const { paymentSuccessEmail } = require("./paymentSuccessEmail");
+const { paymentFailedEmail } = require("./paymentFailedEmail");
+const { subscriptionCanceledEmail } = require("./subscriptionCanceledEmail");
+const {
+  subscriptionCancellationScheduledEmail,
+} = require("./subscriptionCancellationScheduledEmail");
 
 /**
  * @param {string} type
@@ -19,6 +25,14 @@ function resolveEmailTemplate(type, payload) {
       return passwordResetEmail(payload);
     case EMAIL_TYPES.BILLING_UPGRADE_REQUESTED:
       return upgradeRequestedEmail(payload);
+    case EMAIL_TYPES.PAYMENT_SUCCESS:
+      return paymentSuccessEmail(payload);
+    case EMAIL_TYPES.PAYMENT_FAILED:
+      return paymentFailedEmail(payload);
+    case EMAIL_TYPES.SUBSCRIPTION_CANCELED:
+      return subscriptionCanceledEmail(payload);
+    case EMAIL_TYPES.SUBSCRIPTION_CANCELLATION_SCHEDULED:
+      return subscriptionCancellationScheduledEmail(payload);
     default:
       throw new Error(`No template implemented for email type: ${type}`);
   }

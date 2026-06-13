@@ -4,6 +4,8 @@ const { initializeApp, getApps } = require("firebase-admin/app");
 const { getFirestore, FieldValue, Timestamp } = require("firebase-admin/firestore");
 const Stripe = require("stripe");
 const { STRIPE_WEBHOOK_SECRET, STRIPE_SECRET_KEY, getStripeClient } = require("./stripe/client");
+const { EMAIL_TYPES } = require("./config/email");
+const { resolveUserEmail } = require("./email/sendBillingEmail");
 
 if (getApps().length === 0) {
   initializeApp();
@@ -365,6 +367,102 @@ async function handleSubscriptionDeleted(db, subscription) {
     userId,
     subscriptionId: subscription.id,
   });
+
+  try {
+    await enqueueSubscriptionCanceledEmail(db, {
+      userId,
+      planIdAnterior: resolvePreviousPlanId(existingSubscription, existingPlan),
+      providerSubscriptionId: subscription.id,
+      canceledAt,
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    logger.error("stripeWebhook: subscription canceled email enqueue failed", {
+      userId,
+      subscriptionId: subscription.id,
+      error: message,
+    });
+  }
+}
+
+/**
+ * @param {Record<string, unknown> | undefined} existingSubscription
+ * @param {unknown} existingPlan
+ * @returns {string | null}
+ */
+function resolvePreviousPlanId(existingSubscription, existingPlan) {
+  if (typeof existingSubscription?.planId === "string") {
+    return existingSubscription.planId;
+  }
+
+  if (existingPlan && typeof existingPlan === "object" && typeof existingPlan.id === "string") {
+    return existingPlan.id;
+  }
+
+  if (typeof existingPlan === "string") {
+    return existingPlan;
+  }
+
+  return null;
+}
+
+/**
+ * @param {import("firebase-admin/firestore").Firestore} db
+ * @param {{
+ *   userId: string,
+ *   planIdAnterior: string | null,
+ *   providerSubscriptionId: string,
+ *   canceledAt: FirebaseFirestore.Timestamp | FirebaseFirestore.FieldValue,
+ * }} params
+ */
+async function enqueueSubscriptionCanceledEmail(db, {
+  userId,
+  planIdAnterior,
+  providerSubscriptionId,
+  canceledAt,
+}) {
+  const emailId = `subscription_canceled_${providerSubscriptionId}`;
+  const emailRef = db.collection("emailQueue").doc(emailId);
+  const existingSnap = await emailRef.get();
+
+  if (existingSnap.exists) {
+    logger.info("stripeWebhook: subscription canceled email already queued", {
+      emailId,
+      providerSubscriptionId,
+      userId,
+    });
+    return;
+  }
+
+  const to = await resolveUserEmail(db, userId);
+
+  if (!to) {
+    logger.warn("stripeWebhook: subscription canceled email skipped — no recipient", {
+      userId,
+      providerSubscriptionId,
+    });
+    return;
+  }
+
+  await emailRef.set({
+    type: EMAIL_TYPES.SUBSCRIPTION_CANCELED,
+    to,
+    userId,
+    status: "pending",
+    payload: {
+      userId,
+      planIdAnterior,
+      providerSubscriptionId,
+      canceledAt,
+    },
+    createdAt: FieldValue.serverTimestamp(),
+  });
+
+  logger.info("stripeWebhook: subscription canceled email enqueued", {
+    emailId,
+    providerSubscriptionId,
+    userId,
+  });
 }
 
 /**
@@ -383,7 +481,12 @@ function toFirestoreTimestamp(unixSeconds) {
  * @param {import("firebase-admin/firestore").Firestore} db
  * @param {import("stripe").Stripe.Invoice} invoice
  * @param {"paid" | "failed"} status
- * @returns {Promise<void>}
+ * @returns {Promise<{
+ *   userId: string | null,
+ *   planId: string | null,
+ *   amount: number | null,
+ *   currency: string | null,
+ * }>}
  */
 async function upsertInvoiceDoc(db, invoice, status) {
   const providerInvoiceId = invoice.id;
@@ -449,6 +552,183 @@ async function upsertInvoiceDoc(db, invoice, status) {
     userId,
     planId,
   });
+
+  return {
+    userId,
+    planId,
+    amount: typeof amount === "number" ? amount : null,
+    currency: invoice.currency ?? null,
+  };
+}
+
+/**
+ * @param {import("firebase-admin/firestore").Firestore} db
+ * @param {string} userId
+ * @returns {Promise<{
+ *   currentPeriodEnd: FirebaseFirestore.Timestamp | null,
+ *   nextBillingAt: FirebaseFirestore.Timestamp | null,
+ * }>}
+ */
+async function resolveSubscriptionBillingPeriod(db, userId) {
+  const subscriptionSnap = await db.collection("subscriptions").doc(userId).get();
+  const subscriptionData = subscriptionSnap.data() ?? {};
+
+  const currentPeriodEnd =
+    subscriptionData.currentPeriodEnd instanceof Timestamp
+      ? subscriptionData.currentPeriodEnd
+      : null;
+
+  const nextBillingAt =
+    subscriptionData.nextBillingAt instanceof Timestamp
+      ? subscriptionData.nextBillingAt
+      : currentPeriodEnd;
+
+  return { currentPeriodEnd, nextBillingAt };
+}
+
+/**
+ * @param {import("firebase-admin/firestore").Firestore} db
+ * @param {{
+ *   userId: string,
+ *   planId: string | null,
+ *   amount: number | null,
+ *   currency: string | null,
+ *   providerInvoiceId: string,
+ *   paidAt: FirebaseFirestore.Timestamp,
+ *   currentPeriodEnd: FirebaseFirestore.Timestamp | null,
+ *   nextBillingAt: FirebaseFirestore.Timestamp | null,
+ * }} params
+ */
+async function enqueuePaymentSuccessEmail(db, {
+  userId,
+  planId,
+  amount,
+  currency,
+  providerInvoiceId,
+  paidAt,
+  currentPeriodEnd,
+  nextBillingAt,
+}) {
+  const emailId = `payment_success_${providerInvoiceId}`;
+  const emailRef = db.collection("emailQueue").doc(emailId);
+  const existingSnap = await emailRef.get();
+
+  if (existingSnap.exists) {
+    logger.info("stripeWebhook: payment success email already queued", {
+      emailId,
+      providerInvoiceId,
+      userId,
+    });
+    return;
+  }
+
+  const to = await resolveUserEmail(db, userId);
+
+  if (!to) {
+    logger.warn("stripeWebhook: payment success email skipped — no recipient", {
+      userId,
+      providerInvoiceId,
+    });
+    return;
+  }
+
+  await emailRef.set({
+    type: EMAIL_TYPES.PAYMENT_SUCCESS,
+    to,
+    userId,
+    status: "pending",
+    payload: {
+      userId,
+      planId,
+      amount,
+      currency,
+      providerInvoiceId,
+      paidAt,
+      currentPeriodEnd,
+      nextBillingAt,
+    },
+    createdAt: FieldValue.serverTimestamp(),
+  });
+
+  logger.info("stripeWebhook: payment success email enqueued", {
+    emailId,
+    providerInvoiceId,
+    userId,
+  });
+}
+
+/**
+ * @param {import("firebase-admin/firestore").Firestore} db
+ * @param {{
+ *   userId: string,
+ *   planId: string | null,
+ *   amount: number | null,
+ *   currency: string | null,
+ *   providerInvoiceId: string,
+ *   currentPeriodEnd: FirebaseFirestore.Timestamp | null,
+ *   nextBillingAt: FirebaseFirestore.Timestamp | null,
+ *   hostedInvoiceUrl: string | null,
+ *   nextPaymentAttempt: FirebaseFirestore.Timestamp | null,
+ * }} params
+ */
+async function enqueuePaymentFailedEmail(db, {
+  userId,
+  planId,
+  amount,
+  currency,
+  providerInvoiceId,
+  currentPeriodEnd,
+  nextBillingAt,
+  hostedInvoiceUrl,
+  nextPaymentAttempt,
+}) {
+  const emailId = `payment_failed_${providerInvoiceId}`;
+  const emailRef = db.collection("emailQueue").doc(emailId);
+  const existingSnap = await emailRef.get();
+
+  if (existingSnap.exists) {
+    logger.info("stripeWebhook: payment failed email already queued", {
+      emailId,
+      providerInvoiceId,
+      userId,
+    });
+    return;
+  }
+
+  const to = await resolveUserEmail(db, userId);
+
+  if (!to) {
+    logger.warn("stripeWebhook: payment failed email skipped — no recipient", {
+      userId,
+      providerInvoiceId,
+    });
+    return;
+  }
+
+  await emailRef.set({
+    type: EMAIL_TYPES.PAYMENT_FAILED,
+    to,
+    userId,
+    status: "pending",
+    payload: {
+      userId,
+      planId,
+      amount,
+      currency,
+      providerInvoiceId,
+      currentPeriodEnd,
+      nextBillingAt,
+      hostedInvoiceUrl,
+      nextPaymentAttempt,
+    },
+    createdAt: FieldValue.serverTimestamp(),
+  });
+
+  logger.info("stripeWebhook: payment failed email enqueued", {
+    emailId,
+    providerInvoiceId,
+    userId,
+  });
 }
 
 /**
@@ -456,7 +736,43 @@ async function upsertInvoiceDoc(db, invoice, status) {
  * @param {import("stripe").Stripe.Invoice} invoice
  */
 async function handleInvoicePaid(db, invoice) {
-  await upsertInvoiceDoc(db, invoice, "paid");
+  const invoiceContext = await upsertInvoiceDoc(db, invoice, "paid");
+
+  if (!invoiceContext.userId) {
+    logger.warn("stripeWebhook: payment success email skipped — no userId", {
+      providerInvoiceId: invoice.id,
+    });
+    return;
+  }
+
+  const paidAt =
+    toFirestoreTimestamp(invoice.status_transitions?.paid_at) ??
+    Timestamp.now();
+
+  const { currentPeriodEnd, nextBillingAt } = await resolveSubscriptionBillingPeriod(
+    db,
+    invoiceContext.userId,
+  );
+
+  try {
+    await enqueuePaymentSuccessEmail(db, {
+      userId: invoiceContext.userId,
+      planId: invoiceContext.planId,
+      amount: invoiceContext.amount,
+      currency: invoiceContext.currency,
+      providerInvoiceId: invoice.id,
+      paidAt,
+      currentPeriodEnd,
+      nextBillingAt,
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    logger.error("stripeWebhook: payment success email enqueue failed", {
+      userId: invoiceContext.userId,
+      providerInvoiceId: invoice.id,
+      error: message,
+    });
+  }
 }
 
 /**
@@ -464,7 +780,42 @@ async function handleInvoicePaid(db, invoice) {
  * @param {import("stripe").Stripe.Invoice} invoice
  */
 async function handleInvoicePaymentFailed(db, invoice) {
-  await upsertInvoiceDoc(db, invoice, "failed");
+  const invoiceContext = await upsertInvoiceDoc(db, invoice, "failed");
+
+  if (!invoiceContext.userId) {
+    logger.warn("stripeWebhook: payment failed email skipped — no userId", {
+      providerInvoiceId: invoice.id,
+    });
+    return;
+  }
+
+  const { currentPeriodEnd, nextBillingAt } = await resolveSubscriptionBillingPeriod(
+    db,
+    invoiceContext.userId,
+  );
+
+  const nextPaymentAttempt = toFirestoreTimestamp(invoice.next_payment_attempt);
+
+  try {
+    await enqueuePaymentFailedEmail(db, {
+      userId: invoiceContext.userId,
+      planId: invoiceContext.planId,
+      amount: invoiceContext.amount,
+      currency: invoiceContext.currency,
+      providerInvoiceId: invoice.id,
+      currentPeriodEnd,
+      nextBillingAt,
+      hostedInvoiceUrl: invoice.hosted_invoice_url ?? null,
+      nextPaymentAttempt,
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    logger.error("stripeWebhook: payment failed email enqueue failed", {
+      userId: invoiceContext.userId,
+      providerInvoiceId: invoice.id,
+      error: message,
+    });
+  }
 }
 
 const HANDLED_STRIPE_EVENTS = new Set([
