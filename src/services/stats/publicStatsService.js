@@ -1,10 +1,10 @@
 /**
  * Contadores agregados de visualizações públicas (portfólio).
  *
- * Coleções:
- * - portfolioStats/{userId}
- * - projectStats/{projectId}
- * - imageStats/{imageId}
+ * Estrutura:
+ * - stats/{userId}
+ * - stats/{userId}/projects/{projectId}
+ * - stats/{userId}/images/{imageId}
  *
  * Somente incrementos atômicos — sem histórico, IP ou visitante.
  */
@@ -21,7 +21,7 @@ export async function incrementPortfolioViews(userId) {
     return;
   }
 
-  const ref = doc(db, "portfolioStats", userId);
+  const ref = doc(db, "stats", userId);
 
   await setDoc(
     ref,
@@ -34,15 +34,16 @@ export async function incrementPortfolioViews(userId) {
 }
 
 /**
+ * @param {string} userId — dono do portfólio
  * @param {string} projectId
  * @returns {Promise<void>}
  */
-export async function incrementProjectViews(projectId) {
-  if (!projectId) {
+export async function incrementProjectViews(userId, projectId) {
+  if (!userId || !projectId) {
     return;
   }
 
-  const ref = doc(db, "projectStats", projectId);
+  const ref = doc(db, "stats", userId, "projects", projectId);
 
   await setDoc(
     ref,
@@ -55,15 +56,16 @@ export async function incrementProjectViews(projectId) {
 }
 
 /**
+ * @param {string} userId — dono do portfólio
  * @param {string} imageId
  * @returns {Promise<void>}
  */
-export async function incrementImageViews(imageId) {
-  if (!imageId) {
+export async function incrementImageViews(userId, imageId) {
+  if (!userId || !imageId) {
     return;
   }
 
-  const ref = doc(db, "imageStats", imageId);
+  const ref = doc(db, "stats", userId, "images", imageId);
 
   await setDoc(
     ref,

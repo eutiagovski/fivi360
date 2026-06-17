@@ -25,14 +25,17 @@ Backend:
 
 ## Firestore
 
-Coleções:
+Coleções principais:
 
 ```text
 users
+publicProfiles
 slugs
 projects
 images
 ```
+
+Ver [public-profile-model.md](./public-profile-model.md) para o split privado/público.
 
 ---
 
@@ -47,20 +50,22 @@ slugs/{slug}
 ```ts
 SlugRegistry {
   uid
+  type        // "user"
   createdAt
+  updatedAt?
 }
 ```
 
 * O ID do documento é o slug normalizado (`a-z`, `0-9`, `-`).
 * Garante unicidade global — dois usuários não podem usar o mesmo slug.
-* Resolução da rota pública `/u/:slug`: `getDoc(slugs/{slug})` → `uid` → projetos do usuário.
+* Resolução da rota pública `/u/:slug`: `getDoc(slugs/{slug})` → `uid` → `publicProfiles/{uid}` → projetos do usuário.
 
 Alteração de slug (Settings):
 
 1. Verificar `slugs/{novoSlug}` — bloquear se pertencer a outro usuário.
 2. Remover `slugs/{slugAntigo}` se existir e pertencer ao usuário.
 3. Criar `slugs/{novoSlug}`.
-4. Atualizar `users/{uid}.publicSlug`.
+4. Atualizar `publicProfiles/{uid}.slug`.
 
 Operação atômica via transação Firestore.
 
@@ -68,19 +73,42 @@ Operação atômica via transação Firestore.
 
 # Users
 
+## `users/{uid}` — privado
+
 ```ts
 User {
   id
-  name
+  displayName
   email
-  companyName
-  companyLogo
   plan
-  publicSlug
-  portfolioEnabled
+  billing
+  legalConsent?
   createdAt
+  updatedAt
 }
 ```
+
+Acesso Firestore: owner only (`get` / `list` negados para anônimos).
+
+## `publicProfiles/{uid}` — público
+
+```ts
+PublicProfile {
+  uid
+  displayName
+  companyName
+  companyLogo
+  bio
+  slug              // exposto na UI como publicSlug
+  portfolioEnabled
+  portfolioAvailable
+  socialLinks
+  createdAt
+  updatedAt
+}
+```
+
+Leitura anônima: somente se `portfolioAvailable == true`. Settings sincroniza `users/{uid}` + `publicProfiles/{uid}` via `userService`.
 
 ---
 
@@ -262,7 +290,7 @@ help
 terms
 privacy
 
-portfolio-public   → /u/:slug (futuro)
+portfolio-public   → /u/:slug
 share-project
 share-image
 ```

@@ -1,6 +1,5 @@
 import { normalizeBilling } from "@/config/billing";
 import { normalizeUserPlan } from "@/config/planLimits";
-import { isPortfolioPubliclyAvailableFromUserData } from "@/utils/portfolio";
 
 export const EMPTY_SOCIAL_LINKS = Object.freeze({
   website: "",
@@ -15,14 +14,14 @@ export const EMPTY_SOCIAL_LINKS = Object.freeze({
  * @returns {{ website: string, instagram: string, youtube: string, linkedin: string, whatsapp: string }}
  */
 export function normalizeSocialLinks(raw) {
-  const source = raw?.socialLinks ?? raw ?? {};
+  const source = raw?.socialLinks ?? {};
 
   return {
-    website: source.website ?? source.websiteUrl ?? "",
-    instagram: source.instagram ?? source.instagramUrl ?? "",
-    youtube: source.youtube ?? source.youtubeUrl ?? "",
-    linkedin: source.linkedin ?? source.linkedinUrl ?? "",
-    whatsapp: source.whatsapp ?? source.whatsappUrl ?? "",
+    website: source.website ?? "",
+    instagram: source.instagram ?? "",
+    youtube: source.youtube ?? "",
+    linkedin: source.linkedin ?? "",
+    whatsapp: source.whatsapp ?? "",
   };
 }
 
@@ -78,31 +77,34 @@ function enrichBillingFromUserDoc(billing, data) {
 }
 
 /**
- * Perfil completo para o usuário autenticado (inclui campos privados).
+ * Perfil completo para o usuário autenticado (privado + público mesclados).
  *
  * @param {string} userId
- * @param {import("firebase/firestore").DocumentData} data
+ * @param {import("firebase/firestore").DocumentData} userData — `users/{uid}`
+ * @param {import("firebase/firestore").DocumentData | null | undefined} publicProfileData — `publicProfiles/{uid}`
  * @returns {import("./userService").UserProfile}
  */
-export function mapUserDoc(userId, data) {
+export function mapUserDoc(userId, userData, publicProfileData = null) {
+  const publicData = publicProfileData ?? {};
+
   return {
     id: userId,
-    displayName: data.displayName ?? data.name ?? "",
-    email: data.email ?? "",
-    companyName: data.companyName ?? "",
-    companyLogo: data.companyLogo ?? "",
-    bio: data.bio ?? data.companyBio ?? "",
-    plan: data.plan ?? "starter",
-    planId: normalizeUserPlan(data.plan),
-    publicSlug: data.publicSlug ?? "",
-    portfolioEnabled: data.portfolioEnabled ?? false,
-    socialLinks: normalizeSocialLinks(data),
-    billing: enrichBillingFromUserDoc(normalizeBilling(data.billing), data),
+    displayName: publicData.displayName ?? userData.displayName ?? userData.name ?? "",
+    email: userData.email ?? "",
+    companyName: publicData.companyName ?? "",
+    companyLogo: publicData.companyLogo ?? "",
+    bio: publicData.bio ?? "",
+    plan: userData.plan ?? "starter",
+    planId: normalizeUserPlan(userData.plan),
+    publicSlug: publicData.slug ?? "",
+    portfolioEnabled: publicData.portfolioEnabled ?? false,
+    socialLinks: normalizeSocialLinks(publicData),
+    billing: enrichBillingFromUserDoc(normalizeBilling(userData.billing), userData),
   };
 }
 
 /**
- * DTO público — nunca inclui email, plan, billing ou legalConsent.
+ * DTO público a partir de `publicProfiles/{uid}` — nunca inclui email, plan, billing ou legalConsent.
  *
  * @param {string} userId
  * @param {import("firebase/firestore").DocumentData} data
@@ -114,10 +116,10 @@ export function mapToPublicUser(userId, data) {
     displayName: data.displayName ?? data.name ?? "",
     companyName: data.companyName ?? "",
     companyLogo: data.companyLogo ?? "",
-    bio: data.bio ?? data.companyBio ?? "",
-    publicSlug: data.publicSlug ?? "",
+    bio: data.bio ?? "",
+    publicSlug: data.slug ?? "",
     portfolioEnabled: data.portfolioEnabled ?? false,
-    portfolioAvailable: isPortfolioPubliclyAvailableFromUserData(data),
+    portfolioAvailable: data.portfolioAvailable === true,
     socialLinks: normalizeSocialLinks(data),
   };
 }

@@ -30,6 +30,7 @@ import {
   verifyPasswordResetCode,
 } from "firebase/auth";
 import { auth } from "@/config/firebase";
+import { completeEmailVerification } from "@/services/auth/emailVerificationService";
 
 const googleProvider = new GoogleAuthProvider();
 
@@ -70,7 +71,17 @@ export function needsEmailVerification(user) {
  */
 export async function signInWithEmail(email, password) {
   const credential = await signInWithEmailAndPassword(auth, email, password);
-  return mapFirebaseUser(credential.user);
+  const user = mapFirebaseUser(credential.user);
+
+  if (user.usesPasswordAuth && user.emailVerified) {
+    try {
+      await completeEmailVerification();
+    } catch {
+      // Não bloqueia o login.
+    }
+  }
+
+  return user;
 }
 
 /**

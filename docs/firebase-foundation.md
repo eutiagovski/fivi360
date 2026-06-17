@@ -193,8 +193,11 @@ Credenciais Cloud ainda são necessárias no `initializeApp` (valores dummy acei
 
 ### `src/services/users/userService.js`
 
-- Documento `users/{uid}` após cadastro
-- Campos: `name`, `email`, `companyName`, `companyLogo`, `plan`, `publicSlug`, `portfolioEnabled`
+- `users/{uid}` — dados privados após cadastro (`displayName`, `email`, `plan`, `billing`, `legalConsent`)
+- `publicProfiles/{uid}` — dados públicos do portfólio (`slug`, `portfolioEnabled`, `portfolioAvailable`, perfil do escritório)
+- Resolução de slug via `slugs/{slug}`
+
+Ver [public-profile-model.md](./public-profile-model.md).
 
 ### `src/services/projects/projectService.js`
 

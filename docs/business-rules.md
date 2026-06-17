@@ -114,11 +114,7 @@ Navega para outra imagem.
 
 # Portfólio Público
 
-Cada usuário pode possuir:
-
-```ts
-publicSlug
-```
+Cada usuário pode possuir um slug único persistido em `publicProfiles/{uid}.slug` (exposto na UI como `publicSlug`).
 
 URL oficial:
 
@@ -147,11 +143,12 @@ slugs/{slug}
 ```ts
 {
   uid
+  type        // "user"
   createdAt
 }
 ```
 
-O ID do documento é o slug normalizado. A futura rota `/u/:slug` resolve `slugs/{slug}.uid` para carregar o portfólio.
+O ID do documento é o slug normalizado. A rota `/u/:slug` resolve `slugs/{slug}.uid` → `publicProfiles/{uid}`.
 
 ---
 

@@ -1,36 +1,20 @@
 import { CheckCircle2, XCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { AuthCard } from "@/components/auth/AuthCard";
 import { AuthLayout } from "@/components/auth/AuthLayout";
-import { db } from "@/config/firebase";
 import { useAuth } from "@/hooks/useAuth";
 import {
   applyEmailVerificationCode,
   reloadCurrentUser,
 } from "@/services/auth/authService";
-import { maybeEnqueueWelcomeEmail } from "@/services/users/userService";
+import { completeEmailVerification } from "@/services/auth/emailVerificationService";
 import { getActionCodeErrorMessage } from "@/utils/authErrors";
 
 const CONSUMED_ACTION_CODE_ERRORS = new Set([
   "auth/invalid-action-code",
   "auth/expired-action-code",
 ]);
-
-/**
- * @param {string} uid
- */
-async function syncEmailVerifiedToFirestore(uid) {
-  try {
-    await updateDoc(doc(db, "users", uid), {
-      emailVerified: true,
-      emailVerifiedAt: serverTimestamp(),
-    });
-  } catch {
-    // Auth é a fonte de verdade para gating; falha no Firestore não bloqueia o fluxo.
-  }
-}
 
 export const VerifyEmailAction = () => {
   const navigate = useNavigate();
@@ -40,6 +24,7 @@ export const VerifyEmailAction = () => {
 
   const [status, setStatus] = useState("loading");
   const [errorMessage, setErrorMessage] = useState(null);
+  const [hadActiveSession, setHadActiveSession] = useState(false);
 
   useEffect(() => {
     if (hasProcessedRef.current) {
@@ -52,14 +37,9 @@ export const VerifyEmailAction = () => {
 
     const finalizeVerifiedEmail = async (refreshedUser) => {
       setUserFromReload?.(refreshedUser);
-      await syncEmailVerifiedToFirestore(refreshedUser.uid);
 
       try {
-        await maybeEnqueueWelcomeEmail({
-          userId: refreshedUser.uid,
-          to: refreshedUser.email ?? "",
-          name: refreshedUser.displayName?.trim() || "",
-        });
+        await completeEmailVerification();
       } catch {
         // Não bloqueia a confirmação de e-mail.
       }
@@ -69,7 +49,10 @@ export const VerifyEmailAction = () => {
       const refreshedUser = await reloadCurrentUser();
 
       if (refreshedUser) {
+        setHadActiveSession(true);
         await finalizeVerifiedEmail(refreshedUser);
+      } else {
+        setHadActiveSession(false);
       }
 
       setStatus("success");
@@ -82,6 +65,7 @@ export const VerifyEmailAction = () => {
         return false;
       }
 
+      setHadActiveSession(true);
       await finalizeVerifiedEmail(refreshedUser);
       setStatus("success");
       return true;
@@ -147,7 +131,9 @@ export const VerifyEmailAction = () => {
                 E-mail confirmado com sucesso.
               </p>
               <p className="text-zinc-400 text-sm">
-                Agora você já pode acessar o FIVI360.
+                {hadActiveSession
+                  ? "Agora você já pode acessar o FIVI360."
+                  : "Entre na sua conta para concluir a ativação."}
               </p>
             </div>
             <button
@@ -156,7 +142,7 @@ export const VerifyEmailAction = () => {
               data-testid="verify-email-action-continue"
               className="w-full px-4 py-3 bg-white text-black rounded-xl font-medium hover:bg-zinc-200 transition-all"
             >
-              Continuar
+              {hadActiveSession ? "Continuar" : "Ir para login"}
             </button>
           </div>
         )}

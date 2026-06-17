@@ -333,7 +333,7 @@ export const Settings = () => {
               </div>
             )}
 
-            <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8">
+            <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-4 md:p-8">
               <h2 className="text-2xl font-light tracking-tight text-white mb-6">Perfil</h2>
 
               <div className="mb-6">
@@ -393,7 +393,7 @@ export const Settings = () => {
               </div>
             </div>
 
-            <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8">
+            <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-4 md:p-8">
               <h2 className="text-2xl font-light tracking-tight text-white mb-2">
                 Informações públicas
               </h2>
@@ -566,7 +566,7 @@ export const Settings = () => {
               </div>
             </div>
 
-            <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8">
+            <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-4 md:p-8">
               <h2 className="text-2xl font-light tracking-tight text-white mb-6">Portfólio</h2>
 
               <div className="mb-6">

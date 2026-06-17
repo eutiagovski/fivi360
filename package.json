@@ -60,7 +60,6 @@
     "start": "craco start",
     "build": "craco build",
     "test": "craco test",
-    "dev": "craco start && firebase emulators:start --export-on-exit --import=./firebase-data",
     "emulators": "firebase emulators:start --export-on-exit --import=./firebase-data",
     "deploy": "firebase deploy --only hosting"
   },

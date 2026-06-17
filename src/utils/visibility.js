@@ -14,7 +14,7 @@ export const VISIBILITY_OPTIONS = [
   {
     value: "public",
     label: "Público",
-    description: "Aparece no portfólio",
+    description: "Acessível por link e aparece no portfólio público",
   },
 ];
 

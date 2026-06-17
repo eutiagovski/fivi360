@@ -3,7 +3,7 @@
  *
  * Estrutura do documento:
  * ```js
- * { uid, createdAt }
+ * { uid, type: "user", createdAt, updatedAt }
  * ```
  *
  * O ID do documento é o próprio slug (normalizado).
@@ -117,7 +117,9 @@ export async function syncSlugRegistryInTransaction(
     if (!slugSnap.exists()) {
       transaction.set(slugRef, {
         uid: userId,
+        type: "user",
         createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       });
     }
   }

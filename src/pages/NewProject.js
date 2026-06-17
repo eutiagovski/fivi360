@@ -241,7 +241,7 @@ export const NewProject = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-4 w-full justify-center">
+          <div className="flex items-end gap-4 w-full justify-end">
            
             <Link
               to="/projects"

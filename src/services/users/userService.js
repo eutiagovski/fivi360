@@ -1,29 +1,27 @@
 /**
  * Serviço de perfil de usuário.
  *
- * Fonte única da verdade: `users/{uid}`
+ * Dados privados: `users/{uid}`
+ * Dados públicos: `publicProfiles/{uid}`
+ * Resolução de slug: `slugs/{slug}`
  *
  * @see docs/architecture.md
  * @see docs/firebase-foundation.md
+ * @see docs/public-profile-model.md
  */
 
 import {
-  collection,
   doc,
   getDoc,
-  getDocs,
-  limit,
-  query,
   runTransaction,
   serverTimestamp,
   setDoc,
   updateDoc,
-  where,
 } from "firebase/firestore";
 import { db } from "@/config/firebase";
-import { LEGAL_VERSIONS } from "@/config/legal";
 import {
   checkSlugAvailability,
+  resolveSlugToUid,
   SlugTakenError,
   SlugValidationError,
   syncSlugRegistryInTransaction,
@@ -34,7 +32,9 @@ import {
   enqueueWelcomeEmail,
 } from "@/services/email/emailQueueService";
 import { assertPublicPortfolioEnabled } from "@/services/plans/planService";
+import { computePortfolioAvailable } from "@/utils/portfolio";
 import { isValidSlugFormat, normalizeSlug } from "@/utils/slug";
+import { LEGAL_VERSIONS } from "@/config/legal";
 import {
   buildSocialLinksPayload,
   mapToPublicUser,
@@ -42,6 +42,19 @@ import {
 } from "@/services/users/userMappers";
 
 export { SlugTakenError, SlugValidationError };
+
+/**
+ * @param {unknown} error
+ * @returns {boolean}
+ */
+function isFirestorePermissionDenied(error) {
+  return (
+    error != null
+    && typeof error === "object"
+    && "code" in error
+    && error.code === "permission-denied"
+  );
+}
 
 /**
  * @typedef {Object} SocialLinks
@@ -77,7 +90,7 @@ export { SlugTakenError, SlugValidationError };
  * @property {string} bio
  * @property {string} publicSlug
  * @property {boolean} portfolioEnabled
- * @property {boolean} portfolioAvailable — `portfolioEnabled` + limites do plano efetivo
+ * @property {boolean} portfolioAvailable — persistido em `publicProfiles/{uid}`
  * @property {SocialLinks} socialLinks
  */
 
@@ -103,17 +116,13 @@ export function buildLegalConsent(acceptedSource) {
  */
 export async function createUserProfile(userId, { displayName, email, acceptedSource }) {
   const userRef = doc(db, "users", userId);
+  const publicProfileRef = doc(db, "publicProfiles", userId);
 
-  const payload = {
+  /** @type {Record<string, unknown>} */
+  const userPayload = {
     displayName,
     email,
-    companyName: "",
-    companyLogo: "",
-    bio: "",
-    socialLinks: buildSocialLinksPayload(),
     plan: "starter",
-    publicSlug: "",
-    portfolioEnabled: false,
     billing: { ...DEFAULT_BILLING },
     welcomeEmailQueuedAt: null,
     createdAt: serverTimestamp(),
@@ -121,10 +130,25 @@ export async function createUserProfile(userId, { displayName, email, acceptedSo
   };
 
   if (acceptedSource) {
-    payload.legalConsent = buildLegalConsent(acceptedSource);
+    userPayload.legalConsent = buildLegalConsent(acceptedSource);
   }
 
-  await setDoc(userRef, payload);
+  const publicProfilePayload = {
+    uid: userId,
+    slug: "",
+    portfolioEnabled: false,
+    portfolioAvailable: false,
+    displayName,
+    companyName: "",
+    companyLogo: "",
+    bio: "",
+    socialLinks: buildSocialLinksPayload(),
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  };
+
+  await setDoc(userRef, userPayload);
+  await setDoc(publicProfileRef, publicProfilePayload);
 
   if (acceptedSource === "signup") {
     try {
@@ -229,24 +253,33 @@ export async function getUserFirestoreData(userId) {
 }
 
 /**
- * Carrega o documento do usuário no Firestore (sessão autenticada).
+ * Carrega o perfil completo do usuário autenticado (users + publicProfiles).
  *
  * @param {string} userId
  * @returns {Promise<UserProfile | null>}
  */
 export async function getUser(userId) {
   const userRef = doc(db, "users", userId);
-  const snapshot = await getDoc(userRef);
+  const publicProfileRef = doc(db, "publicProfiles", userId);
 
-  if (!snapshot.exists()) {
+  const [userSnapshot, publicProfileSnapshot] = await Promise.all([
+    getDoc(userRef),
+    getDoc(publicProfileRef),
+  ]);
+
+  if (!userSnapshot.exists()) {
     return null;
   }
 
-  return mapUserDoc(userId, snapshot.data());
+  return mapUserDoc(
+    userId,
+    userSnapshot.data(),
+    publicProfileSnapshot.exists() ? publicProfileSnapshot.data() : null,
+  );
 }
 
 /**
- * Perfil público por uid — retorna DTO sem campos privados.
+ * Perfil público por uid — lê apenas `publicProfiles/{uid}`.
  *
  * @param {string} userId
  * @returns {Promise<PublicUserProfile | null>}
@@ -256,7 +289,7 @@ export async function getPublicUserById(userId) {
     return null;
   }
 
-  const snapshot = await getDoc(doc(db, "users", userId));
+  const snapshot = await getDoc(doc(db, "publicProfiles", userId));
 
   if (!snapshot.exists()) {
     return null;
@@ -266,7 +299,7 @@ export async function getPublicUserById(userId) {
 }
 
 /**
- * Perfil público via slug (/u/:slug) — query users where publicSlug == slug.
+ * Perfil público via slug (/u/:slug) — slugs/{slug} → publicProfiles/{uid}.
  *
  * @param {string} slug — slug normalizado ou bruto
  * @returns {Promise<PublicUserProfile | null>}
@@ -278,40 +311,39 @@ export async function getPublicUserBySlug(slug) {
     return null;
   }
 
-  const usersQuery = query(
-    collection(db, "users"),
-    where("publicSlug", "==", normalized),
-    limit(1),
-  );
-  const snapshot = await getDocs(usersQuery);
+  const userId = await resolveSlugToUid(normalized);
 
-  if (snapshot.empty) {
+  if (!userId) {
     return null;
   }
 
-  const userDoc = snapshot.docs[0];
-  const data = userDoc.data();
+  let snapshot;
 
-  if (data.publicSlug !== normalized) {
+  try {
+    snapshot = await getDoc(doc(db, "publicProfiles", userId));
+  } catch (error) {
+    if (isFirestorePermissionDenied(error)) {
+      return mapToPublicUser(userId, {
+        slug: normalized,
+        portfolioEnabled: false,
+        portfolioAvailable: false,
+      });
+    }
+
+    throw error;
+  }
+
+  if (!snapshot.exists()) {
     return null;
   }
 
-  return mapToPublicUser(userDoc.id, data);
-}
+  const data = snapshot.data();
 
-/**
- * Atualiza campos do perfil do usuário no Firestore.
- *
- * @param {string} userId
- * @param {Partial<Omit<UserProfile, "id">> & Record<string, unknown>} data
- */
-export async function updateUser(userId, data) {
-  const userRef = doc(db, "users", userId);
+  if (data.slug !== normalized) {
+    return null;
+  }
 
-  await updateDoc(userRef, {
-    ...data,
-    updatedAt: serverTimestamp(),
-  });
+  return mapToPublicUser(userId, data);
 }
 
 /**
@@ -350,20 +382,39 @@ export async function saveUserSettings(userId, data, previousSlug = "") {
   }
 
   const userRef = doc(db, "users", userId);
+  const publicProfileRef = doc(db, "publicProfiles", userId);
+  const userSnapshot = await getDoc(userRef);
+  const plan = userSnapshot.data()?.plan ?? "starter";
+  const portfolioAvailable = computePortfolioAvailable(data.portfolioEnabled, plan);
+
   const userUpdates = {
+    displayName: data.displayName,
+    updatedAt: serverTimestamp(),
+  };
+
+  const publicProfileUpdates = {
+    uid: userId,
     displayName: data.displayName,
     companyName: data.companyName ?? "",
     bio: data.bio ?? "",
-    publicSlug: normalizedSlug,
+    slug: normalizedSlug,
     portfolioEnabled: data.portfolioEnabled,
+    portfolioAvailable,
     socialLinks: buildSocialLinksPayload(data.socialLinks),
     updatedAt: serverTimestamp(),
+  };
+
+  const persistSettings = async (
+    /** @type {import("firebase/firestore").Transaction} */ transaction,
+  ) => {
+    transaction.update(userRef, userUpdates);
+    transaction.set(publicProfileRef, publicProfileUpdates, { merge: true });
   };
 
   if (normalizedSlug !== oldSlug) {
     await runTransaction(db, async (transaction) => {
       await syncSlugRegistryInTransaction(transaction, userId, normalizedSlug, oldSlug);
-      transaction.update(userRef, userUpdates);
+      await persistSettings(transaction);
     });
   } else if (normalizedSlug) {
     await runTransaction(db, async (transaction) => {
@@ -373,16 +424,20 @@ export async function saveUserSettings(userId, data, previousSlug = "") {
       if (!slugSnap.exists()) {
         transaction.set(slugRef, {
           uid: userId,
+          type: "user",
           createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
         });
       } else if (slugSnap.data().uid !== userId) {
         throw new SlugTakenError();
       }
 
-      transaction.update(userRef, userUpdates);
+      await persistSettings(transaction);
     });
   } else {
-    await updateDoc(userRef, userUpdates);
+    await runTransaction(db, async (transaction) => {
+      await persistSettings(transaction);
+    });
   }
 
   return { publicSlug: normalizedSlug };

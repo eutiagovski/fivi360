@@ -151,7 +151,7 @@ export const PublicPortfolioProject = () => {
       return;
     }
 
-    recordPublicProjectView(state.project.id);
+    recordPublicProjectView(state.project.userId, state.project.id);
   }, [state.loading, state.error, state.project]);
 
   const cardImages = useMemo(

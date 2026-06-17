@@ -134,7 +134,7 @@ Os bloqueadores para produção pública concentram-se em **segurança backend**
 | **Rota afetada** | `/share/project/:id`, `/u/:slug` |
 | **Descrição** | `allow get: if isOwner(userId) \|\| true` em `users`. `getPublicUserById` mapeia `email` no modelo. UI pública não exibe e-mail, mas SDK anônimo lê o documento completo. |
 | **Impacto** | Exposição de PII; não conformidade com expectativa de “só dados de escritório”. |
-| **Sugestão** | Subcoleção `users/{id}/public/profile` com campos limitados; negar `get` anônimo no doc principal. |
+| **Sugestão** | ~~Subcoleção `users/{id}/public/profile`~~ **Implementado:** coleção top-level `publicProfiles/{uid}` + `users/{uid}` owner-only. Ver [public-profile-model.md](./public-profile-model.md). |
 | **Arquivos prováveis** | `firestore.rules` (L117), `src/services/users/userService.js` |
 
 ---
@@ -461,9 +461,12 @@ Os bloqueadores para produção pública concentram-se em **segurança backend**
 
 ### 3. Firestore Rules (resumo)
 
+> **Atualizado (Sprint Public Profile Cleanup 2):** ver [public-profile-model.md](./public-profile-model.md) e [security-rules-notes.md](./security-rules-notes.md). Tabela abaixo reflete o estado **no momento da auditoria**.
+
 | Coleção | Owner | Público shared/public | Gap |
 |---------|--------|------------------------|-----|
-| users | CRUD owner | `get` aberto; `list` só com `publicSlug` | E-mail exposto (A-01) |
+| users | CRUD owner | `get` aberto; `list` só com `publicSlug` | E-mail exposto (A-01) — **corrigido:** `get` owner-only |
+| publicProfiles | — | — | **adicionado** — fonte pública canônica |
 | slugs | create/delete owner | `get` aberto | OK |
 | projects | CRUD owner | `get`/`list` se shared/public | OK no get |
 | images | CRUD owner | `get` com cascata projeto | **list anônimo por projectId** (C-02) |

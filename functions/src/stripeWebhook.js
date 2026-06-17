@@ -11,6 +11,78 @@ if (getApps().length === 0) {
   initializeApp();
 }
 
+const PUBLIC_PORTFOLIO_PLAN_IDS = new Set(["professional", "enterprise"]);
+
+/**
+ * @param {unknown} plan
+ * @returns {"starter" | "professional" | "enterprise"}
+ */
+function normalizePlanId(plan) {
+  if (typeof plan === "string") {
+    const key = plan.toLowerCase().trim();
+    if (key === "professional" || key === "enterprise") {
+      return key;
+    }
+    return "starter";
+  }
+
+  if (plan && typeof plan === "object" && typeof plan.id === "string") {
+    const status = typeof plan.status === "string" ? plan.status.toLowerCase().trim() : "";
+
+    if (status && status !== "active" && status !== "trialing") {
+      return "starter";
+    }
+
+    const id = plan.id.toLowerCase().trim();
+    if (id === "professional" || id === "enterprise") {
+      return id;
+    }
+  }
+
+  return "starter";
+}
+
+/**
+ * @param {boolean | undefined} portfolioEnabled
+ * @param {unknown} plan
+ * @returns {boolean}
+ */
+function computePortfolioAvailable(portfolioEnabled, plan) {
+  if (portfolioEnabled !== true) {
+    return false;
+  }
+
+  return PUBLIC_PORTFOLIO_PLAN_IDS.has(normalizePlanId(plan));
+}
+
+/**
+ * Recalcula `publicProfiles/{uid}.portfolioAvailable` após mudança de plano.
+ *
+ * @param {import("firebase-admin/firestore").Firestore} db
+ * @param {string} uid
+ */
+async function syncPublicProfilePortfolioAvailable(db, uid) {
+  const [userSnap, profileSnap] = await Promise.all([
+    db.collection("users").doc(uid).get(),
+    db.collection("publicProfiles").doc(uid).get(),
+  ]);
+
+  if (!profileSnap.exists) {
+    return;
+  }
+
+  const portfolioEnabled = profileSnap.data()?.portfolioEnabled === true;
+  const portfolioAvailable = computePortfolioAvailable(portfolioEnabled, userSnap.data()?.plan);
+
+  await db.collection("publicProfiles").doc(uid).set(
+    {
+      portfolioAvailable,
+      updatedAt: FieldValue.serverTimestamp(),
+    },
+    { merge: true },
+  );
+}
+
 /**
  * @param {import("stripe").Stripe.Checkout.Session} session
  * @returns {{ userId: string, planId: string, customerId: string, subscriptionId: string } | null}
@@ -115,6 +187,7 @@ async function handleCheckoutSessionCompleted(db, session) {
 
   await updateUserAfterCheckout(db, userId, { planId, customerId, subscriptionId });
   await upsertSubscriptionDoc(db, userId, { planId, customerId, subscriptionId });
+  await syncPublicProfilePortfolioAvailable(db, userId);
 
   logger.info("stripeWebhook: checkout.session.completed processed", {
     userId,
@@ -362,6 +435,8 @@ async function handleSubscriptionDeleted(db, subscription) {
     },
     { merge: true },
   );
+
+  await syncPublicProfilePortfolioAvailable(db, userId);
 
   logger.info("stripeWebhook: customer.subscription.deleted processed", {
     userId,

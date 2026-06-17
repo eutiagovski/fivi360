@@ -2,7 +2,7 @@
  * Rastreamento de visualizações públicas do portfólio (GA4 + Firestore).
  *
  * GA4: apenas parâmetros agregados (sem IDs, slug ou URLs).
- * Firestore: incrementos atômicos nas coleções de stats.
+ * Firestore: incrementos atômicos em stats/{userId}/...
  */
 
 import { trackEvent } from "@/services/analytics/analyticsService";
@@ -32,10 +32,15 @@ export function recordPortfolioView(ownerUserId, authenticated) {
 }
 
 /**
+ * @param {string} ownerUserId
  * @param {string} projectId
  */
-export function recordPublicProjectView(projectId) {
-  if (!projectId || !shouldRecordViewOnce(`public-project:${projectId}`)) {
+export function recordPublicProjectView(ownerUserId, projectId) {
+  if (
+    !ownerUserId ||
+    !projectId ||
+    !shouldRecordViewOnce(`public-project:${projectId}`)
+  ) {
     return;
   }
 
@@ -43,14 +48,19 @@ export function recordPublicProjectView(projectId) {
     source: "portfolio",
   });
 
-  void incrementProjectViews(projectId).catch(() => {});
+  void incrementProjectViews(ownerUserId, projectId).catch(() => {});
 }
 
 /**
+ * @param {string} ownerUserId
  * @param {string} imageId
  */
-export function recordPublic360View(imageId) {
-  if (!imageId || !shouldRecordViewOnce(`public-360:${imageId}`)) {
+export function recordPublic360View(ownerUserId, imageId) {
+  if (
+    !ownerUserId ||
+    !imageId ||
+    !shouldRecordViewOnce(`public-360:${imageId}`)
+  ) {
     return;
   }
 
@@ -58,5 +68,5 @@ export function recordPublic360View(imageId) {
     source: "portfolio",
   });
 
-  void incrementImageViews(imageId).catch(() => {});
+  void incrementImageViews(ownerUserId, imageId).catch(() => {});
 }

@@ -524,7 +524,7 @@ export const ProjectDetail = () => {
           </div>
         )}
 
-      <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8 mb-8 md:p-4">
+      <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-4 mb-8 md:p-8">
         <div className="flex flex-col lg:flex-row gap-8">
           <div className="w-full lg:w-1/3">
             {hasCover ? (

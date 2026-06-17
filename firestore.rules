@@ -1,18 +1,18 @@
 rules_version = '2';
 
 // --------------------------------------------------------------------------
-// FIVI360 — Firestore Security Rules (Sprint 13.3)
+// FIVI360 — Firestore Security Rules (Sprint Public Profile Cleanup 2)
 //
 // Coleções:
-//   users/{userId}              — fonte única (campos públicos + privados)
-//   users/{userId}/public/profile — legado (descontinuado; não usar)
+//   users/{userId}              — dados privados (plano, billing, legal)
+//   publicProfiles/{userId}     — dados públicos do portfólio
 //   slugs/{slug}                — resolução /u/:slug
 //   projects/{projectId}
 //   images/{imageId}
 //   images/{imageId}/hotspots/{hotspotId}
-//   portfolioStats/{userId}       — contadores agregados de portfólio
-//   projectStats/{projectId}      — contadores agregados de projeto público
-//   imageStats/{imageId}          — contadores agregados de imagem 360 pública
+//   stats/{userId}                  — contadores agregados de portfólio
+//   stats/{userId}/projects/{projectId} — contadores de projeto público
+//   stats/{userId}/images/{imageId}     — contadores de imagem 360 pública
 //   invoices/{invoiceId}          — faturas Stripe (escrita via webhook / Admin SDK)
 //   emailQueue/{emailId}          — fila de e-mails transacionais (Resend)
 //
@@ -77,31 +77,11 @@ service cloud.firestore {
         && !request.resource.data.keys().hasAny(['sentAt', 'resendId', 'error']);
     }
 
-    // Portfólio /u/:slug — listagem de projetos públicos exige portfolioEnabled.
+    // Portfólio /u/:slug — listagem de projetos públicos exige portfolioAvailable.
     // get individual de projeto shared/public (ex.: /share/project) não usa este helper.
-    function portfolioEnabledForOwner(userId) {
-      return exists(/databases/$(database)/documents/users/$(userId))
-        && get(/databases/$(database)/documents/users/$(userId)).data.portfolioEnabled == true;
-    }
-
-    // Leitura pública limitada de users/{uid} (perfil de portfólio / share).
-    function isPubliclyReadableUser() {
-      return resource.data.portfolioEnabled == true
-        || (
-          resource.data.publicSlug is string
-          && resource.data.publicSlug.size() > 0
-          && isValidSlug(resource.data.publicSlug)
-        );
-    }
-
-    // Query users where publicSlug == slug (getPublicUserBySlug).
-    function isPublicSlugListQuery() {
-      return request.query.limit <= 1
-        && request.query.filters.size() == 1
-        && request.query.filters[0].fieldPath == 'publicSlug'
-        && request.query.filters[0].op == '=='
-        && request.query.filters[0].value is string
-        && isValidSlug(request.query.filters[0].value);
+    function portfolioAvailableForOwner(userId) {
+      return exists(/databases/$(database)/documents/publicProfiles/$(userId))
+        && get(/databases/$(database)/documents/publicProfiles/$(userId)).data.portfolioAvailable == true;
     }
 
     // Projeto shared/public — usado em get/list de imagens por projectId.
@@ -139,91 +119,94 @@ service cloud.firestore {
       return imageExists(imageId)
         && imageDocData(imageId).projectId is string
         && isPublicProject(imageDocData(imageId).projectId)
-        && portfolioEnabledForOwner(projectDoc(imageDocData(imageId).projectId).data.userId);
+        && portfolioAvailableForOwner(projectDoc(imageDocData(imageId).projectId).data.userId);
     }
 
-    // ---------- portfolioStats ----------
+    // Imagem pública pertencente ao userId do path stats/{userId}/images/{imageId}.
+    function isPortfolioPublicImageForOwner(imageId, ownerUserId) {
+      return imageExists(imageId)
+        && imageDocData(imageId).userId == ownerUserId
+        && imageDocData(imageId).projectId is string
+        && isPublicProject(imageDocData(imageId).projectId)
+        && projectDoc(imageDocData(imageId).projectId).data.userId == ownerUserId
+        && portfolioAvailableForOwner(ownerUserId);
+    }
 
-    match /portfolioStats/{userId} {
+    // ---------- stats (visualizações públicas agrupadas por usuário) ----------
+
+    match /stats/{userId} {
 
       allow get: if isOwner(userId);
       allow list: if false;
 
-      function isValidPortfolioStatsMutation() {
+      function isValidStatsRootMutation() {
         let data = request.resource.data;
 
-        return portfolioEnabledForOwner(userId)
+        return portfolioAvailableForOwner(userId)
           && data.keys().hasOnly(['portfolioViews', 'updatedAt'])
           && data.portfolioViews is int
           && data.portfolioViews >= 1
           && data.updatedAt is timestamp
           && (
-            !exists(/databases/$(database)/documents/portfolioStats/$(userId))
+            !exists(/databases/$(database)/documents/stats/$(userId))
               ? data.portfolioViews == 1
               : data.portfolioViews == resource.data.portfolioViews + 1
           );
       }
 
-      allow create, update: if isValidPortfolioStatsMutation();
+      allow create, update: if isValidStatsRootMutation();
       allow delete: if false;
-    }
 
-    // ---------- projectStats ----------
+      match /projects/{projectId} {
 
-    match /projectStats/{projectId} {
+        allow get: if isOwner(userId);
+        allow list: if isOwner(userId);
 
-      allow get: if isSignedIn()
-        && projectExists(projectId)
-        && isOwner(projectDoc(projectId).data.userId);
-      allow list: if false;
+        function isValidStatsProjectMutation() {
+          let data = request.resource.data;
 
-      function isValidProjectStatsMutation() {
-        let data = request.resource.data;
+          return projectExists(projectId)
+            && projectDoc(projectId).data.userId == userId
+            && isShared(projectDoc(projectId).data.visibility)
+            && portfolioAvailableForOwner(userId)
+            && data.keys().hasOnly(['views', 'updatedAt'])
+            && data.views is int
+            && data.views >= 1
+            && data.updatedAt is timestamp
+            && (
+              !exists(/databases/$(database)/documents/stats/$(userId)/projects/$(projectId))
+                ? data.views == 1
+                : data.views == resource.data.views + 1
+            );
+        }
 
-        return projectExists(projectId)
-          && isShared(projectDoc(projectId).data.visibility)
-          && portfolioEnabledForOwner(projectDoc(projectId).data.userId)
-          && data.keys().hasOnly(['views', 'updatedAt'])
-          && data.views is int
-          && data.views >= 1
-          && data.updatedAt is timestamp
-          && (
-            !exists(/databases/$(database)/documents/projectStats/$(projectId))
-              ? data.views == 1
-              : data.views == resource.data.views + 1
-          );
+        allow create, update: if isValidStatsProjectMutation();
+        allow delete: if false;
       }
 
-      allow create, update: if isValidPortfolioStatsMutation();
-      allow delete: if false;
-    }
+      match /images/{imageId} {
 
-    // ---------- imageStats ----------
+        allow get: if isOwner(userId);
+        allow list: if isOwner(userId);
 
-    match /imageStats/{imageId} {
+        function isValidStatsImageMutation() {
+          let data = request.resource.data;
 
-      allow get: if isSignedIn()
-        && imageExists(imageId)
-        && isOwner(imageDocData(imageId).userId);
-      allow list: if false;
+          return isPortfolioPublicImageForOwner(imageId, userId)
+            && data.keys().hasOnly(['views', 'updatedAt'])
+            && data.views is int
+            && data.views >= 1
+            && data.updatedAt is timestamp
+            && (
+              !exists(/databases/$(database)/documents/stats/$(userId)/images/$(imageId))
+                ? data.views == 1
+                : data.views == resource.data.views + 1
+            );
+        }
 
-      function isValidImageStatsMutation() {
-        let data = request.resource.data;
-
-        return isPortfolioPublicImage(imageId)
-          && data.keys().hasOnly(['views', 'updatedAt'])
-          && data.views is int
-          && data.views >= 1
-          && data.updatedAt is timestamp
-          && (
-            !exists(/databases/$(database)/documents/imageStats/$(imageId))
-              ? data.views == 1
-              : data.views == resource.data.views + 1
-          );
+        allow create, update: if isValidStatsImageMutation();
+        allow delete: if false;
       }
-
-      allow create, update: if isValidImageStatsMutation();
-      allow delete: if false;
     }
 
     // ---------- invoices (Stripe — escrita só via Admin SDK / webhook) ----------
@@ -261,6 +244,7 @@ service cloud.firestore {
 
       allow create: if isSignedIn()
         && request.resource.data.uid == request.auth.uid
+        && request.resource.data.type == 'user'
         && request.resource.data.createdAt is timestamp
         && isValidSlug(slug);
 
@@ -270,33 +254,34 @@ service cloud.firestore {
         && resource.data.uid == request.auth.uid;
     }
 
-    // ---------- users ----------
+    // ---------- publicProfiles (dados públicos do portfólio) ----------
+
+    match /publicProfiles/{userId} {
+
+      allow get: if isOwner(userId)
+        || resource.data.portfolioAvailable == true;
+
+      allow list: if false;
+
+      allow create: if isOwner(userId)
+        && request.resource.data.uid == userId;
+
+      allow update: if isOwner(userId)
+        && request.resource.data.uid == userId;
+
+      allow delete: if isOwner(userId);
+    }
+
+    // ---------- users (dados privados — owner only) ----------
 
     match /users/{userId} {
 
-      // get: owner ou perfil com slug/portfólio (DTO no cliente — ver userMappers).
-      allow get: if isOwner(userId) || isPubliclyReadableUser();
-
-      // list: apenas query por publicSlug (portfólio /u/:slug).
-      allow list: if isPublicSlugListQuery()
-        && resource.data.portfolioEnabled == true
-        && resource.data.publicSlug == request.query.filters[0].value;
+      allow get: if isOwner(userId);
+      allow list: if false;
 
       allow create: if isOwner(userId);
       allow update: if isOwner(userId);
       allow delete: if isOwner(userId);
-
-      // Legado (Sprint 13.3): users/{uid}/public/profile — descontinuado.
-      // Documentos existentes não são apagados; o app não lê/escreve mais aqui.
-      match /public/profile {
-
-        allow get: if isOwner(userId);
-        allow list: if false;
-
-        allow create: if isOwner(userId);
-        allow update: if isOwner(userId);
-        allow delete: if isOwner(userId);
-      }
     }
 
     // ---------- projects ----------
@@ -310,7 +295,7 @@ service cloud.firestore {
         (isSignedIn() && resource.data.userId == request.auth.uid)
         || (
           isShared(resource.data.visibility)
-          && portfolioEnabledForOwner(resource.data.userId)
+          && portfolioAvailableForOwner(resource.data.userId)
         );
 
       allow create: if isSignedIn()

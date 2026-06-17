@@ -180,7 +180,7 @@ Fluxo sugerido para testar auth manualmente (DevTools ou sprint futura de telas)
 
 1. **Telas de login e cadastro** — formulários que consomem `signIn`, `signUp`, `signInGoogle` e `resetPassword`.
 2. **Rotas protegidas** — wrapper que redireciona não autenticados para `/login`; respeitar `loading` para evitar flash.
-3. **Perfil Firestore** — após primeiro login, criar `users/{uid}` via `userService` (name, plan, publicSlug, etc.).
+3. **Perfil Firestore** — após primeiro login, criar `users/{uid}` e `publicProfiles/{uid}` via `userService` (`displayName`, `plan`, etc.).
 4. **Logout na UI** — botão em Settings/Layout usando `signOut`.
 5. **Migrar dados das páginas** — substituir fixtures por services (projects, images) **após** auth estável.
 6. **Security Rules** — regras Firestore/Storage amarradas a `request.auth.uid`.

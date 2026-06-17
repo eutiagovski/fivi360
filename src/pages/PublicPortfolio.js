@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { AuthLoadingScreen } from "@/components/auth/ProtectedRoute";
 import { PublicSocialLinks } from "@/components/public/PublicSocialLinks";
@@ -31,7 +31,8 @@ function PublicMessage({ title, description, dataTestId }) {
 
 export const PublicPortfolio = () => {
   const { slug: rawSlug } = useParams();
-  const { user: authUser } = useAuth();
+  const { user: authUser, loading: authLoading } = useAuth();
+  const recordedViewKeyRef = useRef(null);
   const [state, setState] = useState({
     loading: true,
     error: null,
@@ -91,12 +92,25 @@ export const PublicPortfolio = () => {
   }, [rawSlug]);
 
   useEffect(() => {
-    if (state.loading || state.error || !state.user?.id) {
+    recordedViewKeyRef.current = null;
+  }, [rawSlug]);
+
+  useEffect(() => {
+    if (state.loading || state.error || !state.user?.id || authLoading) {
       return;
     }
 
+    const slug = normalizeSlug(rawSlug ?? "");
+    const viewKey = `${slug}:${state.user.id}`;
+
+    if (recordedViewKeyRef.current === viewKey) {
+      return;
+    }
+
+    recordedViewKeyRef.current = viewKey;
     recordPortfolioView(state.user.id, Boolean(authUser));
-  }, [state.loading, state.error, state.user, authUser]);
+    // authUser omitido das deps — valor lido no primeiro disparo; mudanças posteriores não reexecutam tracking.
+  }, [state.loading, state.error, state.user?.id, rawSlug, authLoading]);
 
   if (state.loading) {
     return <AuthLoadingScreen />;
@@ -123,14 +137,16 @@ export const PublicPortfolio = () => {
       <main className="max-w-7xl mx-auto p-8 md:p-12 lg:p-16">
         {state.error === "not_found" && (
           <PublicMessage
-            title="Usuário não encontrado"
+            title="Página não encontrada"
+            description="Não há um portfólio público com este endereço."
             dataTestId="portfolio-not-found"
           />
         )}
 
         {state.error === "disabled" && (
           <PublicMessage
-            title="Este portfólio não está disponível."
+            title="Este portfólio não está disponível"
+            description="O proprietário desativou este portfólio."
             dataTestId="portfolio-disabled"
           />
         )}
@@ -138,12 +154,12 @@ export const PublicPortfolio = () => {
         {!state.error && state.user && (
           <>
             <div className="mb-12 max-w-2xl">
-              <h1
+              <h2
                 className="text-4xl sm:text-5xl lg:text-6xl font-light tracking-tighter text-white mb-3"
                 data-testid="portfolio-user-name"
               >
                 {displayName}
-              </h1>
+              </h2>
               {companyBio && (
                 <p
                   className="text-lg text-zinc-400 leading-relaxed"

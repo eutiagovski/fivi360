@@ -67,7 +67,10 @@ export function PublicImageViewer({
       trackEvent("view_360_image", { source: viewSource });
 
       if (accessMode === "portfolio" && imageId) {
-        recordPublic360View(imageId);
+        const ownerUserId = project?.userId ?? image?.userId;
+        if (ownerUserId) {
+          recordPublic360View(ownerUserId, imageId);
+        }
       }
     }
   }, [imageId, loading, error, image, viewSource, accessMode]);

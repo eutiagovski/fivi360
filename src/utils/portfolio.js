@@ -1,27 +1,37 @@
 import { getPlanLimits } from "@/config/planLimits";
 
 /**
- * Verifica disponibilidade do portfólio público a partir do documento `users/{uid}`.
- * Respeita `portfolioEnabled` e os limites do plano efetivo (Starter bloqueia).
+ * Calcula `portfolioAvailable` a partir de `portfolioEnabled` e `users.plan`.
+ *
+ * @param {boolean | undefined} portfolioEnabled
+ * @param {import("@/config/planLimits").UserPlanRaw} plan
+ * @returns {boolean}
+ */
+export function computePortfolioAvailable(portfolioEnabled, plan) {
+  if (portfolioEnabled !== true) {
+    return false;
+  }
+
+  return getPlanLimits(plan).publicPortfolioEnabled;
+}
+
+/**
+ * Verifica disponibilidade do portfólio público a partir de `users/{uid}` + plano.
+ * Usado ao persistir `publicProfiles/{uid}.portfolioAvailable`.
  *
  * @param {import("firebase/firestore").DocumentData | null | undefined} data
  * @returns {boolean}
  */
 export function isPortfolioPubliclyAvailableFromUserData(data) {
-  if (data?.portfolioEnabled !== true) {
-    return false;
-  }
-
-  return getPlanLimits(data?.plan).publicPortfolioEnabled;
+  return computePortfolioAvailable(data?.portfolioEnabled, data?.plan);
 }
 
 /**
  * Indica se o portfólio público (/u/:slug) deve exibir dados e projetos.
- * Prefira `portfolioAvailable` em `PublicUserProfile` (inclui checagem de plano).
  *
- * @param {{ portfolioEnabled?: boolean } | null | undefined} profile
+ * @param {{ portfolioAvailable?: boolean } | null | undefined} profile
  * @returns {boolean}
  */
 export function isPortfolioPubliclyAvailable(profile) {
-  return profile?.portfolioEnabled === true;
+  return profile?.portfolioAvailable === true;
 }
