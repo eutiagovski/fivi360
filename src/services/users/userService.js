@@ -119,9 +119,17 @@ export function buildLegalConsent(acceptedSource) {
  * Cria o documento do usuário no Firestore após cadastro no Firebase Auth.
  *
  * @param {string} userId
- * @param {{ displayName: string, email: string, acceptedSource?: "signup" | "modal_existing_user" }} data
+ * @param {{
+ *   displayName: string,
+ *   email: string,
+ *   acceptedSource?: "signup" | "modal_existing_user",
+ *   enqueueVerifyEmail?: boolean,
+ * }} data
  */
-export async function createUserProfile(userId, { displayName, email, acceptedSource }) {
+export async function createUserProfile(
+  userId,
+  { displayName, email, acceptedSource, enqueueVerifyEmail = false },
+) {
   const userRef = doc(db, "users", userId);
   const publicProfileRef = doc(db, "publicProfiles", userId);
   const { workspaceId, workspaceRef, memberRef } = getPersonalWorkspaceRefs(userId);
@@ -185,7 +193,7 @@ export async function createUserProfile(userId, { displayName, email, acceptedSo
     throw error;
   }
 
-  if (acceptedSource === "signup") {
+  if (enqueueVerifyEmail) {
     try {
       await enqueueVerifyEmail({ to: email, userId, name: displayName });
     } catch (err) {
@@ -194,6 +202,31 @@ export async function createUserProfile(userId, { displayName, email, acceptedSo
       }
     }
   }
+}
+
+/**
+ * Enfileira welcome para sessão autenticada quando elegível (idempotente).
+ *
+ * @param {ReturnType<import("@/services/auth/authService").mapFirebaseUser>} authUser
+ * @returns {Promise<boolean>}
+ */
+export async function maybeEnqueueWelcomeEmailForAuthUser(authUser) {
+  if (!authUser?.uid || !authUser.email) {
+    return false;
+  }
+
+  if (!authUser.emailVerified && !authUser.usesGoogleAuth) {
+    return false;
+  }
+
+  const profile = await getUserFirestoreData(authUser.uid);
+
+  return maybeEnqueueWelcomeEmail({
+    userId: authUser.uid,
+    to: authUser.email,
+    name: profile?.displayName ?? authUser.displayName ?? "",
+    companyName: typeof profile?.companyName === "string" ? profile.companyName : "",
+  });
 }
 
 /**

@@ -5,9 +5,10 @@ import { LegalConsentModal } from "@/components/legal/LegalConsentModal";
 import {
   createUserProfile,
   getUserFirestoreData,
+  maybeEnqueueWelcomeEmailForAuthUser,
   saveLegalConsent,
 } from "@/services/users/userService";
-import { completeEmailVerification } from "@/services/auth/emailVerificationService";
+import { canReceiveWelcomeEmail } from "@/services/auth/authService";
 import { isLegalConsentCurrent } from "@/utils/legalConsent";
 
 /**
@@ -58,11 +59,12 @@ export function LegalConsentGate({ children }) {
           displayName: user.displayName?.trim() || "",
           email: user.email ?? "",
           acceptedSource,
+          enqueueVerifyEmail: user.usesPasswordAuth && !user.usesGoogleAuth,
         });
 
-        if (acceptedSource === "signup" && user.emailVerified) {
+        if (canReceiveWelcomeEmail(user)) {
           try {
-            await completeEmailVerification();
+            await maybeEnqueueWelcomeEmailForAuthUser(user);
           } catch {
             // Não bloqueia o aceite legal.
           }

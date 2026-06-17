@@ -13,6 +13,7 @@
 
 import { createContext, useCallback, useEffect, useMemo, useState } from "react";
 import {
+  canReceiveWelcomeEmail,
   logout as authLogout,
   signInWithEmail,
   signInWithGoogle,
@@ -20,7 +21,11 @@ import {
   subscribeToAuthChanges,
 } from "@/services/auth/authService";
 import { requestPasswordResetEmail } from "@/services/auth/passwordResetService";
-import { createUserProfile } from "@/services/users/userService";
+import {
+  createUserProfile,
+  getUserFirestoreData,
+  maybeEnqueueWelcomeEmailForAuthUser,
+} from "@/services/users/userService";
 import {
   setAnalyticsUser,
   trackEvent,
@@ -50,8 +55,20 @@ export function AuthProvider({ children }) {
     setError(null);
 
     try {
-      await signInWithEmail(email, password);
+      const authUser = await signInWithEmail(email, password);
       trackEvent("login", { method: "email" });
+
+      if (canReceiveWelcomeEmail(authUser)) {
+        const profile = await getUserFirestoreData(authUser.uid);
+
+        if (profile) {
+          try {
+            await maybeEnqueueWelcomeEmailForAuthUser(authUser);
+          } catch {
+            // Não bloqueia o login.
+          }
+        }
+      }
     } catch (err) {
       setError(err);
       throw err;
@@ -62,12 +79,14 @@ export function AuthProvider({ children }) {
     setError(null);
 
     try {
-      const user = await signUpWithEmail(email, password);
-      await createUserProfile(user.uid, {
+      const authUser = await signUpWithEmail(email, password);
+      await createUserProfile(authUser.uid, {
         displayName: name,
         email,
         acceptedSource: "signup",
+        enqueueVerifyEmail: true,
       });
+      await authLogout();
       trackEvent("sign_up", { method: "email" });
     } catch (err) {
       setError(err);
@@ -79,8 +98,18 @@ export function AuthProvider({ children }) {
     setError(null);
 
     try {
-      const { isNewUser } = await signInWithGoogle();
+      const { user: authUser, isNewUser } = await signInWithGoogle();
       trackEvent(isNewUser ? "sign_up" : "login", { method: "google" });
+
+      const profile = await getUserFirestoreData(authUser.uid);
+
+      if (profile) {
+        try {
+          await maybeEnqueueWelcomeEmailForAuthUser(authUser);
+        } catch {
+          // Não bloqueia o login.
+        }
+      }
     } catch (err) {
       setError(err);
       throw err;

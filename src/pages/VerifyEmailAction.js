@@ -3,12 +3,11 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { AuthCard } from "@/components/auth/AuthCard";
 import { AuthLayout } from "@/components/auth/AuthLayout";
-import { useAuth } from "@/hooks/useAuth";
 import {
   applyEmailVerificationCode,
+  logout,
   reloadCurrentUser,
 } from "@/services/auth/authService";
-import { completeEmailVerification } from "@/services/auth/emailVerificationService";
 import { getActionCodeErrorMessage } from "@/utils/authErrors";
 
 const CONSUMED_ACTION_CODE_ERRORS = new Set([
@@ -19,12 +18,10 @@ const CONSUMED_ACTION_CODE_ERRORS = new Set([
 export const VerifyEmailAction = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user, setUserFromReload } = useAuth();
   const hasProcessedRef = useRef(false);
 
   const [status, setStatus] = useState("loading");
   const [errorMessage, setErrorMessage] = useState(null);
-  const [hadActiveSession, setHadActiveSession] = useState(false);
 
   useEffect(() => {
     if (hasProcessedRef.current) {
@@ -35,24 +32,11 @@ export const VerifyEmailAction = () => {
     const mode = searchParams.get("mode");
     const oobCode = searchParams.get("oobCode");
 
-    const finalizeVerifiedEmail = async (refreshedUser) => {
-      setUserFromReload?.(refreshedUser);
-
-      try {
-        await completeEmailVerification();
-      } catch {
-        // Não bloqueia a confirmação de e-mail.
-      }
-    };
-
     const completeSuccess = async () => {
-      const refreshedUser = await reloadCurrentUser();
-
-      if (refreshedUser) {
-        setHadActiveSession(true);
-        await finalizeVerifiedEmail(refreshedUser);
-      } else {
-        setHadActiveSession(false);
+      try {
+        await logout();
+      } catch {
+        // Mantém sucesso mesmo se o signOut falhar.
       }
 
       setStatus("success");
@@ -65,9 +49,7 @@ export const VerifyEmailAction = () => {
         return false;
       }
 
-      setHadActiveSession(true);
-      await finalizeVerifiedEmail(refreshedUser);
-      setStatus("success");
+      await completeSuccess();
       return true;
     };
 
@@ -100,14 +82,9 @@ export const VerifyEmailAction = () => {
         setErrorMessage(getActionCodeErrorMessage(err));
       }
     })();
-  }, [searchParams, setUserFromReload]);
+  }, [searchParams]);
 
   const handleContinue = () => {
-    if (user) {
-      navigate("/dashboard", { replace: true });
-      return;
-    }
-
     navigate("/login", { replace: true });
   };
 
@@ -131,9 +108,7 @@ export const VerifyEmailAction = () => {
                 E-mail confirmado com sucesso.
               </p>
               <p className="text-zinc-400 text-sm">
-                {hadActiveSession
-                  ? "Agora você já pode acessar o FIVI360."
-                  : "Entre na sua conta para concluir a ativação."}
+                Entre na sua conta para concluir a ativação.
               </p>
             </div>
             <button
@@ -142,7 +117,7 @@ export const VerifyEmailAction = () => {
               data-testid="verify-email-action-continue"
               className="w-full px-4 py-3 bg-white text-black rounded-xl font-medium hover:bg-zinc-200 transition-all"
             >
-              {hadActiveSession ? "Continuar" : "Ir para login"}
+              Ir para login
             </button>
           </div>
         )}

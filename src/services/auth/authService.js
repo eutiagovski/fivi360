@@ -30,7 +30,6 @@ import {
   verifyPasswordResetCode,
 } from "firebase/auth";
 import { auth } from "@/config/firebase";
-import { completeEmailVerification } from "@/services/auth/emailVerificationService";
 
 const googleProvider = new GoogleAuthProvider();
 
@@ -52,7 +51,20 @@ export function mapFirebaseUser(firebaseUser) {
     usesPasswordAuth: firebaseUser.providerData.some(
       (provider) => provider.providerId === "password",
     ),
+    usesGoogleAuth: firebaseUser.providerData.some(
+      (provider) => provider.providerId === "google.com",
+    ),
   };
+}
+
+/**
+ * Usuário elegível para e-mail de boas-vindas (e-mail verificado ou Google).
+ *
+ * @param {ReturnType<typeof mapFirebaseUser> | null} user
+ * @returns {boolean}
+ */
+export function canReceiveWelcomeEmail(user) {
+  return Boolean(user?.emailVerified || user?.usesGoogleAuth);
 }
 
 /**
@@ -71,17 +83,7 @@ export function needsEmailVerification(user) {
  */
 export async function signInWithEmail(email, password) {
   const credential = await signInWithEmailAndPassword(auth, email, password);
-  const user = mapFirebaseUser(credential.user);
-
-  if (user.usesPasswordAuth && user.emailVerified) {
-    try {
-      await completeEmailVerification();
-    } catch {
-      // Não bloqueia o login.
-    }
-  }
-
-  return user;
+  return mapFirebaseUser(credential.user);
 }
 
 /**
