@@ -1,16 +1,21 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { AuthLoadingScreen } from "@/components/auth/ProtectedRoute";
 import { PublicSocialLinks } from "@/components/public/PublicSocialLinks";
 import { ProjectCard } from "@/components/common/ProjectCard";
 import { SectionHeader } from "@/components/common/SectionHeader";
 import { useAuth } from "@/hooks/useAuth";
+import { usePageSeo } from "@/hooks/usePageSeo";
 import { recordPortfolioView } from "@/services/stats/publicViewTracking";
 import {
   getPublicProjectsByUserId,
   mapProjectToCard,
 } from "@/services/projects/projectService";
 import { getPublicUserBySlug } from "@/services/users/userService";
+import {
+  buildPortfolioDescription,
+  buildPortfolioTitle,
+} from "@/utils/publicSeo";
 import { isValidSlugFormat, normalizeSlug } from "@/utils/slug";
 
 function PublicMessage({ title, description, dataTestId }) {
@@ -112,6 +117,36 @@ export const PublicPortfolio = () => {
     // authUser omitido das deps — valor lido no primeiro disparo; mudanças posteriores não reexecutam tracking.
   }, [state.loading, state.error, state.user?.id, rawSlug, authLoading]);
 
+  const seo = useMemo(() => {
+    if (state.error === "not_found") {
+      return {
+        title: "Página não encontrada | FIVI360",
+        description: "Não há um portfólio público com este endereço.",
+        enabled: !state.loading,
+      };
+    }
+
+    if (state.error === "disabled") {
+      return {
+        title: "Portfólio indisponível | FIVI360",
+        description: "O proprietário desativou este portfólio.",
+        enabled: !state.loading,
+      };
+    }
+
+    if (!state.user) {
+      return { title: "", description: "", enabled: false };
+    }
+
+    return {
+      title: buildPortfolioTitle(state.user),
+      description: buildPortfolioDescription(state.user),
+      enabled: true,
+    };
+  }, [state.loading, state.error, state.user]);
+
+  usePageSeo(seo);
+
   if (state.loading) {
     return <AuthLoadingScreen />;
   }
@@ -176,7 +211,7 @@ export const PublicPortfolio = () => {
 
             <div>
               <SectionHeader
-                title={`Projetos (${cardProjects.length})`}
+                title={`Projetos públicos`}
                 dataTestId="portfolio-projects-title"
               />
 
@@ -204,9 +239,11 @@ export const PublicPortfolio = () => {
 
       <footer className="border-t border-zinc-800 mt-16 p-6">
         <div className="max-w-7xl mx-auto text-center">
+            <a href="https://fivi360.com.br" target="_blank" rel="noopener noreferrer" className="text-white font-medium">
           <p className="text-sm text-zinc-500">
             Powered by <span className="text-white font-medium">FIVI360</span>
           </p>
+            </a>
         </div>
       </footer>
     </div>

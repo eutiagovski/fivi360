@@ -33,6 +33,7 @@ import { isValidSlugFormat, normalizeSlug } from "@/utils/slug";
  * @returns {{
  *   image: import("@/services/images/imageService").Image | null,
  *   project: import("@/services/projects/projectService").Project | null,
+ *   owner: import("@/services/users/userService").PublicUser | null,
  *   projectImages: import("@/services/images/imageService").Image[],
  *   previousImage: import("@/services/images/imageService").Image | null,
  *   nextImage: import("@/services/images/imageService").Image | null,
@@ -50,6 +51,7 @@ export function usePublicViewerImage(imageId, options = {}) {
 
   const [image, setImage] = useState(null);
   const [project, setProject] = useState(null);
+  const [owner, setOwner] = useState(null);
   const [projectImages, setProjectImages] = useState([]);
   const [isProjectContext, setIsProjectContext] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -74,6 +76,7 @@ export function usePublicViewerImage(imageId, options = {}) {
       setError(null);
       setImage(null);
       setProject(null);
+      setOwner(null);
       setProjectImages([]);
       setIsProjectContext(false);
 
@@ -107,6 +110,7 @@ export function usePublicViewerImage(imageId, options = {}) {
 
         let hasAccess = false;
         let projectContext = accessMode !== "standalone";
+        let portfolioOwner = null;
 
         if (accessMode === "standalone") {
           hasAccess = canAccessStandaloneImage(imageData);
@@ -125,9 +129,9 @@ export function usePublicViewerImage(imageId, options = {}) {
             return;
           }
 
-          const owner = await getPublicUserBySlug(slug);
+          const fetchedOwner = await getPublicUserBySlug(slug);
 
-          if (!owner?.portfolioAvailable) {
+          if (!fetchedOwner?.portfolioAvailable) {
             setError("unavailable");
             return;
           }
@@ -135,9 +139,13 @@ export function usePublicViewerImage(imageId, options = {}) {
           hasAccess = canAccessPortfolioImage(
             imageData,
             projectData,
-            owner.id,
+            fetchedOwner.id,
           );
           projectContext = hasAccess;
+
+          if (hasAccess) {
+            portfolioOwner = fetchedOwner;
+          }
         }
 
         if (cancelled) {
@@ -159,6 +167,7 @@ export function usePublicViewerImage(imageId, options = {}) {
 
         setImage(imageData);
         setProject(projectData);
+        setOwner(portfolioOwner);
         setProjectImages(imagesInProject);
         setIsProjectContext(projectContext);
       } catch (err) {
@@ -199,6 +208,7 @@ export function usePublicViewerImage(imageId, options = {}) {
   return {
     image,
     project,
+    owner,
     projectImages,
     previousImage,
     nextImage,

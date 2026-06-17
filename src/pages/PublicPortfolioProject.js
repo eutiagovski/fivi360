@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { SectionHeader } from "@/components/common/SectionHeader";
+import { usePageSeo } from "@/hooks/usePageSeo";
 import { ImageCard } from "@/components/common/ImageCard";
 import {
   hasProjectCover,
@@ -22,6 +23,10 @@ import { recordPublicProjectView } from "@/services/stats/publicViewTracking";
 import {
   canAccessPortfolioProject,
 } from "@/utils/publicAccess";
+import {
+  buildProjectDescription,
+  buildProjectTitle,
+} from "@/utils/publicSeo";
 import { isValidSlugFormat, normalizeSlug } from "@/utils/slug";
 
 export const PublicPortfolioProject = () => {
@@ -158,6 +163,44 @@ export const PublicPortfolioProject = () => {
     () => state.images.map(mapImageToCard),
     [state.images],
   );
+
+  const seo = useMemo(() => {
+    if (state.loading) {
+      return { title: "", description: "", enabled: false };
+    }
+
+    if (state.error === "not_found") {
+      return {
+        title: "Projeto não encontrado | FIVI360",
+        description: "Este link pode estar incorreto ou o projeto foi removido.",
+        enabled: true,
+      };
+    }
+
+    if (state.error === "unavailable") {
+      return {
+        title: "Projeto indisponível | FIVI360",
+        description: "O projeto não faz parte deste portfólio ou não é público.",
+        enabled: true,
+      };
+    }
+
+    if (state.error === "load_failed" || !state.project) {
+      return {
+        title: "Erro ao carregar projeto | FIVI360",
+        description: "Tente novamente em alguns instantes.",
+        enabled: true,
+      };
+    }
+
+    return {
+      title: buildProjectTitle(state.project, state.owner),
+      description: buildProjectDescription(state.project, state.owner),
+      enabled: true,
+    };
+  }, [state.loading, state.error, state.project, state.owner]);
+
+  usePageSeo(seo);
 
   if (state.loading) {
     return (

@@ -5,8 +5,13 @@ import { PanoramaViewer } from "@/components/viewer/PanoramaViewer";
 import { ViewerPageHeader } from "@/components/viewer/ViewerPageHeader";
 import { ViewerNavControls } from "@/components/viewer/ViewerNavControls";
 import { HotspotInfoDialog } from "@/components/viewer/HotspotInfoDialog";
+import { usePageSeo } from "@/hooks/usePageSeo";
 import { usePublicViewerImage } from "@/hooks/usePublicViewerImage";
 import { useHotspots } from "@/hooks/useHotspots";
+import {
+  buildImageDescription,
+  buildImageTitle,
+} from "@/utils/publicSeo";
 import { trackEvent } from "@/services/analytics/analyticsService";
 import { recordPublic360View } from "@/services/stats/publicViewTracking";
 import { HOTSPOT_TYPE_SCENE } from "@/services/hotspots/hotspotService";
@@ -45,6 +50,7 @@ export function PublicImageViewer({
   const {
     image,
     project,
+    owner,
     projectImages,
     previousImage,
     nextImage,
@@ -61,6 +67,20 @@ export function PublicImageViewer({
   const [infoHotspot, setInfoHotspot] = useState(null);
 
   const viewSource = accessMode === "portfolio" ? "public" : "shared";
+
+  const portfolioSeo = useMemo(() => {
+    if (accessMode !== "portfolio" || loading || error || !image) {
+      return { title: "", description: "", enabled: false };
+    }
+
+    return {
+      title: buildImageTitle(image, owner),
+      description: buildImageDescription(image, owner),
+      enabled: true,
+    };
+  }, [accessMode, loading, error, image, owner]);
+
+  usePageSeo(portfolioSeo);
 
   useEffect(() => {
     if (!loading && !error && image) {
