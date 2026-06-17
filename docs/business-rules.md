@@ -90,7 +90,16 @@ Exibe informações.
 
 ## Scene
 
-Navega para outra imagem.
+Navega para outra imagem do **mesmo projeto**.
+
+Ao mover uma imagem de projeto para a galeria (imagem solta):
+
+* hotspots `scene` na própria imagem são removidos;
+* hotspots `scene` em outras imagens do projeto que apontam para ela são removidos;
+* hotspots `info` são preservados;
+* a movimentação só ocorre após a limpeza, em batch atômico no Firestore.
+
+Mover imagem da galeria para um projeto **não** cria hotspots automaticamente — apenas preserva os existentes.
 
 ---
 

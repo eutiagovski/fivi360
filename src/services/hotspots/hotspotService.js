@@ -17,7 +17,10 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { db } from "@/config/firebase";
-import { getImageById } from "@/services/images/imageService";
+import {
+  getImageById,
+  getImagesByProjectId,
+} from "@/services/images/imageService";
 import { assertHotspotsEnabled } from "@/services/plans/planService";
 
 export const HOTSPOT_TYPE_INFO = "info";
@@ -414,6 +417,70 @@ export async function updateSceneHotspot(hotspotId, data) {
 
   const updatedSnapshot = await getDoc(hotspotRef);
   return mapHotspotDoc(hotspotId, updatedSnapshot.data());
+}
+
+/**
+ * Referências Firestore de hotspots scene que devem ser removidos ao mover uma
+ * imagem de projeto para a galeria (própria imagem + incoming no mesmo projeto).
+ *
+ * @param {string} userId
+ * @param {string} imageId
+ * @param {string} projectId
+ * @returns {Promise<import("firebase/firestore").DocumentReference[]>}
+ */
+export async function collectSceneHotspotDeletionRefs(
+  userId,
+  imageId,
+  projectId,
+) {
+  if (!userId || !imageId || !projectId) {
+    return [];
+  }
+
+  const ownHotspots = await getHotspotsByImage(imageId);
+  const refs = ownHotspots
+    .filter((hotspot) => hotspot.type === HOTSPOT_TYPE_SCENE)
+    .map((hotspot) => doc(db, "images", imageId, "hotspots", hotspot.id));
+
+  const projectImages = await getImagesByProjectId(projectId, userId);
+
+  for (const projectImage of projectImages) {
+    if (projectImage.id === imageId) {
+      continue;
+    }
+
+    const hotspots = await getHotspotsByImage(projectImage.id);
+
+    for (const hotspot of hotspots) {
+      if (
+        hotspot.type === HOTSPOT_TYPE_SCENE &&
+        hotspot.targetImageId === imageId
+      ) {
+        refs.push(
+          doc(db, "images", projectImage.id, "hotspots", hotspot.id),
+        );
+      }
+    }
+  }
+
+  return refs;
+}
+
+/**
+ * Indica se mover a imagem para a galeria afetaria hotspots de navegação.
+ *
+ * @param {string} userId
+ * @param {string} imageId
+ * @param {string} projectId
+ * @returns {Promise<boolean>}
+ */
+export async function hasRelatedSceneHotspots(userId, imageId, projectId) {
+  const refs = await collectSceneHotspotDeletionRefs(
+    userId,
+    imageId,
+    projectId,
+  );
+  return refs.length > 0;
 }
 
 /**

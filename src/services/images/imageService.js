@@ -28,6 +28,7 @@ import {
   startAfter,
   updateDoc,
   where,
+  writeBatch,
 } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { db, storage } from "@/config/firebase";
@@ -44,6 +45,7 @@ import {
 import { deleteImageFile } from "@/services/storage/storageService";
 import { getActiveWorkspaceIdForUser } from "@/services/workspaces/workspaceService";
 import { sortImagesByRecency, toMillis } from "@/utils/imageRecencySort";
+import { collectSceneHotspotDeletionRefs } from "@/services/hotspots/hotspotService";
 
 /**
  * @typedef {Object} Image
@@ -765,11 +767,25 @@ export async function moveImageToUnassigned(
 
   const imageUrl = sourceUrl;
 
-  await updateDoc(imageRef, {
+  const sceneHotspotRefs = await collectSceneHotspotDeletionRefs(
+    userId,
+    imageId,
+    sourceProjectId,
+  );
+
+  const batch = writeBatch(db);
+
+  for (const hotspotRef of sceneHotspotRefs) {
+    batch.delete(hotspotRef);
+  }
+
+  batch.update(imageRef, {
     projectId: null,
     projectVisibility: deleteField(),
     updatedAt: serverTimestamp(),
   });
+
+  await batch.commit();
 
   const updatedImage = mapImageDoc(imageId, {
     ...image,

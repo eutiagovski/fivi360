@@ -1,24 +1,33 @@
-import {
-  moveImageToProject,
-  moveImageToUnassigned,
-} from "./imageService";
-
 const mockGetDoc = jest.fn();
 const mockUpdateDoc = jest.fn();
 const mockGetDocs = jest.fn();
 const mockDoc = jest.fn((...segments) => ({ path: segments.join("/") }));
 
-jest.mock("firebase/firestore", () => ({
-  collection: jest.fn(),
-  deleteField: jest.fn(() => Symbol("deleteField")),
-  doc: (...args) => mockDoc(...args),
-  getDoc: (...args) => mockGetDoc(...args),
-  getDocs: (...args) => mockGetDocs(...args),
-  query: jest.fn(),
-  serverTimestamp: jest.fn(() => "server-timestamp"),
-  setDoc: jest.fn(),
-  updateDoc: (...args) => mockUpdateDoc(...args),
-  where: jest.fn(),
+jest.mock("firebase/firestore", () => {
+  const batch = {
+    delete: jest.fn(),
+    update: jest.fn(),
+    commit: jest.fn(),
+  };
+
+  return {
+    collection: jest.fn(),
+    deleteField: jest.fn(() => Symbol("deleteField")),
+    doc: (...args) => mockDoc(...args),
+    getDoc: (...args) => mockGetDoc(...args),
+    getDocs: (...args) => mockGetDocs(...args),
+    query: jest.fn(),
+    serverTimestamp: jest.fn(() => "server-timestamp"),
+    setDoc: jest.fn(),
+    updateDoc: (...args) => mockUpdateDoc(...args),
+    where: jest.fn(),
+    writeBatch: () => batch,
+    __mockBatch: batch,
+  };
+});
+
+jest.mock("../hotspots/hotspotService", () => ({
+  collectSceneHotspotDeletionRefs: jest.fn(),
 }));
 
 jest.mock("../../config/firebase", () => ({
@@ -50,6 +59,12 @@ jest.mock("../storage/storageService", () => ({
 
 const { getProjectById, adjustProjectImageCount } = require("../projects/projectService");
 const { relocateImageFile } = require("../storage/storageService");
+const { collectSceneHotspotDeletionRefs } = require("../hotspots/hotspotService");
+const { __mockBatch: mockBatch } = require("firebase/firestore");
+const {
+  moveImageToProject,
+  moveImageToUnassigned,
+} = require("./imageService");
 
 const userId = "user-1";
 const imageId = "image-1";
@@ -184,11 +199,79 @@ describe("moveImageToUnassigned", () => {
     mockGetDoc.mockReset();
     mockUpdateDoc.mockReset();
     mockGetDocs.mockReset();
+    mockBatch.delete.mockReset();
+    mockBatch.update.mockReset();
+    mockBatch.commit.mockReset();
     relocateImageFile.mockReset();
     adjustProjectImageCount.mockReset();
+    collectSceneHotspotDeletionRefs.mockReset();
     mockUpdateDoc.mockResolvedValue(undefined);
     adjustProjectImageCount.mockResolvedValue(undefined);
+    mockBatch.commit.mockResolvedValue(undefined);
+    collectSceneHotspotDeletionRefs.mockResolvedValue([]);
     mockGetDocs.mockResolvedValue({ docs: [] });
+  });
+
+  it("commits scene hotspot cleanup and image update atomically", async () => {
+    const sceneRef = { path: "images/image-1/hotspots/scene-1" };
+
+    collectSceneHotspotDeletionRefs.mockResolvedValue([sceneRef]);
+
+    mockGetDoc.mockResolvedValue({
+      exists: () => true,
+      id: imageId,
+      data: () =>
+        buildImageDoc({
+          projectId,
+          projectVisibility: "private",
+          storagePath: legacyStoragePath,
+        }),
+    });
+
+    const result = await moveImageToUnassigned(
+      userId,
+      imageId,
+      "https://storage.example/other-cover.webp",
+    );
+
+    expect(collectSceneHotspotDeletionRefs).toHaveBeenCalledWith(
+      userId,
+      imageId,
+      projectId,
+    );
+    expect(mockBatch.delete).toHaveBeenCalledWith(sceneRef);
+    expect(mockBatch.update).toHaveBeenCalledWith(
+      { path: `[object Object]/images/${imageId}` },
+      expect.objectContaining({
+        projectId: null,
+      }),
+    );
+    expect(mockBatch.commit).toHaveBeenCalled();
+    expect(mockUpdateDoc).not.toHaveBeenCalled();
+    expect(result.image.projectId).toBeNull();
+  });
+
+  it("does not move image when batch commit fails", async () => {
+    collectSceneHotspotDeletionRefs.mockResolvedValue([
+      { path: "images/image-1/hotspots/scene-1" },
+    ]);
+    mockBatch.commit.mockRejectedValue(new Error("batch failed"));
+
+    mockGetDoc.mockResolvedValue({
+      exists: () => true,
+      id: imageId,
+      data: () =>
+        buildImageDoc({
+          projectId,
+          projectVisibility: "private",
+        }),
+    });
+
+    await expect(
+      moveImageToUnassigned(userId, imageId, ""),
+    ).rejects.toThrow("batch failed");
+
+    expect(adjustProjectImageCount).not.toHaveBeenCalled();
   });
 
   it("updates only Firestore when moving project image to loose gallery", async () => {
@@ -211,12 +294,13 @@ describe("moveImageToUnassigned", () => {
 
     expect(relocateImageFile).not.toHaveBeenCalled();
 
-    expect(mockUpdateDoc).toHaveBeenCalledWith(
+    expect(mockBatch.update).toHaveBeenCalledWith(
       { path: `[object Object]/images/${imageId}` },
       expect.objectContaining({
         projectId: null,
       }),
     );
+    expect(mockBatch.commit).toHaveBeenCalled();
 
     expect(result.image).toMatchObject({
       id: imageId,

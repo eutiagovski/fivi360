@@ -17,6 +17,7 @@ import { ImageCard } from '@/components/common/ImageCard';
 import { UploadImageDialog } from '@/components/images/UploadImageDialog';
 import { EditImageDialog } from '@/components/images/EditImageDialog';
 import { deleteImage, moveImageToUnassigned } from '@/services/images/imageService';
+import { hasRelatedSceneHotspots } from '@/services/hotspots/hotspotService';
 import { AuthLoadingScreen } from '@/components/auth/ProtectedRoute';
 import { useAuth } from '@/hooks/useAuth';
 import { usePlanLimits } from '@/hooks/usePlanLimits';
@@ -109,6 +110,7 @@ export const ProjectDetail = () => {
   const [showShareImageDialog, setShowShareImageDialog] = useState(false);
   const [imageToMoveToLoose, setImageToMoveToLoose] = useState(null);
   const [showMoveToLooseDialog, setShowMoveToLooseDialog] = useState(false);
+  const [moveToLooseHasSceneHotspots, setMoveToLooseHasSceneHotspots] = useState(false);
   const [isMovingToLoose, setIsMovingToLoose] = useState(false);
 
   const startEditing = () => {
@@ -342,14 +344,27 @@ export const ProjectDetail = () => {
     setShowDeleteImageDialog(true);
   };
 
-  const handleMoveToLooseClick = (imageId) => {
+  const handleMoveToLooseClick = async (imageId) => {
     const image = images.find((item) => item.id === imageId);
-    if (!image) {
+    if (!image || !user?.uid || !project?.id) {
       return;
     }
 
     setOpenImageMenu(null);
     setImageToMoveToLoose(image);
+    setMoveToLooseHasSceneHotspots(false);
+
+    try {
+      const hasSceneHotspots = await hasRelatedSceneHotspots(
+        user.uid,
+        image.id,
+        project.id,
+      );
+      setMoveToLooseHasSceneHotspots(hasSceneHotspots);
+    } catch {
+      setMoveToLooseHasSceneHotspots(false);
+    }
+
     setShowMoveToLooseDialog(true);
   };
 
@@ -903,6 +918,7 @@ export const ProjectDetail = () => {
           setShowMoveToLooseDialog(open);
           if (!open) {
             setImageToMoveToLoose(null);
+            setMoveToLooseHasSceneHotspots(false);
           }
         }}
       >
@@ -910,8 +926,18 @@ export const ProjectDetail = () => {
           <AlertDialogHeader className="text-left">
             <AlertDialogTitle>Mover para imagens soltas</AlertDialogTitle>
             <AlertDialogDescription className="text-zinc-400 break-words">
-              Esta imagem será removida deste projeto e ficará disponível na
-              galeria de imagens soltas.
+              {moveToLooseHasSceneHotspots ? (
+                <>
+                  Esta imagem participa da navegação do projeto. Ao removê-la do
+                  projeto, os hotspots de navegação relacionados serão removidos.
+                  Hotspots informativos não serão afetados. Deseja continuar?
+                </>
+              ) : (
+                <>
+                  Esta imagem será removida deste projeto e ficará disponível na
+                  galeria de imagens soltas.
+                </>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className={APP_MODAL_FOOTER_CLASSES}>
