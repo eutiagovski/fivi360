@@ -155,7 +155,7 @@ export function UpgradePlanModal({
           className="text-center text-sm text-amber-200/90 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3"
           data-testid="upgrade-modal-billing-notice"
         >
-          O plano Professional usa checkout seguro (Stripe). Enterprise em breve.
+          Checkout seguro via Stripe.
         </p>
       </DialogContent>
     </Dialog>

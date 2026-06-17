@@ -40,6 +40,7 @@ import {
   collectImageStoragePaths,
   deleteImageFilesTolerant,
 } from "@/services/storage/storageService";
+import { getActiveWorkspaceIdForUser } from "@/services/workspaces/workspaceService";
 import { sortByRecency } from "@/utils/recencySort";
 import { visibilityToLabel } from "@/utils/visibility";
 
@@ -55,6 +56,7 @@ import { visibilityToLabel } from "@/utils/visibility";
  * @property {number} imageCount
  * @property {import("firebase/firestore").Timestamp | null} [createdAt]
  * @property {import("firebase/firestore").Timestamp | null} [updatedAt]
+ * @property {string} [workspaceId]
  */
 
 /**
@@ -74,6 +76,7 @@ function mapProjectDoc(projectId, data) {
     imageCount: data.imageCount ?? 0,
     createdAt: data.createdAt ?? null,
     updatedAt: data.updatedAt ?? null,
+    workspaceId: data.workspaceId ?? "",
   };
 }
 
@@ -191,8 +194,11 @@ export async function createProject(userId, data) {
     await assertPublicVisibilityEnabled(userId);
   }
 
+  const workspaceId = await getActiveWorkspaceIdForUser(userId);
+
   const docRef = await addDoc(collection(db, "projects"), {
     userId,
+    workspaceId,
     title: data.title.trim(),
     description: data.description?.trim() ?? "",
     clientName: data.clientName?.trim() ?? "",

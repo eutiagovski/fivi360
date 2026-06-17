@@ -15,8 +15,8 @@ import {
   getDoc,
   runTransaction,
   serverTimestamp,
-  setDoc,
   updateDoc,
+  writeBatch,
 } from "firebase/firestore";
 import { db } from "@/config/firebase";
 import {
@@ -40,6 +40,11 @@ import {
   mapToPublicUser,
   mapUserDoc,
 } from "@/services/users/userMappers";
+import {
+  buildPersonalWorkspaceMemberPayload,
+  buildPersonalWorkspacePayload,
+  getPersonalWorkspaceRefs,
+} from "@/services/workspaces/workspaceService";
 
 export { SlugTakenError, SlugValidationError };
 
@@ -79,6 +84,8 @@ function isFirestorePermissionDenied(error) {
  * @property {boolean} portfolioEnabled
  * @property {SocialLinks} socialLinks
  * @property {import("@/config/billing").UserBilling} billing
+ * @property {string} defaultWorkspaceId
+ * @property {string} activeWorkspaceId
  */
 
 /**
@@ -117,6 +124,7 @@ export function buildLegalConsent(acceptedSource) {
 export async function createUserProfile(userId, { displayName, email, acceptedSource }) {
   const userRef = doc(db, "users", userId);
   const publicProfileRef = doc(db, "publicProfiles", userId);
+  const { workspaceId, workspaceRef, memberRef } = getPersonalWorkspaceRefs(userId);
 
   /** @type {Record<string, unknown>} */
   const userPayload = {
@@ -124,6 +132,8 @@ export async function createUserProfile(userId, { displayName, email, acceptedSo
     email,
     plan: "starter",
     billing: { ...DEFAULT_BILLING },
+    defaultWorkspaceId: workspaceId,
+    activeWorkspaceId: workspaceId,
     welcomeEmailQueuedAt: null,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
@@ -147,8 +157,12 @@ export async function createUserProfile(userId, { displayName, email, acceptedSo
     updatedAt: serverTimestamp(),
   };
 
-  await setDoc(userRef, userPayload);
-  await setDoc(publicProfileRef, publicProfilePayload);
+  const batch = writeBatch(db);
+  batch.set(userRef, userPayload);
+  batch.set(publicProfileRef, publicProfilePayload);
+  batch.set(workspaceRef, buildPersonalWorkspacePayload(userId, displayName));
+  batch.set(memberRef, buildPersonalWorkspaceMemberPayload(userId));
+  await batch.commit();
 
   if (acceptedSource === "signup") {
     try {

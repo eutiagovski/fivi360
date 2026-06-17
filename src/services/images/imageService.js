@@ -42,6 +42,7 @@ import {
   assertCanUploadImage,
 } from "@/services/plans/planService";
 import { deleteImageFile } from "@/services/storage/storageService";
+import { getActiveWorkspaceIdForUser } from "@/services/workspaces/workspaceService";
 import { sortImagesByRecency, toMillis } from "@/utils/imageRecencySort";
 
 /**
@@ -485,6 +486,8 @@ export async function uploadImage(userId, projectId, file, title, options = {}) 
 
   onProgress?.("Salvando informações...");
 
+  const workspaceId = await getActiveWorkspaceIdForUser(userId);
+
   const existingImages = normalizedProjectId
     ? await getImagesByProjectId(normalizedProjectId, userId)
     : await getLooseImagesByUserId(userId);
@@ -496,6 +499,7 @@ export async function uploadImage(userId, projectId, file, title, options = {}) 
 
   const imageData = {
     userId,
+    workspaceId,
     projectId: normalizedProjectId,
     title: title.trim(),
     originalUrl: downloadUrl,

@@ -43,6 +43,7 @@ jest.mock("@/utils/imageConversion", () => ({
 jest.mock("../projects/projectService", () => ({
   getProjectById: jest.fn(),
   updateProject: jest.fn(),
+  adjustProjectImageCount: jest.fn(),
 }));
 
 jest.mock("../plans/planService", () => ({
@@ -94,9 +95,14 @@ describe("uploadImage storage path", () => {
     mockDoc.mockReset();
     mockCollection.mockReset();
     mockSetDoc.mockReset();
+    mockGetDoc.mockReset();
     mockGetDocs.mockReset();
     getProjectById.mockReset();
     updateProject.mockReset();
+
+    mockGetDoc.mockResolvedValue({
+      exists: () => false,
+    });
 
     mockCollection.mockReturnValue("images-collection");
     mockDoc.mockImplementation((...segments) => {
@@ -130,6 +136,7 @@ describe("uploadImage storage path", () => {
       expect.objectContaining({
         storagePath: `users/${userId}/images/${imageId}.webp`,
         projectId: null,
+        workspaceId: userId,
       }),
     );
   });
@@ -146,6 +153,7 @@ describe("uploadImage storage path", () => {
       expect.objectContaining({
         storagePath: `users/${userId}/images/${imageId}.webp`,
         projectId,
+        workspaceId: userId,
       }),
     );
   });

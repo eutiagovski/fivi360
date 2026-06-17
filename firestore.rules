@@ -6,6 +6,8 @@ rules_version = '2';
 // Coleções:
 //   users/{userId}              — dados privados (plano, billing, legal)
 //   publicProfiles/{userId}     — dados públicos do portfólio
+//   workspaces/{workspaceId}    — fundação multiusuário (workspace pessoal)
+//   workspaces/{workspaceId}/members/{uid}
 //   slugs/{slug}                — resolução /u/:slug
 //   projects/{projectId}
 //   images/{imageId}
@@ -270,6 +272,74 @@ service cloud.firestore {
         && request.resource.data.uid == userId;
 
       allow delete: if isOwner(userId);
+    }
+
+    // ---------- workspaces (fundação multiusuário — Sprint Multiuser Foundation 1) ----------
+
+    function workspaceExists(workspaceId) {
+      return exists(/databases/$(database)/documents/workspaces/$(workspaceId));
+    }
+
+    function workspaceDoc(workspaceId) {
+      return get(/databases/$(database)/documents/workspaces/$(workspaceId));
+    }
+
+    function isWorkspaceMember(workspaceId) {
+      return isSignedIn()
+        && workspaceExists(workspaceId)
+        && exists(/databases/$(database)/documents/workspaces/$(workspaceId)/members/$(request.auth.uid))
+        && get(/databases/$(database)/documents/workspaces/$(workspaceId)/members/$(request.auth.uid)).data.status == 'active';
+    }
+
+    function isWorkspaceOwner(workspaceId) {
+      return isSignedIn()
+        && workspaceExists(workspaceId)
+        && workspaceDoc(workspaceId).data.ownerId == request.auth.uid;
+    }
+
+    match /workspaces/{workspaceId} {
+
+      allow get: if isWorkspaceMember(workspaceId);
+      allow list: if false;
+
+      allow create: if isSignedIn()
+        && request.resource.data.ownerId == request.auth.uid
+        && workspaceId == request.auth.uid
+        && request.resource.data.type == 'personal'
+        && request.resource.data.planId == 'starter'
+        && request.resource.data.name is string
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.updatedAt is timestamp;
+
+      allow update: if isWorkspaceOwner(workspaceId)
+        && request.resource.data.ownerId == resource.data.ownerId
+        && request.resource.data.type == resource.data.type
+        && request.resource.data.planId is string
+        && request.resource.data.name is string
+        && request.resource.data.updatedAt is timestamp;
+
+      allow delete: if false;
+
+      match /members/{memberId} {
+
+        allow get: if isWorkspaceMember(workspaceId);
+        allow list: if isWorkspaceMember(workspaceId);
+
+        allow create: if isWorkspaceOwner(workspaceId)
+          && request.resource.data.userId == memberId
+          && request.resource.data.role == 'owner'
+          && request.resource.data.status == 'active'
+          && request.resource.data.createdAt is timestamp
+          && request.resource.data.updatedAt is timestamp;
+
+        allow update: if isWorkspaceOwner(workspaceId)
+          && request.resource.data.userId == resource.data.userId
+          && request.resource.data.role is string
+          && request.resource.data.status is string
+          && request.resource.data.updatedAt is timestamp;
+
+        allow delete: if isWorkspaceOwner(workspaceId);
+      }
     }
 
     // ---------- users (dados privados — owner only) ----------

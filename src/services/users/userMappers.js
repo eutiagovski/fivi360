@@ -1,5 +1,6 @@
 import { normalizeBilling } from "@/config/billing";
 import { normalizeUserPlan } from "@/config/planLimits";
+import { getPersonalWorkspaceId } from "@/utils/workspace";
 
 export const EMPTY_SOCIAL_LINKS = Object.freeze({
   website: "",
@@ -100,6 +101,11 @@ export function mapUserDoc(userId, userData, publicProfileData = null) {
     portfolioEnabled: publicData.portfolioEnabled ?? false,
     socialLinks: normalizeSocialLinks(publicData),
     billing: enrichBillingFromUserDoc(normalizeBilling(userData.billing), userData),
+    defaultWorkspaceId: userData.defaultWorkspaceId ?? getPersonalWorkspaceId(userId),
+    activeWorkspaceId:
+      userData.activeWorkspaceId
+      ?? userData.defaultWorkspaceId
+      ?? getPersonalWorkspaceId(userId),
   };
 }
 
