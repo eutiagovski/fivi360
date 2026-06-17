@@ -402,7 +402,7 @@ export async function saveUserSettings(userId, data, previousSlug = "") {
   }
 
   const normalizedSlug = normalizeSlug(data.publicSlug ?? "");
-  const oldSlug = previousSlug ?? "";
+  const oldSlug = normalizeSlug(previousSlug ?? "");
 
   if (normalizedSlug && !isValidSlugFormat(normalizedSlug)) {
     throw new SlugValidationError();

@@ -106,16 +106,21 @@ export async function syncSlugRegistryInTransaction(
     throw new SlugValidationError();
   }
 
-  if (newSlug) {
-    const slugRef = doc(db, "slugs", newSlug);
-    const slugSnap = await transaction.get(slugRef);
+  const newSlugRef = newSlug ? doc(db, "slugs", newSlug) : null;
+  const oldSlugRef = oldSlug && oldSlug !== newSlug ? doc(db, "slugs", oldSlug) : null;
 
-    if (slugSnap.exists() && slugSnap.data().uid !== userId) {
+  const [newSlugSnap, oldSlugSnap] = await Promise.all([
+    newSlugRef ? transaction.get(newSlugRef) : Promise.resolve(null),
+    oldSlugRef ? transaction.get(oldSlugRef) : Promise.resolve(null),
+  ]);
+
+  if (newSlug) {
+    if (newSlugSnap.exists() && newSlugSnap.data().uid !== userId) {
       throw new SlugTakenError();
     }
 
-    if (!slugSnap.exists()) {
-      transaction.set(slugRef, {
+    if (!newSlugSnap.exists()) {
+      transaction.set(newSlugRef, {
         uid: userId,
         type: "user",
         createdAt: serverTimestamp(),
@@ -124,12 +129,7 @@ export async function syncSlugRegistryInTransaction(
     }
   }
 
-  if (oldSlug && oldSlug !== newSlug) {
-    const oldSlugRef = doc(db, "slugs", oldSlug);
-    const oldSlugSnap = await transaction.get(oldSlugRef);
-
-    if (oldSlugSnap.exists() && oldSlugSnap.data().uid === userId) {
-      transaction.delete(oldSlugRef);
-    }
+  if (oldSlugRef && oldSlugSnap.exists() && oldSlugSnap.data().uid === userId) {
+    transaction.delete(oldSlugRef);
   }
 }
