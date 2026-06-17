@@ -162,7 +162,28 @@ export async function createUserProfile(userId, { displayName, email, acceptedSo
   batch.set(publicProfileRef, publicProfilePayload);
   batch.set(workspaceRef, buildPersonalWorkspacePayload(userId, displayName));
   batch.set(memberRef, buildPersonalWorkspaceMemberPayload(userId));
-  await batch.commit();
+
+  try {
+    await batch.commit();
+  } catch (error) {
+    const code =
+      error != null && typeof error === "object" && "code" in error
+        ? String(error.code)
+        : "unknown";
+    const message =
+      error != null && typeof error === "object" && "message" in error
+        ? String(error.message)
+        : String(error);
+
+    console.error("[FIVI360] createUserProfile batch failed:", {
+      userId,
+      code,
+      message,
+      writes: ["users", "publicProfiles", "workspaces", "workspaces/members"],
+    });
+
+    throw error;
+  }
 
   if (acceptedSource === "signup") {
     try {

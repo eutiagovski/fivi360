@@ -25,6 +25,26 @@ function getStripePriceId(planKey) {
   return priceParam.value();
 }
 
+/**
+ * @param {string} stripePriceId
+ * @returns {string | null}
+ */
+function resolvePlanIdFromStripePriceId(stripePriceId) {
+  if (typeof stripePriceId !== "string" || !stripePriceId.trim()) {
+    return null;
+  }
+
+  const normalizedPriceId = stripePriceId.trim();
+
+  for (const planKey of Object.keys(STRIPE_PLAN_PRICE_PARAMS)) {
+    if (getStripePriceId(planKey) === normalizedPriceId) {
+      return planKey;
+    }
+  }
+
+  return null;
+}
+
 /** Params a declarar em functions que resolvam preços (ex.: checkout futuro). */
 const STRIPE_BILLING_PARAMS = [stripePriceProfessional];
 
@@ -33,4 +53,5 @@ module.exports = {
   STRIPE_PLAN_PRICE_PARAMS,
   STRIPE_BILLING_PARAMS,
   getStripePriceId,
+  resolvePlanIdFromStripePriceId,
 };

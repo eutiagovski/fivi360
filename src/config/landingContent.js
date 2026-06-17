@@ -14,13 +14,13 @@ export const LANDING_FEATURES = [
     icon: "Orbit",
     title: "Viewer 360° imersivo",
     description:
-      "Navegação fluida com Pannellum — zoom e tela cheia no desktop.",
+      "Navegação imersiva com zoom e tela cheia no desktop.",
   },
   {
     icon: "MapPin",
-    title: "Hotspots interativos",
+    title: "Informações interativos",
     description:
-      "Pontos de informação e saltos entre ambientes (Professional).",
+      "Pontos de informação e navegação entre ambientes.",
   },
   {
     icon: "FolderKanban",
@@ -34,9 +34,9 @@ export const LANDING_FEATURES = [
   },
   {
     icon: "Briefcase",
-    title: "Portfólio online",
+    title: "Portfólio público online",
     description:
-      "Sua página em fivi360.com/u/seu-nome com projetos públicos.",
+      "Sua página em fivi360.com.br/u/seu-nome com projetos públicos.",
   },
   {
     icon: "Eye",
@@ -81,7 +81,7 @@ export const LANDING_HOW_IT_WORKS_STEPS = [
   },
   {
     title: "Enriqueça com hotspots",
-    description: "Guias informativos e tours entre cenas.",
+    description: "Crie guias informativos e tours entre cenas.",
   },
   {
     title: "Compartilhe",

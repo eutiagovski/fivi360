@@ -20,6 +20,7 @@ const CONSENT_REQUIRED_MESSAGE =
  *   onAccept: () => Promise<void>,
  *   onSignOut: () => Promise<void>,
  *   isSubmitting?: boolean,
+ *   errorMessage?: string | null,
  * }} props
  */
 export function LegalConsentModal({
@@ -27,9 +28,11 @@ export function LegalConsentModal({
   onAccept,
   onSignOut,
   isSubmitting = false,
+  errorMessage = null,
 }) {
   const [accepted, setAccepted] = useState(false);
   const [error, setError] = useState(null);
+  const displayError = errorMessage || error;
 
   const handleAccept = async () => {
     if (!accepted) {
@@ -76,13 +79,13 @@ export function LegalConsentModal({
           </DialogDescription>
         </DialogHeader>
 
-        {error && (
+        {displayError && (
           <div
             role="alert"
             className="rounded-xl border border-red-900/50 bg-red-950/30 px-4 py-3 text-sm text-red-300"
             data-testid="legal-consent-modal-error"
           >
-            {error}
+            {displayError}
           </div>
         )}
 

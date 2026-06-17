@@ -4,6 +4,7 @@ const { initializeApp, getApps } = require("firebase-admin/app");
 const { getFirestore, FieldValue, Timestamp } = require("firebase-admin/firestore");
 const Stripe = require("stripe");
 const { STRIPE_WEBHOOK_SECRET, STRIPE_SECRET_KEY, getStripeClient } = require("./stripe/client");
+const { resolvePlanIdFromStripePriceId } = require("./config/stripeBilling");
 const { EMAIL_TYPES } = require("./config/email");
 const { resolveUserEmail } = require("./email/sendBillingEmail");
 
@@ -141,29 +142,78 @@ async function updateUserAfterCheckout(db, uid, { planId, customerId, subscripti
 }
 
 /**
+ * @param {string} subscriptionId
+ * @returns {Promise<{
+ *   currentPeriodEnd: FirebaseFirestore.Timestamp | null,
+ *   nextBillingAt: FirebaseFirestore.Timestamp | null,
+ *   cancelAtPeriodEnd: boolean,
+ * }>}
+ */
+async function fetchSubscriptionPeriodFields(subscriptionId) {
+  const stripe = getStripeClient();
+  if (!stripe || !subscriptionId) {
+    return { currentPeriodEnd: null, nextBillingAt: null, cancelAtPeriodEnd: false };
+  }
+
+  try {
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    const currentPeriodEnd = toFirestoreTimestamp(subscription.current_period_end);
+
+    return {
+      currentPeriodEnd,
+      nextBillingAt: currentPeriodEnd,
+      cancelAtPeriodEnd: subscription.cancel_at_period_end === true,
+    };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    logger.warn("stripeWebhook: failed to retrieve subscription period fields", {
+      subscriptionId,
+      error: message,
+    });
+    return { currentPeriodEnd: null, nextBillingAt: null, cancelAtPeriodEnd: false };
+  }
+}
+
+/**
  * @param {import("firebase-admin/firestore").Firestore} db
  * @param {string} uid
  * @param {{
  *   planId: string,
  *   customerId: string,
  *   subscriptionId: string,
+ *   currentPeriodEnd?: FirebaseFirestore.Timestamp | null,
+ *   nextBillingAt?: FirebaseFirestore.Timestamp | null,
+ *   cancelAtPeriodEnd?: boolean,
  * }} data
  */
-async function upsertSubscriptionDoc(db, uid, { planId, customerId, subscriptionId }) {
-  await db
-    .collection("subscriptions")
-    .doc(uid)
-    .set(
-      {
-        provider: "stripe",
-        planId,
-        status: "active",
-        providerCustomerId: customerId,
-        providerSubscriptionId: subscriptionId,
-        updatedAt: FieldValue.serverTimestamp(),
-      },
-      { merge: true },
-    );
+async function upsertSubscriptionDoc(
+  db,
+  uid,
+  { planId, customerId, subscriptionId, currentPeriodEnd, nextBillingAt, cancelAtPeriodEnd },
+) {
+  /** @type {Record<string, unknown>} */
+  const payload = {
+    provider: "stripe",
+    planId,
+    status: "active",
+    providerCustomerId: customerId,
+    providerSubscriptionId: subscriptionId,
+    updatedAt: FieldValue.serverTimestamp(),
+  };
+
+  if (currentPeriodEnd) {
+    payload.currentPeriodEnd = currentPeriodEnd;
+  }
+
+  if (nextBillingAt) {
+    payload.nextBillingAt = nextBillingAt;
+  }
+
+  if (typeof cancelAtPeriodEnd === "boolean") {
+    payload.cancelAtPeriodEnd = cancelAtPeriodEnd;
+  }
+
+  await db.collection("subscriptions").doc(uid).set(payload, { merge: true });
 }
 
 /**
@@ -171,7 +221,24 @@ async function upsertSubscriptionDoc(db, uid, { planId, customerId, subscription
  * @param {import("stripe").Stripe.Checkout.Session} session
  */
 async function handleCheckoutSessionCompleted(db, session) {
-  const data = extractCheckoutSessionData(session);
+  let resolvedSession = session;
+  const stripe = getStripeClient();
+
+  if (stripe && session.id && (!session.subscription || !session.customer)) {
+    try {
+      resolvedSession = await stripe.checkout.sessions.retrieve(session.id, {
+        expand: ["subscription", "customer"],
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      logger.warn("stripeWebhook: failed to expand checkout session", {
+        sessionId: session.id,
+        error: message,
+      });
+    }
+  }
+
+  const data = extractCheckoutSessionData(resolvedSession);
 
   if (!data) {
     logger.warn("stripeWebhook: checkout.session.completed missing required fields", {
@@ -184,9 +251,15 @@ async function handleCheckoutSessionCompleted(db, session) {
   }
 
   const { userId, planId, customerId, subscriptionId } = data;
+  const periodFields = await fetchSubscriptionPeriodFields(subscriptionId);
 
   await updateUserAfterCheckout(db, userId, { planId, customerId, subscriptionId });
-  await upsertSubscriptionDoc(db, userId, { planId, customerId, subscriptionId });
+  await upsertSubscriptionDoc(db, userId, {
+    planId,
+    customerId,
+    subscriptionId,
+    ...periodFields,
+  });
   await syncPublicProfilePortfolioAvailable(db, userId);
 
   logger.info("stripeWebhook: checkout.session.completed processed", {
@@ -241,22 +314,219 @@ function getSubscriptionMetadata(subscription) {
 }
 
 /**
- * @param {import("firebase-admin/firestore").Firestore} db
- * @param {string | null} subscriptionId
- * @param {string | null} customerId
- * @param {import("stripe").Stripe.Subscription | string | null | undefined} subscriptionRef
- * @returns {Promise<{ userId: string | null, planId: string | null }>}
+ * Stripe API 2025+ moveu a referência da assinatura para `invoice.parent`.
+ *
+ * @param {import("stripe").Stripe.Invoice} invoice
+ * @returns {string | null}
  */
-async function resolveInvoiceUserContext(db, subscriptionId, customerId, subscriptionRef) {
-  const inlineMetadata = getSubscriptionMetadata(subscriptionRef);
-  if (inlineMetadata.userId) {
-    return {
-      userId: inlineMetadata.userId,
-      planId: inlineMetadata.planId || null,
-    };
+function getInvoiceSubscriptionId(invoice) {
+  const legacySubscriptionId = getStripeSubscriptionId(invoice.subscription);
+  if (legacySubscriptionId) {
+    return legacySubscriptionId;
   }
 
-  if (subscriptionId) {
+  const parent = invoice.parent;
+  if (parent?.type === "subscription_details") {
+    const parentSubscription = parent.subscription_details?.subscription;
+    const parentSubscriptionId = getStripeSubscriptionId(parentSubscription);
+    if (parentSubscriptionId) {
+      return parentSubscriptionId;
+    }
+  }
+
+  const lines = invoice.lines?.data;
+  if (Array.isArray(lines)) {
+    for (const line of lines) {
+      const lineParent = line.parent;
+      if (lineParent?.type === "subscription_item_details") {
+        const lineSubscriptionId = getStripeSubscriptionId(
+          lineParent.subscription_item_details?.subscription,
+        );
+        if (lineSubscriptionId) {
+          return lineSubscriptionId;
+        }
+      }
+
+      const legacyLineSubscriptionId = getStripeSubscriptionId(line.subscription);
+      if (legacyLineSubscriptionId) {
+        return legacyLineSubscriptionId;
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * @param {import("stripe").Stripe.InvoiceLineItem} line
+ * @returns {string | null}
+ */
+function getStripePriceIdFromInvoiceLine(line) {
+  if (line.price && typeof line.price === "object" && typeof line.price.id === "string") {
+    return line.price.id;
+  }
+
+  if (
+    line.pricing?.type === "price_details" &&
+    line.pricing.price_details?.price
+  ) {
+    const price = line.pricing.price_details.price;
+    return typeof price === "string" ? price : price?.id ?? null;
+  }
+
+  if (line.plan && typeof line.plan === "object" && typeof line.plan.id === "string") {
+    return line.plan.id;
+  }
+
+  return null;
+}
+
+/**
+ * @param {import("stripe").Stripe.Invoice} invoice
+ * @returns {{ planId: string | null, source: string | null }}
+ */
+function getPlanIdFromInvoiceLines(invoice) {
+  const lines = invoice.lines?.data;
+  if (!Array.isArray(lines) || lines.length === 0) {
+    return { planId: null, source: null };
+  }
+
+  for (const line of lines) {
+    const price = line.price;
+    if (price && typeof price === "object") {
+      const fromPriceMetadata = price.metadata?.planId?.trim();
+      if (fromPriceMetadata) {
+        return { planId: fromPriceMetadata, source: "invoice_line_price_metadata" };
+      }
+    }
+
+    const stripePriceId = getStripePriceIdFromInvoiceLine(line);
+    if (stripePriceId) {
+      const fromConfiguredPrice = resolvePlanIdFromStripePriceId(stripePriceId);
+      if (fromConfiguredPrice) {
+        return { planId: fromConfiguredPrice, source: "invoice_line_stripe_price_id" };
+      }
+    }
+
+    const plan = line.plan;
+    if (plan && typeof plan === "object") {
+      const fromPlanMetadata = plan.metadata?.planId?.trim();
+      if (fromPlanMetadata) {
+        return { planId: fromPlanMetadata, source: "invoice_line_plan_metadata" };
+      }
+    }
+  }
+
+  return { planId: null, source: null };
+}
+
+/**
+ * @param {import("firebase-admin/firestore").Firestore} db
+ * @param {string} customerId
+ * @returns {Promise<string | null>}
+ */
+async function resolveUserIdByStripeCustomerId(db, customerId) {
+  if (!customerId) {
+    return null;
+  }
+
+  for (const fieldPath of ["billing.stripe.customerId", "billing.stripeCustomerId"]) {
+    const userSnap = await db.collection("users").where(fieldPath, "==", customerId).limit(1).get();
+
+    if (!userSnap.empty) {
+      return userSnap.docs[0].id;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Sempre busca a subscription na API — não confiar no objeto expandido do invoice.
+ *
+ * @param {string | null} subscriptionId
+ * @returns {Promise<import("stripe").Stripe.Subscription | null>}
+ */
+async function fetchStripeSubscriptionById(subscriptionId) {
+  if (!subscriptionId) {
+    return null;
+  }
+
+  const stripe = getStripeClient();
+  if (!stripe) {
+    return null;
+  }
+
+  try {
+    return await stripe.subscriptions.retrieve(subscriptionId);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    logger.warn("stripeWebhook: failed to retrieve subscription", {
+      subscriptionId,
+      error: message,
+    });
+    return null;
+  }
+}
+
+/**
+ * @param {import("stripe").Stripe.Subscription | null | undefined} stripeSubscription
+ * @returns {{
+ *   currentPeriodEnd: FirebaseFirestore.Timestamp | null,
+ *   nextBillingAt: FirebaseFirestore.Timestamp | null,
+ *   cancelAtPeriodEnd: boolean,
+ * }}
+ */
+function extractSubscriptionPeriodFields(stripeSubscription) {
+  if (!stripeSubscription) {
+    return { currentPeriodEnd: null, nextBillingAt: null, cancelAtPeriodEnd: false };
+  }
+
+  const currentPeriodEnd = toFirestoreTimestamp(stripeSubscription.current_period_end);
+
+  return {
+    currentPeriodEnd,
+    nextBillingAt: currentPeriodEnd,
+    cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end === true,
+  };
+}
+
+/**
+ * @param {import("firebase-admin/firestore").Firestore} db
+ * @param {import("stripe").Stripe.Invoice} invoice
+ * @returns {Promise<{
+ *   userId: string | null,
+ *   planId: string,
+ *   planIdSource: string,
+ *   subscriptionId: string | null,
+ *   customerId: string | null,
+ *   subscriptionMetadata: Record<string, string>,
+ *   firestoreSubscriptionPlanId: string | null,
+ *   userPlanFallback: string | null,
+ *   currentPeriodEnd: FirebaseFirestore.Timestamp | null,
+ *   nextBillingAt: FirebaseFirestore.Timestamp | null,
+ *   cancelAtPeriodEnd: boolean,
+ * }>}
+ */
+async function resolveInvoicePaidContext(db, invoice) {
+  const subscriptionId = getInvoiceSubscriptionId(invoice);
+  const customerId = getStripeCustomerId(invoice.customer);
+  const stripeSubscription = await fetchStripeSubscriptionById(subscriptionId);
+  const subscriptionMetadata = stripeSubscription?.metadata ?? {};
+  const subscriptionMetaUserId =
+    typeof subscriptionMetadata.userId === "string" ? subscriptionMetadata.userId.trim() : "";
+  const subscriptionMetaPlanId =
+    typeof subscriptionMetadata.planId === "string" ? subscriptionMetadata.planId.trim() : "";
+
+  let userId = subscriptionMetaUserId || null;
+  let planId = subscriptionMetaPlanId || null;
+  let planIdSource = planId ? "stripe_subscription_metadata" : "unresolved";
+  let firestoreSubscriptionPlanId = null;
+  let userPlanFallback = null;
+
+  const periodFields = extractSubscriptionPeriodFields(stripeSubscription);
+
+  if (!userId && subscriptionId) {
     const subscriptionSnap = await db
       .collection("subscriptions")
       .where("providerSubscriptionId", "==", subscriptionId)
@@ -264,63 +534,165 @@ async function resolveInvoiceUserContext(db, subscriptionId, customerId, subscri
       .get();
 
     if (!subscriptionSnap.empty) {
-      const subscriptionDoc = subscriptionSnap.docs[0];
-      const subscriptionData = subscriptionDoc.data();
-
-      return {
-        userId: subscriptionDoc.id,
-        planId:
-          typeof subscriptionData.planId === "string" ? subscriptionData.planId : null,
-      };
+      userId = subscriptionSnap.docs[0].id;
     }
+  }
 
-    const stripe = getStripeClient();
-    if (stripe) {
-      try {
-        const stripeSubscription = await stripe.subscriptions.retrieve(subscriptionId);
-        const metadata = getSubscriptionMetadata(stripeSubscription);
+  if (!userId && customerId) {
+    userId = await resolveUserIdByStripeCustomerId(db, customerId);
+  }
 
-        if (metadata.userId) {
-          return {
-            userId: metadata.userId,
-            planId: metadata.planId || null,
-          };
-        }
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        logger.warn("stripeWebhook: failed to retrieve subscription metadata", {
-          subscriptionId,
-          error: message,
-        });
+  if (!planId) {
+    const linePlan = getPlanIdFromInvoiceLines(invoice);
+    if (linePlan.planId) {
+      planId = linePlan.planId;
+      planIdSource = linePlan.source || "invoice_line";
+    }
+  }
+
+  if (!planId && stripeSubscription?.items?.data?.length) {
+    for (const item of stripeSubscription.items.data) {
+      const priceRef = item.price;
+      const stripePriceId =
+        typeof priceRef === "string" ? priceRef : priceRef?.id ?? null;
+      const fromSubscriptionPrice = resolvePlanIdFromStripePriceId(stripePriceId);
+
+      if (fromSubscriptionPrice) {
+        planId = fromSubscriptionPrice;
+        planIdSource = "stripe_subscription_item_price_id";
+        break;
       }
     }
   }
 
-  if (customerId) {
-    const userSnap = await db
-      .collection("users")
-      .where("billing.stripe.customerId", "==", customerId)
-      .limit(1)
-      .get();
+  if (!planId && userId) {
+    const subscriptionSnap = await db.collection("subscriptions").doc(userId).get();
+    if (subscriptionSnap.exists) {
+      const rawPlanId = subscriptionSnap.data()?.planId;
+      firestoreSubscriptionPlanId =
+        typeof rawPlanId === "string" && rawPlanId.trim() ? rawPlanId.trim() : null;
 
-    if (!userSnap.empty) {
-      const userDoc = userSnap.docs[0];
-      const userData = userDoc.data();
-      const planId =
-        typeof userData.plan?.id === "string"
-          ? userData.plan.id
-          : typeof userData.plan === "string"
-            ? userData.plan
-            : null;
-
-      return {
-        userId: userDoc.id,
-        planId,
-      };
+      if (firestoreSubscriptionPlanId) {
+        planId = firestoreSubscriptionPlanId;
+        planIdSource = "firestore_subscriptions";
+      }
     }
   }
 
-  return { userId: null, planId: inlineMetadata.planId || null };
+  if (!planId && subscriptionId) {
+    const subscriptionSnap = await db
+      .collection("subscriptions")
+      .where("providerSubscriptionId", "==", subscriptionId)
+      .limit(1)
+      .get();
+
+    if (!subscriptionSnap.empty) {
+      const rawPlanId = subscriptionSnap.docs[0].data()?.planId;
+      firestoreSubscriptionPlanId =
+        typeof rawPlanId === "string" && rawPlanId.trim() ? rawPlanId.trim() : null;
+
+      if (firestoreSubscriptionPlanId) {
+        planId = firestoreSubscriptionPlanId;
+        planIdSource = "firestore_subscriptions_query";
+      }
+    }
+  }
+
+  if (!planId && userId) {
+    const userSnap = await db.collection("users").doc(userId).get();
+    if (userSnap.exists) {
+      const userData = userSnap.data();
+      userPlanFallback =
+        typeof userData?.plan?.id === "string"
+          ? userData.plan.id.trim()
+          : typeof userData?.plan === "string"
+            ? userData.plan.trim()
+            : null;
+
+      if (userPlanFallback) {
+        planId = userPlanFallback;
+        planIdSource = "users_plan_fallback";
+      }
+    }
+  }
+
+  if (!planId) {
+    planId = "starter";
+    planIdSource = "default_starter";
+  }
+
+  logger.info("stripeWebhook: invoice.paid context resolved", {
+    invoiceId: invoice.id,
+    invoiceCustomer: invoice.customer,
+    invoiceSubscription: invoice.subscription,
+    invoiceParentType: invoice.parent?.type ?? null,
+    invoiceParentSubscription: invoice.parent?.subscription_details?.subscription ?? null,
+    resolvedSubscriptionId: subscriptionId,
+    resolvedUserId: userId,
+    resolvedPlanId: planId,
+    planIdSource,
+    subscriptionMetadata,
+    firestoreSubscriptionPlanId,
+    userPlanFallback,
+    currentPeriodEnd: periodFields.currentPeriodEnd?.seconds ?? null,
+    nextBillingAt: periodFields.nextBillingAt?.seconds ?? null,
+  });
+
+  return {
+    userId,
+    planId,
+    planIdSource,
+    subscriptionId,
+    customerId,
+    subscriptionMetadata,
+    firestoreSubscriptionPlanId,
+    userPlanFallback,
+    ...periodFields,
+  };
+}
+
+/**
+ * @param {import("stripe").Stripe.Invoice} invoice
+ * @returns {Promise<import("stripe").Stripe.Invoice>}
+ */
+async function expandStripeInvoice(invoice) {
+  const stripe = getStripeClient();
+  if (!stripe || !invoice?.id) {
+    return invoice;
+  }
+
+  try {
+    return await stripe.invoices.retrieve(invoice.id, {
+      expand: [
+        "subscription",
+        "parent.subscription_details.subscription",
+        "lines.data.price",
+        "lines.data.pricing.price_details.price",
+      ],
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    logger.warn("stripeWebhook: failed to expand invoice", {
+      providerInvoiceId: invoice.id,
+      error: message,
+    });
+    return invoice;
+  }
+}
+
+/**
+ * Wrapper legado usado por invoice.payment_failed.
+ *
+ * @param {import("firebase-admin/firestore").Firestore} db
+ * @param {import("stripe").Stripe.Invoice} invoice
+ * @returns {Promise<{ userId: string | null, planId: string }>}
+ */
+async function resolveInvoiceUserContext(db, invoice) {
+  const context = await resolveInvoicePaidContext(db, invoice);
+  return {
+    userId: context.userId,
+    planId: context.planId,
+  };
 }
 
 /**
@@ -561,18 +933,17 @@ function toFirestoreTimestamp(unixSeconds) {
  *   planId: string | null,
  *   amount: number | null,
  *   currency: string | null,
+ *   currentPeriodEnd: FirebaseFirestore.Timestamp | null,
+ *   nextBillingAt: FirebaseFirestore.Timestamp | null,
  * }>}
  */
-async function upsertInvoiceDoc(db, invoice, status) {
+async function upsertInvoiceDoc(db, invoice, status, billingContext = null) {
+  const context =
+    billingContext ?? (await resolveInvoicePaidContext(db, invoice));
+
   const providerInvoiceId = invoice.id;
-  const providerSubscriptionId = getStripeSubscriptionId(invoice.subscription);
-  const providerCustomerId = getStripeCustomerId(invoice.customer);
-  const { userId, planId } = await resolveInvoiceUserContext(
-    db,
-    providerSubscriptionId,
-    providerCustomerId,
-    invoice.subscription,
-  );
+  const providerSubscriptionId = context.subscriptionId ?? getInvoiceSubscriptionId(invoice);
+  const providerCustomerId = context.customerId ?? getStripeCustomerId(invoice.customer);
 
   const amount =
     status === "paid"
@@ -584,12 +955,12 @@ async function upsertInvoiceDoc(db, invoice, status) {
 
   /** @type {Record<string, unknown>} */
   const payload = {
-    userId,
+    userId: context.userId,
     provider: "stripe",
     providerInvoiceId,
     providerSubscriptionId,
     providerCustomerId,
-    planId,
+    planId: context.planId,
     status,
     amount,
     currency: invoice.currency ?? null,
@@ -597,6 +968,14 @@ async function upsertInvoiceDoc(db, invoice, status) {
     invoicePdf: invoice.invoice_pdf ?? null,
     updatedAt: FieldValue.serverTimestamp(),
   };
+
+  if (context.currentPeriodEnd) {
+    payload.currentPeriodEnd = context.currentPeriodEnd;
+  }
+
+  if (context.nextBillingAt) {
+    payload.nextBillingAt = context.nextBillingAt;
+  }
 
   if (status === "paid") {
     payload.paidAt =
@@ -612,7 +991,7 @@ async function upsertInvoiceDoc(db, invoice, status) {
 
   await invoiceRef.set(payload, { merge: true });
 
-  if (!userId) {
+  if (!context.userId) {
     logger.warn("stripeWebhook: invoice persisted without userId", {
       providerInvoiceId,
       status,
@@ -624,39 +1003,64 @@ async function upsertInvoiceDoc(db, invoice, status) {
   logger.info("stripeWebhook: invoice persisted", {
     providerInvoiceId,
     status,
-    userId,
-    planId,
+    userId: context.userId,
+    planId: context.planId,
+    planIdSource: context.planIdSource,
+    currentPeriodEnd: context.currentPeriodEnd?.seconds ?? null,
+    nextBillingAt: context.nextBillingAt?.seconds ?? null,
   });
 
   return {
-    userId,
-    planId,
+    userId: context.userId,
+    planId: context.planId,
     amount: typeof amount === "number" ? amount : null,
     currency: invoice.currency ?? null,
+    currentPeriodEnd: context.currentPeriodEnd,
+    nextBillingAt: context.nextBillingAt,
   };
 }
 
 /**
  * @param {import("firebase-admin/firestore").Firestore} db
  * @param {string} userId
+ * @param {string | null} [providerSubscriptionId]
  * @returns {Promise<{
  *   currentPeriodEnd: FirebaseFirestore.Timestamp | null,
  *   nextBillingAt: FirebaseFirestore.Timestamp | null,
  * }>}
  */
-async function resolveSubscriptionBillingPeriod(db, userId) {
-  const subscriptionSnap = await db.collection("subscriptions").doc(userId).get();
+async function resolveSubscriptionBillingPeriod(db, userId, providerSubscriptionId = null) {
+  const subscriptionRef = db.collection("subscriptions").doc(userId);
+  const subscriptionSnap = await subscriptionRef.get();
   const subscriptionData = subscriptionSnap.data() ?? {};
 
-  const currentPeriodEnd =
+  let currentPeriodEnd =
     subscriptionData.currentPeriodEnd instanceof Timestamp
       ? subscriptionData.currentPeriodEnd
       : null;
 
-  const nextBillingAt =
+  let nextBillingAt =
     subscriptionData.nextBillingAt instanceof Timestamp
       ? subscriptionData.nextBillingAt
       : currentPeriodEnd;
+
+  if (!currentPeriodEnd && providerSubscriptionId) {
+    const periodFields = await fetchSubscriptionPeriodFields(providerSubscriptionId);
+    currentPeriodEnd = periodFields.currentPeriodEnd;
+    nextBillingAt = periodFields.nextBillingAt ?? currentPeriodEnd;
+
+    if (currentPeriodEnd) {
+      await subscriptionRef.set(
+        {
+          currentPeriodEnd,
+          nextBillingAt,
+          cancelAtPeriodEnd: periodFields.cancelAtPeriodEnd,
+          updatedAt: FieldValue.serverTimestamp(),
+        },
+        { merge: true },
+      );
+    }
+  }
 
   return { currentPeriodEnd, nextBillingAt };
 }
@@ -688,11 +1092,77 @@ async function enqueuePaymentSuccessEmail(db, {
   const emailRef = db.collection("emailQueue").doc(emailId);
   const existingSnap = await emailRef.get();
 
+  const payload = {
+    userId,
+    planId,
+    amount,
+    currency,
+    providerInvoiceId,
+    paidAt,
+    currentPeriodEnd,
+    nextBillingAt,
+  };
+
   if (existingSnap.exists) {
+    const existing = existingSnap.data() ?? {};
+    const existingStatus = existing.status;
+
+    if (existingStatus === "sent") {
+      logger.warn("stripeWebhook: payment success email already sent with previous payload", {
+        emailId,
+        providerInvoiceId,
+        userId,
+        existingPlanId: existing.payload?.planId ?? null,
+        correctedPlanId: planId,
+      });
+      return;
+    }
+
+    if (existingStatus === "pending" || existingStatus === "failed") {
+      if (existingStatus === "failed") {
+        await emailRef.delete();
+        const to = existing.to || (await resolveUserEmail(db, userId));
+
+        if (!to) {
+          logger.warn("stripeWebhook: payment success email correction skipped — no recipient", {
+            userId,
+            providerInvoiceId,
+          });
+          return;
+        }
+
+        await emailRef.set({
+          type: EMAIL_TYPES.PAYMENT_SUCCESS,
+          to,
+          userId,
+          status: "pending",
+          payload,
+          createdAt: FieldValue.serverTimestamp(),
+          correctedAt: FieldValue.serverTimestamp(),
+        });
+      } else {
+        await emailRef.update({
+          payload,
+          updatedAt: FieldValue.serverTimestamp(),
+          correctedAt: FieldValue.serverTimestamp(),
+        });
+      }
+
+      logger.info("stripeWebhook: payment success email payload corrected", {
+        emailId,
+        providerInvoiceId,
+        userId,
+        planId,
+        previousStatus: existingStatus,
+      });
+      return;
+    }
+
     logger.info("stripeWebhook: payment success email already queued", {
       emailId,
       providerInvoiceId,
       userId,
+      status: existingStatus,
     });
     return;
   }
@@ -712,16 +1182,7 @@ async function enqueuePaymentSuccessEmail(db, {
     to,
     userId,
     status: "pending",
-    payload: {
-      userId,
-      planId,
-      amount,
-      currency,
-      providerInvoiceId,
-      paidAt,
-      currentPeriodEnd,
-      nextBillingAt,
-    },
+    payload,
     createdAt: FieldValue.serverTimestamp(),
   });
 
@@ -729,6 +1190,7 @@ async function enqueuePaymentSuccessEmail(db, {
     emailId,
     providerInvoiceId,
     userId,
+    planId,
   });
 }
 
@@ -811,7 +1273,29 @@ async function enqueuePaymentFailedEmail(db, {
  * @param {import("stripe").Stripe.Invoice} invoice
  */
 async function handleInvoicePaid(db, invoice) {
-  const invoiceContext = await upsertInvoiceDoc(db, invoice, "paid");
+  logger.info("stripeWebhook: invoice.paid received", {
+    invoiceId: invoice.id,
+    invoiceCustomer: invoice.customer ?? null,
+    invoiceSubscription: invoice.subscription ?? null,
+    invoiceParentType: invoice.parent?.type ?? null,
+    invoiceParentSubscription: invoice.parent?.subscription_details?.subscription ?? null,
+  });
+
+  const expandedInvoice = await expandStripeInvoice(invoice);
+  const context = await resolveInvoicePaidContext(db, expandedInvoice);
+
+  if (context.userId && context.subscriptionId) {
+    await upsertSubscriptionDoc(db, context.userId, {
+      planId: context.planId,
+      customerId: context.customerId ?? "",
+      subscriptionId: context.subscriptionId,
+      currentPeriodEnd: context.currentPeriodEnd,
+      nextBillingAt: context.nextBillingAt,
+      cancelAtPeriodEnd: context.cancelAtPeriodEnd,
+    });
+  }
+
+  const invoiceContext = await upsertInvoiceDoc(db, expandedInvoice, "paid", context);
 
   if (!invoiceContext.userId) {
     logger.warn("stripeWebhook: payment success email skipped — no userId", {
@@ -824,11 +1308,6 @@ async function handleInvoicePaid(db, invoice) {
     toFirestoreTimestamp(invoice.status_transitions?.paid_at) ??
     Timestamp.now();
 
-  const { currentPeriodEnd, nextBillingAt } = await resolveSubscriptionBillingPeriod(
-    db,
-    invoiceContext.userId,
-  );
-
   try {
     await enqueuePaymentSuccessEmail(db, {
       userId: invoiceContext.userId,
@@ -837,8 +1316,8 @@ async function handleInvoicePaid(db, invoice) {
       currency: invoiceContext.currency,
       providerInvoiceId: invoice.id,
       paidAt,
-      currentPeriodEnd,
-      nextBillingAt,
+      currentPeriodEnd: invoiceContext.currentPeriodEnd,
+      nextBillingAt: invoiceContext.nextBillingAt,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

@@ -18,6 +18,7 @@ export function LegalConsentGate({ children }) {
   const [profileData, setProfileData] = useState(null);
   const [profileChecked, setProfileChecked] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
 
   const loadProfile = useCallback(async (userId) => {
     setProfileChecked(false);
@@ -47,6 +48,7 @@ export function LegalConsentGate({ children }) {
     }
 
     setIsSubmitting(true);
+    setSubmitError(null);
 
     try {
       const acceptedSource = profileData ? "modal_existing_user" : "signup";
@@ -70,6 +72,21 @@ export function LegalConsentGate({ children }) {
       }
 
       await loadProfile(user.uid);
+    } catch (error) {
+      const code =
+        error != null && typeof error === "object" && "code" in error
+          ? String(error.code)
+          : null;
+
+      if (process.env.NODE_ENV === "development") {
+        console.error("[FIVI360] Legal consent submit failed:", error);
+      }
+
+      setSubmitError(
+        code === "permission-denied"
+          ? "Não foi possível criar seu perfil. Tente novamente ou entre em contato com o suporte."
+          : "Não foi possível registrar o aceite. Tente novamente.",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -103,6 +120,7 @@ export function LegalConsentGate({ children }) {
           onAccept={handleAccept}
           onSignOut={handleSignOut}
           isSubmitting={isSubmitting}
+          errorMessage={submitError}
         />
       </>
     );

@@ -297,6 +297,19 @@ service cloud.firestore {
         && workspaceDoc(workspaceId).data.ownerId == request.auth.uid;
     }
 
+    // Bootstrap do workspace pessoal em batch (workspace + member na mesma operação).
+    // exists()/get() no workspace pai ainda não enxergam writes anteriores do batch.
+    function isPersonalWorkspaceMemberBootstrap(workspaceId, memberId) {
+      return isSignedIn()
+        && workspaceId == request.auth.uid
+        && memberId == request.auth.uid
+        && request.resource.data.userId == memberId
+        && request.resource.data.role == 'owner'
+        && request.resource.data.status == 'active'
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.updatedAt is timestamp;
+    }
+
     match /workspaces/{workspaceId} {
 
       allow get: if isWorkspaceMember(workspaceId);
@@ -325,7 +338,10 @@ service cloud.firestore {
         allow get: if isWorkspaceMember(workspaceId);
         allow list: if isWorkspaceMember(workspaceId);
 
-        allow create: if isWorkspaceOwner(workspaceId)
+        allow create: if (
+          isWorkspaceOwner(workspaceId)
+          || isPersonalWorkspaceMemberBootstrap(workspaceId, memberId)
+        )
           && request.resource.data.userId == memberId
           && request.resource.data.role == 'owner'
           && request.resource.data.status == 'active'
