@@ -12,6 +12,81 @@ if (getApps().length === 0) {
 
 const ALLOWED_CHECKOUT_PLAN_IDS = new Set(["professional"]);
 
+const ACTIVE_SUBSCRIPTION_STATUSES = new Set(["active", "trialing"]);
+
+const CHECKOUT_ALREADY_SUBSCRIBED_MESSAGE =
+  "Você já possui uma assinatura Professional ativa.";
+
+/**
+ * @param {{ plan?: unknown }} userData
+ * @returns {"starter" | "professional" | "enterprise"}
+ */
+function normalizeUserPlanId(userData) {
+  const plan = userData.plan;
+
+  if (typeof plan === "string") {
+    const key = plan.toLowerCase().trim();
+    if (key === "professional" || key === "enterprise") {
+      return key;
+    }
+    return "starter";
+  }
+
+  if (plan && typeof plan === "object" && typeof plan.id === "string") {
+    const status = typeof plan.status === "string" ? plan.status.toLowerCase().trim() : "";
+
+    if (status && !ACTIVE_SUBSCRIPTION_STATUSES.has(status)) {
+      return "starter";
+    }
+
+    const id = plan.id.toLowerCase().trim();
+    if (id === "professional" || id === "enterprise") {
+      return id;
+    }
+  }
+
+  return "starter";
+}
+
+/**
+ * @param {import("firebase-admin/firestore").Firestore} db
+ * @param {string} uid
+ * @param {{ plan?: unknown }} userData
+ * @returns {Promise<boolean>}
+ */
+async function hasActiveProfessionalSubscription(db, uid, userData) {
+  const effectivePlanId = normalizeUserPlanId(userData);
+  const plan = userData.plan;
+  const planStatus =
+    plan && typeof plan === "object" && typeof plan.status === "string"
+      ? plan.status.toLowerCase().trim()
+      : "";
+
+  if (
+    effectivePlanId === "professional" &&
+    (!planStatus || ACTIVE_SUBSCRIPTION_STATUSES.has(planStatus))
+  ) {
+    return true;
+  }
+
+  const subscriptionSnap = await db.collection("subscriptions").doc(uid).get();
+
+  if (!subscriptionSnap.exists) {
+    return false;
+  }
+
+  const subscription = subscriptionSnap.data() ?? {};
+  const subscriptionStatus =
+    typeof subscription.status === "string" ? subscription.status.toLowerCase().trim() : "";
+  const subscriptionPlanId =
+    typeof subscription.planId === "string" ? subscription.planId.toLowerCase().trim() : "";
+
+  return (
+    subscriptionPlanId === "professional" &&
+    ACTIVE_SUBSCRIPTION_STATUSES.has(subscriptionStatus)
+  );
+}
+
 /**
  * @param {{ billing?: { stripe?: { customerId?: string }, stripeCustomerId?: string } }} userData
  * @returns {string | undefined}
@@ -103,6 +178,13 @@ exports.createStripeCheckoutSession = onCall(
     }
 
     const userData = userSnap.data();
+
+    if (
+      planId === "professional" &&
+      (await hasActiveProfessionalSubscription(db, uid, userData))
+    ) {
+      throw new HttpsError("failed-precondition", CHECKOUT_ALREADY_SUBSCRIBED_MESSAGE);
+    }
 
     try {
       const customerId = await resolveStripeCustomerId(

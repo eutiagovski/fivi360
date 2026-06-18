@@ -49,6 +49,30 @@ export const CHECKOUT_START_ERROR_MESSAGE =
 const STRIPE_CHECKOUT_PLAN_IDS = new Set([PLAN_IDS.PROFESSIONAL]);
 
 /**
+ * @param {unknown} error
+ * @param {string} fallback
+ * @returns {string}
+ */
+function getCallableErrorMessage(error, fallback) {
+  if (
+    error != null
+    && typeof error === "object"
+    && "code" in error
+    && "message" in error
+    && typeof error.message === "string"
+    && error.message
+  ) {
+    const code = String(error.code);
+
+    if (code === "functions/failed-precondition") {
+      return error.message;
+    }
+  }
+
+  return fallback;
+}
+
+/**
  * Chama a Cloud Function createStripeCheckoutSession.
  * @param {string} planId
  * @returns {Promise<string>}
@@ -77,8 +101,11 @@ export async function requestUpgrade(planId) {
   try {
     const checkoutUrl = await createStripeCheckoutSession(planId);
     return { ok: true, checkoutUrl };
-  } catch {
-    return { ok: false, message: CHECKOUT_START_ERROR_MESSAGE };
+  } catch (error) {
+    return {
+      ok: false,
+      message: getCallableErrorMessage(error, CHECKOUT_START_ERROR_MESSAGE),
+    };
   }
 }
 

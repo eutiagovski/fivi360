@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import {
   Table,
@@ -16,9 +17,22 @@ const actionLinkClassName =
 /**
  * Histórico de cobrança com faturas Stripe persistidas em Firestore.
  */
-export function BillingHistorySection() {
-  const { invoices, loadingInitial, loadingMore, hasMore, error, loadMore } =
-    useInvoicesPage();
+export function BillingHistorySection({ invoiceReloadSignal = 0 }) {
+  const {
+    invoices,
+    loadingInitial,
+    loadingMore,
+    hasMore,
+    error,
+    loadMore,
+    refreshSilent,
+  } = useInvoicesPage();
+
+  useEffect(() => {
+    if (invoiceReloadSignal > 0) {
+      void refreshSilent();
+    }
+  }, [invoiceReloadSignal, refreshSilent]);
 
   const sentinelRef = useInfiniteScrollSentinel({
     hasMore,

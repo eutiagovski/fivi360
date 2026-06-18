@@ -1,10 +1,10 @@
 export const DEFAULT_SITE_TITLE =
-  "FIVI360 — Apresente projetos com imagens panorâmicas 360°";
+  "FIVI360 | Apresente seus projetos de forma imersiva e profissional";
 
 export const DEFAULT_SITE_DESCRIPTION =
-  "Plataforma para arquitetos e designers apresentarem projetos com viewer 360°, hotspots, compartilhamento por link e portfólio online. Comece grátis.";
+  "Plataforma para arquitetos e designers apresentarem projetos imersivos, hotspots, compartilhamento por link e portfólio online. Comece grátis.";
 
-const PORTFOLIO_TITLE_SUFFIX = "Portfólio 360°";
+const PORTFOLIO_TITLE_SUFFIX = "Portfólio Público";
 
 /**
  * Nome público do escritório/usuário (companyName > displayName).

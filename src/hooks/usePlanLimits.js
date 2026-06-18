@@ -78,6 +78,21 @@ export function usePlanLimits() {
     }
   }, [user?.uid, applyContext]);
 
+  /** Atualiza plano/billing sem loading global (ex.: pós-checkout Stripe). */
+  const refreshSilent = useCallback(async () => {
+    if (!user?.uid) {
+      return null;
+    }
+
+    try {
+      const context = await getUserPlanContext(user.uid);
+      applyContext(context);
+      return context;
+    } catch {
+      return null;
+    }
+  }, [user?.uid, applyContext]);
+
   const applyUsageDelta = useCallback((delta) => {
     setUsage((current) => ({
       projectCount: Math.max(
@@ -112,6 +127,7 @@ export function usePlanLimits() {
     publicPortfolioEnabled: limits.publicPortfolioEnabled,
     publicVisibilityEnabled: limits.publicVisibilityEnabled,
     refresh: load,
+    refreshSilent,
     refreshUsage,
     applyUsageDelta,
   };

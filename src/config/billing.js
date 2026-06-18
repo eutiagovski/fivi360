@@ -97,8 +97,12 @@ export const SUBSCRIPTION_STATUS_LABELS = {
 
 export const BILLING_NOT_ACTIVE_MESSAGE = "Billing ainda não está ativo.";
 
-export const PAYMENTS_COMING_SOON_MESSAGE =
-  "Pagamentos serão ativados em breve.";
+export const CHECKOUT_LOADING_MESSAGE = "Preparando seu link seguro...";
+
+export const CHECKOUT_ALREADY_SUBSCRIBED_MESSAGE =
+  "Você já possui uma assinatura Professional ativa.";
+
+export const ENTERPRISE_PLAN_UNAVAILABLE_LABEL = "Em breve";
 
 export const BILLING_PORTAL_COMING_SOON_MESSAGE = "Disponível em breve.";
 
@@ -140,6 +144,9 @@ export const BILLING_UPGRADE_PLAN_IDS = [
   PLAN_IDS.ENTERPRISE,
 ];
 
+export const PAYMENTS_COMING_SOON_MESSAGE =
+  "Pagamentos serão ativados em breve.";
+
 /**
  * @param {string | null | undefined} planId
  * @returns {planId is import("@/config/planLimits").PlanId}
@@ -148,6 +155,36 @@ export function isBillingUpgradePlanId(planId) {
   return BILLING_UPGRADE_PLAN_IDS.includes(
     /** @type {import("@/config/planLimits").PlanId} */ (planId),
   );
+}
+
+/**
+ * Estado do botão de assinatura no modal de upgrade.
+ * @param {import("@/config/planLimits").PlanId} targetPlanId
+ * @param {import("@/config/planLimits").PlanId} currentPlanId
+ * @returns {{ disabled: boolean, label: string }}
+ */
+export function getUpgradePlanButtonState(targetPlanId, currentPlanId) {
+  if (targetPlanId === PLAN_IDS.ENTERPRISE) {
+    return { disabled: true, label: ENTERPRISE_PLAN_UNAVAILABLE_LABEL };
+  }
+
+  if (
+    targetPlanId === PLAN_IDS.PROFESSIONAL &&
+    currentPlanId === PLAN_IDS.PROFESSIONAL
+  ) {
+    return { disabled: true, label: "Plano atual" };
+  }
+
+  return { disabled: false, label: "Assinar plano" };
+}
+
+/**
+ * @param {import("@/config/planLimits").PlanId} targetPlanId
+ * @param {import("@/config/planLimits").PlanId} currentPlanId
+ * @returns {boolean}
+ */
+export function canStartStripeCheckoutForPlan(targetPlanId, currentPlanId) {
+  return !getUpgradePlanButtonState(targetPlanId, currentPlanId).disabled;
 }
 
 /**

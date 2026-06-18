@@ -37,50 +37,46 @@ export function useInvoicesPage() {
     setLoadingMore(false);
   }, [allInvoices.length, hasMore, loadingInitial, loadingMore]);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      if (!user?.uid) {
-        if (!cancelled) {
-          setAllInvoices([]);
-          setVisibleCount(INVOICES_INITIAL_PAGE_SIZE);
-          setLoadingInitial(false);
-        }
-        return;
-      }
-
-      if (!cancelled) {
-        setLoadingInitial(true);
-        setError(null);
-      }
-
-      try {
-        const invoices = await getInvoicesByUserId(user.uid);
-
-        if (!cancelled) {
-          setAllInvoices(invoices);
-          setVisibleCount(INVOICES_INITIAL_PAGE_SIZE);
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setError(err);
-          setAllInvoices([]);
-          setVisibleCount(INVOICES_INITIAL_PAGE_SIZE);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoadingInitial(false);
-        }
-      }
+  const loadInvoices = useCallback(async ({ silent = false } = {}) => {
+    if (!user?.uid) {
+      setAllInvoices([]);
+      setVisibleCount(INVOICES_INITIAL_PAGE_SIZE);
+      setLoadingInitial(false);
+      return;
     }
 
-    load();
+    if (!silent) {
+      setLoadingInitial(true);
+      setError(null);
+    }
 
-    return () => {
-      cancelled = true;
-    };
+    try {
+      const invoices = await getInvoicesByUserId(user.uid);
+      setAllInvoices(invoices);
+
+      if (!silent) {
+        setVisibleCount(INVOICES_INITIAL_PAGE_SIZE);
+      }
+    } catch (err) {
+      if (!silent) {
+        setError(err);
+        setAllInvoices([]);
+        setVisibleCount(INVOICES_INITIAL_PAGE_SIZE);
+      }
+    } finally {
+      if (!silent) {
+        setLoadingInitial(false);
+      }
+    }
   }, [user?.uid]);
+
+  const refreshSilent = useCallback(async () => {
+    await loadInvoices({ silent: true });
+  }, [loadInvoices]);
+
+  useEffect(() => {
+    void loadInvoices();
+  }, [loadInvoices]);
 
   const visibleInvoices = useMemo(
     () => allInvoices.slice(0, visibleCount),
@@ -99,5 +95,7 @@ export function useInvoicesPage() {
     hasMore,
     error,
     loadMore,
+    refresh: loadInvoices,
+    refreshSilent,
   };
 }

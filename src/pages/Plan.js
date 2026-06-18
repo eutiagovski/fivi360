@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Link2 } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { Link2, Loader2 } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { PageActionHeader } from '@/components/common/PageActionHeader';
 import { SectionHeader } from '@/components/common/SectionHeader';
@@ -23,9 +23,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { canCancelStripeSubscription } from '@/config/billing';
+import { canCancelStripeSubscription, canStartStripeCheckoutForPlan, CHECKOUT_ALREADY_SUBSCRIBED_MESSAGE, PAYMENTS_COMING_SOON_MESSAGE } from '@/config/billing';
 import { PLAN_IDS } from '@/config/planLimits';
 import { usePlanLimits } from '@/hooks/usePlanLimits';
+import { useCheckoutSuccessSync } from '@/hooks/useCheckoutSuccessSync';
 import { useProjects } from '@/hooks/useProjects';
 import { useToast } from '@/hooks/use-toast';
 import { isBillingUpgradePlanId } from '@/utils/billingPlanFlow';
@@ -37,12 +38,33 @@ export const Plan = () => {
   const [searchParams] = useSearchParams();
   const upgradeFromQuery = searchParams.get('upgrade');
   const checkoutStatus = searchParams.get('checkout');
-  const { loading, planId, limits, usageStats, billing, refresh } = usePlanLimits();
+  const isCheckoutSuccess = checkoutStatus === 'success';
+  const {
+    loading,
+    planId,
+    limits,
+    usageStats,
+    billing,
+    refresh,
+    refreshSilent,
+  } = usePlanLimits();
   const { projects, loading: projectsLoading } = useProjects();
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const [highlightedPlanId, setHighlightedPlanId] = useState(null);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancelingSubscription, setCancelingSubscription] = useState(false);
+  const [invoiceReloadSignal, setInvoiceReloadSignal] = useState(0);
+
+  const reloadInvoices = useCallback(() => {
+    setInvoiceReloadSignal((current) => current + 1);
+  }, []);
+
+  const { confirming, confirmMessage } = useCheckoutSuccessSync({
+    checkoutStatus,
+    refreshPlan: refreshSilent,
+    onInvoicesReload: reloadInvoices,
+    toast,
+  });
 
   const openUpgradeModal = (planToHighlight = null) => {
     if (planToHighlight && isBillingUpgradePlanId(planToHighlight)) {
@@ -57,12 +79,6 @@ export const Plan = () => {
       setUpgradeModalOpen(true);
     }
   }, [upgradeFromQuery]);
-
-  useEffect(() => {
-    if (checkoutStatus === 'success') {
-      trackEvent('subscription_success');
-    }
-  }, [checkoutStatus]);
 
   const isEnterprise = planId === PLAN_IDS.ENTERPRISE;
   const isStarter = planId === PLAN_IDS.STARTER;
@@ -98,8 +114,20 @@ export const Plan = () => {
     }
   };
 
-  const handleSubscribe = async (planId) => {
-    const result = await requestUpgrade(planId);
+  const handleSubscribe = async (selectedPlanId) => {
+    if (!canStartStripeCheckoutForPlan(selectedPlanId, planId)) {
+      toast({
+        title: 'Assinatura',
+        description:
+          selectedPlanId === PLAN_IDS.PROFESSIONAL && planId === PLAN_IDS.PROFESSIONAL
+            ? CHECKOUT_ALREADY_SUBSCRIBED_MESSAGE
+            : PAYMENTS_COMING_SOON_MESSAGE,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const result = await requestUpgrade(selectedPlanId);
 
     if (!result.ok) {
       toast({
@@ -110,11 +138,11 @@ export const Plan = () => {
       return;
     }
 
-    trackEvent('begin_checkout', { plan_id: planId });
+    trackEvent('begin_checkout', { plan_id: selectedPlanId });
     window.location.assign(result.checkoutUrl);
   };
 
-  if (loading || projectsLoading) {
+  if ((loading || projectsLoading) && !isCheckoutSuccess) {
     return <AuthLoadingScreen />;
   }
 
@@ -128,6 +156,27 @@ export const Plan = () => {
         dataTestId="plan-title"
         actionDataTestId="plan-upgrade-btn"
       />
+
+      {(confirming || confirmMessage) && (
+        <aside
+          className="mb-8 w-full min-w-0 rounded-xl border border-sky-500/25 bg-sky-500/[0.07] px-5 py-4 sm:px-6 sm:py-5"
+          data-testid="checkout-confirming-banner"
+          role="status"
+        >
+          <div className="flex items-start gap-3 min-w-0">
+            {confirming ? (
+              <Loader2
+                size={20}
+                className="flex-shrink-0 animate-spin text-sky-400/90 mt-0.5"
+                aria-hidden
+              />
+            ) : null}
+            <p className="text-sm text-zinc-300 leading-relaxed">
+              {confirmMessage}
+            </p>
+          </div>
+        </aside>
+      )}
 
       <CurrentPlanBanner
         planId={planId}
@@ -215,7 +264,7 @@ export const Plan = () => {
           title="Histórico de cobrança"
           dataTestId="billing-history-title"
         />
-        <BillingHistorySection />
+        <BillingHistorySection invoiceReloadSignal={invoiceReloadSignal} />
       </div>
 
       <UpgradePlanModal
@@ -227,6 +276,7 @@ export const Plan = () => {
           }
         }}
         highlightedPlanId={highlightedPlanId ?? upgradeFromQuery}
+        currentPlanId={planId}
         onSubscribe={handleSubscribe}
       />
 
