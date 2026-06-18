@@ -8,6 +8,7 @@ Guia curto para variáveis usadas por `createStripeCheckoutSession` no emulador 
 |----------|---------------------|---------------|---------|
 | `STRIPE_SECRET_KEY` | `defineSecret` → `secrets: [...]` | `functions/.secret.local` | Sim |
 | `STRIPE_PRICE_PROFESSIONAL` | `defineString` → `params: [...]` | `functions/.env` ou `functions/.env.local` | Não |
+| `STRIPE_PRICE_STUDIO` | `defineString` → `params: [...]` | `functions/.env` ou `functions/.env.local` | Não |
 | `APP_BASE_URL` | `process.env.APP_BASE_URL` (sem `defineString`) | `functions/.env` ou `functions/.env.local` | Não |
 
 Referências no código:

@@ -3,6 +3,9 @@
  * Fonte: docs/LANDING_REBUILD.md §7.3, §7.1.1, §7.4
  */
 
+import { PLAN_LIMITS, PLAN_IDS } from "@/config/planLimits";
+import { CONTACT_EMAIL } from "@/config/billing";
+
 export const LANDING_FEATURES_SECTION = {
   title: "Recursos",
   subtitle:
@@ -106,50 +109,56 @@ export const LANDING_PRICING_SECTION = {
   title: "Planos e preços",
   subtitle: "Comece grátis e evolua conforme sua demanda cresce.",
   footnote:
-    "Cobrança online em breve. Limites do plano Starter já estão ativos.",
+    "Cobrança online via Stripe. Limites do plano Starter já estão ativos.",
 };
 
 /** Bullets de marketing por plano (complementa PLAN_LIMITS na landing). */
 export const LANDING_PRICING_MARKETING = {
-  starter: {
-    priceLabel: "R$ 0",
-    featureBullets: [
-      "3 projetos",
-      "10 imagens",
-      "50 MB",
-      "Compartilhamento por link",
-    ],
+  [PLAN_IDS.STARTER]: {
+    headline: PLAN_LIMITS[PLAN_IDS.STARTER].tagline,
+    description: PLAN_LIMITS[PLAN_IDS.STARTER].description,
+    priceLabel: "Grátis",
+    periodLabel: "",
+    featureBullets: PLAN_LIMITS[PLAN_IDS.STARTER].featureBullets,
     ctaLabel: "Começar gratuitamente",
     ctaTo: "/register",
     ctaDisabled: false,
     highlighted: false,
+    badge: null,
   },
-  professional: {
+  [PLAN_IDS.PROFESSIONAL]: {
+    headline: PLAN_LIMITS[PLAN_IDS.PROFESSIONAL].tagline,
+    description: PLAN_LIMITS[PLAN_IDS.PROFESSIONAL].description,
     priceLabel: "R$ 49",
-    featureBullets: [
-      "Projetos ilimitados",
-      "Imagens ilimitadas",
-      "500 MB",
-      "Hotspots interativos",
-      "Portfólio público",
-    ],
+    periodLabel: "/mês",
+    featureBullets: PLAN_LIMITS[PLAN_IDS.PROFESSIONAL].featureBullets,
     ctaLabel: "Assinar Professional",
     ctaTo: "/register",
     highlighted: true,
-    badge: "Recomendado",
+    badge: "Mais popular",
   },
-  enterprise: {
-    priceLabel: "R$ 149",
-    featureBullets: [
-      "Tudo do Professional",
-      "5 GB",
-      "Múltiplos usuários",
-      "White label",
-      "Suporte prioritário",
-    ],
-    ctaLabel: "Assinar Enterprise",
+  [PLAN_IDS.STUDIO]: {
+    headline: PLAN_LIMITS[PLAN_IDS.STUDIO].tagline,
+    description: PLAN_LIMITS[PLAN_IDS.STUDIO].description,
+    priceLabel: "R$ 199",
+    periodLabel: "/mês",
+    featureBullets: PLAN_LIMITS[PLAN_IDS.STUDIO].featureBullets,
+    ctaLabel: "Assinar Studio",
     ctaTo: "/register",
     highlighted: false,
+    badge: "Recomendado",
+  },
+  [PLAN_IDS.ENTERPRISE]: {
+    headline: PLAN_LIMITS[PLAN_IDS.ENTERPRISE].tagline,
+    description: PLAN_LIMITS[PLAN_IDS.ENTERPRISE].description,
+    priceLabel: "A partir de R$ 499",
+    periodLabel: "/mês",
+    featureBullets: PLAN_LIMITS[PLAN_IDS.ENTERPRISE].featureBullets,
+    ctaLabel: "Fale conosco",
+    ctaTo: `mailto:${CONTACT_EMAIL}?subject=Plano%20Enterprise%20FIVI360`,
+    ctaDisabled: true,
+    highlighted: false,
+    badge: "Em breve",
   },
 };
 
@@ -172,12 +181,12 @@ export const LANDING_FAQ_ITEMS = [
   {
     question: "O plano gratuito tem limites?",
     answer:
-      "Sim: 3 projetos, 10 imagens e 50 MB de armazenamento. Consulte a tabela de planos acima para comparar.",
+      "Sim: 2 projetos, 10 imagens e 25 MB de armazenamento. Consulte a tabela de planos acima para comparar.",
   },
   {
     question: "O que são hotspots?",
     answer:
-      "São marcadores no viewer com texto informativo ou link para outra cena. Disponíveis no plano Professional.",
+      "São marcadores no viewer com texto informativo ou link para outra cena. Disponíveis a partir do plano Professional.",
   },
   {
     question: "Meus clientes precisam de conta?",

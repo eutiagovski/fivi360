@@ -6,21 +6,28 @@ const PLAN_BANNER_CONTENT = {
     badge: "STARTER",
     title: "Plano Starter",
     description:
-      "Plano gratuito com limites de projetos, imagens e armazenamento.",
+      "Experimente o FIVI360 — ideal para conhecer a plataforma e criar suas primeiras apresentações em 360°.",
     showProCta: true,
   },
   [PLAN_IDS.PROFESSIONAL]: {
     badge: "PROFESSIONAL",
     title: "Plano Professional ativo",
     description:
-      "Projetos ilimitados, hotspots interativos e portfólio público.",
+      "Para arquitetos e designers independentes — projetos ilimitados, hotspots, portfólio público e analytics básico.",
+    showProCta: false,
+  },
+  [PLAN_IDS.STUDIO]: {
+    badge: "STUDIO",
+    title: "Plano Studio ativo",
+    description:
+      "Para escritórios em crescimento — mais armazenamento, analytics avançado e suporte prioritário.",
     showProCta: false,
   },
   [PLAN_IDS.ENTERPRISE]: {
     badge: "ENTERPRISE",
     title: "Plano Enterprise ativo",
     description:
-      "Todos os recursos do FIVI360 disponíveis para sua conta.",
+      "Solução corporativa com multiusuário, workspaces compartilhados e recursos avançados.",
     showProCta: false,
   },
 };

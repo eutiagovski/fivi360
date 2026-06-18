@@ -12,16 +12,16 @@ if (getApps().length === 0) {
   initializeApp();
 }
 
-const PUBLIC_PORTFOLIO_PLAN_IDS = new Set(["professional", "enterprise"]);
+const PUBLIC_PORTFOLIO_PLAN_IDS = new Set(["professional", "studio", "enterprise"]);
 
 /**
  * @param {unknown} plan
- * @returns {"starter" | "professional" | "enterprise"}
+ * @returns {"starter" | "professional" | "studio" | "enterprise"}
  */
 function normalizePlanId(plan) {
   if (typeof plan === "string") {
     const key = plan.toLowerCase().trim();
-    if (key === "professional" || key === "enterprise") {
+    if (key === "professional" || key === "studio" || key === "enterprise") {
       return key;
     }
     return "starter";
@@ -35,7 +35,7 @@ function normalizePlanId(plan) {
     }
 
     const id = plan.id.toLowerCase().trim();
-    if (id === "professional" || id === "enterprise") {
+    if (id === "professional" || id === "studio" || id === "enterprise") {
       return id;
     }
   }

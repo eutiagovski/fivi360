@@ -3,19 +3,20 @@
  * Fonte única de verdade para enforcement e UI.
  *
  * Formato persistido em `users.plan` (padrão):
- *   { id: "starter" | "professional" | "enterprise", status, source, ... }
+ *   { id: "starter" | "professional" | "studio" | "enterprise", status, source, ... }
  *
  * Formato legado (compatível):
- *   "starter" | "professional" | "enterprise"
+ *   "starter" | "professional" | "studio" | "enterprise"
  */
 
 export const PLAN_IDS = {
   STARTER: "starter",
   PROFESSIONAL: "professional",
+  STUDIO: "studio",
   ENTERPRISE: "enterprise",
 };
 
-/** @typedef {'starter' | 'professional' | 'enterprise'} PlanId */
+/** @typedef {'starter' | 'professional' | 'studio' | 'enterprise'} PlanId */
 
 /**
  * @typedef {Object} UserPlan
@@ -32,87 +33,186 @@ export const PLAN_IDS = {
  * @typedef {Object} PlanLimits
  * @property {string} name
  * @property {string} displayName
+ * @property {string} tagline
+ * @property {string} description
+ * @property {string | null} [badge]
  * @property {number | null} maxProjects — null = ilimitado
  * @property {number | null} maxTotalImages — null = ilimitado
  * @property {number} maxStorageBytes
  * @property {boolean} hotspotsEnabled
  * @property {boolean} publicPortfolioEnabled
  * @property {boolean} publicVisibilityEnabled
+ * @property {boolean} analyticsEnabled
+ * @property {boolean} advancedAnalytics
+ * @property {boolean} prioritySupport
+ * @property {boolean} multiuserEnabled
+ * @property {boolean} customDomainEnabled
+ * @property {boolean} whiteLabelEnabled
+ * @property {string | null} [status]
  * @property {string} priceLabel
+ * @property {string} [periodLabel]
  * @property {string[]} featureBullets
  */
+
+const MB = 1024 * 1024;
+const GB = 1024 * 1024 * 1024;
 
 /** @type {Record<PlanId, PlanLimits>} */
 export const PLAN_LIMITS = {
   [PLAN_IDS.STARTER]: {
     name: PLAN_IDS.STARTER,
     displayName: "Starter",
-    maxProjects: 3,
+    tagline: "Experimente o FIVI360",
+    description:
+      "Ideal para conhecer a plataforma e criar suas primeiras apresentações em 360°.",
+    badge: null,
+    maxProjects: 2,
     maxTotalImages: 10,
-    maxStorageBytes: 10 * 1024 * 1024,
+    maxStorageBytes: 25 * MB,
     hotspotsEnabled: false,
     publicPortfolioEnabled: false,
     publicVisibilityEnabled: false,
-    priceLabel: "R$ 0",
+    analyticsEnabled: false,
+    advancedAnalytics: false,
+    prioritySupport: false,
+    multiuserEnabled: false,
+    customDomainEnabled: false,
+    whiteLabelEnabled: false,
+    status: null,
+    priceLabel: "Grátis",
+    periodLabel: "",
     featureBullets: [
-      "3 projetos",
-      "10 imagens no total",
-      "10 MB de armazenamento",
+      "2 projetos",
+      "10 imagens",
+      "25 MB de armazenamento",
       "Links compartilhados",
-      "Sem hotspots",
       "Sem portfólio público",
+      "Sem hotspots",
+      "Sem analytics",
     ],
   },
   [PLAN_IDS.PROFESSIONAL]: {
     name: PLAN_IDS.PROFESSIONAL,
     displayName: "Professional",
+    tagline: "Para arquitetos e designers independentes",
+    description:
+      "Transforme suas apresentações em uma experiência profissional e compartilhe seus projetos com clientes de forma imersiva.",
+    badge: "Mais popular",
     maxProjects: null,
     maxTotalImages: null,
-    maxStorageBytes: 100 * 1024 * 1024,
+    maxStorageBytes: 500 * MB,
     hotspotsEnabled: true,
     publicPortfolioEnabled: true,
     publicVisibilityEnabled: true,
-    priceLabel: "Em breve",
+    analyticsEnabled: true,
+    advancedAnalytics: false,
+    prioritySupport: false,
+    multiuserEnabled: false,
+    customDomainEnabled: false,
+    whiteLabelEnabled: false,
+    status: null,
+    priceLabel: "R$ 49",
+    periodLabel: "/mês",
     featureBullets: [
       "Projetos ilimitados",
       "Imagens ilimitadas",
-      "100 MB de armazenamento",
-      "Hotspots no viewer 360°",
+      "500 MB de armazenamento",
       "Portfólio público",
-      "Links compartilhados",
+      "Informações interativas (hotspots — info)",
+      "Navegação entre imagens (hotspot — scene)",
+      "Analytics básico",
+    ],
+  },
+  [PLAN_IDS.STUDIO]: {
+    name: PLAN_IDS.STUDIO,
+    displayName: "Studio",
+    tagline: "Para escritórios em crescimento",
+    description:
+      "Mais espaço, mais capacidade e recursos preparados para equipes que gerenciam múltiplos projetos simultaneamente.",
+    badge: "Recomendado",
+    maxProjects: null,
+    maxTotalImages: null,
+    maxStorageBytes: 2 * GB,
+    hotspotsEnabled: true,
+    publicPortfolioEnabled: true,
+    publicVisibilityEnabled: true,
+    analyticsEnabled: true,
+    advancedAnalytics: true,
+    prioritySupport: true,
+    multiuserEnabled: false,
+    customDomainEnabled: false,
+    whiteLabelEnabled: false,
+    status: null,
+    priceLabel: "R$ 199",
+    periodLabel: "/mês",
+    featureBullets: [
+      "Tudo do Professional",
+      "2 GB de armazenamento",
+      "Projetos ilimitados",
+      "Imagens ilimitadas",
+      "Informações interativas (hotspots — info)",
+      "Navegação entre imagens (hotspot — scene)",
+      "Analytics avançado",
+      "Suporte prioritário",
     ],
   },
   [PLAN_IDS.ENTERPRISE]: {
     name: PLAN_IDS.ENTERPRISE,
     displayName: "Enterprise",
+    tagline: "Para incorporadoras e construtoras",
+    description:
+      "Uma solução corporativa para equipes, empreendimentos e operações em escala.",
+    badge: "Em breve",
     maxProjects: null,
     maxTotalImages: null,
-    maxStorageBytes: 1 * 1024 * 1024 * 1024,
+    maxStorageBytes: 10 * GB,
     hotspotsEnabled: true,
     publicPortfolioEnabled: true,
     publicVisibilityEnabled: true,
-    priceLabel: "Em breve",
+    analyticsEnabled: true,
+    advancedAnalytics: true,
+    prioritySupport: true,
+    multiuserEnabled: true,
+    customDomainEnabled: true,
+    whiteLabelEnabled: true,
+    status: "coming_soon",
+    priceLabel: "A partir de R$ 499",
+    periodLabel: "/mês",
     featureBullets: [
-      "Tudo liberado",
-      "1 GB de armazenamento",
+      "Tudo do Studio",
+      "10 GB de armazenamento",
+      "Multiusuário",
+      "Workspaces compartilhados",
+      "Permissões e equipe",
+      "Domínio personalizado",
+      "White-label parcial",
       "Suporte prioritário",
-      "Recursos avançados (em breve)",
     ],
   },
 };
 
-/** Ordem de exibição na página de planos */
+/** Ordem de exibição na página de planos e landing */
 export const PLAN_ORDER = [
   PLAN_IDS.STARTER,
   PLAN_IDS.PROFESSIONAL,
+  PLAN_IDS.STUDIO,
   PLAN_IDS.ENTERPRISE,
 ];
+
+/** Hierarquia de planos (maior = mais recursos). */
+export const PLAN_TIER = {
+  [PLAN_IDS.STARTER]: 0,
+  [PLAN_IDS.PROFESSIONAL]: 1,
+  [PLAN_IDS.STUDIO]: 2,
+  [PLAN_IDS.ENTERPRISE]: 3,
+};
 
 const LEGACY_PLAN_ALIASES = {
   free: PLAN_IDS.STARTER,
   pro: PLAN_IDS.PROFESSIONAL,
   starter: PLAN_IDS.STARTER,
   professional: PLAN_IDS.PROFESSIONAL,
+  studio: PLAN_IDS.STUDIO,
   enterprise: PLAN_IDS.ENTERPRISE,
 };
 
@@ -176,6 +276,23 @@ export function normalizePlanId(raw) {
 export function getPlanLimits(raw) {
   const normalized = normalizeUserPlan(raw);
   return PLAN_LIMITS[normalized];
+}
+
+/**
+ * @param {PlanId} planId
+ * @returns {number}
+ */
+export function getPlanTier(planId) {
+  return PLAN_TIER[planId] ?? 0;
+}
+
+/**
+ * @param {PlanId} currentPlanId
+ * @param {PlanId} targetPlanId
+ * @returns {boolean}
+ */
+export function isPlanAtOrAbove(currentPlanId, targetPlanId) {
+  return getPlanTier(currentPlanId) >= getPlanTier(targetPlanId);
 }
 
 /**

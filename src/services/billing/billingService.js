@@ -10,6 +10,7 @@ import app from "@/config/firebase";
 import {
   CANCEL_SUBSCRIPTION_ERROR_MESSAGE,
   CANCEL_SUBSCRIPTION_SUCCESS_MESSAGE,
+  getStripeCheckoutPlanIds,
   PAYMENTS_COMING_SOON_MESSAGE,
 } from "@/config/billing";
 import { PLAN_IDS } from "@/config/planLimits";
@@ -46,7 +47,6 @@ const NOT_ACTIVE = { ok: false, message: "Billing ainda não está ativo." };
 export const CHECKOUT_START_ERROR_MESSAGE =
   "Não foi possível iniciar o checkout. Tente novamente.";
 
-const STRIPE_CHECKOUT_PLAN_IDS = new Set([PLAN_IDS.PROFESSIONAL]);
 
 /**
  * @param {unknown} error
@@ -94,7 +94,7 @@ export async function createStripeCheckoutSession(planId) {
  * @returns {Promise<{ ok: false, message: string } | { ok: true, checkoutUrl: string }>}
  */
 export async function requestUpgrade(planId) {
-  if (!STRIPE_CHECKOUT_PLAN_IDS.has(planId)) {
+  if (!getStripeCheckoutPlanIds().has(planId)) {
     return { ok: false, message: PAYMENTS_COMING_SOON_MESSAGE };
   }
 

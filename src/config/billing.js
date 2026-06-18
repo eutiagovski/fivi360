@@ -1,8 +1,12 @@
 /**
- * Configuração e modelo de billing — Mercado Pago.
+ * Configuração e modelo de billing — Stripe (checkout) + legado Mercado Pago.
  */
 
-import { PLAN_IDS } from "@/config/planLimits";
+import {
+  isPlanAtOrAbove,
+  PLAN_IDS,
+  PLAN_LIMITS,
+} from "@/config/planLimits";
 
 export const BILLING_PROVIDER = "mercado_pago";
 
@@ -24,10 +28,18 @@ export const BILLING_PLANS = {
     interval: "month",
     mercadoPagoPlanIdEnv: "REACT_APP_MP_PLAN_PROFESSIONAL",
   },
+  studio: {
+    id: "studio",
+    name: "Studio",
+    price: 199,
+    currency: "BRL",
+    interval: "month",
+    mercadoPagoPlanIdEnv: "REACT_APP_MP_PLAN_STUDIO",
+  },
   enterprise: {
     id: "enterprise",
     name: "Enterprise",
-    price: 149,
+    price: 499,
     currency: "BRL",
     interval: "month",
     mercadoPagoPlanIdEnv: "REACT_APP_MP_PLAN_ENTERPRISE",
@@ -67,23 +79,34 @@ export const DEFAULT_BILLING = {
   updatedAt: null,
 };
 
-/** Valores exibidos no modal de upgrade (checkout futuro). */
+export const CONTACT_EMAIL = "contato@fivi360.com.br";
+
+/** Valores exibidos no modal de upgrade (checkout). */
 export const UPGRADE_PLAN_PRICES = {
+  [PLAN_IDS.STARTER]: {
+    priceLabel: PLAN_LIMITS[PLAN_IDS.STARTER].priceLabel,
+    periodLabel: "",
+  },
   [PLAN_IDS.PROFESSIONAL]: {
     priceLabel: "R$ 49",
     periodLabel: "/mês",
   },
+  [PLAN_IDS.STUDIO]: {
+    priceLabel: "R$ 199",
+    periodLabel: "/mês",
+  },
   [PLAN_IDS.ENTERPRISE]: {
-    priceLabel: "R$ 149",
+    priceLabel: "A partir de R$ 499",
     periodLabel: "/mês",
   },
 };
 
 /** Rótulos mensais na seção Gerenciar assinatura. */
 export const PLAN_MONTHLY_PRICE_LABELS = {
-  [PLAN_IDS.STARTER]: "R$ 0",
+  [PLAN_IDS.STARTER]: "Grátis",
   [PLAN_IDS.PROFESSIONAL]: "R$ 49",
-  [PLAN_IDS.ENTERPRISE]: "R$ 149",
+  [PLAN_IDS.STUDIO]: "R$ 199",
+  [PLAN_IDS.ENTERPRISE]: "A partir de R$ 499",
 };
 
 export const SUBSCRIPTION_STATUS_LABELS = {
@@ -100,9 +123,13 @@ export const BILLING_NOT_ACTIVE_MESSAGE = "Billing ainda não está ativo.";
 export const CHECKOUT_LOADING_MESSAGE = "Preparando seu link seguro...";
 
 export const CHECKOUT_ALREADY_SUBSCRIBED_MESSAGE =
-  "Você já possui uma assinatura Professional ativa.";
+  "Você já possui uma assinatura ativa neste plano ou superior.";
 
 export const ENTERPRISE_PLAN_UNAVAILABLE_LABEL = "Em breve";
+
+export const ENTERPRISE_CONTACT_LABEL = "Fale conosco";
+
+export const STUDIO_PLAN_UNAVAILABLE_LABEL = "Em breve";
 
 export const BILLING_PORTAL_COMING_SOON_MESSAGE = "Disponível em breve.";
 
@@ -121,6 +148,15 @@ const ACTIVE_STRIPE_SUBSCRIPTION_STATUSES = new Set([
 ]);
 
 /**
+ * Indica se o checkout Stripe do plano Studio está habilitado no frontend.
+ * Deve espelhar `STRIPE_PRICE_STUDIO` (ou equivalente) no backend.
+ * @returns {boolean}
+ */
+export function isStudioCheckoutConfigured() {
+  return process.env.REACT_APP_STRIPE_STUDIO_CHECKOUT === "true";
+}
+
+/**
  * Indica se o usuário pode cancelar uma assinatura Stripe ativa.
  * @param {UserBilling} billing
  * @returns {boolean}
@@ -136,16 +172,30 @@ export function canCancelStripeSubscription(billing) {
 }
 
 /**
- * IDs de plano pagos usados no fluxo de upgrade/checkout.
+ * IDs de plano pagos usados no fluxo de upgrade/checkout (exceto Enterprise).
  * @type {import("@/config/planLimits").PlanId[]}
  */
 export const BILLING_UPGRADE_PLAN_IDS = [
   PLAN_IDS.PROFESSIONAL,
-  PLAN_IDS.ENTERPRISE,
+  PLAN_IDS.STUDIO,
 ];
 
 export const PAYMENTS_COMING_SOON_MESSAGE =
   "Pagamentos serão ativados em breve.";
+
+/**
+ * Planos com checkout Stripe habilitado no frontend.
+ * @returns {Set<import("@/config/planLimits").PlanId>}
+ */
+export function getStripeCheckoutPlanIds() {
+  const ids = new Set([PLAN_IDS.PROFESSIONAL]);
+
+  if (isStudioCheckoutConfigured()) {
+    ids.add(PLAN_IDS.STUDIO);
+  }
+
+  return ids;
+}
 
 /**
  * @param {string | null | undefined} planId
@@ -161,18 +211,51 @@ export function isBillingUpgradePlanId(planId) {
  * Estado do botão de assinatura no modal de upgrade.
  * @param {import("@/config/planLimits").PlanId} targetPlanId
  * @param {import("@/config/planLimits").PlanId} currentPlanId
- * @returns {{ disabled: boolean, label: string }}
+ * @returns {{ disabled: boolean, label: string, contactHref?: string }}
  */
 export function getUpgradePlanButtonState(targetPlanId, currentPlanId) {
-  if (targetPlanId === PLAN_IDS.ENTERPRISE) {
-    return { disabled: true, label: ENTERPRISE_PLAN_UNAVAILABLE_LABEL };
+  if (targetPlanId === PLAN_IDS.STARTER) {
+    if (currentPlanId === PLAN_IDS.STARTER) {
+      return { disabled: true, label: "Plano atual" };
+    }
+
+    return { disabled: true, label: "Começar gratuitamente" };
   }
 
-  if (
-    targetPlanId === PLAN_IDS.PROFESSIONAL &&
-    currentPlanId === PLAN_IDS.PROFESSIONAL
-  ) {
-    return { disabled: true, label: "Plano atual" };
+  if (targetPlanId === PLAN_IDS.ENTERPRISE) {
+    return {
+      disabled: true,
+      label: ENTERPRISE_CONTACT_LABEL,
+      contactHref: `mailto:${CONTACT_EMAIL}?subject=Plano%20Enterprise%20FIVI360`,
+    };
+  }
+
+  if (targetPlanId === PLAN_IDS.STUDIO) {
+    if (currentPlanId === PLAN_IDS.STUDIO) {
+      return { disabled: true, label: "Plano atual" };
+    }
+
+    if (isPlanAtOrAbove(currentPlanId, PLAN_IDS.STUDIO)) {
+      return { disabled: true, label: "Incluído no seu plano" };
+    }
+
+    if (!isStudioCheckoutConfigured()) {
+      return { disabled: true, label: STUDIO_PLAN_UNAVAILABLE_LABEL };
+    }
+
+    return { disabled: false, label: "Assinar Studio" };
+  }
+
+  if (targetPlanId === PLAN_IDS.PROFESSIONAL) {
+    if (currentPlanId === PLAN_IDS.PROFESSIONAL) {
+      return { disabled: true, label: "Plano atual" };
+    }
+
+    if (isPlanAtOrAbove(currentPlanId, PLAN_IDS.PROFESSIONAL)) {
+      return { disabled: true, label: "Incluído no seu plano" };
+    }
+
+    return { disabled: false, label: "Assinar Professional" };
   }
 
   return { disabled: false, label: "Assinar plano" };
@@ -184,6 +267,10 @@ export function getUpgradePlanButtonState(targetPlanId, currentPlanId) {
  * @returns {boolean}
  */
 export function canStartStripeCheckoutForPlan(targetPlanId, currentPlanId) {
+  if (!getStripeCheckoutPlanIds().has(targetPlanId)) {
+    return false;
+  }
+
   return !getUpgradePlanButtonState(targetPlanId, currentPlanId).disabled;
 }
 
@@ -337,6 +424,9 @@ export function getPlanMonthlyPriceLabel(planId) {
 export function getBillingPlanChosenMessage(planId) {
   if (planId === PLAN_IDS.PROFESSIONAL) {
     return "Você escolheu o plano Professional.";
+  }
+  if (planId === PLAN_IDS.STUDIO) {
+    return "Você escolheu o plano Studio.";
   }
   if (planId === PLAN_IDS.ENTERPRISE) {
     return "Você escolheu o plano Enterprise.";

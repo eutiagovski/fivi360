@@ -24,7 +24,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { canCancelStripeSubscription, canStartStripeCheckoutForPlan, CHECKOUT_ALREADY_SUBSCRIBED_MESSAGE, PAYMENTS_COMING_SOON_MESSAGE } from '@/config/billing';
-import { PLAN_IDS } from '@/config/planLimits';
+import { isPlanAtOrAbove, PLAN_IDS } from '@/config/planLimits';
 import { usePlanLimits } from '@/hooks/usePlanLimits';
 import { useCheckoutSuccessSync } from '@/hooks/useCheckoutSuccessSync';
 import { useProjects } from '@/hooks/useProjects';
@@ -80,8 +80,8 @@ export const Plan = () => {
     }
   }, [upgradeFromQuery]);
 
-  const isEnterprise = planId === PLAN_IDS.ENTERPRISE;
   const isStarter = planId === PLAN_IDS.STARTER;
+  const canOpenUpgrade = planId !== PLAN_IDS.ENTERPRISE;
   const showCancelSubscriptionButton = canCancelStripeSubscription(billing);
 
   const sharedLinksCount = projects.filter(
@@ -118,10 +118,9 @@ export const Plan = () => {
     if (!canStartStripeCheckoutForPlan(selectedPlanId, planId)) {
       toast({
         title: 'Assinatura',
-        description:
-          selectedPlanId === PLAN_IDS.PROFESSIONAL && planId === PLAN_IDS.PROFESSIONAL
-            ? CHECKOUT_ALREADY_SUBSCRIBED_MESSAGE
-            : PAYMENTS_COMING_SOON_MESSAGE,
+        description: isPlanAtOrAbove(planId, selectedPlanId)
+          ? CHECKOUT_ALREADY_SUBSCRIBED_MESSAGE
+          : PAYMENTS_COMING_SOON_MESSAGE,
         variant: 'destructive',
       });
       return;
@@ -151,7 +150,7 @@ export const Plan = () => {
       <PageActionHeader
         title="Plano"
         subtitle="Acompanhe seu plano atual e o consumo da conta"
-        actionLabel={isEnterprise ? undefined : 'Fazer upgrade'}
+        actionLabel={canOpenUpgrade ? 'Fazer upgrade' : undefined}
         onAction={() => openUpgradeModal()}
         dataTestId="plan-title"
         actionDataTestId="plan-upgrade-btn"

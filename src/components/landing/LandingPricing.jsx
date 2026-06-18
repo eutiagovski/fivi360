@@ -7,6 +7,7 @@ import {
   LANDING_PRICING_SECTION,
 } from "@/config/landingContent";
 import { PLAN_IDS, PLAN_LIMITS, PLAN_ORDER } from "@/config/planLimits";
+import { isStudioCheckoutConfigured } from "@/config/billing";
 import { useAuth } from "@/hooks/useAuth";
 import {
   getPlanUpgradePath,
@@ -17,16 +18,48 @@ import { trackEvent } from "@/services/analytics/analyticsService";
 const primaryBtnClass =
   "w-full py-3 rounded-full font-medium btn-scale transition-colors bg-white text-black hover:bg-zinc-200";
 
+const disabledBtnClass =
+  "w-full py-3 rounded-full font-medium bg-zinc-800 border border-zinc-700 text-zinc-500 cursor-not-allowed";
+
 /**
  * @param {string} planId
  * @param {boolean} isAuthenticated
+ * @returns {{ href: string, disabled: boolean }}
+ */
+function getPlanCta(planId, isAuthenticated) {
+  const marketing = LANDING_PRICING_MARKETING[planId];
+
+  if (planId === PLAN_IDS.ENTERPRISE || marketing.ctaDisabled) {
+    return { href: marketing.ctaTo, disabled: true };
+  }
+
+  if (planId === PLAN_IDS.STARTER) {
+    return { href: marketing.ctaTo, disabled: false };
+  }
+
+  if (planId === PLAN_IDS.STUDIO && !isStudioCheckoutConfigured()) {
+    return { href: "#", disabled: true };
+  }
+
+  if (isAuthenticated) {
+    return { href: getPlanUpgradePath(planId), disabled: false };
+  }
+
+  return { href: getRegisterWithPlanPath(planId), disabled: false };
+}
+
+/**
+ * @param {string} planId
  * @returns {string}
  */
-function getPaidPlanCtaHref(planId, isAuthenticated) {
-  if (isAuthenticated) {
-    return getPlanUpgradePath(planId);
+function getCtaLabel(planId) {
+  const marketing = LANDING_PRICING_MARKETING[planId];
+
+  if (planId === PLAN_IDS.STUDIO && !isStudioCheckoutConfigured()) {
+    return "Em breve";
   }
-  return getRegisterWithPlanPath(planId);
+
+  return marketing.ctaLabel;
 }
 
 export function LandingPricing() {
@@ -43,23 +76,20 @@ export function LandingPricing() {
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
           {PLAN_ORDER.map((id) => {
             const plan = PLAN_LIMITS[id];
             const marketing = LANDING_PRICING_MARKETING[id];
             const isHighlighted = marketing.highlighted;
-            const isPaidPlan =
-              id === PLAN_IDS.PROFESSIONAL || id === PLAN_IDS.ENTERPRISE;
-            const ctaHref = isPaidPlan
-              ? getPaidPlanCtaHref(id, Boolean(user))
-              : marketing.ctaTo;
+            const { href, disabled } = getPlanCta(id, Boolean(user));
+            const ctaLabel = getCtaLabel(id);
 
             return (
               <div
                 key={id}
                 data-testid={`landing-pricing-card-${id}`}
                 className={`
-                  bg-zinc-900/50 rounded-2xl p-8 card-hover relative
+                  bg-zinc-900/50 rounded-2xl p-8 card-hover relative flex flex-col
                   ${
                     isHighlighted
                       ? "border-2 border-white"
@@ -67,27 +97,34 @@ export function LandingPricing() {
                   }
                 `}
               >
-                {marketing.badge && (
+                {marketing.badge ? (
                   <div className="absolute -top-3 right-6">
                     <div className="px-4 py-1 bg-white text-black text-xs font-medium rounded-full">
                       {marketing.badge}
                     </div>
                   </div>
-                )}
+                ) : null}
 
-                <div className="mb-6">
-                  <h3 className="text-2xl font-medium text-white mb-4">
+                <div className="mb-4">
+                  <h3 className="text-2xl font-medium text-white mb-2">
                     {plan.displayName}
                   </h3>
+                  <p className="text-sm text-zinc-400 leading-relaxed mb-4 min-h-[2.75rem]">
+                    {marketing.headline}
+                  </p>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-5xl font-light text-white">
+                    <span className="text-4xl font-light text-white">
                       {marketing.priceLabel}
                     </span>
-                    <span className="text-lg text-zinc-400">/mês</span>
+                    {marketing.periodLabel ? (
+                      <span className="text-lg text-zinc-400">
+                        {marketing.periodLabel}
+                      </span>
+                    ) : null}
                   </div>
                 </div>
 
-                <ul className="space-y-4 mb-8">
+                <ul className="space-y-3 mb-8 flex-1">
                   {marketing.featureBullets.map((feature) => (
                     <li key={feature} className="flex items-start gap-3">
                       <div className="mt-1 p-0.5 bg-white rounded-full flex-shrink-0">
@@ -100,19 +137,40 @@ export function LandingPricing() {
                   ))}
                 </ul>
 
-                <Button className={primaryBtnClass} asChild>
-                  <Link
-                    to={ctaHref}
-                    data-testid={`landing-pricing-btn-${id}`}
-                    onClick={() => {
-                      if (id === PLAN_IDS.PROFESSIONAL) {
-                        trackEvent("click_pricing_pro");
-                      }
-                    }}
-                  >
-                    {marketing.ctaLabel}
-                  </Link>
-                </Button>
+                {disabled ? (
+                  id === PLAN_IDS.ENTERPRISE ? (
+                    <a
+                      href={href}
+                      data-testid={`landing-pricing-btn-${id}`}
+                      className={`${disabledBtnClass} inline-flex items-center justify-center text-center hover:text-zinc-400`}
+                    >
+                      {ctaLabel}
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled
+                      data-testid={`landing-pricing-btn-${id}`}
+                      className={disabledBtnClass}
+                    >
+                      {ctaLabel}
+                    </button>
+                  )
+                ) : (
+                  <Button className={primaryBtnClass} asChild>
+                    <Link
+                      to={href}
+                      data-testid={`landing-pricing-btn-${id}`}
+                      onClick={() => {
+                        if (id === PLAN_IDS.PROFESSIONAL) {
+                          trackEvent("click_pricing_pro");
+                        }
+                      }}
+                    >
+                      {ctaLabel}
+                    </Link>
+                  </Button>
+                )}
               </div>
             );
           })}

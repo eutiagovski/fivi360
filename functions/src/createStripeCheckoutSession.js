@@ -4,29 +4,46 @@ const { initializeApp, getApps } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
 const { APP_BASE_URL } = require("./config/app");
 const { STRIPE_SECRET_KEY, getStripeClient } = require("./stripe/client");
-const { STRIPE_BILLING_PARAMS, getStripePriceId } = require("./config/stripeBilling");
+const {
+  STRIPE_BILLING_PARAMS,
+  getAllowedCheckoutPlanIds,
+  getStripePriceId,
+} = require("./config/stripeBilling");
 
 if (getApps().length === 0) {
   initializeApp();
 }
 
-const ALLOWED_CHECKOUT_PLAN_IDS = new Set(["professional"]);
-
 const ACTIVE_SUBSCRIPTION_STATUSES = new Set(["active", "trialing"]);
 
+const PLAN_TIER = {
+  starter: 0,
+  professional: 1,
+  studio: 2,
+  enterprise: 3,
+};
+
 const CHECKOUT_ALREADY_SUBSCRIBED_MESSAGE =
-  "Você já possui uma assinatura Professional ativa.";
+  "Você já possui uma assinatura ativa neste plano ou superior.";
+
+/**
+ * @param {string} planId
+ * @returns {number}
+ */
+function getPlanTier(planId) {
+  return PLAN_TIER[planId] ?? 0;
+}
 
 /**
  * @param {{ plan?: unknown }} userData
- * @returns {"starter" | "professional" | "enterprise"}
+ * @returns {"starter" | "professional" | "studio" | "enterprise"}
  */
 function normalizeUserPlanId(userData) {
   const plan = userData.plan;
 
   if (typeof plan === "string") {
     const key = plan.toLowerCase().trim();
-    if (key === "professional" || key === "enterprise") {
+    if (key in PLAN_TIER) {
       return key;
     }
     return "starter";
@@ -40,7 +57,7 @@ function normalizeUserPlanId(userData) {
     }
 
     const id = plan.id.toLowerCase().trim();
-    if (id === "professional" || id === "enterprise") {
+    if (id in PLAN_TIER) {
       return id;
     }
   }
@@ -52,9 +69,9 @@ function normalizeUserPlanId(userData) {
  * @param {import("firebase-admin/firestore").Firestore} db
  * @param {string} uid
  * @param {{ plan?: unknown }} userData
- * @returns {Promise<boolean>}
+ * @returns {Promise<"starter" | "professional" | "studio" | "enterprise">}
  */
-async function hasActiveProfessionalSubscription(db, uid, userData) {
+async function resolveEffectivePlanId(db, uid, userData) {
   const effectivePlanId = normalizeUserPlanId(userData);
   const plan = userData.plan;
   const planStatus =
@@ -63,16 +80,16 @@ async function hasActiveProfessionalSubscription(db, uid, userData) {
       : "";
 
   if (
-    effectivePlanId === "professional" &&
+    effectivePlanId !== "starter" &&
     (!planStatus || ACTIVE_SUBSCRIPTION_STATUSES.has(planStatus))
   ) {
-    return true;
+    return effectivePlanId;
   }
 
   const subscriptionSnap = await db.collection("subscriptions").doc(uid).get();
 
   if (!subscriptionSnap.exists) {
-    return false;
+    return "starter";
   }
 
   const subscription = subscriptionSnap.data() ?? {};
@@ -81,10 +98,14 @@ async function hasActiveProfessionalSubscription(db, uid, userData) {
   const subscriptionPlanId =
     typeof subscription.planId === "string" ? subscription.planId.toLowerCase().trim() : "";
 
-  return (
-    subscriptionPlanId === "professional" &&
+  if (
+    subscriptionPlanId in PLAN_TIER &&
     ACTIVE_SUBSCRIPTION_STATUSES.has(subscriptionStatus)
-  );
+  ) {
+    return subscriptionPlanId;
+  }
+
+  return "starter";
 }
 
 /**
@@ -155,11 +176,28 @@ exports.createStripeCheckoutSession = onCall(
     const uid = request.auth.uid;
     const planId = request.data?.planId;
 
-    if (typeof planId !== "string" || !ALLOWED_CHECKOUT_PLAN_IDS.has(planId)) {
-      throw new HttpsError("invalid-argument", 'planId inválido. Use "professional".');
+    if (typeof planId !== "string") {
+      throw new HttpsError("invalid-argument", "planId inválido.");
     }
 
-    const priceId = getStripePriceId(planId);
+    const normalizedPlanId = planId.toLowerCase().trim();
+    const allowedCheckoutPlanIds = getAllowedCheckoutPlanIds();
+
+    if (normalizedPlanId === "enterprise" || normalizedPlanId === "starter") {
+      throw new HttpsError(
+        "invalid-argument",
+        'Checkout indisponível para este plano.',
+      );
+    }
+
+    if (!allowedCheckoutPlanIds.has(normalizedPlanId)) {
+      throw new HttpsError(
+        "invalid-argument",
+        'planId inválido ou preço Stripe não configurado.',
+      );
+    }
+
+    const priceId = getStripePriceId(normalizedPlanId);
     if (!priceId) {
       throw new HttpsError("failed-precondition", "Preço Stripe não configurado.");
     }
@@ -178,11 +216,9 @@ exports.createStripeCheckoutSession = onCall(
     }
 
     const userData = userSnap.data();
+    const currentPlanId = await resolveEffectivePlanId(db, uid, userData);
 
-    if (
-      planId === "professional" &&
-      (await hasActiveProfessionalSubscription(db, uid, userData))
-    ) {
+    if (getPlanTier(currentPlanId) >= getPlanTier(normalizedPlanId)) {
       throw new HttpsError("failed-precondition", CHECKOUT_ALREADY_SUBSCRIBED_MESSAGE);
     }
 
@@ -209,12 +245,12 @@ exports.createStripeCheckoutSession = onCall(
         client_reference_id: uid,
         metadata: {
           userId: uid,
-          planId,
+          planId: normalizedPlanId,
         },
         subscription_data: {
           metadata: {
             userId: uid,
-            planId,
+            planId: normalizedPlanId,
           },
         },
       });
@@ -225,7 +261,7 @@ exports.createStripeCheckoutSession = onCall(
 
       logger.info("createStripeCheckoutSession: session created", {
         uid,
-        planId,
+        planId: normalizedPlanId,
         sessionId: session.id,
       });
 
@@ -236,7 +272,11 @@ exports.createStripeCheckoutSession = onCall(
       }
 
       const message = err instanceof Error ? err.message : String(err);
-      logger.error("createStripeCheckoutSession: failed", { uid, planId, error: message });
+      logger.error("createStripeCheckoutSession: failed", {
+        uid,
+        planId: normalizedPlanId,
+        error: message,
+      });
       throw new HttpsError("internal", "Não foi possível iniciar o checkout.");
     }
   },
