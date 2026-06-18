@@ -151,7 +151,7 @@ export const LANDING_PRICING_MARKETING = {
   [PLAN_IDS.ENTERPRISE]: {
     headline: PLAN_LIMITS[PLAN_IDS.ENTERPRISE].tagline,
     description: PLAN_LIMITS[PLAN_IDS.ENTERPRISE].description,
-    priceLabel: "A partir de R$ 499",
+    priceLabel: "R$ 499",
     periodLabel: "/mês",
     featureBullets: PLAN_LIMITS[PLAN_IDS.ENTERPRISE].featureBullets,
     ctaLabel: "Fale conosco",
