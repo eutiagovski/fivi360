@@ -8,11 +8,11 @@ import {
   hasProjectCover,
   ProjectCoverPlaceholder,
 } from "@/components/common/ProjectCoverPlaceholder";
+import { PublicContactSection } from "@/components/public/PublicContactSection";
 import {
   PublicPageMessage,
   PublicPageShell,
 } from "@/components/public/PublicPageShell";
-import { PublicSocialLinks } from "@/components/public/PublicSocialLinks";
 import { getProjectById } from "@/services/projects/projectService";
 import {
   getImagesByProjectIdPublic,
@@ -204,7 +204,7 @@ export const PublicPortfolioProject = () => {
 
   if (state.loading) {
     return (
-      <PublicPageShell>
+      <PublicPageShell headerMode="minimal">
         <div
           className="flex flex-col items-center justify-center py-24 gap-4"
           data-testid="portfolio-project-loading"
@@ -222,6 +222,7 @@ export const PublicPortfolioProject = () => {
         title="Projeto não encontrado"
         description="Este link pode estar incorreto ou o projeto foi removido."
         dataTestId="portfolio-project-not-found"
+        headerMode="minimal"
       />
     );
   }
@@ -232,6 +233,7 @@ export const PublicPortfolioProject = () => {
         title="Este projeto não está disponível"
         description="O projeto não faz parte deste portfólio ou não é público."
         dataTestId="portfolio-project-unavailable"
+        headerMode="minimal"
       />
     );
   }
@@ -242,18 +244,16 @@ export const PublicPortfolioProject = () => {
         title="Não foi possível carregar o projeto"
         description="Tente novamente em alguns instantes."
         dataTestId="portfolio-project-error"
+        headerMode="minimal"
       />
     );
   }
 
   const { project, owner, slug } = state;
   const hasCover = hasProjectCover(project.coverImage);
-  const officeName =
-    owner?.companyName?.trim() || owner?.displayName?.trim() || "";
-  const officeBio = owner?.bio?.trim() ?? "";
 
   return (
-    <PublicPageShell>
+    <PublicPageShell office={owner}>
       <div className="mb-8">
         <Link
           to={`/u/${slug}`}
@@ -306,32 +306,6 @@ export const PublicPortfolioProject = () => {
         >
           {project.description || "Sem descrição."}
         </p>
-
-        {officeName && (
-          <div className="mt-8 pt-8 border-t border-zinc-800 max-w-2xl">
-            <p
-              className="text-sm text-zinc-500 mb-1"
-              data-testid="portfolio-project-office-label"
-            >
-              Escritório
-            </p>
-            <h2
-              className="text-xl font-light text-white mb-2"
-              data-testid="portfolio-project-office-name"
-            >
-              {officeName}
-            </h2>
-            {officeBio && (
-              <p
-                className="text-base text-zinc-400 leading-relaxed"
-                data-testid="portfolio-project-office-bio"
-              >
-                {officeBio}
-              </p>
-            )}
-            {owner && <PublicSocialLinks user={owner} />}
-          </div>
-        )}
       </div>
 
       <div>
@@ -366,6 +340,11 @@ export const PublicPortfolioProject = () => {
           </div>
         )}
       </div>
+
+      <PublicContactSection
+        user={owner}
+        testIdPrefix="portfolio-project-contact"
+      />
     </PublicPageShell>
   );
 };

@@ -310,7 +310,7 @@ export const Settings = () => {
         dataTestId="settings-title"
       />
 
-      <div className="max-w-3xl">
+      <div className="w-full mx-auto flex gap-4">
         {isLoadingProfile ? (
           <div
             className="flex items-center justify-center py-24"
@@ -322,7 +322,7 @@ export const Settings = () => {
             />
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-8">
+          <form onSubmit={handleSubmit} className="space-y-8 flex-1">
             {loadError && (
               <div
                 role="alert"
@@ -436,7 +436,7 @@ export const Settings = () => {
                   data-testid="input-company-bio"
                   value={formData.companyBio}
                   onChange={handleChange}
-                  rows={3}
+                  rows={10}
                   disabled={isSaving}
                   placeholder="Conte um pouco sobre o seu escritório..."
                   className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-white focus:outline-none focus:ring-1 focus:ring-white transition-all disabled:opacity-50 resize-none"
@@ -666,7 +666,8 @@ export const Settings = () => {
               </div>
             </div>
 
-            <button
+           <div className="flex justify-end">
+           <button
               type="submit"
               data-testid="save-settings-btn"
               disabled={isSaving || slugAvailability === 'unavailable'}
@@ -674,6 +675,8 @@ export const Settings = () => {
             >
               {isSaving ? 'Salvando...' : 'Salvar alterações'}
             </button>
+
+           </div>
           </form>
         )}
       </div>

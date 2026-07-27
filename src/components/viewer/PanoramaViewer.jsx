@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import "pannellum/build/pannellum.css";
 import "@/components/viewer/panorama-viewer.css";
+import { ViewerInteractionHint } from "@/components/viewer/ViewerInteractionHint";
+import { useViewerInteractionHint } from "@/hooks/useViewerInteractionHint";
 import { mapHotspotsToPannellum } from "@/utils/hotspotPannellum";
 
 const CONTEXT_MENU_DEBUG = process.env.NODE_ENV === "development";
@@ -40,6 +42,7 @@ export function PanoramaViewer({
   const getSceneHotspotLabelRef = useRef(getSceneHotspotLabel);
   const onPlacementClickRef = useRef(onPlacementClick);
   const onPanoramaContextMenuRef = useRef(onPanoramaContextMenu);
+  const hintVisible = useViewerInteractionHint(viewerRef, viewerReady);
 
   onInfoHotspotClickRef.current = onInfoHotspotClick;
   onSceneHotspotClickRef.current = onSceneHotspotClick;
@@ -256,11 +259,14 @@ export function PanoramaViewer({
   }, [panoramaUrl, viewerReady, mouseEventToCoords]);
 
   return (
-    <div
-      ref={containerRef}
-      className={`panorama-viewer ${placementMode ? "panorama-viewer--placing" : ""} ${className}`.trim()}
-      data-testid="panorama-viewer"
-      data-placing={placementMode ? "true" : "false"}
-    />
+    <div className={`relative ${className}`.trim()} data-testid="panorama-viewer-wrapper">
+      <div
+        ref={containerRef}
+        className={`panorama-viewer absolute inset-0 ${placementMode ? "panorama-viewer--placing" : ""}`.trim()}
+        data-testid="panorama-viewer"
+        data-placing={placementMode ? "true" : "false"}
+      />
+      <ViewerInteractionHint visible={hintVisible} />
+    </div>
   );
 }

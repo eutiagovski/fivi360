@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { AuthLoadingScreen } from "@/components/auth/ProtectedRoute";
-import { PublicSocialLinks } from "@/components/public/PublicSocialLinks";
 import { ProjectCard } from "@/components/common/ProjectCard";
 import { SectionHeader } from "@/components/common/SectionHeader";
+import { PublicContactSection } from "@/components/public/PublicContactSection";
+import { PublicPageShell } from "@/components/public/PublicPageShell";
 import { useAuth } from "@/hooks/useAuth";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { recordPortfolioView } from "@/services/stats/publicViewTracking";
@@ -152,100 +153,68 @@ export const PublicPortfolio = () => {
   }
 
   const cardProjects = state.projects.map(mapProjectToCard);
-  const displayName =
-    state.user?.companyName?.trim() || state.user?.displayName?.trim() || "Portfólio";
-  const companyBio = state.user?.bio?.trim() ?? "";
 
   return (
-    <div className="min-h-screen bg-[#050505] fade-in">
-      <header className="border-b border-zinc-800 p-6">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <h1
-            className="text-2xl font-light tracking-tighter text-white"
-            data-testid="public-logo"
-          >
-            FIVI<span className="font-medium">360</span>
-          </h1>
-        </div>
-      </header>
+    <PublicPageShell
+      office={!state.error ? state.user : undefined}
+      headerMode={state.error ? "minimal" : "platform"}
+    >
+      {state.error === "not_found" && (
+        <PublicMessage
+          title="Página não encontrada"
+          description="Não há um portfólio público com este endereço."
+          dataTestId="portfolio-not-found"
+        />
+      )}
 
-      <main className="max-w-7xl mx-auto p-8 md:p-12 lg:p-16">
-        {state.error === "not_found" && (
-          <PublicMessage
-            title="Página não encontrada"
-            description="Não há um portfólio público com este endereço."
-            dataTestId="portfolio-not-found"
+      {state.error === "disabled" && (
+        <PublicMessage
+          title="Este portfólio não está disponível"
+          description="O proprietário desativou este portfólio."
+          dataTestId="portfolio-disabled"
+        />
+      )}
+
+      {!state.error && state.user && (
+        <div className="pt-2">
+          <SectionHeader
+            title="Projetos públicos"
+            dataTestId="portfolio-projects-title"
           />
-        )}
 
-        {state.error === "disabled" && (
-          <PublicMessage
-            title="Este portfólio não está disponível"
-            description="O proprietário desativou este portfólio."
-            dataTestId="portfolio-disabled"
-          />
-        )}
-
-        {!state.error && state.user && (
-          <>
-            <div className="mb-12 max-w-2xl">
-              <h2
-                className="text-4xl sm:text-5xl lg:text-6xl font-light tracking-tighter text-white mb-3"
-                data-testid="portfolio-user-name"
-              >
-                {displayName}
-              </h2>
-              {companyBio && (
-                <p
-                  className="text-lg text-zinc-400 leading-relaxed"
-                  data-testid="portfolio-company-bio"
-                >
-                  {companyBio}
-                </p>
-              )}
-              <PublicSocialLinks
-                user={state.user}
-                testIdPrefix="portfolio-social"
-              />
+          {cardProjects.length === 0 ? (
+            <div
+              className="text-center px-4 py-12 sm:px-6 sm:py-16 bg-zinc-900/50 border border-zinc-800 rounded-2xl"
+              data-testid="portfolio-empty"
+            >
+              <p className="text-base font-medium text-white mb-2">
+                Nenhum projeto público disponível.
+              </p>
+              <p className="text-sm text-zinc-400 max-w-md mx-auto">
+                Quando este portfólio tiver projetos publicados, eles aparecerão aqui.
+              </p>
             </div>
-
-            <div>
-              <SectionHeader
-                title={`Projetos públicos`}
-                dataTestId="portfolio-projects-title"
-              />
-
-              {cardProjects.length === 0 ? (
-                <PublicMessage
-                  title="Nenhum projeto público disponível."
-                  dataTestId="portfolio-empty"
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+              {cardProjects.map((project) => (
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  href={`/u/${normalizeSlug(rawSlug ?? "")}/project/${project.id}`}
+                  dataTestId={`portfolio-project-${project.id}`}
                 />
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {cardProjects.map((project) => (
-                    <ProjectCard
-                      key={project.id}
-                      project={project}
-                      href={`/u/${normalizeSlug(rawSlug ?? "")}/project/${project.id}`}
-                      dataTestId={`portfolio-project-${project.id}`}
-                    />
-                  ))}
-                </div>
-              )}
+              ))}
             </div>
-          </>
-        )}
-      </main>
-
-      <footer className="border-t border-zinc-800 mt-16 p-6">
-        <div className="max-w-7xl mx-auto text-center">
-            <a href="https://fivi360.com.br" target="_blank" rel="noopener noreferrer" className="text-white font-medium">
-          <p className="text-sm text-zinc-500">
-            Powered by <span className="text-white font-medium">FIVI360</span>
-          </p>
-            </a>
+          )}
         </div>
-      </footer>
-    </div>
+      )}
+
+      {!state.error && state.user && (
+        <PublicContactSection
+          user={state.user}
+          testIdPrefix="portfolio-contact"
+        />
+      )}
+    </PublicPageShell>
   );
 };
