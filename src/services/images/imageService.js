@@ -42,10 +42,20 @@ import {
   assertCanReplaceImageStorage,
   assertCanUploadImage,
 } from "@/services/plans/planService";
-import { deleteImageFile } from "@/services/storage/storageService";
+import {
+  collectImageStoragePaths,
+  deleteImageFile,
+  deleteImageFilesTolerant,
+} from "@/services/storage/storageService";
 import { getActiveWorkspaceIdForUser } from "@/services/workspaces/workspaceService";
 import { sortImagesByRecency, toMillis } from "@/utils/imageRecencySort";
-import { collectSceneHotspotDeletionRefs } from "@/services/hotspots/hotspotService";
+import {
+  collectImageDeleteHotspotRefs,
+  collectSceneHotspotDeletionRefs,
+} from "@/services/hotspots/hotspotService";
+
+/** Limite de operações por `writeBatch` do Firestore. */
+const FIRESTORE_BATCH_LIMIT = 500;
 
 /**
  * @typedef {Object} Image
@@ -384,13 +394,80 @@ export async function updateImageVisibility(imageId, userId, visibility) {
 }
 
 /**
- * Exclui imagem do Storage e Firestore. Se era capa, promove a mais antiga restante.
+ * Executa exclusões/atualizações em um ou mais writeBatches (limite 500 ops).
+ *
+ * @param {Array<{
+ *   type: 'delete' | 'update',
+ *   ref: import("firebase/firestore").DocumentReference,
+ *   data?: Record<string, unknown>,
+ * }>} operations
+ * @returns {Promise<void>}
+ */
+async function commitFirestoreOperationsInChunks(operations) {
+  for (let offset = 0; offset < operations.length; offset += FIRESTORE_BATCH_LIMIT) {
+    const chunk = operations.slice(offset, offset + FIRESTORE_BATCH_LIMIT);
+    const batch = writeBatch(db);
+
+    for (const operation of chunk) {
+      if (operation.type === "delete") {
+        batch.delete(operation.ref);
+      } else {
+        batch.update(operation.ref, operation.data ?? {});
+      }
+    }
+
+    await batch.commit();
+  }
+}
+
+/**
+ * Remove o documento de stats diretamente associado à imagem, se existir.
+ * Falhas (incl. rules ainda sem delete) não restauram o cascade já commitado.
  *
  * @param {string} userId
- * @param {string | null} projectId
+ * @param {string} imageId
+ * @returns {Promise<boolean>}
+ */
+async function deleteImageStatsDocTolerant(userId, imageId) {
+  if (!userId || !imageId) {
+    return false;
+  }
+
+  try {
+    await deleteDoc(doc(db, "stats", userId, "images", imageId));
+    return true;
+  } catch (error) {
+    console.warn(
+      "[deleteImage] Falha ao remover stats da imagem — cleanup pendente:",
+      imageId,
+      error,
+    );
+    return false;
+  }
+}
+
+/**
+ * @typedef {Object} DeleteImageResult
+ * @property {string | null} coverImage — nova capa quando a excluída era capa; `null` se não mudou
+ * @property {number} deletedOwnHotspotCount
+ * @property {number} deletedIncomingSceneHotspotCount
+ * @property {number} deletedStoragePathCount
+ * @property {number} sizeBytes
+ * @property {boolean} deletedImageStats
+ */
+
+/**
+ * Exclui imagem com cascade completo: hotspots próprios, scene de entrada,
+ * documento Firestore, referências de projeto/capa/count, stats da imagem e Storage.
+ *
+ * Ordem: coletar refs → commit Firestore (hotspots + imagem + projeto) →
+ * stats tolerante → Storage tolerante. Falhas de Storage/stats não restauram docs.
+ *
+ * @param {string} userId
+ * @param {string | null} projectId — contexto da UI; o `projectId` da imagem prevalece
  * @param {string} imageId
  * @param {string} [projectCoverImage]
- * @returns {Promise<{ coverImage: string | null }>}
+ * @returns {Promise<DeleteImageResult>}
  */
 export async function deleteImage(
   userId,
@@ -398,6 +475,10 @@ export async function deleteImage(
   imageId,
   projectCoverImage = "",
 ) {
+  if (!userId || !imageId) {
+    throw new Error("Dados incompletos para excluir a imagem.");
+  }
+
   const imageRef = doc(db, "images", imageId);
   const snapshot = await getDoc(imageRef);
 
@@ -405,54 +486,100 @@ export async function deleteImage(
     throw new Error("Imagem não encontrada.");
   }
 
-  const image = mapImageDoc(imageId, snapshot.data());
+  const rawData = snapshot.data();
+  const image = mapImageDoc(imageId, rawData);
 
   if (image.userId !== userId) {
     throw new Error("Sem permissão para excluir esta imagem.");
   }
 
-  console.log("[deleteImage] storagePath:", image.storagePath || "(ausente)");
+  const effectiveProjectId = image.projectId ?? normalizeProjectId(projectId);
+  const storagePaths = collectImageStoragePaths(rawData);
+  const { ownRefs, incomingRefs, allRefs } = await collectImageDeleteHotspotRefs(
+    userId,
+    imageId,
+    effectiveProjectId,
+  );
 
-  const storageResult = await deleteImageFile(image.storagePath);
+  const imageUrl = image.previewUrl || image.originalUrl;
+  /** @type {string | null} */
+  let coverImageResult = null;
+  /** @type {Record<string, unknown> | null} */
+  let projectUpdate = null;
 
-  if (storageResult.success) {
-    console.log("[deleteImage] Storage excluído com sucesso (ou arquivo inexistente).");
-  } else {
-    console.error("[deleteImage] Falha na exclusão do Storage — abortando exclusão do Firestore.");
-    throw storageResult.error ?? new Error("Não foi possível excluir o arquivo da imagem.");
+  if (effectiveProjectId) {
+    const project = await getProjectById(effectiveProjectId);
+
+    if (project) {
+      const coverToCheck =
+        (projectCoverImage && String(projectCoverImage).trim()) ||
+        project.coverImage ||
+        "";
+      const wasCover = Boolean(coverToCheck && coverToCheck === imageUrl);
+      const nextImageCount = Math.max(0, (project.imageCount ?? 0) - 1);
+
+      projectUpdate = {
+        imageCount: nextImageCount,
+        updatedAt: serverTimestamp(),
+      };
+
+      if (wasCover) {
+        const remaining = (
+          await getImagesByProjectId(effectiveProjectId, userId)
+        ).filter((item) => item.id !== imageId);
+        const oldestRemaining = pickOldestImageForCover(remaining);
+        const newCover = oldestRemaining
+          ? oldestRemaining.previewUrl || oldestRemaining.originalUrl
+          : "";
+
+        projectUpdate.coverImage = newCover;
+        coverImageResult = newCover;
+      }
+    }
+  }
+
+  /** @type {Array<{ type: 'delete' | 'update', ref: import("firebase/firestore").DocumentReference, data?: Record<string, unknown> }>} */
+  const operations = [
+    ...allRefs.map((hotspotRef) => ({ type: /** @type {'delete'} */ ("delete"), ref: hotspotRef })),
+    { type: /** @type {'delete'} */ ("delete"), ref: imageRef },
+  ];
+
+  if (effectiveProjectId && projectUpdate) {
+    operations.push({
+      type: "update",
+      ref: doc(db, "projects", effectiveProjectId),
+      data: projectUpdate,
+    });
   }
 
   try {
-    await deleteDoc(imageRef);
-    console.log("[deleteImage] Firestore excluído com sucesso:", imageId);
+    await commitFirestoreOperationsInChunks(operations);
+    console.log(
+      "[deleteImage] Firestore cascade concluído:",
+      imageId,
+      {
+        ownHotspots: ownRefs.length,
+        incomingSceneHotspots: incomingRefs.length,
+        projectId: effectiveProjectId,
+      },
+    );
   } catch (error) {
-    console.error("[deleteImage] Falha ao excluir documento do Firestore:", imageId, error);
+    console.error("[deleteImage] Falha no cascade Firestore:", imageId, error);
     throw error;
   }
 
-  const imageUrl = image.previewUrl || image.originalUrl;
-  const wasCover = Boolean(
-    projectId && projectCoverImage && projectCoverImage === imageUrl,
-  );
+  const deletedImageStats = await deleteImageStatsDocTolerant(userId, imageId);
 
-  if (projectId) {
-    if (!wasCover) {
-      await adjustProjectImageCount(projectId, -1);
-      return { coverImage: null };
-    }
-  } else {
-    return { coverImage: null };
-  }
+  await deleteImageFilesTolerant(storagePaths);
 
-  const remaining = await getImagesByProjectId(projectId, userId);
-  const oldestRemaining = pickOldestImageForCover(remaining);
-  const newCover = oldestRemaining
-    ? oldestRemaining.previewUrl || oldestRemaining.originalUrl
-    : "";
-
-  await adjustProjectImageCount(projectId, -1, { coverImage: newCover });
-
-  return { coverImage: newCover };
+  return {
+    coverImage: coverImageResult,
+    deletedOwnHotspotCount: ownRefs.length,
+    deletedIncomingSceneHotspotCount: incomingRefs.length,
+    deletedStoragePathCount: storagePaths.length,
+    sizeBytes: image.sizeBytes ?? 0,
+    deletedImageStats,
+  };
 }
 
 /**

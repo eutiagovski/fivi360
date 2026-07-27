@@ -244,7 +244,7 @@ export const Images = () => {
   };
 
   const handleConfirmDeleteImage = async () => {
-    if (!imageToDelete || !user?.uid) {
+    if (!imageToDelete || !user?.uid || isDeletingImage) {
       return;
     }
 
@@ -266,10 +266,13 @@ export const Images = () => {
 
       setImageToDelete(null);
       setShowDeleteImageDialog(false);
-    } catch {
+    } catch (error) {
       toast({
         title: "Erro ao excluir",
-        description: "Não foi possível excluir a imagem.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Não foi possível excluir a imagem.",
         variant: "destructive",
       });
     } finally {
@@ -440,6 +443,9 @@ export const Images = () => {
       <AlertDialog
         open={showDeleteImageDialog}
         onOpenChange={(open) => {
+          if (isDeletingImage) {
+            return;
+          }
           setShowDeleteImageDialog(open);
           if (!open) {
             setImageToDelete(null);
@@ -450,16 +456,23 @@ export const Images = () => {
           <AlertDialogHeader className="text-left">
             <AlertDialogTitle>Excluir imagem</AlertDialogTitle>
             <AlertDialogDescription className="text-zinc-400 break-words">
-              Tem certeza que deseja excluir esta imagem? Esta ação não pode ser
+              A imagem será removida permanentemente. Hotspots de navegação que
+              apontam para ela também serão excluídos. Esta ação não pode ser
               desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className={APP_MODAL_FOOTER_CLASSES}>
-            <AlertDialogCancel className="mt-0 bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700">
+            <AlertDialogCancel
+              disabled={isDeletingImage}
+              className="mt-0 bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700"
+            >
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleConfirmDeleteImage}
+              onClick={(event) => {
+                event.preventDefault();
+                void handleConfirmDeleteImage();
+              }}
               disabled={isDeletingImage}
               className="bg-red-600 text-white hover:bg-red-700"
               data-testid="confirm-delete-loose-image-btn"

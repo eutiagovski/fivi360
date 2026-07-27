@@ -457,7 +457,8 @@ service cloud.firestore {
         }
 
         allow create, update: if isValidStatsImageMutation();
-        allow delete: if false;
+        // Dono pode limpar stats órfãos na exclusão cascade da imagem (RC-P0.6).
+        allow delete: if isOwner(userId);
       }
     }
 

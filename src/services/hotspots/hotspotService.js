@@ -420,15 +420,31 @@ export async function updateSceneHotspot(hotspotId, data) {
 }
 
 /**
- * Referências Firestore de hotspots scene que devem ser removidos ao mover uma
- * imagem de projeto para a galeria (própria imagem + incoming no mesmo projeto).
+ * Referências de todos os hotspots da própria imagem
+ * (`images/{imageId}/hotspots/{hotspotId}`).
+ *
+ * @param {string} imageId
+ * @returns {Promise<import("firebase/firestore").DocumentReference[]>}
+ */
+export async function collectOwnHotspotDeletionRefs(imageId) {
+  if (!imageId) {
+    return [];
+  }
+
+  const snapshot = await getDocs(hotspotsCollection(imageId));
+  return snapshot.docs.map((docSnap) => docSnap.ref);
+}
+
+/**
+ * Hotspots scene em outras imagens do mesmo projeto cujo `targetImageId`
+ * aponta para a imagem informada. Não inclui hotspots info.
  *
  * @param {string} userId
  * @param {string} imageId
  * @param {string} projectId
  * @returns {Promise<import("firebase/firestore").DocumentReference[]>}
  */
-export async function collectSceneHotspotDeletionRefs(
+export async function collectIncomingSceneHotspotDeletionRefs(
   userId,
   imageId,
   projectId,
@@ -437,11 +453,8 @@ export async function collectSceneHotspotDeletionRefs(
     return [];
   }
 
-  const ownHotspots = await getHotspotsByImage(imageId);
-  const refs = ownHotspots
-    .filter((hotspot) => hotspot.type === HOTSPOT_TYPE_SCENE)
-    .map((hotspot) => doc(db, "images", imageId, "hotspots", hotspot.id));
-
+  /** @type {import("firebase/firestore").DocumentReference[]} */
+  const refs = [];
   const projectImages = await getImagesByProjectId(projectId, userId);
 
   for (const projectImage of projectImages) {
@@ -464,6 +477,68 @@ export async function collectSceneHotspotDeletionRefs(
   }
 
   return refs;
+}
+
+/**
+ * Referências Firestore de hotspots scene que devem ser removidos ao mover uma
+ * imagem de projeto para a galeria (própria imagem scene + incoming no mesmo projeto).
+ *
+ * @param {string} userId
+ * @param {string} imageId
+ * @param {string} projectId
+ * @returns {Promise<import("firebase/firestore").DocumentReference[]>}
+ */
+export async function collectSceneHotspotDeletionRefs(
+  userId,
+  imageId,
+  projectId,
+) {
+  if (!userId || !imageId || !projectId) {
+    return [];
+  }
+
+  const ownHotspots = await getHotspotsByImage(imageId);
+  const ownSceneRefs = ownHotspots
+    .filter((hotspot) => hotspot.type === HOTSPOT_TYPE_SCENE)
+    .map((hotspot) => doc(db, "images", imageId, "hotspots", hotspot.id));
+
+  const incomingRefs = await collectIncomingSceneHotspotDeletionRefs(
+    userId,
+    imageId,
+    projectId,
+  );
+
+  return [...ownSceneRefs, ...incomingRefs];
+}
+
+/**
+ * Hotspots a remover na exclusão completa de uma imagem:
+ * todos os próprios (info + scene) + scene de entrada no mesmo projeto.
+ *
+ * @param {string} userId
+ * @param {string} imageId
+ * @param {string | null} projectId
+ * @returns {Promise<{
+ *   ownRefs: import("firebase/firestore").DocumentReference[],
+ *   incomingRefs: import("firebase/firestore").DocumentReference[],
+ *   allRefs: import("firebase/firestore").DocumentReference[],
+ * }>}
+ */
+export async function collectImageDeleteHotspotRefs(
+  userId,
+  imageId,
+  projectId,
+) {
+  const ownRefs = await collectOwnHotspotDeletionRefs(imageId);
+  const incomingRefs = projectId
+    ? await collectIncomingSceneHotspotDeletionRefs(userId, imageId, projectId)
+    : [];
+
+  return {
+    ownRefs,
+    incomingRefs,
+    allRefs: [...ownRefs, ...incomingRefs],
+  };
 }
 
 /**
@@ -491,19 +566,15 @@ export async function hasRelatedSceneHotspots(userId, imageId, projectId) {
  * @returns {Promise<number>} Quantidade de hotspots removidos
  */
 export async function deleteAllHotspotsForImage(imageId) {
-  if (!imageId) {
+  const refs = await collectOwnHotspotDeletionRefs(imageId);
+
+  if (refs.length === 0) {
     return 0;
   }
 
-  const snapshot = await getDocs(hotspotsCollection(imageId));
+  await Promise.all(refs.map((hotspotRef) => deleteDoc(hotspotRef)));
 
-  if (snapshot.empty) {
-    return 0;
-  }
-
-  await Promise.all(snapshot.docs.map((docSnap) => deleteDoc(docSnap.ref)));
-
-  return snapshot.size;
+  return refs.length;
 }
 
 /**
