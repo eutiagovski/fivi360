@@ -1,7 +1,7 @@
 rules_version = '2';
 
 // --------------------------------------------------------------------------
-// FIVI360 — Firestore Security Rules (Sprint Public Profile Cleanup 2)
+// FIVI360 — Firestore Security Rules (RC-P0.5 — Firestore Rules Hardening)
 //
 // Coleções:
 //   users/{userId}              — dados privados (plano, billing, legal)
@@ -17,6 +17,9 @@ rules_version = '2';
 //   stats/{userId}/images/{imageId}     — contadores de imagem 360 pública
 //   invoices/{invoiceId}          — faturas Stripe (escrita via webhook / Admin SDK)
 //   emailQueue/{emailId}          — fila de e-mails transacionais (Resend)
+//
+// Admin SDK / Cloud Functions ignoram estas rules e continuam gravando
+// plan, billing, portfolioAvailable, emailVerified*, etc.
 //
 // Split get vs list: queries precisam provar estaticamente os predicados
 // usados em allow list. Ver docs/security-rules-notes.md.
@@ -77,6 +80,253 @@ service cloud.firestore {
         && request.resource.data.payload is map
         && request.resource.data.createdAt is timestamp
         && !request.resource.data.keys().hasAny(['sentAt', 'resendId', 'error']);
+    }
+
+    // ---------- RC-P0.5: users / publicProfiles field hardening ----------
+
+    // Bootstrap billing permitido no create (espelha DEFAULT_BILLING do client).
+    // Após o create, billing é imutável pelo cliente (Stripe/webhook via Admin SDK).
+    function isStarterBootstrapBilling(billing) {
+      return billing is map
+        && billing.keys().hasOnly([
+          'provider',
+          'customerId',
+          'subscriptionId',
+          'planId',
+          'subscriptionStatus',
+          'currentPeriodStart',
+          'currentPeriodEnd',
+          'nextInvoiceDate',
+          'cancelAtPeriodEnd',
+          'lastInvoiceUrl',
+          'lastPaymentStatus',
+          'updatedAt'
+        ])
+        && billing.provider == 'mercado_pago'
+        && billing.customerId == ''
+        && billing.subscriptionId == ''
+        && billing.planId == ''
+        && billing.subscriptionStatus == 'free'
+        && billing.currentPeriodStart == null
+        && billing.currentPeriodEnd == null
+        && billing.nextInvoiceDate == null
+        && billing.cancelAtPeriodEnd == false
+        && billing.lastInvoiceUrl == ''
+        && billing.lastPaymentStatus == ''
+        && billing.updatedAt == null;
+    }
+
+    function isValidLegalConsent(consent) {
+      return consent is map
+        && consent.keys().hasOnly([
+          'termsAccepted',
+          'privacyAccepted',
+          'termsVersion',
+          'privacyVersion',
+          'acceptedAt',
+          'acceptedSource'
+        ])
+        && consent.termsAccepted == true
+        && consent.privacyAccepted == true
+        && consent.termsVersion is string
+        && consent.privacyVersion is string
+        && consent.acceptedAt is timestamp
+        && consent.acceptedSource in ['signup', 'modal_existing_user'];
+    }
+
+    function isValidSocialLinks(links) {
+      return links is map
+        && links.keys().hasOnly([
+          'website',
+          'instagram',
+          'youtube',
+          'linkedin',
+          'whatsapp'
+        ])
+        && links.website is string
+        && links.instagram is string
+        && links.youtube is string
+        && links.linkedin is string
+        && links.whatsapp is string;
+    }
+
+    function userCreateFieldsAreValid(userId) {
+      let data = request.resource.data;
+
+      return data.keys().hasOnly([
+          'displayName',
+          'email',
+          'plan',
+          'billing',
+          'defaultWorkspaceId',
+          'activeWorkspaceId',
+          'welcomeEmailQueuedAt',
+          'createdAt',
+          'updatedAt',
+          'legalConsent'
+        ])
+        && data.displayName is string
+        && data.email is string
+        && data.plan == 'starter'
+        && isStarterBootstrapBilling(data.billing)
+        && data.defaultWorkspaceId is string
+        && data.defaultWorkspaceId == userId
+        && data.activeWorkspaceId is string
+        && data.activeWorkspaceId == userId
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp
+        && (
+          !data.keys().hasAny(['welcomeEmailQueuedAt'])
+          || data.welcomeEmailQueuedAt == null
+        )
+        && (
+          !data.keys().hasAny(['legalConsent'])
+          || isValidLegalConsent(data.legalConsent)
+        );
+    }
+
+    function userUpdateFieldsAreValid() {
+      let affected = request.resource.data.diff(resource.data).affectedKeys();
+      let data = request.resource.data;
+
+      // Allowlist mínima — qualquer outro campo (plan, billing, admin, etc.) é negado.
+      return affected.hasOnly([
+          'displayName',
+          'updatedAt',
+          'legalConsent',
+          'welcomeEmailQueuedAt'
+        ])
+        && data.updatedAt is timestamp
+        && (
+          !affected.hasAny(['displayName'])
+          || data.displayName is string
+        )
+        && (
+          !affected.hasAny(['legalConsent'])
+          || isValidLegalConsent(data.legalConsent)
+        )
+        && (
+          !affected.hasAny(['welcomeEmailQueuedAt'])
+          || data.welcomeEmailQueuedAt == null
+          || data.welcomeEmailQueuedAt is timestamp
+        );
+    }
+
+    // portfolioAvailable: entitlement comercial — cliente nunca promove a true.
+    // Demote para false é permitido (ocultar portfólio). Promote só via Admin SDK.
+    function publicEntitlementFieldsUnchanged() {
+      let affected = request.resource.data.diff(resource.data).affectedKeys();
+
+      return !affected.hasAny(['portfolioAvailable'])
+        || request.resource.data.portfolioAvailable == false;
+    }
+
+    function publicProfileCreateFieldsAreValid(userId) {
+      let data = request.resource.data;
+
+      return data.keys().hasOnly([
+          'uid',
+          'slug',
+          'portfolioEnabled',
+          'portfolioAvailable',
+          'displayName',
+          'companyName',
+          'companyLogo',
+          'bio',
+          'socialLinks',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.uid == userId
+        && data.slug is string
+        && data.portfolioEnabled is bool
+        && data.portfolioEnabled == false
+        && data.portfolioAvailable is bool
+        && data.portfolioAvailable == false
+        && data.displayName is string
+        && data.companyName is string
+        && data.companyLogo is string
+        && data.bio is string
+        && isValidSocialLinks(data.socialLinks)
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function publicProfileUpdateFieldsAreValid(userId) {
+      let affected = request.resource.data.diff(resource.data).affectedKeys();
+      let data = request.resource.data;
+
+      return data.uid == userId
+        && data.uid == resource.data.uid
+        && publicEntitlementFieldsUnchanged()
+        && !affected.hasAny([
+          'plan',
+          'planId',
+          'billing',
+          'subscription',
+          'subscriptionStatus',
+          'featureFlags',
+          'premiumFeatures',
+          'portfolioEnabledByPlan',
+          'analyticsAvailable',
+          'hotspotsAvailable',
+          'whiteLabelAvailable',
+          'customDomainAvailable',
+          'role',
+          'admin',
+          'isAdmin',
+          'permissions',
+          'claims',
+          'createdAt'
+        ])
+        && affected.hasOnly([
+          'uid',
+          'displayName',
+          'companyName',
+          'companyLogo',
+          'bio',
+          'slug',
+          'portfolioEnabled',
+          'portfolioAvailable',
+          'socialLinks',
+          'updatedAt'
+        ])
+        && (
+          !affected.hasAny(['portfolioAvailable'])
+          || data.portfolioAvailable == false
+        )
+        && (
+          !affected.hasAny(['displayName'])
+          || data.displayName is string
+        )
+        && (
+          !affected.hasAny(['companyName'])
+          || data.companyName is string
+        )
+        && (
+          !affected.hasAny(['companyLogo'])
+          || data.companyLogo is string
+        )
+        && (
+          !affected.hasAny(['bio'])
+          || data.bio is string
+        )
+        && (
+          !affected.hasAny(['slug'])
+          || data.slug is string
+        )
+        && (
+          !affected.hasAny(['portfolioEnabled'])
+          || data.portfolioEnabled is bool
+        )
+        && (
+          !affected.hasAny(['socialLinks'])
+          || isValidSocialLinks(data.socialLinks)
+        )
+        && (
+          !affected.hasAny(['updatedAt'])
+          || data.updatedAt is timestamp
+        );
     }
 
     // Portfólio /u/:slug — listagem de projetos públicos exige portfolioAvailable.
@@ -257,6 +507,8 @@ service cloud.firestore {
     }
 
     // ---------- publicProfiles (dados públicos do portfólio) ----------
+    // portfolioAvailable: SERVER_ONLY promote (Admin SDK / syncPublicPortfolioAvailability).
+    // Cliente pode demote para false ao desativar o portfólio.
 
     match /publicProfiles/{userId} {
 
@@ -266,12 +518,12 @@ service cloud.firestore {
       allow list: if false;
 
       allow create: if isOwner(userId)
-        && request.resource.data.uid == userId;
+        && publicProfileCreateFieldsAreValid(userId);
 
       allow update: if isOwner(userId)
-        && request.resource.data.uid == userId;
+        && publicProfileUpdateFieldsAreValid(userId);
 
-      allow delete: if isOwner(userId);
+      allow delete: if false;
     }
 
     // ---------- workspaces (fundação multiusuário — Sprint Multiuser Foundation 1) ----------
@@ -327,7 +579,8 @@ service cloud.firestore {
       allow update: if isWorkspaceOwner(workspaceId)
         && request.resource.data.ownerId == resource.data.ownerId
         && request.resource.data.type == resource.data.type
-        && request.resource.data.planId is string
+        // RC-P0.5A: planId não é fonte de entitlement, mas não pode ser alterado pelo cliente.
+        && request.resource.data.planId == resource.data.planId
         && request.resource.data.name is string
         && request.resource.data.updatedAt is timestamp;
 
@@ -359,15 +612,21 @@ service cloud.firestore {
     }
 
     // ---------- users (dados privados — owner only) ----------
+    // plan / billing: bootstrap starter no create; updates só via Admin SDK.
+    // Allowlist de update: displayName, legalConsent, welcomeEmailQueuedAt, updatedAt.
 
     match /users/{userId} {
 
       allow get: if isOwner(userId);
       allow list: if false;
 
-      allow create: if isOwner(userId);
-      allow update: if isOwner(userId);
-      allow delete: if isOwner(userId);
+      allow create: if isOwner(userId)
+        && userCreateFieldsAreValid(userId);
+
+      allow update: if isOwner(userId)
+        && userUpdateFieldsAreValid();
+
+      allow delete: if false;
     }
 
     // ---------- projects ----------

@@ -1,0 +1,547 @@
+/**
+ * RC-P0.5 — Firestore Rules Hardening tests
+ *
+ * Run: npm run test:rules
+ * (starts Firestore emulator via firebase emulators:exec)
+ */
+
+const { readFileSync } = require("fs");
+const { resolve } = require("path");
+const {
+  assertFails,
+  assertSucceeds,
+  initializeTestEnvironment,
+} = require("@firebase/rules-unit-testing");
+const {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  deleteDoc,
+  Timestamp,
+} = require("firebase/firestore");
+
+const PROJECT_ID = "demo-fivi360-rules";
+const RULES_PATH = resolve(__dirname, "../../firestore.rules");
+
+/** @type {import('@firebase/rules-unit-testing').RulesTestEnvironment} */
+let testEnv;
+
+const STARTER_BILLING = Object.freeze({
+  provider: "mercado_pago",
+  customerId: "",
+  subscriptionId: "",
+  planId: "",
+  subscriptionStatus: "free",
+  currentPeriodStart: null,
+  currentPeriodEnd: null,
+  nextInvoiceDate: null,
+  cancelAtPeriodEnd: false,
+  lastInvoiceUrl: "",
+  lastPaymentStatus: "",
+  updatedAt: null,
+});
+
+const EMPTY_SOCIAL = Object.freeze({
+  website: "",
+  instagram: "",
+  youtube: "",
+  linkedin: "",
+  whatsapp: "",
+});
+
+function authContext(uid) {
+  return testEnv.authenticatedContext(uid, { email: `${uid}@example.com` });
+}
+
+function unauthContext() {
+  return testEnv.unauthenticatedContext();
+}
+
+function buildUserCreate(uid, overrides = {}) {
+  return {
+    displayName: "Test User",
+    email: `${uid}@example.com`,
+    plan: "starter",
+    billing: { ...STARTER_BILLING },
+    defaultWorkspaceId: uid,
+    activeWorkspaceId: uid,
+    welcomeEmailQueuedAt: null,
+    createdAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+    ...overrides,
+  };
+}
+
+function buildPublicProfileCreate(uid, overrides = {}) {
+  return {
+    uid,
+    slug: "",
+    portfolioEnabled: false,
+    portfolioAvailable: false,
+    displayName: "Test User",
+    companyName: "",
+    companyLogo: "",
+    bio: "",
+    socialLinks: { ...EMPTY_SOCIAL },
+    createdAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+    ...overrides,
+  };
+}
+
+async function seedOwnerDocs(uid, { user, profile } = {}) {
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    const db = context.firestore();
+    await setDoc(doc(db, "users", uid), user ?? buildUserCreate(uid));
+    await setDoc(
+      doc(db, "publicProfiles", uid),
+      profile ?? buildPublicProfileCreate(uid),
+    );
+  });
+}
+
+beforeAll(async () => {
+  testEnv = await initializeTestEnvironment({
+    projectId: PROJECT_ID,
+    firestore: {
+      rules: readFileSync(RULES_PATH, "utf8"),
+      host: "127.0.0.1",
+      port: 8085,
+    },
+  });
+});
+
+afterAll(async () => {
+  if (testEnv) {
+    await testEnv.cleanup();
+  }
+});
+
+beforeEach(async () => {
+  await testEnv.clearFirestore();
+});
+
+describe("users/{uid} — allow", () => {
+  test("1. owner reads own users/{uid}", async () => {
+    const uid = "user-a";
+    await seedOwnerDocs(uid);
+
+    const db = authContext(uid).firestore();
+    await assertSucceeds(getDoc(doc(db, "users", uid)));
+  });
+
+  test("2. owner updates safe field (displayName)", async () => {
+    const uid = "user-a";
+    await seedOwnerDocs(uid);
+
+    const db = authContext(uid).firestore();
+    await assertSucceeds(
+      updateDoc(doc(db, "users", uid), {
+        displayName: "Novo Nome",
+        updatedAt: Timestamp.now(),
+      }),
+    );
+  });
+
+  test("5. legitimate profile bootstrap create succeeds", async () => {
+    const uid = "user-new";
+    const db = authContext(uid).firestore();
+
+    await assertSucceeds(setDoc(doc(db, "users", uid), buildUserCreate(uid)));
+    await assertSucceeds(
+      setDoc(doc(db, "publicProfiles", uid), buildPublicProfileCreate(uid)),
+    );
+  });
+
+  test("owner updates legalConsent", async () => {
+    const uid = "user-a";
+    await seedOwnerDocs(uid);
+
+    const db = authContext(uid).firestore();
+    await assertSucceeds(
+      updateDoc(doc(db, "users", uid), {
+        legalConsent: {
+          termsAccepted: true,
+          privacyAccepted: true,
+          termsVersion: "1.0",
+          privacyVersion: "1.0",
+          acceptedAt: Timestamp.now(),
+          acceptedSource: "modal_existing_user",
+        },
+        updatedAt: Timestamp.now(),
+      }),
+    );
+  });
+});
+
+describe("publicProfiles/{uid} — allow", () => {
+  test("3. owner updates legitimate public fields", async () => {
+    const uid = "user-a";
+    await seedOwnerDocs(uid);
+
+    const db = authContext(uid).firestore();
+    await assertSucceeds(
+      setDoc(
+        doc(db, "publicProfiles", uid),
+        {
+          uid,
+          displayName: "Escritório",
+          companyName: "Studio X",
+          bio: "Bio",
+          slug: "studio-x",
+          portfolioEnabled: false,
+          socialLinks: {
+            website: "https://example.com",
+            instagram: "",
+            youtube: "",
+            linkedin: "",
+            whatsapp: "",
+          },
+          updatedAt: Timestamp.now(),
+        },
+        { merge: true },
+      ),
+    );
+  });
+
+  test("4. owner may change portfolioEnabled (preference)", async () => {
+    const uid = "user-a";
+    await seedOwnerDocs(uid);
+
+    const db = authContext(uid).firestore();
+    await assertSucceeds(
+      updateDoc(doc(db, "publicProfiles", uid), {
+        portfolioEnabled: true,
+        updatedAt: Timestamp.now(),
+      }),
+    );
+  });
+
+  test("owner may demote portfolioAvailable to false", async () => {
+    const uid = "user-a";
+    await seedOwnerDocs(uid, {
+      profile: buildPublicProfileCreate(uid, { portfolioAvailable: true }),
+    });
+
+    const db = authContext(uid).firestore();
+    await assertSucceeds(
+      updateDoc(doc(db, "publicProfiles", uid), {
+        portfolioAvailable: false,
+        portfolioEnabled: false,
+        updatedAt: Timestamp.now(),
+      }),
+    );
+  });
+});
+
+describe("slugs/{slug} — allow", () => {
+  test("6. legitimate slug create and owner delete work", async () => {
+    const uid = "user-a";
+    const db = authContext(uid).firestore();
+
+    await assertSucceeds(
+      setDoc(doc(db, "slugs", "meu-escritorio"), {
+        uid,
+        type: "user",
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+      }),
+    );
+
+    await assertSucceeds(deleteDoc(doc(db, "slugs", "meu-escritorio")));
+  });
+});
+
+describe("users/{uid} — deny", () => {
+  test("7. owner cannot change users.plan", async () => {
+    const uid = "user-a";
+    await seedOwnerDocs(uid);
+
+    const db = authContext(uid).firestore();
+    await assertFails(
+      updateDoc(doc(db, "users", uid), {
+        plan: { id: "studio", status: "active", source: "stripe" },
+        updatedAt: Timestamp.now(),
+      }),
+    );
+  });
+
+  test("8. owner cannot change users.billing", async () => {
+    const uid = "user-a";
+    await seedOwnerDocs(uid);
+
+    const db = authContext(uid).firestore();
+    await assertFails(
+      updateDoc(doc(db, "users", uid), {
+        billing: {
+          ...STARTER_BILLING,
+          provider: "stripe",
+          subscriptionStatus: "active",
+        },
+        updatedAt: Timestamp.now(),
+      }),
+    );
+  });
+
+  test("9. owner cannot add billing.stripe.customerId", async () => {
+    const uid = "user-a";
+    await seedOwnerDocs(uid);
+
+    const db = authContext(uid).firestore();
+    await assertFails(
+      updateDoc(doc(db, "users", uid), {
+        billing: {
+          provider: "stripe",
+          stripe: { customerId: "cus_hack", subscriptionId: "sub_hack" },
+        },
+        updatedAt: Timestamp.now(),
+      }),
+    );
+  });
+
+  test("10. owner cannot change subscriptionStatus", async () => {
+    const uid = "user-a";
+    await seedOwnerDocs(uid);
+
+    const db = authContext(uid).firestore();
+    await assertFails(
+      updateDoc(doc(db, "users", uid), {
+        subscriptionStatus: "active",
+        updatedAt: Timestamp.now(),
+      }),
+    );
+  });
+
+  test("11. owner cannot change priceId", async () => {
+    const uid = "user-a";
+    await seedOwnerDocs(uid);
+
+    const db = authContext(uid).firestore();
+    await assertFails(
+      updateDoc(doc(db, "users", uid), {
+        priceId: "price_paid",
+        updatedAt: Timestamp.now(),
+      }),
+    );
+  });
+
+  test("12. owner cannot add admin field", async () => {
+    const uid = "user-a";
+    await seedOwnerDocs(uid);
+
+    const db = authContext(uid).firestore();
+    await assertFails(
+      updateDoc(doc(db, "users", uid), {
+        isAdmin: true,
+        updatedAt: Timestamp.now(),
+      }),
+    );
+  });
+
+  test("15. user cannot alter another user's document", async () => {
+    await seedOwnerDocs("user-a");
+
+    const db = authContext("user-b").firestore();
+    await assertFails(
+      updateDoc(doc(db, "users", "user-a"), {
+        displayName: "Hijacked",
+        updatedAt: Timestamp.now(),
+      }),
+    );
+  });
+
+  test("17. owner cannot delete users/{uid}", async () => {
+    const uid = "user-a";
+    await seedOwnerDocs(uid);
+
+    const db = authContext(uid).firestore();
+    await assertFails(deleteDoc(doc(db, "users", uid)));
+  });
+
+  test("create with paid plan is denied", async () => {
+    const uid = "user-new";
+    const db = authContext(uid).firestore();
+
+    await assertFails(
+      setDoc(
+        doc(db, "users", uid),
+        buildUserCreate(uid, {
+          plan: { id: "professional", status: "active", source: "stripe" },
+        }),
+      ),
+    );
+  });
+});
+
+describe("publicProfiles/{uid} — deny", () => {
+  test("13. owner cannot promote portfolioAvailable to true", async () => {
+    const uid = "user-a";
+    await seedOwnerDocs(uid);
+
+    const db = authContext(uid).firestore();
+    await assertFails(
+      updateDoc(doc(db, "publicProfiles", uid), {
+        portfolioAvailable: true,
+        updatedAt: Timestamp.now(),
+      }),
+    );
+  });
+
+  test("14. owner cannot add planId to publicProfiles", async () => {
+    const uid = "user-a";
+    await seedOwnerDocs(uid);
+
+    const db = authContext(uid).firestore();
+    await assertFails(
+      updateDoc(doc(db, "publicProfiles", uid), {
+        planId: "studio",
+        updatedAt: Timestamp.now(),
+      }),
+    );
+  });
+
+  test("16. owner cannot repoint uid to another person", async () => {
+    const uid = "user-a";
+    await seedOwnerDocs(uid);
+
+    const db = authContext(uid).firestore();
+    await assertFails(
+      updateDoc(doc(db, "publicProfiles", uid), {
+        uid: "user-b",
+        updatedAt: Timestamp.now(),
+      }),
+    );
+  });
+
+  test("create with portfolioAvailable true is denied", async () => {
+    const uid = "user-new";
+    const db = authContext(uid).firestore();
+
+    await assertFails(
+      setDoc(
+        doc(db, "publicProfiles", uid),
+        buildPublicProfileCreate(uid, { portfolioAvailable: true }),
+      ),
+    );
+  });
+
+  test("anonymous cannot read profile when portfolioAvailable is false", async () => {
+    const uid = "user-a";
+    await seedOwnerDocs(uid);
+
+    const db = unauthContext().firestore();
+    await assertFails(getDoc(doc(db, "publicProfiles", uid)));
+  });
+
+  test("anonymous can read profile when portfolioAvailable is true", async () => {
+    const uid = "user-a";
+    await seedOwnerDocs(uid, {
+      profile: buildPublicProfileCreate(uid, { portfolioAvailable: true }),
+    });
+
+    const db = unauthContext().firestore();
+    await assertSucceeds(getDoc(doc(db, "publicProfiles", uid)));
+  });
+});
+
+describe("slugs/{slug} — deny", () => {
+  test("18. user cannot overwrite slug owned by another uid", async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await setDoc(doc(db, "slugs", "taken-slug"), {
+        uid: "user-a",
+        type: "user",
+        createdAt: Timestamp.now(),
+      });
+    });
+
+    const db = authContext("user-b").firestore();
+
+    // update is always denied
+    await assertFails(
+      updateDoc(doc(db, "slugs", "taken-slug"), {
+        uid: "user-b",
+      }),
+    );
+
+    // delete only by owner
+    await assertFails(deleteDoc(doc(db, "slugs", "taken-slug")));
+
+    // create on existing doc fails (already exists); pointing new slug to other uid denied
+    await assertFails(
+      setDoc(doc(db, "slugs", "other-slug"), {
+        uid: "user-a",
+        type: "user",
+        createdAt: Timestamp.now(),
+      }),
+    );
+  });
+});
+
+describe("Admin SDK note", () => {
+  test("withSecurityRulesDisabled can write server-only fields", async () => {
+    const uid = "user-a";
+    await seedOwnerDocs(uid);
+
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await updateDoc(doc(db, "users", uid), {
+        plan: { id: "professional", status: "active", source: "stripe" },
+        billing: {
+          provider: "stripe",
+          stripe: { customerId: "cus_1", subscriptionId: "sub_1" },
+        },
+      });
+      await updateDoc(doc(db, "publicProfiles", uid), {
+        portfolioAvailable: true,
+      });
+    });
+
+    const db = authContext(uid).firestore();
+    const userSnap = await getDoc(doc(db, "users", uid));
+    expect(userSnap.data().plan.id).toBe("professional");
+  });
+});
+
+describe("workspaces.planId — RC-P0.5A", () => {
+  test("owner cannot change workspaces.planId (not an entitlement bypass)", async () => {
+    const uid = "user-a";
+
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await setDoc(doc(db, "workspaces", uid), {
+        ownerId: uid,
+        name: "Meu workspace",
+        type: "personal",
+        planId: "starter",
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+      });
+      await setDoc(doc(db, "workspaces", uid, "members", uid), {
+        userId: uid,
+        role: "owner",
+        status: "active",
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+      });
+    });
+
+    const db = authContext(uid).firestore();
+    await assertFails(
+      updateDoc(doc(db, "workspaces", uid), {
+        planId: "studio",
+        name: "Meu workspace",
+        updatedAt: Timestamp.now(),
+      }),
+    );
+
+    await assertSucceeds(
+      updateDoc(doc(db, "workspaces", uid), {
+        planId: "starter",
+        name: "Workspace renomeado",
+        updatedAt: Timestamp.now(),
+      }),
+    );
+  });
+});

@@ -40,6 +40,7 @@ import {
   mapToPublicUser,
   mapUserDoc,
 } from "@/services/users/userMappers";
+import { syncPublicPortfolioAvailability } from "@/services/users/syncPublicPortfolioAvailability";
 import {
   buildPersonalWorkspaceMemberPayload,
   buildPersonalWorkspacePayload,
@@ -460,6 +461,9 @@ export async function saveUserSettings(userId, data, previousSlug = "") {
     updatedAt: serverTimestamp(),
   };
 
+  // RC-P0.5: cliente nunca promove portfolioAvailable=true.
+  // Demote para false é permitido pelas rules; promote via Admin SDK (callable).
+  /** @type {Record<string, unknown>} */
   const publicProfileUpdates = {
     uid: userId,
     displayName: data.displayName,
@@ -467,10 +471,13 @@ export async function saveUserSettings(userId, data, previousSlug = "") {
     bio: data.bio ?? "",
     slug: normalizedSlug,
     portfolioEnabled: data.portfolioEnabled,
-    portfolioAvailable,
     socialLinks: buildSocialLinksPayload(data.socialLinks),
     updatedAt: serverTimestamp(),
   };
+
+  if (portfolioAvailable === false) {
+    publicProfileUpdates.portfolioAvailable = false;
+  }
 
   const persistSettings = async (
     /** @type {import("firebase/firestore").Transaction} */ transaction,
@@ -506,6 +513,16 @@ export async function saveUserSettings(userId, data, previousSlug = "") {
     await runTransaction(db, async (transaction) => {
       await persistSettings(transaction);
     });
+  }
+
+  if (portfolioAvailable === true) {
+    try {
+      await syncPublicPortfolioAvailability();
+    } catch (err) {
+      if (process.env.NODE_ENV === "development") {
+        console.error("[FIVI360] Failed to sync portfolioAvailable:", err);
+      }
+    }
   }
 
   return { publicSlug: normalizedSlug };

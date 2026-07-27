@@ -58,6 +58,8 @@ function computePortfolioAvailable(portfolioEnabled, plan) {
 
 /**
  * Recalcula `publicProfiles/{uid}.portfolioAvailable` após mudança de plano.
+ * Promote/demote via Admin SDK (rules bloqueiam promote pelo cliente — RC-P0.5).
+ * Settings também chama a callable `syncPublicPortfolioAvailability` ao ativar o portfólio.
  *
  * @param {import("firebase-admin/firestore").Firestore} db
  * @param {string} uid
