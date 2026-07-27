@@ -84,36 +84,16 @@ service cloud.firestore {
 
     // ---------- RC-P0.5: users / publicProfiles field hardening ----------
 
-    // Bootstrap billing permitido no create (espelha DEFAULT_BILLING do client).
+    // Bootstrap billing mínimo (espelha DEFAULT_BILLING — Stripe / free).
     // Após o create, billing é imutável pelo cliente (Stripe/webhook via Admin SDK).
     function isStarterBootstrapBilling(billing) {
       return billing is map
         && billing.keys().hasOnly([
           'provider',
-          'customerId',
-          'subscriptionId',
-          'planId',
-          'subscriptionStatus',
-          'currentPeriodStart',
-          'currentPeriodEnd',
-          'nextInvoiceDate',
-          'cancelAtPeriodEnd',
-          'lastInvoiceUrl',
-          'lastPaymentStatus',
-          'updatedAt'
+          'subscriptionStatus'
         ])
-        && billing.provider == 'mercado_pago'
-        && billing.customerId == ''
-        && billing.subscriptionId == ''
-        && billing.planId == ''
-        && billing.subscriptionStatus == 'free'
-        && billing.currentPeriodStart == null
-        && billing.currentPeriodEnd == null
-        && billing.nextInvoiceDate == null
-        && billing.cancelAtPeriodEnd == false
-        && billing.lastInvoiceUrl == ''
-        && billing.lastPaymentStatus == ''
-        && billing.updatedAt == null;
+        && billing.provider == 'stripe'
+        && billing.subscriptionStatus == 'free';
     }
 
     function isValidLegalConsent(consent) {

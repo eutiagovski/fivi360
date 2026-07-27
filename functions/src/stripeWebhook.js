@@ -5,6 +5,7 @@ const { getFirestore, FieldValue, Timestamp } = require("firebase-admin/firestor
 const Stripe = require("stripe");
 const { STRIPE_WEBHOOK_SECRET, STRIPE_SECRET_KEY, getStripeClient } = require("./stripe/client");
 const { resolvePlanIdFromStripePriceId } = require("./config/stripeBilling");
+const { createGetPlanIdFromInvoiceLines } = require("./billing/resolvePlanFromInvoiceLines");
 const { EMAIL_TYPES } = require("./config/email");
 const { resolveUserEmail } = require("./email/sendBillingEmail");
 
@@ -13,6 +14,7 @@ if (getApps().length === 0) {
 }
 
 const PUBLIC_PORTFOLIO_PLAN_IDS = new Set(["professional", "studio", "enterprise"]);
+const getPlanIdFromInvoiceLines = createGetPlanIdFromInvoiceLines(resolvePlanIdFromStripePriceId);
 
 /**
  * @param {unknown} plan
@@ -357,69 +359,6 @@ function getInvoiceSubscriptionId(invoice) {
   }
 
   return null;
-}
-
-/**
- * @param {import("stripe").Stripe.InvoiceLineItem} line
- * @returns {string | null}
- */
-function getStripePriceIdFromInvoiceLine(line) {
-  if (line.price && typeof line.price === "object" && typeof line.price.id === "string") {
-    return line.price.id;
-  }
-
-  if (
-    line.pricing?.type === "price_details" &&
-    line.pricing.price_details?.price
-  ) {
-    const price = line.pricing.price_details.price;
-    return typeof price === "string" ? price : price?.id ?? null;
-  }
-
-  if (line.plan && typeof line.plan === "object" && typeof line.plan.id === "string") {
-    return line.plan.id;
-  }
-
-  return null;
-}
-
-/**
- * @param {import("stripe").Stripe.Invoice} invoice
- * @returns {{ planId: string | null, source: string | null }}
- */
-function getPlanIdFromInvoiceLines(invoice) {
-  const lines = invoice.lines?.data;
-  if (!Array.isArray(lines) || lines.length === 0) {
-    return { planId: null, source: null };
-  }
-
-  for (const line of lines) {
-    const price = line.price;
-    if (price && typeof price === "object") {
-      const fromPriceMetadata = price.metadata?.planId?.trim();
-      if (fromPriceMetadata) {
-        return { planId: fromPriceMetadata, source: "invoice_line_price_metadata" };
-      }
-    }
-
-    const stripePriceId = getStripePriceIdFromInvoiceLine(line);
-    if (stripePriceId) {
-      const fromConfiguredPrice = resolvePlanIdFromStripePriceId(stripePriceId);
-      if (fromConfiguredPrice) {
-        return { planId: fromConfiguredPrice, source: "invoice_line_stripe_price_id" };
-      }
-    }
-
-    const plan = line.plan;
-    if (plan && typeof plan === "object") {
-      const fromPlanMetadata = plan.metadata?.planId?.trim();
-      if (fromPlanMetadata) {
-        return { planId: fromPlanMetadata, source: "invoice_line_plan_metadata" };
-      }
-    }
-  }
-
-  return { planId: null, source: null };
 }
 
 /**

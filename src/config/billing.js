@@ -1,5 +1,7 @@
 /**
- * Configuração e modelo de billing — Stripe (checkout) + legado Mercado Pago.
+ * Configuração e modelo de billing — Stripe (único provedor ativo).
+ * Usuários antigos com `billing.provider === "mercado_pago"` são só leitura
+ * (não liberam entitlement; fonte de plano continua sendo `users.plan`).
  */
 
 import {
@@ -8,7 +10,11 @@ import {
   PLAN_LIMITS,
 } from "@/config/planLimits";
 
-export const BILLING_PROVIDER = "mercado_pago";
+/** Provedor ativo de billing. */
+export const BILLING_PROVIDER = "stripe";
+
+/** Provider legado — nunca usar para entitlement ou checkout. */
+export const LEGACY_BILLING_PROVIDER = "mercado_pago";
 
 export const BILLING_STATUS = {
   FREE: "free",
@@ -26,7 +32,6 @@ export const BILLING_PLANS = {
     price: 49,
     currency: "BRL",
     interval: "month",
-    mercadoPagoPlanIdEnv: "REACT_APP_MP_PLAN_PROFESSIONAL",
   },
   studio: {
     id: "studio",
@@ -34,7 +39,6 @@ export const BILLING_PLANS = {
     price: 199,
     currency: "BRL",
     interval: "month",
-    mercadoPagoPlanIdEnv: "REACT_APP_MP_PLAN_STUDIO",
   },
   enterprise: {
     id: "enterprise",
@@ -42,7 +46,6 @@ export const BILLING_PLANS = {
     price: 499,
     currency: "BRL",
     interval: "month",
-    mercadoPagoPlanIdEnv: "REACT_APP_MP_PLAN_ENTERPRISE",
   },
 };
 
@@ -64,7 +67,18 @@ export const BILLING_PLANS = {
  * @property {import("firebase/firestore").Timestamp | Date | string | null} updatedAt
  */
 
-export const DEFAULT_BILLING = {
+/**
+ * Bootstrap mínimo de billing para novos usuários Starter.
+ * Sem IDs Stripe vazios e sem provider legado.
+ * Campos de UI ausentes são preenchidos em `normalizeBilling`.
+ */
+export const DEFAULT_BILLING = Object.freeze({
+  provider: BILLING_PROVIDER,
+  subscriptionStatus: BILLING_STATUS.FREE,
+});
+
+/** Shape completo usado pela UI após normalização. */
+const BILLING_UI_DEFAULTS = Object.freeze({
   provider: BILLING_PROVIDER,
   customerId: "",
   subscriptionId: "",
@@ -77,7 +91,7 @@ export const DEFAULT_BILLING = {
   lastInvoiceUrl: "",
   lastPaymentStatus: "",
   updatedAt: null,
-};
+});
 
 export const CONTACT_EMAIL = "contato@fivi360.com.br";
 
@@ -148,16 +162,58 @@ const ACTIVE_STRIPE_SUBSCRIPTION_STATUSES = new Set([
 ]);
 
 /**
- * Indica se o checkout Stripe do plano Studio está habilitado no frontend.
- * Deve espelhar `STRIPE_PRICE_STUDIO` (ou equivalente) no backend.
+ * Planos pagos (incluindo Enterprise futuro).
+ * @param {string | null | undefined} planId
+ * @returns {boolean}
+ */
+export function isPaidPlan(planId) {
+  return (
+    planId === PLAN_IDS.PROFESSIONAL
+    || planId === PLAN_IDS.STUDIO
+    || planId === PLAN_IDS.ENTERPRISE
+  );
+}
+
+/**
+ * @param {string | null | undefined} status
+ * @returns {boolean}
+ */
+export function isActiveSubscriptionStatus(status) {
+  return ACTIVE_STRIPE_SUBSCRIPTION_STATUSES.has(
+    (status ?? "").toLowerCase().trim(),
+  );
+}
+
+/**
+ * Studio no Beta: habilitado no frontend por padrão.
+ * Opt-out explícito: `REACT_APP_STRIPE_STUDIO_CHECKOUT=false` (ex.: ambiente sem
+ * `STRIPE_PRICE_STUDIO` no backend). Fonte de verdade do preço continua no backend.
  * @returns {boolean}
  */
 export function isStudioCheckoutConfigured() {
-  return process.env.REACT_APP_STRIPE_STUDIO_CHECKOUT === "true";
+  return process.env.REACT_APP_STRIPE_STUDIO_CHECKOUT !== "false";
+}
+
+/**
+ * @param {string | null | undefined} provider
+ * @returns {boolean}
+ */
+export function isLegacyBillingProvider(provider) {
+  return (provider ?? "").toLowerCase().trim() === LEGACY_BILLING_PROVIDER;
+}
+
+/**
+ * Provider Stripe ativo (ignora Mercado Pago legado).
+ * @param {string | null | undefined} provider
+ * @returns {boolean}
+ */
+export function isActiveStripeBillingProvider(provider) {
+  return (provider ?? "").toLowerCase().trim() === BILLING_PROVIDER;
 }
 
 /**
  * Indica se o usuário pode cancelar uma assinatura Stripe ativa.
+ * Billing legado Mercado Pago nunca habilita cancelamento Stripe.
  * @param {UserBilling} billing
  * @returns {boolean}
  */
@@ -165,9 +221,9 @@ export function canCancelStripeSubscription(billing) {
   const status = (billing.subscriptionStatus ?? "").toLowerCase();
 
   return (
-    billing.provider === "stripe" &&
-    ACTIVE_STRIPE_SUBSCRIPTION_STATUSES.has(status) &&
-    !billing.cancelAtPeriodEnd
+    isActiveStripeBillingProvider(billing.provider)
+    && ACTIVE_STRIPE_SUBSCRIPTION_STATUSES.has(status)
+    && !billing.cancelAtPeriodEnd
   );
 }
 
@@ -185,6 +241,7 @@ export const PAYMENTS_COMING_SOON_MESSAGE =
 
 /**
  * Planos com checkout Stripe habilitado no frontend.
+ * Backend rejeita se o priceId correspondente não estiver configurado.
  * @returns {Set<import("@/config/planLimits").PlanId>}
  */
 export function getStripeCheckoutPlanIds() {
@@ -199,12 +256,82 @@ export function getStripeCheckoutPlanIds() {
 
 /**
  * @param {string | null | undefined} planId
+ * @returns {boolean}
+ */
+export function isCheckoutEnabledPlan(planId) {
+  return getStripeCheckoutPlanIds().has(
+    /** @type {import("@/config/planLimits").PlanId} */ (planId),
+  );
+}
+
+/**
+ * @param {string | null | undefined} planId
  * @returns {planId is import("@/config/planLimits").PlanId}
  */
 export function isBillingUpgradePlanId(planId) {
   return BILLING_UPGRADE_PLAN_IDS.includes(
     /** @type {import("@/config/planLimits").PlanId} */ (planId),
   );
+}
+
+/**
+ * Confirma se o plano atual satisfaz o plano solicitado no checkout.
+ * Sem `requestedPlan`, qualquer plano pago elegível conta.
+ * @param {string | null | undefined} currentPlan
+ * @param {string | null | undefined} requestedPlan
+ * @returns {boolean}
+ */
+export function doesPlanSatisfyRequestedPlan(currentPlan, requestedPlan) {
+  if (!currentPlan || !isPaidPlan(currentPlan)) {
+    return false;
+  }
+
+  if (!requestedPlan) {
+    return true;
+  }
+
+  return (
+    currentPlan === requestedPlan
+    || isPlanAtOrAbove(
+      /** @type {import("@/config/planLimits").PlanId} */ (currentPlan),
+      /** @type {import("@/config/planLimits").PlanId} */ (requestedPlan),
+    )
+  );
+}
+
+/**
+ * Avalia se o retorno de `refreshPlan` confirma assinatura pós-checkout.
+ * @param {{
+ *   planId?: string | null,
+ *   billing?: { subscriptionStatus?: string | null, provider?: string | null } | null,
+ * } | null | undefined} context
+ * @param {string | null | undefined} [requestedPlanId]
+ * @returns {boolean}
+ */
+export function isCheckoutSuccessConfirmed(context, requestedPlanId = null) {
+  if (!context?.planId || !isPaidPlan(context.planId)) {
+    return false;
+  }
+
+  // Enterprise futuro: reconhecer se já estiver ativo; Beta sem checkout.
+  if (
+    context.planId !== PLAN_IDS.ENTERPRISE
+    && !isCheckoutEnabledPlan(context.planId)
+  ) {
+    return false;
+  }
+
+  const status = context.billing?.subscriptionStatus;
+  if (status && !isActiveSubscriptionStatus(status)) {
+    return false;
+  }
+
+  // Billing legado Mercado Pago não confirma sucesso de checkout Stripe.
+  if (isLegacyBillingProvider(context.billing?.provider)) {
+    return false;
+  }
+
+  return doesPlanSatisfyRequestedPlan(context.planId, requestedPlanId);
 }
 
 /**
@@ -267,25 +394,11 @@ export function getUpgradePlanButtonState(targetPlanId, currentPlanId) {
  * @returns {boolean}
  */
 export function canStartStripeCheckoutForPlan(targetPlanId, currentPlanId) {
-  if (!getStripeCheckoutPlanIds().has(targetPlanId)) {
+  if (!isCheckoutEnabledPlan(targetPlanId)) {
     return false;
   }
 
   return !getUpgradePlanButtonState(targetPlanId, currentPlanId).disabled;
-}
-
-/**
- * Resolve o ID do plano de assinatura no Mercado Pago (env no build).
- * @param {keyof typeof BILLING_PLANS} planKey
- * @returns {string}
- */
-export function getMercadoPagoPlanId(planKey) {
-  const config = BILLING_PLANS[planKey];
-  if (!config) {
-    return "";
-  }
-
-  return process.env[config.mercadoPagoPlanIdEnv] ?? "";
 }
 
 /**
@@ -294,16 +407,19 @@ export function getMercadoPagoPlanId(planKey) {
  */
 export function normalizeBilling(raw) {
   if (!raw || typeof raw !== "object") {
-    return { ...DEFAULT_BILLING };
+    return { ...BILLING_UI_DEFAULTS };
   }
 
   const data = /** @type {Record<string, unknown>} */ (raw);
 
+  // Preserva provider legado para leitura; default de novos docs é Stripe.
+  const provider =
+    typeof data.provider === "string" && data.provider
+      ? data.provider
+      : BILLING_PROVIDER;
+
   return {
-    provider:
-      typeof data.provider === "string" && data.provider
-        ? data.provider
-        : BILLING_PROVIDER,
+    provider,
     customerId: typeof data.customerId === "string" ? data.customerId : "",
     subscriptionId:
       typeof data.subscriptionId === "string" ? data.subscriptionId : "",
@@ -311,7 +427,7 @@ export function normalizeBilling(raw) {
     subscriptionStatus:
       typeof data.subscriptionStatus === "string"
         ? data.subscriptionStatus
-        : DEFAULT_BILLING.subscriptionStatus,
+        : BILLING_UI_DEFAULTS.subscriptionStatus,
     currentPeriodStart: data.currentPeriodStart ?? null,
     currentPeriodEnd: data.currentPeriodEnd ?? null,
     nextInvoiceDate: data.nextInvoiceDate ?? null,

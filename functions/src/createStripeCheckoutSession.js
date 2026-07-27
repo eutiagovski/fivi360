@@ -9,6 +9,7 @@ const {
   getAllowedCheckoutPlanIds,
   getStripePriceId,
 } = require("./config/stripeBilling");
+const { resolveCheckoutPlanFromRequest } = require("./billing/checkoutPlanGate");
 
 if (getApps().length === 0) {
   initializeApp();
@@ -174,33 +175,19 @@ exports.createStripeCheckoutSession = onCall(
     }
 
     const uid = request.auth.uid;
-    const planId = request.data?.planId;
 
-    if (typeof planId !== "string") {
-      throw new HttpsError("invalid-argument", "planId inválido.");
+    // priceId do cliente é ignorado — resolução apenas no backend.
+    const checkoutPlan = resolveCheckoutPlanFromRequest(request.data ?? {}, {
+      getAllowedCheckoutPlanIds,
+      getStripePriceId,
+    });
+
+    if (!checkoutPlan.ok) {
+      throw new HttpsError(checkoutPlan.code, checkoutPlan.message);
     }
 
-    const normalizedPlanId = planId.toLowerCase().trim();
-    const allowedCheckoutPlanIds = getAllowedCheckoutPlanIds();
-
-    if (normalizedPlanId === "enterprise" || normalizedPlanId === "starter") {
-      throw new HttpsError(
-        "invalid-argument",
-        'Checkout indisponível para este plano.',
-      );
-    }
-
-    if (!allowedCheckoutPlanIds.has(normalizedPlanId)) {
-      throw new HttpsError(
-        "invalid-argument",
-        'planId inválido ou preço Stripe não configurado.',
-      );
-    }
-
-    const priceId = getStripePriceId(normalizedPlanId);
-    if (!priceId) {
-      throw new HttpsError("failed-precondition", "Preço Stripe não configurado.");
-    }
+    const normalizedPlanId = checkoutPlan.planId;
+    const priceId = checkoutPlan.priceId;
 
     const stripe = getStripeClient();
     if (!stripe) {

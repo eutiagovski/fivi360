@@ -28,18 +28,8 @@ const RULES_PATH = resolve(__dirname, "../../firestore.rules");
 let testEnv;
 
 const STARTER_BILLING = Object.freeze({
-  provider: "mercado_pago",
-  customerId: "",
-  subscriptionId: "",
-  planId: "",
+  provider: "stripe",
   subscriptionStatus: "free",
-  currentPeriodStart: null,
-  currentPeriodEnd: null,
-  nextInvoiceDate: null,
-  cancelAtPeriodEnd: false,
-  lastInvoiceUrl: "",
-  lastPaymentStatus: "",
-  updatedAt: null,
 });
 
 const EMPTY_SOCIAL = Object.freeze({
@@ -154,6 +144,19 @@ describe("users/{uid} — allow", () => {
     );
   });
 
+  test("bootstrap Starter billing is stripe/free without Mercado Pago", async () => {
+    const uid = "user-stripe-bootstrap";
+    const db = authContext(uid).firestore();
+    const payload = buildUserCreate(uid);
+
+    expect(payload.billing.provider).toBe("stripe");
+    expect(payload.billing.subscriptionStatus).toBe("free");
+    expect(payload.billing).not.toHaveProperty("customerId");
+    expect(JSON.stringify(payload)).not.toMatch(/mercado_pago/i);
+
+    await assertSucceeds(setDoc(doc(db, "users", uid), payload));
+  });
+
   test("owner updates legalConsent", async () => {
     const uid = "user-a";
     await seedOwnerDocs(uid);
@@ -254,6 +257,50 @@ describe("slugs/{slug} — allow", () => {
 });
 
 describe("users/{uid} — deny", () => {
+  test("create with provider mercado_pago is denied", async () => {
+    const uid = "user-mp-create";
+    const db = authContext(uid).firestore();
+
+    await assertFails(
+      setDoc(
+        doc(db, "users", uid),
+        buildUserCreate(uid, {
+          billing: {
+            provider: "mercado_pago",
+            subscriptionStatus: "free",
+          },
+        }),
+      ),
+    );
+  });
+
+  test("create with legacy empty Stripe ID fields is denied", async () => {
+    const uid = "user-legacy-shape";
+    const db = authContext(uid).firestore();
+
+    await assertFails(
+      setDoc(
+        doc(db, "users", uid),
+        buildUserCreate(uid, {
+          billing: {
+            provider: "stripe",
+            customerId: "",
+            subscriptionId: "",
+            planId: "",
+            subscriptionStatus: "free",
+            currentPeriodStart: null,
+            currentPeriodEnd: null,
+            nextInvoiceDate: null,
+            cancelAtPeriodEnd: false,
+            lastInvoiceUrl: "",
+            lastPaymentStatus: "",
+            updatedAt: null,
+          },
+        }),
+      ),
+    );
+  });
+
   test("7. owner cannot change users.plan", async () => {
     const uid = "user-a";
     await seedOwnerDocs(uid);

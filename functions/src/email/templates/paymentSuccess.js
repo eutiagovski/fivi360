@@ -4,6 +4,7 @@ const { normalizeToDate, formatBillingDatePtBr } = require("../dateUtils");
 
 const PLAN_DISPLAY_NAMES = {
   professional: "Professional",
+  studio: "Studio",
   enterprise: "Enterprise",
   starter: "Starter",
 };

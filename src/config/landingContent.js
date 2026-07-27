@@ -186,7 +186,7 @@ export const LANDING_FAQ_ITEMS = [
   {
     question: "O que são hotspots?",
     answer:
-      "São marcadores no viewer com texto informativo ou link para outra cena. Disponíveis a partir do plano Professional.",
+      "São marcadores no viewer com texto informativo ou link para outra cena. Disponíveis nos planos Professional e Studio.",
   },
   {
     question: "Meus clientes precisam de conta?",

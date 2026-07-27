@@ -14,7 +14,7 @@ const FEATURE_COPY = {
   hotspots: {
     title: "Recurso Premium",
     message:
-      "Hotspots interativos estão disponíveis apenas no plano Professional.",
+      "Hotspots interativos estão disponíveis nos planos Professional e Studio.",
     benefits: [
       "Hotspots de informação",
       "Hotspots de navegação",
@@ -24,7 +24,7 @@ const FEATURE_COPY = {
   portfolio: {
     title: "Recurso Premium",
     message:
-      "O Portfólio Público está disponível apenas no plano Professional.",
+      "O Portfólio Público está disponível nos planos Professional e Studio.",
     benefits: [
       "Página pública do escritório",
       "Compartilhamento profissional",

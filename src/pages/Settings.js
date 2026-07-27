@@ -643,7 +643,7 @@ export const Settings = () => {
                 <UpgradePrompt
                   compact
                   showUpgradeButton={false}
-                  message="O portfólio público está disponível no plano Professional."
+                  message="O portfólio público está disponível nos planos Professional e Studio."
                   className="mb-4"
                 />
               )}

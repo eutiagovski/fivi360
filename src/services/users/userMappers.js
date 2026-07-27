@@ -28,6 +28,8 @@ export function normalizeSocialLinks(raw) {
 
 /**
  * Enriquece billing com dados Stripe persistidos em `users.plan` e `users.billing.stripe`.
+ * Billing `mercado_pago` legado é preservado como leitura; não inventa IDs Stripe
+ * e não é usado para entitlement (fonte: `users.plan` via normalizeUserPlan).
  *
  * @param {import("@/config/billing").UserBilling} billing
  * @param {import("firebase/firestore").DocumentData} data
@@ -44,6 +46,7 @@ function enrichBillingFromUserDoc(billing, data) {
       result.provider = rawBilling.provider;
     }
 
+    // IDs Stripe só a partir de `billing.stripe` (nunca de campos vazios/legado MP).
     if (stripeBilling && typeof stripeBilling === "object") {
       if (typeof stripeBilling.customerId === "string") {
         result.customerId = stripeBilling.customerId;

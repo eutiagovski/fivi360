@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { PLAN_IDS } from "@/config/planLimits";
+import { isCheckoutSuccessConfirmed } from "@/config/billing";
 import { trackEvent } from "@/services/analytics/analyticsService";
 
 const POLL_INTERVAL_MS = 2000;
@@ -8,12 +8,14 @@ const MAX_POLL_MS = 20000;
 
 /**
  * Sincroniza plano e billing após retorno do Stripe Checkout (`?checkout=success`).
+ * Reconhece qualquer plano pago elegível (Professional, Studio; Enterprise futuro).
  */
 export function useCheckoutSuccessSync({
   checkoutStatus,
   refreshPlan,
   onInvoicesReload,
   toast,
+  requestedPlanId = null,
 }) {
   const [, setSearchParams] = useSearchParams();
   const [confirming, setConfirming] = useState(false);
@@ -82,7 +84,7 @@ export function useCheckoutSuccessSync({
 
       const context = await refreshPlan();
 
-      if (context?.planId === PLAN_IDS.PROFESSIONAL) {
+      if (isCheckoutSuccessConfirmed(context, requestedPlanId)) {
         if (intervalId) {
           clearInterval(intervalId);
         }
@@ -114,7 +116,14 @@ export function useCheckoutSuccessSync({
         clearInterval(intervalId);
       }
     };
-  }, [checkoutStatus, refreshPlan, onInvoicesReload, toast, clearCheckoutParam]);
+  }, [
+    checkoutStatus,
+    refreshPlan,
+    onInvoicesReload,
+    toast,
+    clearCheckoutParam,
+    requestedPlanId,
+  ]);
 
   return { confirming, confirmMessage };
 }

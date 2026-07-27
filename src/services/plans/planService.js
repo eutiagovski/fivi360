@@ -34,9 +34,9 @@ const FRIENDLY_MESSAGES = {
   [PLAN_LIMIT_CODES.HOTSPOTS_DISABLED]:
     "Hotspots estão disponíveis a partir do plano Professional. Faça upgrade para usar marcadores no panorama.",
   [PLAN_LIMIT_CODES.PORTFOLIO_DISABLED]:
-    "O portfólio público está disponível a partir do plano Professional. Faça upgrade para ativar.",
+    "O portfólio público está disponível nos planos Professional e Studio. Faça upgrade para ativar.",
   [PLAN_LIMIT_CODES.PUBLIC_VISIBILITY_DISABLED]:
-    "Visibilidade pública (portfólio) está disponível a partir do plano Professional. Faça upgrade para publicar.",
+    "Visibilidade pública (portfólio) está disponível nos planos Professional e Studio. Faça upgrade para publicar.",
 };
 
 export class PlanLimitError extends Error {

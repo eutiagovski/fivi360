@@ -117,7 +117,7 @@ export function ShareProjectDialog({
           <div className="mb-3">
             <PlanUpgradeHint
               compact
-              message="A opção Público (portfólio) está disponível no plano Professional."
+              message="A opção Público (portfólio) está disponível nos planos Professional e Studio."
             />
           </div>
         )}

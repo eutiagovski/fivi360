@@ -113,7 +113,7 @@ Go Live
 
 ## Monetização
 
-* Mercado Pago (assinaturas)
+* Stripe (assinaturas)
 
 ## IA
 

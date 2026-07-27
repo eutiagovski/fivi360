@@ -86,6 +86,11 @@ describe("ensureUserStructure", () => {
 
     const userPayload = mockBatchSet.mock.calls[0][1];
     expect(userPayload.plan).toBe("starter");
+    expect(userPayload.billing).toEqual({
+      provider: "stripe",
+      subscriptionStatus: "free",
+    });
+    expect(JSON.stringify(userPayload)).not.toMatch(/mercado_pago/i);
     expect(userPayload).not.toHaveProperty("legalConsent");
     expect(userPayload.defaultWorkspaceId).toBe("uid-1");
 
