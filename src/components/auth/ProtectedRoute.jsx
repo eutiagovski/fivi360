@@ -2,7 +2,7 @@ import { Loader2 } from "lucide-react";
 import { Navigate } from "react-router-dom";
 import { LegalConsentGate } from "@/components/legal/LegalConsentGate";
 import { useAuth } from "@/hooks/useAuth";
-import { needsEmailVerification } from "@/services/auth/authService";
+import { resolveProtectedRoute } from "./authRouteGuards";
 
 export function AuthLoadingScreen() {
   return (
@@ -21,19 +21,21 @@ export function AuthLoadingScreen() {
 /**
  * Wrapper para rotas que exigem sessão autenticada.
  * Redireciona para /login enquanto carrega ou quando não há usuário.
+ * Durante `signUpInProgress`, mantém loading para evitar flash /verify-email.
  */
 export function ProtectedRoute({ children }) {
-  const { user, loading } = useAuth();
+  const { user, loading, signUpInProgress } = useAuth();
+  const decision = resolveProtectedRoute({ user, loading, signUpInProgress });
 
-  if (loading) {
+  if (decision === "loading") {
     return <AuthLoadingScreen />;
   }
 
-  if (!user) {
+  if (decision === "login") {
     return <Navigate to="/login" replace />;
   }
 
-  if (needsEmailVerification(user)) {
+  if (decision === "verify-email") {
     return <Navigate to="/verify-email" replace />;
   }
 

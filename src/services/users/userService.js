@@ -117,7 +117,23 @@ export function buildLegalConsent(acceptedSource) {
 }
 
 /**
+ * @typedef {Object} CreateUserProfileResult
+ * @property {true} profileCreated
+ * @property {boolean} verificationEmailQueued
+ * @property {string} [verificationEmailId]
+ * @property {"verification-email-queue-failed"} [errorCode]
+ * @property {unknown} [error]
+ */
+
+/**
  * Cria o documento do usuário no Firestore após cadastro no Firebase Auth.
+ *
+ * Quando `enqueueVerifyEmail` é true, falhas na fila NÃO são engolidas como
+ * sucesso silencioso: o retorno estrutura `verificationEmailQueued: false`
+ * com `errorCode`. Auth/users/workspace não são revertidos.
+ *
+ * O e-mail em `data.email` deve ser o canônico do Firebase Auth
+ * (`userCredential.user.email`). A fila usa `auth.currentUser.email`.
  *
  * @param {string} userId
  * @param {{
@@ -126,10 +142,16 @@ export function buildLegalConsent(acceptedSource) {
  *   acceptedSource?: "signup" | "modal_existing_user",
  *   enqueueVerifyEmail?: boolean,
  * }} data
+ * @returns {Promise<CreateUserProfileResult>}
  */
 export async function createUserProfile(
   userId,
-  { displayName, email, acceptedSource, enqueueVerifyEmail = false },
+  {
+    displayName,
+    email,
+    acceptedSource,
+    enqueueVerifyEmail: shouldEnqueueVerifyEmail = false,
+  },
 ) {
   const userRef = doc(db, "users", userId);
   const publicProfileRef = doc(db, "publicProfiles", userId);
@@ -185,23 +207,51 @@ export async function createUserProfile(
         : String(error);
 
     console.error("[FIVI360] createUserProfile batch failed:", {
+      stage: "createUserProfile.batch",
       userId,
       code,
       message,
+      stack: error?.stack,
       writes: ["users", "publicProfiles", "workspaces", "workspaces/members"],
     });
 
     throw error;
   }
 
-  if (enqueueVerifyEmail) {
-    try {
-      await enqueueVerifyEmail({ to: email, userId, name: displayName });
-    } catch (err) {
-      if (process.env.NODE_ENV === "development") {
-        console.error("[FIVI360] Failed to enqueue verify email:", err);
-      }
-    }
+  if (!shouldEnqueueVerifyEmail) {
+    return {
+      profileCreated: true,
+      verificationEmailQueued: false,
+    };
+  }
+
+  try {
+    const emailId = await enqueueVerifyEmail({
+      to: email,
+      userId,
+      name: displayName,
+    });
+
+    return {
+      profileCreated: true,
+      verificationEmailQueued: true,
+      verificationEmailId: emailId,
+    };
+  } catch (err) {
+    console.error("[FIVI360] Failed to enqueue verify email:", {
+      stage: "createUserProfile.enqueueVerifyEmail",
+      userId,
+      code: err?.code,
+      message: err?.message,
+      stack: err?.stack,
+    });
+
+    return {
+      profileCreated: true,
+      verificationEmailQueued: false,
+      errorCode: "verification-email-queue-failed",
+      error: err,
+    };
   }
 }
 

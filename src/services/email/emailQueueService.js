@@ -8,7 +8,7 @@
  */
 
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { db } from "@/config/firebase";
+import { auth, db } from "@/config/firebase";
 
 const EMAIL_QUEUE_COLLECTION = "emailQueue";
 
@@ -29,31 +29,68 @@ export const CLIENT_EMAIL_TYPES = {
  * @returns {Promise<string>} ID do documento na fila
  */
 export async function enqueueEmail({ type, to, userId, payload = {} }) {
-  const docRef = await addDoc(collection(db, EMAIL_QUEUE_COLLECTION), {
-    type,
-    to,
-    userId,
-    payload,
-    status: "pending",
-    createdAt: serverTimestamp(),
-  });
+  try {
+    const docRef = await addDoc(collection(db, EMAIL_QUEUE_COLLECTION), {
+      type,
+      to,
+      userId,
+      payload,
+      status: "pending",
+      createdAt: serverTimestamp(),
+    });
 
-  return docRef.id;
+    return docRef.id;
+  } catch (err) {
+    console.error("[FIVI360] emailQueue.addDoc failed:", {
+      stage: "enqueueEmail",
+      type,
+      userId,
+      code: err?.code,
+      message: err?.message,
+      stack: err?.stack,
+    });
+    throw err;
+  }
 }
 
 /**
  * Enfileira e-mail de verificação de cadastro.
  *
+ * O campo `to` usa exclusivamente o e-mail canônico de `auth.currentUser`
+ * (exigência das Firestore Rules: `to == request.auth.token.email`).
+ * O parâmetro `to` do caller é ignorado quando há sessão autenticada.
+ *
  * @param {{
- *   to: string,
+ *   to?: string,
  *   userId: string,
  *   name?: string,
  * }} params
  */
 export async function enqueueVerifyEmail({ to, userId, name = "" }) {
+  const authenticatedEmail = auth.currentUser?.email;
+
+  if (!authenticatedEmail) {
+    const error = new Error(
+      "Authenticated email required to enqueue verify_email",
+    );
+    error.code = "verification-email-missing-auth-email";
+    throw error;
+  }
+
+  if (
+    process.env.NODE_ENV === "development"
+    && to
+    && to !== authenticatedEmail
+  ) {
+    console.warn("[FIVI360] enqueueVerifyEmail ignoring non-canonical to", {
+      providedTo: to,
+      authEmail: authenticatedEmail,
+    });
+  }
+
   return enqueueEmail({
     type: CLIENT_EMAIL_TYPES.VERIFY_EMAIL,
-    to,
+    to: authenticatedEmail,
     userId,
     payload: { name },
   });

@@ -551,6 +551,89 @@ describe("Admin SDK note", () => {
   });
 });
 
+describe("emailQueue/{emailId} — RC-BUG-001", () => {
+  function buildEmailQueueCreate(uid, overrides = {}) {
+    return {
+      type: "verify_email",
+      to: `${uid}@example.com`,
+      userId: uid,
+      payload: { name: "Ana" },
+      status: "pending",
+      createdAt: Timestamp.now(),
+      ...overrides,
+    };
+  }
+
+  test("canonical auth email allows verify_email create", async () => {
+    const uid = "user-a";
+    const db = authContext(uid).firestore();
+
+    await assertSucceeds(
+      setDoc(doc(db, "emailQueue", "email-ok"), buildEmailQueueCreate(uid)),
+    );
+  });
+
+  test("different to email is rejected", async () => {
+    const uid = "user-a";
+    const db = authContext(uid).firestore();
+
+    await assertFails(
+      setDoc(
+        doc(db, "emailQueue", "email-wrong-to"),
+        buildEmailQueueCreate(uid, { to: "other@example.com" }),
+      ),
+    );
+  });
+
+  test("unauthenticated create is rejected", async () => {
+    const db = unauthContext().firestore();
+
+    await assertFails(
+      setDoc(
+        doc(db, "emailQueue", "email-anon"),
+        buildEmailQueueCreate("user-a"),
+      ),
+    );
+  });
+
+  test("invalid type is rejected", async () => {
+    const uid = "user-a";
+    const db = authContext(uid).firestore();
+
+    await assertFails(
+      setDoc(
+        doc(db, "emailQueue", "email-bad-type"),
+        buildEmailQueueCreate(uid, { type: "password_reset" }),
+      ),
+    );
+  });
+
+  test("invalid payload is rejected", async () => {
+    const uid = "user-a";
+    const db = authContext(uid).firestore();
+
+    await assertFails(
+      setDoc(
+        doc(db, "emailQueue", "email-bad-payload"),
+        buildEmailQueueCreate(uid, { payload: "not-a-map" }),
+      ),
+    );
+  });
+
+  test("casing mismatch vs token.email is rejected", async () => {
+    const uid = "user-a";
+    // authContext uses `${uid}@example.com` — uppercase differs from token
+    const db = authContext(uid).firestore();
+
+    await assertFails(
+      setDoc(
+        doc(db, "emailQueue", "email-casing"),
+        buildEmailQueueCreate(uid, { to: "User-A@Example.com" }),
+      ),
+    );
+  });
+});
+
 describe("workspaces.planId — RC-P0.5A", () => {
   test("owner cannot change workspaces.planId (not an entitlement bypass)", async () => {
     const uid = "user-a";

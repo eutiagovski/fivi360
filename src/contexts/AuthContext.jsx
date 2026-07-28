@@ -34,12 +34,24 @@ import {
 export const AuthContext = createContext(undefined);
 
 /**
+ * @typedef {Object} SignUpResult
+ * @property {true} userCreated
+ * @property {true} profileCreated
+ * @property {boolean} verificationEmailQueued
+ * @property {string} email — e-mail canônico do Firebase Auth
+ * @property {boolean} logoutCompleted
+ * @property {"verification-email-queue-failed"} [errorCode]
+ */
+
+/**
  * Provider de autenticação conectado ao Firebase Auth.
  */
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  /** Impede PublicRoute de redirecionar durante o cadastro por e-mail. */
+  const [signUpInProgress, setSignUpInProgress] = useState(false);
 
   useEffect(() => {
     const unsubscribe = subscribeToAuthChanges((nextUser) => {
@@ -75,20 +87,97 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
+  const clearSignUpInProgress = useCallback(() => {
+    setSignUpInProgress(false);
+  }, []);
+
+  /**
+   * Cadastro por e-mail (estratégia B):
+   * Auth → Firestore → enqueue → logout → resultado estruturado.
+   * A navegação para `/verify-email-sent` fica a cargo da UI.
+   *
+   * @returns {Promise<SignUpResult>}
+   */
   const signUp = useCallback(async (email, password, name) => {
     setError(null);
+    setSignUpInProgress(true);
+
+    let userCreated = false;
 
     try {
       const authUser = await signUpWithEmail(email, password);
-      await createUserProfile(authUser.uid, {
+      userCreated = true;
+
+      const canonicalEmail = authUser.email;
+
+      if (!canonicalEmail) {
+        const missingEmailError = new Error(
+          "Authenticated user has no email after sign-up",
+        );
+        missingEmailError.code = "verification-email-missing-auth-email";
+        throw missingEmailError;
+      }
+
+      const profileResult = await createUserProfile(authUser.uid, {
         displayName: name,
-        email,
+        email: canonicalEmail,
         acceptedSource: "signup",
         enqueueVerifyEmail: true,
       });
-      await authLogout();
+
+      let logoutCompleted = false;
+
+      try {
+        await authLogout();
+        logoutCompleted = true;
+      } catch (logoutErr) {
+        console.error("[FIVI360] Signup logout failed:", {
+          stage: "signUp.logout",
+          code: logoutErr?.code,
+          message: logoutErr?.message,
+          stack: logoutErr?.stack,
+        });
+      }
+
       trackEvent("sign_up", { method: "email" });
+
+      /** @type {SignUpResult} */
+      const result = {
+        userCreated: true,
+        profileCreated: true,
+        verificationEmailQueued: Boolean(profileResult.verificationEmailQueued),
+        email: canonicalEmail,
+        logoutCompleted,
+      };
+
+      if (!result.verificationEmailQueued) {
+        result.errorCode = "verification-email-queue-failed";
+      }
+
+      return result;
     } catch (err) {
+      if (userCreated) {
+        try {
+          await authLogout();
+        } catch (logoutErr) {
+          console.error("[FIVI360] Signup cleanup logout failed:", {
+            stage: "signUp.cleanupLogout",
+            code: logoutErr?.code,
+            message: logoutErr?.message,
+            stack: logoutErr?.stack,
+          });
+        }
+      }
+
+      console.error("[FIVI360] AuthContext.signUp failed:", {
+        stage: "signUp",
+        code: err?.code,
+        message: err?.message,
+        stack: err?.stack,
+        userCreated,
+      });
+
+      setSignUpInProgress(false);
       setError(err);
       throw err;
     }
@@ -147,14 +236,28 @@ export function AuthProvider({ children }) {
       user,
       loading,
       error,
+      signUpInProgress,
       signIn,
       signUp,
       signInGoogle,
       signOut,
       resetPassword,
       setUserFromReload,
+      clearSignUpInProgress,
     }),
-    [user, loading, error, signIn, signUp, signInGoogle, signOut, resetPassword, setUserFromReload],
+    [
+      user,
+      loading,
+      error,
+      signUpInProgress,
+      signIn,
+      signUp,
+      signInGoogle,
+      signOut,
+      resetPassword,
+      setUserFromReload,
+      clearSignUpInProgress,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

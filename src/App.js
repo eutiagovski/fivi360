@@ -25,6 +25,7 @@ import { Login } from './pages/Login';
 import { SignUp } from './pages/SignUp';
 import { ForgotPassword } from './pages/ForgotPassword';
 import { VerifyEmail } from './pages/VerifyEmail';
+import { VerifyEmailSent } from './pages/VerifyEmailSent';
 import { VerifyEmailAction } from './pages/VerifyEmailAction';
 import { ResetPasswordAction } from './pages/ResetPasswordAction';
 import { VerifyEmailRoute } from './components/auth/VerifyEmailRoute';
@@ -46,6 +47,7 @@ function App() {
           <Route path="/register" element={<PublicRoute><SignUp /></PublicRoute>} />
           <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
           <Route path="/verify-email" element={<VerifyEmailRoute><VerifyEmail /></VerifyEmailRoute>} />
+          <Route path="/verify-email-sent" element={<VerifyEmailSent />} />
           <Route path="/verify-email/action" element={<VerifyEmailAction />} />
           <Route path="/reset-password/action" element={<ResetPasswordAction />} />
 

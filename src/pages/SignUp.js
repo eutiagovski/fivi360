@@ -1,4 +1,4 @@
-import { CheckCircle2, Lock, Mail, User } from "lucide-react";
+import { Lock, Mail, User } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { AuthCard } from "@/components/auth/AuthCard";
@@ -12,12 +12,13 @@ import {
   appendPlanQueryToPath,
   getPostAuthRedirectPath,
 } from "@/utils/billingPlanFlow";
+import { persistVerifyEmailSentState } from "@/utils/verifyEmailSentState";
 
 export const SignUp = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const plan = searchParams.get("plan");
-  const { signUp, signInGoogle } = useAuth();
+  const { signUp, signInGoogle, clearSignUpInProgress } = useAuth();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -25,7 +26,6 @@ export const SignUp = () => {
   const [acceptedLegal, setAcceptedLegal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState(null);
-  const [signupSuccessEmail, setSignupSuccessEmail] = useState(null);
 
   const handleChange = (e) => {
     const { name: fieldName, value } = e.target;
@@ -69,11 +69,24 @@ export const SignUp = () => {
     setIsSubmitting(true);
 
     try {
-      await signUp(email, password, name);
-      setSignupSuccessEmail(email);
+      const result = await signUp(email, password, name);
+
+      persistVerifyEmailSentState({
+        email: result.email,
+        verificationEmailQueued: result.verificationEmailQueued,
+      });
+
+      navigate("/verify-email-sent", {
+        replace: true,
+        state: {
+          email: result.email,
+          verificationEmailQueued: result.verificationEmailQueued,
+        },
+      });
     } catch (err) {
       setFormError(getAuthErrorMessage(err));
     } finally {
+      clearSignUpInProgress();
       setIsSubmitting(false);
     }
   };
@@ -81,39 +94,10 @@ export const SignUp = () => {
   return (
     <AuthLayout pageTestId="signup-page" logoTestId="signup-logo">
       <AuthCard
-        title={signupSuccessEmail ? "Confirme seu e-mail" : "Criar conta"}
-        subtitle={
-          signupSuccessEmail
-            ? "Enviamos um link de verificação para o seu endereço"
-            : "Cadastre-se para começar a usar o FIVI360"
-        }
+        title="Criar conta"
+        subtitle="Cadastre-se para começar a usar o FIVI360"
         titleTestId="signup-title"
       >
-        {signupSuccessEmail ? (
-          <div className="space-y-6 text-center">
-            <CheckCircle2
-              className="mx-auto h-12 w-12 text-green-400"
-              aria-hidden
-            />
-            <div className="space-y-2">
-              <p className="text-zinc-300" data-testid="signup-success-message">
-                Conta criada com sucesso.
-              </p>
-              <p className="text-sm text-zinc-400">
-                Enviamos um link de confirmação para{" "}
-                <span className="text-zinc-200">{signupSuccessEmail}</span>.
-                Abra o e-mail, confirme o endereço e depois faça login.
-              </p>
-            </div>
-            <Link
-              to={appendPlanQueryToPath("/login", plan)}
-              className="inline-block w-full px-8 py-3 bg-white text-black rounded-full font-medium btn-scale hover:bg-zinc-200 transition-colors text-center"
-              data-testid="signup-success-login-link"
-            >
-              Ir para login
-            </Link>
-          </div>
-        ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
           {formError && (
             <div
@@ -246,7 +230,6 @@ export const SignUp = () => {
             </Link>
           </p>
         </form>
-        )}
       </AuthCard>
     </AuthLayout>
   );
