@@ -43,12 +43,12 @@ describe("repairUserWorkspaceFields patch logic", () => {
     });
   });
 
-  it("does not overwrite legacy workspace ids", () => {
+  it("does not overwrite existing workspace ids", () => {
     expect(
       buildRepairPatch(
         {
-          defaultWorkspaceId: "legacy-ws",
-          activeWorkspaceId: "legacy-ws",
+          defaultWorkspaceId: "existing-ws",
+          activeWorkspaceId: "existing-ws",
           plan: "studio",
           billing: { planId: "studio" },
         },

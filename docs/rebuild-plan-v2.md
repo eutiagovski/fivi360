@@ -1,5 +1,8 @@
 # FIVI360 — Plano Oficial de Reconstrução v2
 
+> **Nota histórica (RC-CLEANUP-LEGACY-1):** itens que citam Mercado Pago neste plano
+> estão **descontinuados**. Billing ativo = Stripe apenas; Beta sem migração de schemas antigos.
+
 **Documento:** Plano executivo para transformar o protótipo visual em MVP funcional  
 **Versão:** 2.0  
 **Data:** 31/05/2026  

@@ -113,7 +113,7 @@ async function resolveEffectivePlanId(db, uid, userData) {
 }
 
 /**
- * @param {{ billing?: { stripe?: { customerId?: string }, stripeCustomerId?: string } }} userData
+ * @param {{ billing?: { stripe?: { customerId?: string } } }} userData
  * @returns {string | undefined}
  */
 function getStoredStripeCustomerId(userData) {
@@ -127,14 +127,14 @@ function getStoredStripeCustomerId(userData) {
     return nestedCustomerId;
   }
 
-  return billing.stripeCustomerId || undefined;
+  return undefined;
 }
 
 /**
  * @param {string} uid
  * @param {import("firebase-admin/firestore").Firestore} db
  * @param {import("stripe").Stripe} stripe
- * @param {{ email?: string, displayName?: string, billing?: { stripe?: { customerId?: string }, stripeCustomerId?: string } }} userData
+ * @param {{ email?: string, displayName?: string, billing?: { stripe?: { customerId?: string } } }} userData
  * @param {string | undefined} authEmail
  * @returns {Promise<string>}
  */

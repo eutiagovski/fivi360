@@ -11,10 +11,8 @@ import {
   isActiveSubscriptionStatus,
   isCheckoutEnabledPlan,
   isCheckoutSuccessConfirmed,
-  isLegacyBillingProvider,
   isPaidPlan,
   isStudioCheckoutConfigured,
-  LEGACY_BILLING_PROVIDER,
   normalizeBilling,
   normalizeCheckoutRequestedPlanId,
   normalizeCheckoutSessionId,
@@ -23,7 +21,7 @@ import {
 import { PLAN_IDS } from "@/config/planLimits";
 
 describe("DEFAULT_BILLING bootstrap", () => {
-  test("novo bootstrap não contém Mercado Pago nem IDs vazios", () => {
+  test("novo bootstrap é stripe/free sem IDs vazios", () => {
     expect(DEFAULT_BILLING.provider).toBe("stripe");
     expect(DEFAULT_BILLING.subscriptionStatus).toBe("free");
     expect(DEFAULT_BILLING).not.toHaveProperty("customerId");
@@ -220,14 +218,14 @@ describe("isCheckoutSuccessConfirmed", () => {
     ).toBe(false);
   });
 
-  test("billing legado Mercado Pago não confirma sucesso", () => {
+  test("provider inválido não confirma sucesso de checkout", () => {
     expect(
       isCheckoutSuccessConfirmed(
         {
           planId: PLAN_IDS.PROFESSIONAL,
           billing: {
             subscriptionStatus: "active",
-            provider: LEGACY_BILLING_PROVIDER,
+            provider: "mercado_pago",
           },
         },
         PLAN_IDS.PROFESSIONAL,
@@ -362,17 +360,32 @@ describe("shouldFinalizeCheckoutSuccess", () => {
   });
 });
 
-describe("legacy billing compatibility", () => {
-  test("normalizeBilling preserva provider mercado_pago sem inventar Stripe IDs", () => {
+describe("normalizeBilling schema atual", () => {
+  test("provider inválido cai em defaults Stripe/free sem inventar IDs", () => {
     const billing = normalizeBilling({
       provider: "mercado_pago",
-      subscriptionStatus: "free",
+      subscriptionStatus: "active",
+      planId: "professional",
+      customerId: "cus_fake",
     });
 
-    expect(isLegacyBillingProvider(billing.provider)).toBe(true);
-    expect(isActiveStripeBillingProvider(billing.provider)).toBe(false);
+    expect(billing.provider).toBe("stripe");
+    expect(isActiveStripeBillingProvider(billing.provider)).toBe(true);
+    expect(billing.subscriptionStatus).toBe("free");
     expect(billing.customerId).toBe("");
     expect(billing.subscriptionId).toBe("");
+    expect(billing.planId).toBe("");
+  });
+
+  test("billing Stripe parcial preserva campos conhecidos", () => {
+    const billing = normalizeBilling({
+      provider: "stripe",
+      subscriptionStatus: "active",
+    });
+
+    expect(billing.provider).toBe("stripe");
+    expect(billing.subscriptionStatus).toBe("active");
+    expect(billing.customerId).toBe("");
   });
 
   test("isActiveSubscriptionStatus", () => {

@@ -2,11 +2,12 @@
  * Definição central dos planos e limites do FIVI360.
  * Fonte única de verdade para enforcement e UI.
  *
- * Formato persistido em `users.plan` (padrão):
- *   { id: "starter" | "professional" | "studio" | "enterprise", status, source, ... }
+ * Formato persistido em `users.plan`:
+ *   - Bootstrap Starter: `"starter"`
+ *   - Assinatura Stripe / sistema: `{ id, status, source, ... }`
  *
- * Formato legado (compatível):
- *   "starter" | "professional" | "studio" | "enterprise"
+ * IDs reconhecidos: starter | professional | studio | enterprise.
+ * Valores desconhecidos → Starter (sem entitlement pago).
  */
 
 export const PLAN_IDS = {
@@ -209,9 +210,7 @@ export const PLAN_TIER = {
   [PLAN_IDS.ENTERPRISE]: 3,
 };
 
-const LEGACY_PLAN_ALIASES = {
-  free: PLAN_IDS.STARTER,
-  pro: PLAN_IDS.PROFESSIONAL,
+const RECOGNIZED_PLAN_IDS = {
   starter: PLAN_IDS.STARTER,
   professional: PLAN_IDS.PROFESSIONAL,
   studio: PLAN_IDS.STUDIO,
@@ -223,23 +222,25 @@ export const ACTIVE_PLAN_STATUSES = new Set(["active", "trialing"]);
 
 /**
  * Normaliza um ID de plano bruto (string).
+ * Apenas IDs canônicos; aliases históricos (`free`, `pro`) não são reconhecidos.
  *
  * @param {string | undefined | null} planId
  * @returns {PlanId}
  */
 export function normalizePlanIdFromString(planId) {
   const key = (planId ?? "").toLowerCase().trim();
-  return LEGACY_PLAN_ALIASES[key] ?? PLAN_IDS.STARTER;
+  return RECOGNIZED_PLAN_IDS[key] ?? PLAN_IDS.STARTER;
 }
 
 /**
  * Resolve o plano efetivo do usuário a partir de `users.plan`.
- * Aceita o objeto `{ id, status, source }` (padrão) ou string legada.
+ * Aceita string canônica (`"starter"`) ou objeto `{ id, status, source }`.
  *
  * Regras:
  * - Objeto com `status` diferente de `active` / `trialing` → Starter
- * - Objeto com `id` válido e status ativo → limites do `id`
- * - String legada → limites do alias (sem checagem de status)
+ * - Objeto com `id` válido e status ativo (ou ausente) → limites do `id`
+ * - String canônica → limites do id
+ * - Valor desconhecido → Starter
  *
  * @param {UserPlanRaw} raw
  * @returns {PlanId}
@@ -264,7 +265,7 @@ export function normalizeUserPlan(raw) {
 }
 
 /**
- * @param {UserPlanRaw} raw — `users.plan` ou ID legado
+ * @param {UserPlanRaw} raw — `users.plan`
  * @returns {PlanId}
  */
 export function normalizePlanId(raw) {

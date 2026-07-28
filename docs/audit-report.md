@@ -1,5 +1,8 @@
 # FIVI360 - Auditoria do Projeto Base
 
+> **Nota histórica (RC-CLEANUP-LEGACY-1):** menções a Mercado Pago são do protótipo
+> original e **não** descrevem o billing atual (Stripe).
+
 **Documento:** Auditoria visual e estrutural do frontend  
 **Versão:** 1.0  
 **Data:** 31/05/2026  

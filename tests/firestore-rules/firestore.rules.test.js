@@ -144,7 +144,7 @@ describe("users/{uid} — allow", () => {
     );
   });
 
-  test("bootstrap Starter billing is stripe/free without Mercado Pago", async () => {
+  test("bootstrap Starter billing is stripe/free", async () => {
     const uid = "user-stripe-bootstrap";
     const db = authContext(uid).firestore();
     const payload = buildUserCreate(uid);
@@ -257,7 +257,7 @@ describe("slugs/{slug} — allow", () => {
 });
 
 describe("users/{uid} — deny", () => {
-  test("create with provider mercado_pago is denied", async () => {
+  test("create with billing.provider mercado_pago is denied", async () => {
     const uid = "user-mp-create";
     const db = authContext(uid).firestore();
 
@@ -274,8 +274,8 @@ describe("users/{uid} — deny", () => {
     );
   });
 
-  test("create with legacy empty Stripe ID fields is denied", async () => {
-    const uid = "user-legacy-shape";
+  test("create with non-bootstrap billing shape is denied", async () => {
+    const uid = "user-invalid-billing-shape";
     const db = authContext(uid).firestore();
 
     await assertFails(

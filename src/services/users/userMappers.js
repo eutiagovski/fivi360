@@ -27,9 +27,9 @@ export function normalizeSocialLinks(raw) {
 }
 
 /**
- * Enriquece billing com dados Stripe persistidos em `users.plan` e `users.billing.stripe`.
- * Billing `mercado_pago` legado é preservado como leitura; não inventa IDs Stripe
- * e não é usado para entitlement (fonte: `users.plan` via normalizeUserPlan).
+ * Enriquece billing UI com metadados Stripe de `users.billing.stripe` e
+ * status/plano de `users.plan` (objeto). Provider inválido é normalizado para Stripe.
+ * Entitlement continua em `users.plan` via `normalizeUserPlan`.
  *
  * @param {import("@/config/billing").UserBilling} billing
  * @param {import("firebase/firestore").DocumentData} data
@@ -42,11 +42,13 @@ function enrichBillingFromUserDoc(billing, data) {
   if (rawBilling && typeof rawBilling === "object") {
     const stripeBilling = rawBilling.stripe;
 
-    if (typeof rawBilling.provider === "string" && rawBilling.provider) {
-      result.provider = rawBilling.provider;
+    if (
+      typeof rawBilling.provider === "string"
+      && rawBilling.provider.toLowerCase().trim() === "stripe"
+    ) {
+      result.provider = "stripe";
     }
 
-    // IDs Stripe só a partir de `billing.stripe` (nunca de campos vazios/legado MP).
     if (stripeBilling && typeof stripeBilling === "object") {
       if (typeof stripeBilling.customerId === "string") {
         result.customerId = stripeBilling.customerId;
@@ -93,7 +95,7 @@ export function mapUserDoc(userId, userData, publicProfileData = null) {
 
   return {
     id: userId,
-    displayName: publicData.displayName ?? userData.displayName ?? userData.name ?? "",
+    displayName: publicData.displayName ?? userData.displayName ?? "",
     email: userData.email ?? "",
     companyName: publicData.companyName ?? "",
     companyLogo: publicData.companyLogo ?? "",
@@ -122,7 +124,7 @@ export function mapUserDoc(userId, userData, publicProfileData = null) {
 export function mapToPublicUser(userId, data) {
   return {
     id: userId,
-    displayName: data.displayName ?? data.name ?? "",
+    displayName: data.displayName ?? "",
     companyName: data.companyName ?? "",
     companyLogo: data.companyLogo ?? "",
     bio: data.bio ?? "",

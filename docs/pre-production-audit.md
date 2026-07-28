@@ -1,5 +1,9 @@
 # Auditoria Pré-Produção FIVI360
 
+> **Nota histórica (RC-CLEANUP-LEGACY-1):** menções a Mercado Pago neste documento
+> refletem o estado na data da auditoria e **não** são configuração atual.
+> Billing ativo = Stripe apenas.
+
 **Sprint 13** — Auditoria somente leitura (sem alteração de código, git ou deploy)  
 **Data:** 10 de junho de 2026  
 **Versão analisada:** `fivi360@1.0.2`  

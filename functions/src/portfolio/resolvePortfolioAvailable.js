@@ -9,7 +9,7 @@ const PUBLIC_PORTFOLIO_PLAN_IDS = new Set(["professional", "studio", "enterprise
 const ACTIVE_PLAN_STATUSES = new Set(["active", "trialing"]);
 
 /**
- * @param {unknown} plan — `users.plan` (string legada ou objeto)
+ * @param {unknown} plan — `users.plan` (string canônica ou objeto `{ id, status }`)
  * @returns {"starter" | "professional" | "studio" | "enterprise"}
  */
 function normalizePlanId(plan) {

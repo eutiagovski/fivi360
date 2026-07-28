@@ -1,5 +1,8 @@
 # Relatório de Auditoria — Frontend FIVI360 (base Emergent)
 
+> **Nota histórica (RC-CLEANUP-LEGACY-1):** menções a Mercado Pago são do protótipo
+> original e **não** descrevem o billing atual (Stripe).
+
 **Versão:** v1  
 **Data:** 31/05/2026  
 **Escopo:** Auditoria somente leitura do projeto em `frontend/`  

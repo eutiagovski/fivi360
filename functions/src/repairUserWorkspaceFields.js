@@ -17,7 +17,7 @@ if (getApps().length === 0) {
  * - users.defaultWorkspaceId / activeWorkspaceId ausentes
  *
  * Não altera plan, billing, legalConsent, entitlements, slug ou perfil público.
- * Não sobrescreve workspace IDs já preenchidos (legacy ≠ uid).
+ * Não sobrescreve workspace IDs já preenchidos (mesmo que ≠ uid).
  */
 exports.repairUserWorkspaceFields = onCall(
   { region: "southamerica-east1" },

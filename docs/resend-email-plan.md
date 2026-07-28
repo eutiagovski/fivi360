@@ -157,7 +157,7 @@ flowchart LR
 | `payment_failed` | Falha de cobrança |
 | `subscription_canceled` | Cancelamento de assinatura |
 
-**Fora de escopo:** newsletter, marketing, campanhas, automações, editor de e-mails, unsubscribe, Mercado Pago, e-mails de pagamento reais.
+**Fora de escopo:** newsletter, marketing, campanhas, automações, editor de e-mails, unsubscribe, e-mails de pagamento reais.
 
 ---
 

@@ -324,9 +324,9 @@ function getSubscriptionMetadata(subscription) {
  * @returns {string | null}
  */
 function getInvoiceSubscriptionId(invoice) {
-  const legacySubscriptionId = getStripeSubscriptionId(invoice.subscription);
-  if (legacySubscriptionId) {
-    return legacySubscriptionId;
+  const topLevelSubscriptionId = getStripeSubscriptionId(invoice.subscription);
+  if (topLevelSubscriptionId) {
+    return topLevelSubscriptionId;
   }
 
   const parent = invoice.parent;
@@ -351,9 +351,9 @@ function getInvoiceSubscriptionId(invoice) {
         }
       }
 
-      const legacyLineSubscriptionId = getStripeSubscriptionId(line.subscription);
-      if (legacyLineSubscriptionId) {
-        return legacyLineSubscriptionId;
+      const lineSubscriptionId = getStripeSubscriptionId(line.subscription);
+      if (lineSubscriptionId) {
+        return lineSubscriptionId;
       }
     }
   }
@@ -371,12 +371,14 @@ async function resolveUserIdByStripeCustomerId(db, customerId) {
     return null;
   }
 
-  for (const fieldPath of ["billing.stripe.customerId", "billing.stripeCustomerId"]) {
-    const userSnap = await db.collection("users").where(fieldPath, "==", customerId).limit(1).get();
+  const userSnap = await db
+    .collection("users")
+    .where("billing.stripe.customerId", "==", customerId)
+    .limit(1)
+    .get();
 
-    if (!userSnap.empty) {
-      return userSnap.docs[0].id;
-    }
+  if (!userSnap.empty) {
+    return userSnap.docs[0].id;
   }
 
   return null;

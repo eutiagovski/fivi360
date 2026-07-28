@@ -81,13 +81,13 @@ describe("analyzeUserStructureGaps", () => {
     expect(gaps.needsServerWorkspaceIdRepair).toBe(true);
   });
 
-  it("does not request server repair when legacy workspace ids already exist", () => {
+  it("does not request server repair when workspace ids already exist", () => {
     const gaps = analyzeUserStructureGaps({
       userId: "uid-1",
       userExists: true,
       userData: {
-        defaultWorkspaceId: "legacy-ws",
-        activeWorkspaceId: "legacy-ws",
+        defaultWorkspaceId: "existing-ws",
+        activeWorkspaceId: "existing-ws",
       },
       publicProfileExists: true,
       workspaceExists: false,
@@ -127,12 +127,12 @@ describe("buildWorkspaceIdRepairPatch", () => {
     });
   });
 
-  it("does not overwrite existing legacy workspace ids", () => {
+  it("does not overwrite existing workspace ids", () => {
     expect(
       buildWorkspaceIdRepairPatch(
         {
-          defaultWorkspaceId: "legacy-ws",
-          activeWorkspaceId: "legacy-ws",
+          defaultWorkspaceId: "existing-ws",
+          activeWorkspaceId: "existing-ws",
           plan: "studio",
           billing: { planId: "studio" },
         },

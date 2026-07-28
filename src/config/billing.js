@@ -1,7 +1,7 @@
 /**
- * Configuração e modelo de billing — Stripe (único provedor ativo).
- * Usuários antigos com `billing.provider === "mercado_pago"` são só leitura
- * (não liberam entitlement; fonte de plano continua sendo `users.plan`).
+ * Configuração e modelo de billing — Stripe (único provedor).
+ * Fonte de plano / entitlement: `users.plan`.
+ * `users.billing` guarda metadados Stripe gerenciados pelo backend.
  */
 
 import {
@@ -10,11 +10,8 @@ import {
   PLAN_LIMITS,
 } from "@/config/planLimits";
 
-/** Provedor ativo de billing. */
+/** Único provedor de billing suportado. */
 export const BILLING_PROVIDER = "stripe";
-
-/** Provider legado — nunca usar para entitlement ou checkout. */
-export const LEGACY_BILLING_PROVIDER = "mercado_pago";
 
 export const BILLING_STATUS = {
   FREE: "free",
@@ -69,8 +66,7 @@ export const BILLING_PLANS = {
 
 /**
  * Bootstrap mínimo de billing para novos usuários Starter.
- * Sem IDs Stripe vazios e sem provider legado.
- * Campos de UI ausentes são preenchidos em `normalizeBilling`.
+ * Sem IDs Stripe vazios. Campos de UI ausentes são preenchidos em `normalizeBilling`.
  */
 export const DEFAULT_BILLING = Object.freeze({
   provider: BILLING_PROVIDER,
@@ -198,22 +194,12 @@ export function isStudioCheckoutConfigured() {
  * @param {string | null | undefined} provider
  * @returns {boolean}
  */
-export function isLegacyBillingProvider(provider) {
-  return (provider ?? "").toLowerCase().trim() === LEGACY_BILLING_PROVIDER;
-}
-
-/**
- * Provider Stripe ativo (ignora Mercado Pago legado).
- * @param {string | null | undefined} provider
- * @returns {boolean}
- */
 export function isActiveStripeBillingProvider(provider) {
   return (provider ?? "").toLowerCase().trim() === BILLING_PROVIDER;
 }
 
 /**
  * Indica se o usuário pode cancelar uma assinatura Stripe ativa.
- * Billing legado Mercado Pago nunca habilita cancelamento Stripe.
  * @param {UserBilling} billing
  * @returns {boolean}
  */
@@ -375,8 +361,8 @@ export function isCheckoutSuccessConfirmed(context, requestedPlanId = null) {
     return false;
   }
 
-  // Billing legado Mercado Pago não confirma sucesso de checkout Stripe.
-  if (isLegacyBillingProvider(context.billing?.provider)) {
+  const provider = context.billing?.provider;
+  if (provider && !isActiveStripeBillingProvider(provider)) {
     return false;
   }
 
@@ -491,15 +477,16 @@ export function normalizeBilling(raw) {
   }
 
   const data = /** @type {Record<string, unknown>} */ (raw);
+  const rawProvider =
+    typeof data.provider === "string" ? data.provider.toLowerCase().trim() : "";
 
-  // Preserva provider legado para leitura; default de novos docs é Stripe.
-  const provider =
-    typeof data.provider === "string" && data.provider
-      ? data.provider
-      : BILLING_PROVIDER;
+  // Provider ausente é tolerado (doc parcial); provider inválido → defaults Stripe/free.
+  if (rawProvider && rawProvider !== BILLING_PROVIDER) {
+    return { ...BILLING_UI_DEFAULTS };
+  }
 
   return {
-    provider,
+    provider: BILLING_PROVIDER,
     customerId: typeof data.customerId === "string" ? data.customerId : "",
     subscriptionId:
       typeof data.subscriptionId === "string" ? data.subscriptionId : "",

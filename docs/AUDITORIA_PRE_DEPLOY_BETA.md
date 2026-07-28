@@ -220,7 +220,7 @@ Os principais riscos para deploy em produção concentraram-se em:
 | M-09 | README / docs desatualizados (Mongo, Vite, rotas antigas) | Confusão operacional | `README.md` | Não |
 | M-10 | `.env.production` versionável (só emulators=false) — risco se alguém colocar secrets | Vazamento | `.gitignore` não ignora `.env.production` | Não* |
 | M-11 | Sem exclusão de conta (LGPD self-serve) | Compliance | — | Não (documentar) |
-| M-12 | Mercado Pago ainda em config (`REACT_APP_MP_*`, `BILLING_PROVIDER`) | Confusão dual billing | `billing.js`, `.env.example` | Não |
+| M-12 | ~~Mercado Pago ainda em config~~ **Resolvido em RC-CLEANUP-LEGACY-1** — Stripe único provider; sem `REACT_APP_MP_*` | — | `billing.js`, `.env.example` | Sim (limpo) |
 | M-13 | `slugs` update negado — troca de slug exige delete+create (já tratado no service) | OK se service correto | `firestore.rules` L253 | Não |
 | M-14 | Índice composto ausente para `projects` `userId`+`visibility` (query portfólio) | Pode falhar com `failed-precondition` se Firestore exigir | `projectService.js` L365–369; `firestore.indexes.json` | Validar em prod |
 

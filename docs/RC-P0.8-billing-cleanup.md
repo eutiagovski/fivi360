@@ -2,15 +2,19 @@
 
 ## Status
 
-Mercado Pago **não** é mais dependência ativa. Stripe é o único provedor de billing.
+Stripe é o **único** provedor de billing. Compatibilidade com Mercado Pago e schemas
+pré-Beta foi removida em **RC-CLEANUP-LEGACY-1** (ambiente Beta = Firebase novo,
+sem migração de produção).
 
-Documentos históricos que mencionam Mercado Pago (`mercado-pago-billing-plan.md`, audits antigos) estão **obsoletos** para a arquitetura atual.
+Documentos históricos que mencionam Mercado Pago (`mercado-pago-billing-plan.md`,
+audits antigos) permanecem apenas como arquivo histórico — **não** são configuração atual.
 
 ## Fonte de verdade
 
 | Conceito | Fonte |
 |----------|--------|
-| Plano / entitlements | `users.plan` (`id` + `status` active/trialing) |
+| Plano / entitlements | `users.plan` (`id` + `status` active/trialing, ou `"starter"` no bootstrap) |
+| Metadados Stripe | `users.billing` (`provider: "stripe"`, `billing.stripe.*`) |
 | priceId Stripe | Backend (`STRIPE_PRICE_PROFESSIONAL`, `STRIPE_PRICE_STUDIO`) |
 | Checkout Studio (FE) | Habilitado por padrão no Beta; opt-out `REACT_APP_STRIPE_STUDIO_CHECKOUT=false` |
 | Checkout Studio (BE) | Disponível quando `STRIPE_PRICE_STUDIO` está configurado |
@@ -28,23 +32,7 @@ Documentos históricos que mencionam Mercado Pago (`mercado-pago-billing-plan.md
 }
 ```
 
-Sem `customerId` / `subscriptionId` / `priceId` vazios. Sem `mercado_pago`.
-
-## Compatibilidade legado
-
-Usuários com `billing.provider === "mercado_pago"`:
-
-- Continuam carregando o app
-- Billing legado **não** libera entitlement
-- Billing legado **não** sobrescreve `users.plan`
-- Não há conversão automática para Stripe
-
-## Migração futura (não nesta sprint)
-
-1. Query Firestore: `billing.provider == "mercado_pago"`
-2. Saneamento opcional: remover campos vazios legados; **não** inventar customer/subscription Stripe
-3. Remover secrets/env MP se ainda existirem no projeto Firebase/hosting
-4. Arquivar `docs/mercado-pago-billing-plan.md`
+Sem `customerId` / `subscriptionId` / `priceId` vazios. Único provider válido: `stripe`.
 
 ## Upgrade Professional → Studio
 
@@ -52,11 +40,10 @@ Checkout Stripe cria nova subscription apenas quando o plano atual é inferior a
 Usuário já em Professional que sobe para Studio usa o mesmo callable (upgrade de tier).
 Portal de billing (`createBillingPortalSession`) permanece stub “em breve” — troca avançada/proration via portal fica para sprint futura.
 
-## Itens externos que podem ser removidos posteriormente
+## Removido (RC-CLEANUP-LEGACY-1)
 
-Ver relatório de entrega RC-P0.8 (não executar remoção remota nesta sprint):
-
-- Variáveis `REACT_APP_MP_PLAN_*` em Hosting / CI (se ainda definidas)
-- Qualquer secret Mercado Pago residual no Google Cloud / Firebase (nenhum encontrado no repo)
-- Webhooks ou apps Mercado Pago externos (se existirem fora do código)
-- Documento `docs/mercado-pago-billing-plan.md` (arquivar)
+- Leitura / preservação de `billing.provider = mercado_pago`
+- Aliases históricos de plano (`free`, `pro`)
+- Fallback `billing.stripeCustomerId` (usar apenas `billing.stripe.customerId`)
+- Testes e mappers de compatibilidade legada
+- Migração Mercado Pago → Stripe (não aplicável ao Firebase novo)
