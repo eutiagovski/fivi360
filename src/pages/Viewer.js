@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Loader2, MapPin } from "lucide-react";
 import { PanoramaViewer } from "@/components/viewer/PanoramaViewer";
@@ -26,6 +26,13 @@ import {
   updateHotspot,
   updateSceneHotspot,
 } from "@/services/hotspots/hotspotService";
+import { createSceneHotspotClickHandler } from "@/utils/sceneHotspotNavigation";
+import {
+  SCENE_HOTSPOT_CONTEXT,
+  SCENE_HOTSPOT_UNAVAILABLE_SHORT,
+  buildAvailableSceneTargetMap,
+  resolveSceneHotspotTarget,
+} from "@/utils/sceneHotspotTarget";
 
 const ERROR_MESSAGES = {
   not_found: "Imagem não encontrada.",
@@ -82,6 +89,23 @@ export const Viewer = () => {
   const viewerSubtitle = image?.projectId
     ? project?.title || "Projeto"
     : "Imagens";
+
+  const imagesLoadState = loading
+    ? "loading"
+    : error === "load_failed"
+      ? "failed"
+      : "loaded";
+
+  const availableImagesById = useMemo(
+    () => buildAvailableSceneTargetMap(projectImages),
+    [projectImages],
+  );
+
+  const sceneNavTransitionLockedRef = useRef(false);
+
+  useEffect(() => {
+    sceneNavTransitionLockedRef.current = false;
+  }, [imageId]);
 
   const resetFormState = useCallback(() => {
     setFormOpen(false);
@@ -232,23 +256,74 @@ export const Viewer = () => {
 
   const getSceneHotspotLabel = useCallback(
     (hotspot) => {
-      const destination = projectImages.find(
-        (img) => img.id === hotspot.targetImageId,
-      );
-      return destination?.title
-        ? `Ir para ${destination.title}`
-        : "Ir para";
+      const resolution = resolveSceneHotspotTarget({
+        hotspot,
+        availableImagesById,
+        context: SCENE_HOTSPOT_CONTEXT.INTERNAL_PROJECT_VIEWER,
+        sourceImageId: image?.id ?? imageId,
+        expectedProjectId: image?.projectId ?? null,
+        expectedUserId: user?.uid ?? null,
+        imagesLoadState,
+        sceneNavigationEnabled: sceneHotspotsEnabled,
+      });
+
+      if (resolution.available && resolution.targetImage?.title) {
+        return `Ir para ${resolution.targetImage.title}`;
+      }
+
+      if (resolution.isOrphanCandidate) {
+        return SCENE_HOTSPOT_UNAVAILABLE_SHORT;
+      }
+
+      return "Ir para";
     },
-    [projectImages],
+    [
+      availableImagesById,
+      image?.id,
+      image?.projectId,
+      imageId,
+      imagesLoadState,
+      sceneHotspotsEnabled,
+      user?.uid,
+    ],
   );
 
-  const handleSceneHotspotClick = useCallback(
-    (hotspot) => {
-      if (hotspot.targetImageId) {
-        navigate(`/viewer/${hotspot.targetImageId}`);
-      }
-    },
-    [navigate],
+  const handleSceneHotspotClick = useMemo(
+    () =>
+      createSceneHotspotClickHandler({
+        availableImagesById,
+        context: SCENE_HOTSPOT_CONTEXT.INTERNAL_PROJECT_VIEWER,
+        sourceImageId: image?.id ?? imageId,
+        expectedProjectId: image?.projectId ?? null,
+        expectedUserId: user?.uid ?? null,
+        imagesLoadState,
+        sceneNavigationEnabled: sceneHotspotsEnabled,
+        isTransitionLocked: () => sceneNavTransitionLockedRef.current,
+        lockTransition: () => {
+          sceneNavTransitionLockedRef.current = true;
+        },
+        onUnavailable: (message) => {
+          toast({
+            variant: "destructive",
+            title: SCENE_HOTSPOT_UNAVAILABLE_SHORT,
+            description: message,
+          });
+        },
+        onNavigate: (targetImageId) => {
+          navigate(`/viewer/${targetImageId}`);
+        },
+      }),
+    [
+      availableImagesById,
+      image?.id,
+      image?.projectId,
+      imageId,
+      imagesLoadState,
+      navigate,
+      sceneHotspotsEnabled,
+      toast,
+      user?.uid,
+    ],
   );
 
   const handleFormSubmit = async (formData) => {

@@ -96,6 +96,38 @@ Paths legados `projects/` e `images/` na raiz do bucket foram **removidos** das 
 
 ---
 
+## Hotspots scene — validação de destino (RC-P0.9)
+
+### O que as Rules validam hoje
+
+Em `images/{imageId}/hotspots/{hotspotId}`:
+
+- **create/update**: ownership da imagem **origem** (`parentImage().userId`);
+- shape mínimo (`type`, `targetImageId is string` para scene; title/description para info);
+- imutabilidade de `pitch`/`yaw` no update.
+
+### Limite conhecido
+
+As Rules **não** validam que `targetImageId` aponte para uma imagem existente do mesmo `userId`/`projectId`.
+
+Fazer `get(images/{targetImageId})` em todo create/update de scene:
+
+- aumenta leituras por escrita;
+- exige tratar target inexistente / cross-project / cross-user com cuidado;
+- pode tornar writes frágeis se o documento destino estiver inconsistente.
+
+### Camadas de defesa (prioridade)
+
+1. Ownership da imagem origem (Rules) — já existe.
+2. Frontend filtra opções de destino (`HotspotFormDialog` + `assertValidSceneTarget` no service).
+3. Viewer valida defensivamente em memória (`resolveSceneHotspotTarget`) antes de navegar.
+4. Cascade em `deleteImage` remove scene hotspots de entrada (RC-P0.6).
+5. Auditoria read-only: `scripts/audit-orphan-scene-hotspots.mjs`.
+
+Validação de destino via Rules com `get()` **não** foi adicionada nesta sprint (custo/fragilidade). Continua como validação de aplicação.
+
+---
+
 ## Publicar rules
 
 ```bash

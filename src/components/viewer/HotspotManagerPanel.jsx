@@ -20,6 +20,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { HOTSPOT_TYPE_SCENE } from "@/services/hotspots/hotspotService";
+import {
+  SCENE_HOTSPOT_CONTEXT,
+  buildAvailableSceneTargetMap,
+  resolveSceneHotspotTarget,
+} from "@/utils/sceneHotspotTarget";
 
 const PANEL_BUTTON =
   "flex items-center justify-center gap-2 px-3 py-2 rounded-xl border text-sm font-medium transition-colors disabled:opacity-50";
@@ -31,9 +36,13 @@ const PANEL_BUTTON_SECONDARY =
 /**
  * @param {import("@/services/hotspots/hotspotService").Hotspot} hotspot
  * @param {Map<string, string>} imageTitleById
+ * @param {boolean} [targetMissing]
  */
-function getHotspotListLabel(hotspot, imageTitleById) {
+function getHotspotListLabel(hotspot, imageTitleById, targetMissing = false) {
   if (hotspot.type === HOTSPOT_TYPE_SCENE) {
+    if (targetMissing) {
+      return "Navegação → Imagem de destino não encontrada";
+    }
     const destination =
       imageTitleById.get(hotspot.targetImageId) || "Imagem removida";
     return `Navegação → ${destination}`;
@@ -80,7 +89,30 @@ export function HotspotManagerPanel({
     projectImages.map((img) => [img.id, img.title || "Sem título"]),
   );
 
+  const availableImagesById = buildAvailableSceneTargetMap(projectImages);
+
   const hotspotCount = hotspots.length;
+
+  /**
+   * @param {import("@/services/hotspots/hotspotService").Hotspot} hotspot
+   */
+  const isSceneTargetMissing = (hotspot) => {
+    if (hotspot.type !== HOTSPOT_TYPE_SCENE) {
+      return false;
+    }
+
+    const resolution = resolveSceneHotspotTarget({
+      hotspot,
+      availableImagesById,
+      context: SCENE_HOTSPOT_CONTEXT.INTERNAL_PROJECT_VIEWER,
+      sourceImageId: hotspot.imageId,
+      expectedProjectId: hotspot.projectId || null,
+      imagesLoadState: loading ? "loading" : "loaded",
+      sceneNavigationEnabled: sceneHotspotsEnabled,
+    });
+
+    return resolution.isOrphanCandidate;
+  };
 
   useEffect(() => {
     if (placingMode) {
@@ -187,23 +219,33 @@ export function HotspotManagerPanel({
               Nenhum hotspot nesta imagem.
             </p>
           ) : (
-            hotspots.map((hotspot) => (
+            hotspots.map((hotspot) => {
+              const targetMissing = isSceneTargetMissing(hotspot);
+
+              return (
               <div
                 key={hotspot.id}
                 className="p-3 bg-zinc-900/80 border border-zinc-800 rounded-xl"
                 data-testid={`hotspot-list-item-${hotspot.id}`}
+                data-target-missing={targetMissing ? "true" : "false"}
               >
                 <div className="flex items-start gap-2">
                   {hotspot.type === HOTSPOT_TYPE_SCENE && (
                     <Navigation
                       size={14}
-                      className="text-sky-300 flex-shrink-0 mt-0.5"
+                      className={`flex-shrink-0 mt-0.5 ${
+                        targetMissing ? "text-amber-300" : "text-sky-300"
+                      }`}
                       aria-hidden
                     />
                   )}
                   <div className="min-w-0 flex-1">
                     <p className="text-sm text-white font-medium truncate">
-                      {getHotspotListLabel(hotspot, imageTitleById)}
+                      {getHotspotListLabel(
+                        hotspot,
+                        imageTitleById,
+                        targetMissing,
+                      )}
                     </p>
                     {hotspot.type !== HOTSPOT_TYPE_SCENE && hotspot.description && (
                       <p className="text-xs text-zinc-400 mt-1 line-clamp-2">
@@ -211,7 +253,15 @@ export function HotspotManagerPanel({
                       </p>
                     )}
                     {hotspot.type === HOTSPOT_TYPE_SCENE && (
-                      <p className="text-xs text-zinc-500 mt-1">Navegação</p>
+                      <p
+                        className={`text-xs mt-1 ${
+                          targetMissing ? "text-amber-400" : "text-zinc-500"
+                        }`}
+                      >
+                        {targetMissing
+                          ? "Imagem de destino não encontrada"
+                          : "Navegação"}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -239,7 +289,8 @@ export function HotspotManagerPanel({
                   </button>
                 </div>
               </div>
-            ))
+              );
+            })
           )}
         </div>
         )}

@@ -63,6 +63,12 @@ export function HotspotFormDialog({
     [projectImages, currentImageId],
   );
 
+  const targetMissingInOptions =
+    Boolean(initialTargetImageId) &&
+    !destinationOptions.some((img) => img.id === initialTargetImageId) &&
+    (!targetImageId ||
+      !destinationOptions.some((img) => img.id === targetImageId));
+
   const isScene =
     sceneHotspotsEnabled && hotspotType === HOTSPOT_TYPE_SCENE;
   const isEdit = mode === "edit";
@@ -186,6 +192,15 @@ export function HotspotFormDialog({
                 >
                   Imagem de destino
                 </label>
+                {isEdit && targetMissingInOptions && (
+                  <p
+                    className="text-xs text-amber-400 mb-2"
+                    data-testid="hotspot-target-missing-warning"
+                  >
+                    Imagem de destino não encontrada. Escolha outro destino ou
+                    exclua este hotspot.
+                  </p>
+                )}
                 {destinationOptions.length === 0 ? (
                   <p className="text-sm text-zinc-400 break-words">
                     Adicione outra imagem ao projeto para criar navegação entre
@@ -193,7 +208,11 @@ export function HotspotFormDialog({
                   </p>
                 ) : (
                   <Select
-                    value={targetImageId}
+                    value={
+                      destinationOptions.some((img) => img.id === targetImageId)
+                        ? targetImageId
+                        : undefined
+                    }
                     onValueChange={setTargetImageId}
                     disabled={isSaving}
                   >

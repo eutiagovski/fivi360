@@ -3,6 +3,7 @@ import {
   Suspense,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -17,6 +18,13 @@ import { useHotspots } from "@/hooks/useHotspots";
 import { useInViewport } from "@/hooks/useInViewport";
 import { useLandingDemo } from "@/hooks/useLandingDemo";
 import { HOTSPOT_TYPE_SCENE } from "@/services/hotspots/hotspotService";
+import { createSceneHotspotClickHandler } from "@/utils/sceneHotspotNavigation";
+import {
+  SCENE_HOTSPOT_CONTEXT,
+  buildAvailableSceneTargetMap,
+  filterNavigableHotspots,
+  resolveSceneHotspotTarget,
+} from "@/utils/sceneHotspotTarget";
 
 const PanoramaViewer = lazy(() =>
   import("@/components/viewer/PanoramaViewer").then((module) => ({
@@ -71,6 +79,7 @@ function LandingDemoViewer({ image, images }) {
   const [activeImageId, setActiveImageId] = useState(image?.id);
   const { hotspots } = useHotspots(activeImageId);
   const [infoHotspot, setInfoHotspot] = useState(null);
+  const transitionLockedRef = useRef(false);
 
   useEffect(() => {
     if (image?.id) {
@@ -78,28 +87,69 @@ function LandingDemoViewer({ image, images }) {
     }
   }, [image?.id]);
 
+  useEffect(() => {
+    transitionLockedRef.current = false;
+  }, [activeImageId]);
+
   const activeImage =
     images.find((img) => img.id === activeImageId) ?? image ?? null;
   const panoramaUrl =
     activeImage?.originalUrl || activeImage?.previewUrl || "";
 
-  const getSceneHotspotLabel = useCallback(
-    (hotspot) => {
-      const destination = images.find(
-        (img) => img.id === hotspot.targetImageId,
-      );
-      return destination?.title
-        ? `Ir para ${destination.title}`
-        : "Ir para";
-    },
+  const availableImagesById = useMemo(
+    () => buildAvailableSceneTargetMap(images),
     [images],
   );
 
-  const handleSceneHotspotClick = useCallback((hotspot) => {
-    if (hotspot.targetImageId) {
-      setActiveImageId(hotspot.targetImageId);
-    }
-  }, []);
+  const expectedProjectId = activeImage?.projectId ?? image?.projectId ?? null;
+
+  const sceneResolveOptions = useMemo(
+    () => ({
+      availableImagesById,
+      context: SCENE_HOTSPOT_CONTEXT.LANDING_DEMO,
+      sourceImageId: activeImage?.id ?? activeImageId,
+      expectedProjectId,
+      imagesLoadState: "loaded",
+    }),
+    [activeImage?.id, activeImageId, availableImagesById, expectedProjectId],
+  );
+
+  // Landing: oculta scene inválidos para não quebrar a demo.
+  const visibleHotspots = useMemo(
+    () => filterNavigableHotspots(hotspots, sceneResolveOptions),
+    [hotspots, sceneResolveOptions],
+  );
+
+  const getSceneHotspotLabel = useCallback(
+    (hotspot) => {
+      const resolution = resolveSceneHotspotTarget({
+        ...sceneResolveOptions,
+        hotspot,
+      });
+
+      if (resolution.available && resolution.targetImage?.title) {
+        return `Ir para ${resolution.targetImage.title}`;
+      }
+
+      return "Ir para";
+    },
+    [sceneResolveOptions],
+  );
+
+  const handleSceneHotspotClick = useMemo(
+    () =>
+      createSceneHotspotClickHandler({
+        ...sceneResolveOptions,
+        isTransitionLocked: () => transitionLockedRef.current,
+        lockTransition: () => {
+          transitionLockedRef.current = true;
+        },
+        onNavigate: (targetImageId) => {
+          setActiveImageId(targetImageId);
+        },
+      }),
+    [sceneResolveOptions],
+  );
 
   if (!panoramaUrl) {
     return (
@@ -119,7 +169,7 @@ function LandingDemoViewer({ image, images }) {
         <PanoramaViewer
           panoramaUrl={panoramaUrl}
           className="absolute inset-0"
-          hotspots={hotspots}
+          hotspots={visibleHotspots}
           onInfoHotspotClick={setInfoHotspot}
           onSceneHotspotClick={handleSceneHotspotClick}
           getSceneHotspotLabel={getSceneHotspotLabel}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { PanoramaViewer } from "@/components/viewer/PanoramaViewer";
@@ -8,6 +8,7 @@ import { HotspotInfoDialog } from "@/components/viewer/HotspotInfoDialog";
 import { usePageSeo } from "@/hooks/usePageSeo";
 import { usePublicViewerImage } from "@/hooks/usePublicViewerImage";
 import { useHotspots } from "@/hooks/useHotspots";
+import { useToast } from "@/hooks/use-toast";
 import {
   buildImageDescription,
   buildImageTitle,
@@ -15,6 +16,29 @@ import {
 import { trackEvent } from "@/services/analytics/analyticsService";
 import { recordPublic360View } from "@/services/stats/publicViewTracking";
 import { HOTSPOT_TYPE_SCENE } from "@/services/hotspots/hotspotService";
+import { createSceneHotspotClickHandler } from "@/utils/sceneHotspotNavigation";
+import {
+  SCENE_HOTSPOT_CONTEXT,
+  SCENE_HOTSPOT_UNAVAILABLE_SHORT,
+  buildAvailableSceneTargetMap,
+  filterNavigableHotspots,
+  resolveSceneHotspotTarget,
+} from "@/utils/sceneHotspotTarget";
+
+/**
+ * Mapeia accessMode do viewer público para o contexto de validação de scene.
+ * @param {string} accessMode
+ * @returns {string}
+ */
+function resolvePublicSceneContext(accessMode) {
+  if (accessMode === "portfolio") {
+    return SCENE_HOTSPOT_CONTEXT.PUBLIC_PORTFOLIO_VIEWER;
+  }
+  if (accessMode === "standalone") {
+    return SCENE_HOTSPOT_CONTEXT.PUBLIC_STANDALONE_VIEWER;
+  }
+  return SCENE_HOTSPOT_CONTEXT.PUBLIC_PROJECT_VIEWER;
+}
 
 const ERROR_MESSAGES = {
   not_found: "Imagem não encontrada.",
@@ -47,6 +71,7 @@ export function PublicImageViewer({
   subtitle,
 }) {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const {
     image,
     project,
@@ -65,8 +90,25 @@ export function PublicImageViewer({
   const { hotspots } = useHotspots(imageId);
 
   const [infoHotspot, setInfoHotspot] = useState(null);
+  const sceneNavTransitionLockedRef = useRef(false);
 
   const viewSource = accessMode === "portfolio" ? "public" : "shared";
+  const sceneContext = resolvePublicSceneContext(accessMode);
+
+  const imagesLoadState = loading
+    ? "loading"
+    : error === "load_failed"
+      ? "failed"
+      : "loaded";
+
+  const availableImagesById = useMemo(
+    () => buildAvailableSceneTargetMap(projectImages),
+    [projectImages],
+  );
+
+  useEffect(() => {
+    sceneNavTransitionLockedRef.current = false;
+  }, [imageId]);
 
   const portfolioSeo = useMemo(() => {
     if (accessMode !== "portfolio" || loading || error || !image) {
@@ -100,24 +142,51 @@ export function PublicImageViewer({
     subtitle ??
     (isProjectContext ? project?.title || "Projeto" : "Imagem compartilhada");
 
-  const visibleHotspots = useMemo(
-    () =>
-      isProjectContext
-        ? hotspots
-        : hotspots.filter((hotspot) => hotspot.type !== HOTSPOT_TYPE_SCENE),
-    [hotspots, isProjectContext],
+  const sceneResolveOptions = useMemo(
+    () => ({
+      availableImagesById,
+      context: sceneContext,
+      sourceImageId: image?.id ?? imageId,
+      expectedProjectId: image?.projectId ?? expectedProjectId ?? null,
+      imagesLoadState,
+      sceneNavigationEnabled: isProjectContext,
+    }),
+    [
+      availableImagesById,
+      expectedProjectId,
+      image?.id,
+      image?.projectId,
+      imageId,
+      imagesLoadState,
+      isProjectContext,
+      sceneContext,
+    ],
   );
+
+  // Público: oculta scene órfãos (mais seguro visualmente). Info permanece.
+  // Standalone: remove todos os scene (sem conjunto navegável).
+  const visibleHotspots = useMemo(() => {
+    if (!isProjectContext) {
+      return hotspots.filter((hotspot) => hotspot.type !== HOTSPOT_TYPE_SCENE);
+    }
+
+    return filterNavigableHotspots(hotspots, sceneResolveOptions);
+  }, [hotspots, isProjectContext, sceneResolveOptions]);
 
   const getSceneHotspotLabel = useCallback(
     (hotspot) => {
-      const destination = projectImages.find(
-        (img) => img.id === hotspot.targetImageId,
-      );
-      return destination?.title
-        ? `Ir para ${destination.title}`
-        : "Ir para";
+      const resolution = resolveSceneHotspotTarget({
+        ...sceneResolveOptions,
+        hotspot,
+      });
+
+      if (resolution.available && resolution.targetImage?.title) {
+        return `Ir para ${resolution.targetImage.title}`;
+      }
+
+      return "Ir para";
     },
-    [projectImages],
+    [sceneResolveOptions],
   );
 
   const resolveImagePath = useCallback(
@@ -135,13 +204,26 @@ export function PublicImageViewer({
     [buildImagePath, imageNavBasePath],
   );
 
-  const handleSceneHotspotClick = useCallback(
-    (hotspot) => {
-      if (hotspot.targetImageId) {
-        navigate(resolveImagePath(hotspot.targetImageId));
-      }
-    },
-    [navigate, resolveImagePath],
+  const handleSceneHotspotClick = useMemo(
+    () =>
+      createSceneHotspotClickHandler({
+        ...sceneResolveOptions,
+        isTransitionLocked: () => sceneNavTransitionLockedRef.current,
+        lockTransition: () => {
+          sceneNavTransitionLockedRef.current = true;
+        },
+        onUnavailable: (message) => {
+          toast({
+            variant: "destructive",
+            title: SCENE_HOTSPOT_UNAVAILABLE_SHORT,
+            description: message,
+          });
+        },
+        onNavigate: (targetImageId) => {
+          navigate(resolveImagePath(targetImageId));
+        },
+      }),
+    [navigate, resolveImagePath, sceneResolveOptions, toast],
   );
 
   if (loading) {
