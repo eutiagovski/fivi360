@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { isCheckoutSuccessConfirmed } from "@/config/billing";
+import { shouldFinalizeCheckoutSuccess } from "@/config/billing";
 import { trackEvent } from "@/services/analytics/analyticsService";
 
 const POLL_INTERVAL_MS = 2000;
@@ -8,29 +8,36 @@ const MAX_POLL_MS = 20000;
 
 /**
  * Sincroniza plano e billing após retorno do Stripe Checkout (`?checkout=success`).
- * Reconhece qualquer plano pago elegível (Professional, Studio; Enterprise futuro).
+ * Só finaliza sucesso quando `users.plan` satisfaz especificamente `requestedPlanId`.
  */
 export function useCheckoutSuccessSync({
   checkoutStatus,
+  sessionId = null,
+  requestedPlanId = null,
   refreshPlan,
   onInvoicesReload,
   toast,
-  requestedPlanId = null,
 }) {
   const [, setSearchParams] = useSearchParams();
   const [confirming, setConfirming] = useState(false);
   const [confirmMessage, setConfirmMessage] = useState(null);
   const handledRef = useRef(false);
 
-  const clearCheckoutParam = useCallback(() => {
+  const clearCheckoutParams = useCallback(() => {
     setSearchParams(
       (prev) => {
-        if (!prev.has("checkout")) {
+        if (
+          !prev.has("checkout")
+          && !prev.has("session_id")
+          && !prev.has("plan")
+        ) {
           return prev;
         }
 
         const next = new URLSearchParams(prev);
         next.delete("checkout");
+        next.delete("session_id");
+        next.delete("plan");
         return next;
       },
       { replace: true },
@@ -50,15 +57,17 @@ export function useCheckoutSuccessSync({
     let cancelled = false;
     let intervalId = null;
     const startedAt = Date.now();
+    let finalized = false;
 
     const finishSuccess = () => {
-      if (cancelled) {
+      if (cancelled || finalized) {
         return;
       }
 
+      finalized = true;
       setConfirming(false);
       setConfirmMessage(null);
-      clearCheckoutParam();
+      clearCheckoutParams();
       toast({
         title: "Assinatura",
         description: "Assinatura ativada com sucesso.",
@@ -66,25 +75,33 @@ export function useCheckoutSuccessSync({
     };
 
     const finishTimeout = () => {
-      if (cancelled) {
+      if (cancelled || finalized) {
         return;
       }
 
+      finalized = true;
       setConfirming(false);
       setConfirmMessage(
         "Pagamento recebido. Sua assinatura pode levar alguns instantes para atualizar.",
       );
-      clearCheckoutParam();
+      clearCheckoutParams();
     };
 
     const poll = async () => {
-      if (cancelled) {
+      if (cancelled || finalized) {
         return;
       }
 
       const context = await refreshPlan();
 
-      if (isCheckoutSuccessConfirmed(context, requestedPlanId)) {
+      if (
+        shouldFinalizeCheckoutSuccess({
+          checkoutStatus,
+          sessionId,
+          requestedPlanId,
+          context,
+        })
+      ) {
         if (intervalId) {
           clearInterval(intervalId);
         }
@@ -118,11 +135,12 @@ export function useCheckoutSuccessSync({
     };
   }, [
     checkoutStatus,
+    sessionId,
+    requestedPlanId,
     refreshPlan,
     onInvoicesReload,
     toast,
-    clearCheckoutParam,
-    requestedPlanId,
+    clearCheckoutParams,
   ]);
 
   return { confirming, confirmMessage };

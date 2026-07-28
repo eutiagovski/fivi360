@@ -9,7 +9,10 @@ const {
   getAllowedCheckoutPlanIds,
   getStripePriceId,
 } = require("./config/stripeBilling");
-const { resolveCheckoutPlanFromRequest } = require("./billing/checkoutPlanGate");
+const {
+  buildCheckoutSuccessUrl,
+  resolveCheckoutPlanFromRequest,
+} = require("./billing/checkoutPlanGate");
 
 if (getApps().length === 0) {
   initializeApp();
@@ -227,7 +230,7 @@ exports.createStripeCheckoutSession = onCall(
             quantity: 1,
           },
         ],
-        success_url: `${APP_BASE_URL}/plan?checkout=success`,
+        success_url: buildCheckoutSuccessUrl(APP_BASE_URL, normalizedPlanId),
         cancel_url: `${APP_BASE_URL}/plan?checkout=cancel`,
         client_reference_id: uid,
         metadata: {

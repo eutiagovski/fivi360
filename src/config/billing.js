@@ -275,8 +275,50 @@ export function isBillingUpgradePlanId(planId) {
 }
 
 /**
+ * Normaliza o plano solicitado no retorno do checkout (`?plan=`).
+ * Aceita apenas planos contratáveis via Stripe Checkout.
+ * @param {unknown} planId
+ * @returns {import("@/config/planLimits").PlanId | null}
+ */
+export function normalizeCheckoutRequestedPlanId(planId) {
+  if (typeof planId !== "string") {
+    return null;
+  }
+
+  const normalized = planId.toLowerCase().trim();
+
+  if (
+    normalized === PLAN_IDS.PROFESSIONAL
+    || normalized === PLAN_IDS.STUDIO
+  ) {
+    return /** @type {import("@/config/planLimits").PlanId} */ (normalized);
+  }
+
+  return null;
+}
+
+/**
+ * Normaliza `session_id` do retorno do Stripe Checkout.
+ * @param {unknown} sessionId
+ * @returns {string | null}
+ */
+export function normalizeCheckoutSessionId(sessionId) {
+  if (typeof sessionId !== "string") {
+    return null;
+  }
+
+  const trimmed = sessionId.trim();
+
+  if (!trimmed || trimmed === "{CHECKOUT_SESSION_ID}") {
+    return null;
+  }
+
+  return trimmed;
+}
+
+/**
  * Confirma se o plano atual satisfaz o plano solicitado no checkout.
- * Sem `requestedPlan`, qualquer plano pago elegível conta.
+ * Sem `requestedPlan` válido, nunca confirma (fail-safe).
  * @param {string | null | undefined} currentPlan
  * @param {string | null | undefined} requestedPlan
  * @returns {boolean}
@@ -286,21 +328,23 @@ export function doesPlanSatisfyRequestedPlan(currentPlan, requestedPlan) {
     return false;
   }
 
-  if (!requestedPlan) {
-    return true;
+  const normalizedRequested = normalizeCheckoutRequestedPlanId(requestedPlan);
+  if (!normalizedRequested) {
+    return false;
   }
 
   return (
-    currentPlan === requestedPlan
+    currentPlan === normalizedRequested
     || isPlanAtOrAbove(
       /** @type {import("@/config/planLimits").PlanId} */ (currentPlan),
-      /** @type {import("@/config/planLimits").PlanId} */ (requestedPlan),
+      normalizedRequested,
     )
   );
 }
 
 /**
  * Avalia se o retorno de `refreshPlan` confirma assinatura pós-checkout.
+ * Exige `requestedPlanId` válido — não confirma “qualquer plano pago”.
  * @param {{
  *   planId?: string | null,
  *   billing?: { subscriptionStatus?: string | null, provider?: string | null } | null,
@@ -309,6 +353,11 @@ export function doesPlanSatisfyRequestedPlan(currentPlan, requestedPlan) {
  * @returns {boolean}
  */
 export function isCheckoutSuccessConfirmed(context, requestedPlanId = null) {
+  const normalizedRequested = normalizeCheckoutRequestedPlanId(requestedPlanId);
+  if (!normalizedRequested) {
+    return false;
+  }
+
   if (!context?.planId || !isPaidPlan(context.planId)) {
     return false;
   }
@@ -331,7 +380,38 @@ export function isCheckoutSuccessConfirmed(context, requestedPlanId = null) {
     return false;
   }
 
-  return doesPlanSatisfyRequestedPlan(context.planId, requestedPlanId);
+  return doesPlanSatisfyRequestedPlan(context.planId, normalizedRequested);
+}
+
+/**
+ * Decide se o retorno do checkout pode ser tratado como sucesso confirmado.
+ * Query string só indica o que aguardar — entitlement continua em `users.plan`.
+ * @param {{
+ *   checkoutStatus?: string | null,
+ *   sessionId?: string | null,
+ *   requestedPlanId?: string | null,
+ *   context?: {
+ *     planId?: string | null,
+ *     billing?: { subscriptionStatus?: string | null, provider?: string | null } | null,
+ *   } | null,
+ * }} params
+ * @returns {boolean}
+ */
+export function shouldFinalizeCheckoutSuccess({
+  checkoutStatus,
+  sessionId,
+  requestedPlanId,
+  context,
+}) {
+  if (checkoutStatus !== "success") {
+    return false;
+  }
+
+  if (!normalizeCheckoutSessionId(sessionId)) {
+    return false;
+  }
+
+  return isCheckoutSuccessConfirmed(context, requestedPlanId);
 }
 
 /**

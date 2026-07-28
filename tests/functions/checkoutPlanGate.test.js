@@ -1,10 +1,12 @@
 /**
- * RC-P0.8 — gate de checkout Stripe (planId → priceId no backend).
+ * RC-P0.8 / RC-FIX-001 — gate de checkout Stripe (planId → priceId no backend).
  */
 
 const {
+  buildCheckoutSuccessUrl,
   normalizeCheckoutPlanId,
   resolveCheckoutPlanFromRequest,
+  STRIPE_CHECKOUT_SESSION_ID_PLACEHOLDER,
 } = require("../../functions/src/billing/checkoutPlanGate");
 
 describe("normalizeCheckoutPlanId", () => {
@@ -16,6 +18,32 @@ describe("normalizeCheckoutPlanId", () => {
 
   test("normaliza planId string", () => {
     expect(normalizeCheckoutPlanId(" Professional ").planId).toBe("professional");
+  });
+});
+
+describe("buildCheckoutSuccessUrl", () => {
+  test("E — inclui checkout=success, session_id placeholder e plan", () => {
+    const professionalUrl = buildCheckoutSuccessUrl(
+      "https://app.example.com",
+      "professional",
+    );
+    const studioUrl = buildCheckoutSuccessUrl(
+      "https://app.example.com/",
+      "studio",
+    );
+
+    expect(professionalUrl).toBe(
+      `https://app.example.com/plan?checkout=success&session_id=${STRIPE_CHECKOUT_SESSION_ID_PLACEHOLDER}&plan=professional`,
+    );
+    expect(studioUrl).toBe(
+      `https://app.example.com/plan?checkout=success&session_id=${STRIPE_CHECKOUT_SESSION_ID_PLACEHOLDER}&plan=studio`,
+    );
+    expect(professionalUrl).toContain("checkout=success");
+    expect(professionalUrl).toContain(
+      `session_id=${STRIPE_CHECKOUT_SESSION_ID_PLACEHOLDER}`,
+    );
+    expect(professionalUrl).toContain("plan=professional");
+    expect(studioUrl).toContain("plan=studio");
   });
 });
 

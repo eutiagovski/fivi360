@@ -3,6 +3,9 @@
  * priceId é sempre resolvido no backend — nunca confiar em priceId do cliente.
  */
 
+/** Placeholder literal — Stripe substitui na URL de retorno. */
+const STRIPE_CHECKOUT_SESSION_ID_PLACEHOLDER = "{CHECKOUT_SESSION_ID}";
+
 /**
  * @param {unknown} planId
  * @returns {{ ok: true, planId: string } | { ok: false, code: string, message: string }}
@@ -19,6 +22,25 @@ function normalizeCheckoutPlanId(planId) {
   }
 
   return { ok: true, planId: normalized };
+}
+
+/**
+ * Monta success_url do Stripe Checkout com session_id e plan validados.
+ * `planId` deve já ter sido normalizado/validado pelo gate de checkout.
+ *
+ * @param {string} appBaseUrl
+ * @param {string} planId — professional | studio
+ * @returns {string}
+ */
+function buildCheckoutSuccessUrl(appBaseUrl, planId) {
+  const base = String(appBaseUrl || "").replace(/\/$/, "");
+  const plan = encodeURIComponent(planId);
+
+  return (
+    `${base}/plan?checkout=success`
+    + `&session_id=${STRIPE_CHECKOUT_SESSION_ID_PLACEHOLDER}`
+    + `&plan=${plan}`
+  );
 }
 
 /**
@@ -86,6 +108,8 @@ function resolveCheckoutPlanFromRequest(data, deps) {
 
 module.exports = {
   normalizeCheckoutPlanId,
+  buildCheckoutSuccessUrl,
   resolveCheckoutPriceForPlan,
   resolveCheckoutPlanFromRequest,
+  STRIPE_CHECKOUT_SESSION_ID_PLACEHOLDER,
 };

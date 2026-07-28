@@ -23,7 +23,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { canCancelStripeSubscription, canStartStripeCheckoutForPlan, CHECKOUT_ALREADY_SUBSCRIBED_MESSAGE, PAYMENTS_COMING_SOON_MESSAGE } from '@/config/billing';
+import { canCancelStripeSubscription, canStartStripeCheckoutForPlan, CHECKOUT_ALREADY_SUBSCRIBED_MESSAGE, normalizeCheckoutRequestedPlanId, normalizeCheckoutSessionId, PAYMENTS_COMING_SOON_MESSAGE } from '@/config/billing';
 import { isPlanAtOrAbove, PLAN_IDS } from '@/config/planLimits';
 import { usePlanLimits } from '@/hooks/usePlanLimits';
 import { useCheckoutSuccessSync } from '@/hooks/useCheckoutSuccessSync';
@@ -38,6 +38,8 @@ export const Plan = () => {
   const [searchParams] = useSearchParams();
   const upgradeFromQuery = searchParams.get('upgrade');
   const checkoutStatus = searchParams.get('checkout');
+  const sessionId = normalizeCheckoutSessionId(searchParams.get('session_id'));
+  const requestedPlanId = normalizeCheckoutRequestedPlanId(searchParams.get('plan'));
   const isCheckoutSuccess = checkoutStatus === 'success';
   const {
     loading,
@@ -61,6 +63,8 @@ export const Plan = () => {
 
   const { confirming, confirmMessage } = useCheckoutSuccessSync({
     checkoutStatus,
+    sessionId,
+    requestedPlanId,
     refreshPlan: refreshSilent,
     onInvoicesReload: reloadInvoices,
     toast,
