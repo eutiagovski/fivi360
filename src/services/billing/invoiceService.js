@@ -17,6 +17,7 @@ import {
   getInvoiceStatusLabel,
 } from "@/config/billing";
 import { getPlanLimits } from "@/config/planLimits";
+import { toAppDate, toMillis } from "@/services/firebase/dates";
 
 /**
  * @typedef {Object} Invoice
@@ -32,10 +33,10 @@ import { getPlanLimits } from "@/config/planLimits";
  * @property {string | null} currency
  * @property {string | null} hostedInvoiceUrl
  * @property {string | null} invoicePdf
- * @property {import("firebase/firestore").Timestamp | Date | string | null} paidAt
- * @property {import("firebase/firestore").Timestamp | Date | string | null} failedAt
- * @property {import("firebase/firestore").Timestamp | Date | string | null} createdAt
- * @property {import("firebase/firestore").Timestamp | Date | string | null} updatedAt
+ * @property {Date | null} paidAt
+ * @property {Date | null} failedAt
+ * @property {Date | null} createdAt
+ * @property {Date | null} updatedAt
  */
 
 /**
@@ -50,24 +51,12 @@ import { getPlanLimits } from "@/config/planLimits";
  */
 
 /**
- * @param {import("firebase/firestore").Timestamp | Date | string | number | null | undefined} value
+ * @param {unknown} value
  * @returns {number | null}
  */
 function timestampToMillis(value) {
-  if (value == null) {
-    return null;
-  }
-
-  if (typeof value === "object" && value !== null && "toDate" in value) {
-    return value.toDate().getTime();
-  }
-
-  if (value instanceof Date) {
-    return value.getTime();
-  }
-
-  const parsed = new Date(value).getTime();
-  return Number.isNaN(parsed) ? null : parsed;
+  const ms = toMillis(value);
+  return ms > 0 ? ms : null;
 }
 
 /**
@@ -119,10 +108,10 @@ function mapInvoiceDoc(id, data) {
     hostedInvoiceUrl:
       typeof data.hostedInvoiceUrl === "string" ? data.hostedInvoiceUrl : null,
     invoicePdf: typeof data.invoicePdf === "string" ? data.invoicePdf : null,
-    paidAt: data.paidAt ?? null,
-    failedAt: data.failedAt ?? null,
-    createdAt: data.createdAt ?? null,
-    updatedAt: data.updatedAt ?? null,
+    paidAt: toAppDate(data.paidAt),
+    failedAt: toAppDate(data.failedAt),
+    createdAt: toAppDate(data.createdAt),
+    updatedAt: toAppDate(data.updatedAt),
   };
 }
 

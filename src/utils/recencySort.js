@@ -1,16 +1,25 @@
 /**
  * Ordenação por atividade recente: updatedAt DESC, fallback createdAt DESC.
- *
- * @param {{ updatedAt?: { toMillis?: () => number } | null, createdAt?: { toMillis?: () => number } | null }} item
+ */
+
+import { toMillis } from "@/services/firebase/dates";
+
+/**
+ * @param {{ updatedAt?: unknown, createdAt?: unknown }} item
  * @returns {number}
  */
 export function getRecencyMillis(item) {
-  return item.updatedAt?.toMillis?.() ?? item.createdAt?.toMillis?.() ?? 0;
+  const updated = toMillis(item.updatedAt);
+  if (updated > 0) {
+    return updated;
+  }
+
+  return toMillis(item.createdAt);
 }
 
 /**
- * @param {typeof item} a
- * @param {typeof item} b
+ * @param {{ updatedAt?: unknown, createdAt?: unknown }} a
+ * @param {{ updatedAt?: unknown, createdAt?: unknown }} b
  * @returns {number}
  */
 export function compareByRecency(a, b) {

@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Timestamp } from "firebase/firestore";
 import { useAuth } from "@/hooks/useAuth";
 import {
   getLooseImagesPageByUserId,
@@ -21,13 +20,14 @@ export function useLooseImagesPage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState(null);
-  const lastVisibleDocRef = useRef(null);
+  /** @type {React.MutableRefObject<import("@/services/firebase/dates").PaginationCursor | null>} */
+  const cursorRef = useRef(null);
 
   const loadFirstPage = useCallback(async () => {
     if (!user?.uid) {
       setImages([]);
       setHasMore(false);
-      lastVisibleDocRef.current = null;
+      cursorRef.current = null;
       setLoadingInitial(false);
       return;
     }
@@ -41,13 +41,13 @@ export function useLooseImagesPage() {
       });
 
       setImages(result.items);
-      lastVisibleDocRef.current = result.lastDoc;
+      cursorRef.current = result.cursor;
       setHasMore(result.hasMore);
     } catch (err) {
       setError(err);
       setImages([]);
       setHasMore(false);
-      lastVisibleDocRef.current = null;
+      cursorRef.current = null;
     } finally {
       setLoadingInitial(false);
     }
@@ -59,7 +59,7 @@ export function useLooseImagesPage() {
       !hasMore ||
       loadingMore ||
       loadingInitial ||
-      !lastVisibleDocRef.current
+      !cursorRef.current
     ) {
       return;
     }
@@ -70,11 +70,11 @@ export function useLooseImagesPage() {
     try {
       const result = await getLooseImagesPageByUserId(user.uid, {
         limitCount: LIST_LOAD_MORE_PAGE_SIZE,
-        startAfterDoc: lastVisibleDocRef.current,
+        cursor: cursorRef.current,
       });
 
       setImages((current) => deduplicateMergeById(current, result.items));
-      lastVisibleDocRef.current = result.lastDoc;
+      cursorRef.current = result.cursor;
       setHasMore(result.hasMore);
     } catch (err) {
       setError(err);
@@ -87,7 +87,7 @@ export function useLooseImagesPage() {
     setImages((current) => [
       {
         ...image,
-        updatedAt: image.updatedAt ?? Timestamp.now(),
+        updatedAt: image.updatedAt ?? new Date(),
       },
       ...current.filter((item) => item.id !== image.id),
     ]);
@@ -104,7 +104,7 @@ export function useLooseImagesPage() {
       const updated = {
         ...existing,
         ...updates,
-        updatedAt: updates.updatedAt ?? Timestamp.now(),
+        updatedAt: updates.updatedAt ?? new Date(),
       };
 
       return [updated, ...current.filter((image) => image.id !== imageId)];
@@ -123,7 +123,7 @@ export function useLooseImagesPage() {
         if (!cancelled) {
           setImages([]);
           setHasMore(false);
-          lastVisibleDocRef.current = null;
+          cursorRef.current = null;
           setLoadingInitial(false);
         }
         return;
@@ -141,7 +141,7 @@ export function useLooseImagesPage() {
 
         if (!cancelled) {
           setImages(result.items);
-          lastVisibleDocRef.current = result.lastDoc;
+          cursorRef.current = result.cursor;
           setHasMore(result.hasMore);
         }
       } catch (err) {
@@ -149,7 +149,7 @@ export function useLooseImagesPage() {
           setError(err);
           setImages([]);
           setHasMore(false);
-          lastVisibleDocRef.current = null;
+          cursorRef.current = null;
         }
       } finally {
         if (!cancelled) {

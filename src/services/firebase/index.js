@@ -1,16 +1,14 @@
 /**
- * Módulo compartilhado de utilitários Firebase.
- *
- * Responsabilidade:
- * - Helpers reutilizáveis (conversão de timestamps, tratamento de erros Firebase)
- * - Funções transversais que não pertencem a um domínio específico
- *
- * A inicialização do SDK permanece em `src/config/firebase.js`.
- * Serviços de domínio ficam em `src/services/{auth,projects,images,users}/`.
- *
- * Sprint 1: esqueleto — helpers serão implementados conforme os services forem integrados.
+ * Utilitários compartilhados Firebase (fronteira SDK ↔ domínio).
  *
  * @see docs/firebase-foundation.md
+ * @see docs/RC-INDEXEDDB-P0-PREP-1.md
  */
 
-export {};
+export {
+  toAppDate,
+  toMillis,
+  toFirestoreDate,
+  buildPaginationCursor,
+  isPaginationCursor,
+} from "./dates";

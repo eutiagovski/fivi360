@@ -388,6 +388,21 @@ describe("normalizeBilling schema atual", () => {
     expect(billing.customerId).toBe("");
   });
 
+  test("normaliza timestamps de billing para Date", () => {
+    const start = new Date("2026-01-01T00:00:00.000Z");
+    const billing = normalizeBilling({
+      provider: "stripe",
+      subscriptionStatus: "active",
+      currentPeriodStart: { toDate: () => start },
+      currentPeriodEnd: "2026-02-01T00:00:00.000Z",
+      updatedAt: start.getTime(),
+    });
+
+    expect(billing.currentPeriodStart).toEqual(start);
+    expect(billing.currentPeriodEnd).toEqual(new Date("2026-02-01T00:00:00.000Z"));
+    expect(billing.updatedAt).toEqual(start);
+  });
+
   test("isActiveSubscriptionStatus", () => {
     expect(isActiveSubscriptionStatus("active")).toBe(true);
     expect(isActiveSubscriptionStatus("trialing")).toBe(true);

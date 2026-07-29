@@ -2,24 +2,14 @@
  * Ordenação de imagens por atividade recente: updatedAt DESC, fallback createdAt DESC.
  */
 
+import { toMillis as toAppMillis } from "@/services/firebase/dates";
+
 /**
  * @param {unknown} value
  * @returns {number}
  */
 export function toMillis(value) {
-  if (!value) {
-    return 0;
-  }
-
-  if (typeof value.toMillis === "function") {
-    return value.toMillis();
-  }
-
-  if (typeof value.seconds === "number") {
-    return value.seconds * 1000;
-  }
-
-  return new Date(value).getTime() || 0;
+  return toAppMillis(value);
 }
 
 /**

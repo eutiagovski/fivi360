@@ -21,13 +21,14 @@ export function useProjectsPage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState(null);
-  const lastVisibleDocRef = useRef(null);
+  /** @type {React.MutableRefObject<import("@/services/firebase/dates").PaginationCursor | null>} */
+  const cursorRef = useRef(null);
 
   const loadFirstPage = useCallback(async () => {
     if (!user?.uid) {
       setProjects([]);
       setHasMore(false);
-      lastVisibleDocRef.current = null;
+      cursorRef.current = null;
       setLoadingInitial(false);
       return;
     }
@@ -41,13 +42,13 @@ export function useProjectsPage() {
       });
 
       setProjects(result.items);
-      lastVisibleDocRef.current = result.lastDoc;
+      cursorRef.current = result.cursor;
       setHasMore(result.hasMore);
     } catch (err) {
       setError(err);
       setProjects([]);
       setHasMore(false);
-      lastVisibleDocRef.current = null;
+      cursorRef.current = null;
     } finally {
       setLoadingInitial(false);
     }
@@ -59,7 +60,7 @@ export function useProjectsPage() {
       !hasMore ||
       loadingMore ||
       loadingInitial ||
-      !lastVisibleDocRef.current
+      !cursorRef.current
     ) {
       return;
     }
@@ -70,11 +71,11 @@ export function useProjectsPage() {
     try {
       const result = await getProjectsPageByUserId(user.uid, {
         limitCount: LIST_LOAD_MORE_PAGE_SIZE,
-        startAfterDoc: lastVisibleDocRef.current,
+        cursor: cursorRef.current,
       });
 
       setProjects((current) => deduplicateMergeById(current, result.items));
-      lastVisibleDocRef.current = result.lastDoc;
+      cursorRef.current = result.cursor;
       setHasMore(result.hasMore);
     } catch (err) {
       setError(err);
@@ -113,7 +114,7 @@ export function useProjectsPage() {
         if (!cancelled) {
           setProjects([]);
           setHasMore(false);
-          lastVisibleDocRef.current = null;
+          cursorRef.current = null;
           setLoadingInitial(false);
         }
         return;
@@ -131,7 +132,7 @@ export function useProjectsPage() {
 
         if (!cancelled) {
           setProjects(result.items);
-          lastVisibleDocRef.current = result.lastDoc;
+          cursorRef.current = result.cursor;
           setHasMore(result.hasMore);
         }
       } catch (err) {
@@ -139,7 +140,7 @@ export function useProjectsPage() {
           setError(err);
           setProjects([]);
           setHasMore(false);
-          lastVisibleDocRef.current = null;
+          cursorRef.current = null;
         }
       } finally {
         if (!cancelled) {

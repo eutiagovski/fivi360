@@ -26,6 +26,7 @@ import {
   serverTimestamp,
   setDoc,
   startAfter,
+  Timestamp,
   updateDoc,
   where,
   writeBatch,
@@ -53,6 +54,11 @@ import {
   collectImageDeleteHotspotRefs,
   collectSceneHotspotDeletionRefs,
 } from "@/services/hotspots/hotspotService";
+import {
+  buildPaginationCursor,
+  isPaginationCursor,
+  toAppDate,
+} from "@/services/firebase/dates";
 
 /** Limite de operações por `writeBatch` do Firestore. */
 const FIRESTORE_BATCH_LIMIT = 500;
@@ -73,8 +79,8 @@ const FIRESTORE_BATCH_LIMIT = 500;
  * @property {string} optimizedFileType
  * @property {'private' | 'shared' | 'public'} visibility
  * @property {'private' | 'shared' | 'public' | null} [projectVisibility]
- * @property {import("firebase/firestore").Timestamp | null} [createdAt]
- * @property {import("firebase/firestore").Timestamp | null} [updatedAt]
+ * @property {Date | null} [createdAt]
+ * @property {Date | null} [updatedAt]
  */
 
 /**
@@ -136,8 +142,8 @@ function mapImageDoc(imageId, data) {
     projectVisibility: normalizeProjectId(data.projectId)
       ? (data.projectVisibility ?? "private")
       : null,
-    createdAt: data.createdAt ?? null,
-    updatedAt: data.updatedAt ?? null,
+    createdAt: toAppDate(data.createdAt),
+    updatedAt: toAppDate(data.updatedAt),
   };
 }
 
@@ -241,7 +247,7 @@ export async function getLooseImagesByUserId(userId) {
 /**
  * @typedef {Object} LooseImagesPageResult
  * @property {Image[]} items
- * @property {import("firebase/firestore").QueryDocumentSnapshot | null} lastDoc
+ * @property {import("@/services/firebase/dates").PaginationCursor | null} cursor
  * @property {boolean} hasMore
  */
 
@@ -250,12 +256,12 @@ export async function getLooseImagesByUserId(userId) {
  * Requer índice composto: images — userId ASC, projectId ASC, updatedAt DESC.
  *
  * @param {string} userId
- * @param {{ limitCount: number, startAfterDoc?: import("firebase/firestore").QueryDocumentSnapshot | null }} options
+ * @param {{ limitCount: number, cursor?: import("@/services/firebase/dates").PaginationCursor | null }} options
  * @returns {Promise<LooseImagesPageResult>}
  */
 export async function getLooseImagesPageByUserId(
   userId,
-  { limitCount, startAfterDoc = null },
+  { limitCount, cursor = null },
 ) {
   const constraints = [
     where("userId", "==", userId),
@@ -263,8 +269,13 @@ export async function getLooseImagesPageByUserId(
     orderBy("updatedAt", "desc"),
   ];
 
-  if (startAfterDoc) {
-    constraints.push(startAfter(startAfterDoc));
+  if (isPaginationCursor(cursor)) {
+    const cursorSnap = await getDoc(doc(db, "images", cursor.id));
+    if (cursorSnap.exists()) {
+      constraints.push(startAfter(cursorSnap));
+    } else if (cursor.sortValue != null) {
+      constraints.push(startAfter(Timestamp.fromMillis(cursor.sortValue)));
+    }
   }
 
   constraints.push(limit(limitCount + 1));
@@ -281,9 +292,13 @@ export async function getLooseImagesPageByUserId(
       pageDocs.map((docSnap) => mapImageDoc(docSnap.id, docSnap.data())),
     );
 
+    const last = pageDocs.at(-1);
+
     return {
       items,
-      lastDoc: pageDocs.at(-1) ?? null,
+      cursor: last
+        ? buildPaginationCursor(last.id, last.data().updatedAt)
+        : null,
       hasMore,
     };
   } catch (error) {
@@ -657,7 +672,12 @@ export async function uploadImage(userId, projectId, file, title, options = {}) 
     }
   }
 
-  return mapImageDoc(imageId, imageData);
+  const now = new Date();
+  return mapImageDoc(imageId, {
+    ...imageData,
+    createdAt: now,
+    updatedAt: now,
+  });
 }
 
 /**
@@ -761,6 +781,7 @@ export async function replaceImageFile(
   const updatedImage = mapImageDoc(imageId, {
     ...existingImage,
     ...firestoreUpdates,
+    updatedAt: new Date(),
   });
 
   const previousUrl =
@@ -840,6 +861,7 @@ export async function moveImageToProject(userId, imageId, targetProjectId) {
     ...image,
     projectId: targetProjectId,
     projectVisibility: project.visibility,
+    updatedAt: new Date(),
   });
 
   const projectHasCover = Boolean(project.coverImage?.trim());
@@ -918,6 +940,7 @@ export async function moveImageToUnassigned(
     ...image,
     projectId: null,
     projectVisibility: null,
+    updatedAt: new Date(),
   });
 
   const wasCover = Boolean(

@@ -11,25 +11,26 @@
 
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { db } from "@/config/firebase";
+import { toAppDate } from "@/services/firebase/dates";
 
 /**
  * @typedef {Object} PortfolioStats
  * @property {number} portfolioViews
- * @property {import("firebase/firestore").Timestamp | null} updatedAt
+ * @property {Date | null} updatedAt
  */
 
 /**
  * @typedef {Object} ProjectStatEntry
  * @property {string} projectId
  * @property {number} views
- * @property {import("firebase/firestore").Timestamp | null} updatedAt
+ * @property {Date | null} updatedAt
  */
 
 /**
  * @typedef {Object} ImageStatEntry
  * @property {string} imageId
  * @property {number} views
- * @property {import("firebase/firestore").Timestamp | null} updatedAt
+ * @property {Date | null} updatedAt
  */
 
 /**
@@ -63,7 +64,7 @@ export async function getPortfolioStats(userId) {
 
   return {
     portfolioViews: typeof data.portfolioViews === "number" ? data.portfolioViews : 0,
-    updatedAt: data.updatedAt ?? null,
+    updatedAt: toAppDate(data.updatedAt),
   };
 }
 
@@ -84,7 +85,7 @@ export async function getTopProjectStats(userId, limit = 5) {
     .map((entry) => ({
       projectId: entry.id,
       views: typeof entry.data().views === "number" ? entry.data().views : 0,
-      updatedAt: entry.data().updatedAt ?? null,
+      updatedAt: toAppDate(entry.data().updatedAt),
     }))
     .sort((a, b) => b.views - a.views);
 
@@ -113,7 +114,7 @@ export async function getTopImageStats(userId, limit = 5) {
     .map((entry) => ({
       imageId: entry.id,
       views: typeof entry.data().views === "number" ? entry.data().views : 0,
-      updatedAt: entry.data().updatedAt ?? null,
+      updatedAt: toAppDate(entry.data().updatedAt),
     }))
     .sort((a, b) => b.views - a.views);
 

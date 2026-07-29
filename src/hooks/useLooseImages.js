@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Timestamp } from "firebase/firestore";
 import { useAuth } from "@/hooks/useAuth";
 import {
   getLooseImagesByUserId,
@@ -83,7 +82,7 @@ export function useLooseImages() {
       sortImagesByCreatedAt([
         {
           ...image,
-          updatedAt: image.updatedAt ?? Timestamp.now(),
+          updatedAt: image.updatedAt ?? new Date(),
         },
         ...current.filter((item) => item.id !== image.id),
       ]),
@@ -97,7 +96,7 @@ export function useLooseImages() {
           ? {
               ...image,
               ...updates,
-              updatedAt: updates.updatedAt ?? Timestamp.now(),
+              updatedAt: updates.updatedAt ?? new Date(),
             }
           : image,
       ),

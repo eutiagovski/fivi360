@@ -20,6 +20,10 @@ jest.mock("firebase/firestore", () => ({
   serverTimestamp: jest.fn(),
   setDoc: jest.fn(),
   updateDoc: jest.fn(),
+  Timestamp: {
+    fromMillis: (ms) => ({ __millis: ms }),
+    fromDate: (date) => ({ __date: date }),
+  },
 }));
 
 jest.mock("../../config/firebase", () => ({

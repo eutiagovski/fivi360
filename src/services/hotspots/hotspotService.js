@@ -22,6 +22,7 @@ import {
   getImagesByProjectId,
 } from "@/services/images/imageService";
 import { assertHotspotsEnabled } from "@/services/plans/planService";
+import { toAppDate, toMillis } from "@/services/firebase/dates";
 
 export const HOTSPOT_TYPE_INFO = "info";
 export const HOTSPOT_TYPE_SCENE = "scene";
@@ -37,8 +38,8 @@ export const SCENE_HOTSPOT_REQUIRES_PROJECT_MSG =
  * @property {string} projectId
  * @property {number} pitch
  * @property {number} yaw
- * @property {import("firebase/firestore").Timestamp | null} [createdAt]
- * @property {import("firebase/firestore").Timestamp | null} [updatedAt]
+ * @property {Date | null} [createdAt]
+ * @property {Date | null} [updatedAt]
  */
 
 /**
@@ -64,8 +65,8 @@ function mapHotspotDoc(hotspotId, data) {
     projectId: data.projectId ?? "",
     pitch: Number(data.pitch) || 0,
     yaw: Number(data.yaw) || 0,
-    createdAt: data.createdAt ?? null,
-    updatedAt: data.updatedAt ?? null,
+    createdAt: toAppDate(data.createdAt),
+    updatedAt: toAppDate(data.updatedAt),
   };
 
   if (data.type === HOTSPOT_TYPE_SCENE) {
@@ -185,9 +186,7 @@ export async function getHotspotsByImage(imageId) {
   return snapshot.docs
     .map((docSnap) => mapHotspotDoc(docSnap.id, docSnap.data()))
     .sort((a, b) => {
-      const aTime = a.createdAt?.toMillis?.() ?? 0;
-      const bTime = b.createdAt?.toMillis?.() ?? 0;
-      return aTime - bTime;
+      return toMillis(a.createdAt) - toMillis(b.createdAt);
     });
 }
 
@@ -241,7 +240,12 @@ export async function createHotspot(data) {
 
   await setDoc(hotspotRef, hotspotData);
 
-  return mapHotspotDoc(hotspotId, hotspotData);
+  const now = new Date();
+  return mapHotspotDoc(hotspotId, {
+    ...hotspotData,
+    createdAt: now,
+    updatedAt: now,
+  });
 }
 
 /**
@@ -296,7 +300,12 @@ export async function createSceneHotspot(data) {
 
   await setDoc(hotspotRef, hotspotData);
 
-  return mapHotspotDoc(hotspotId, hotspotData);
+  const now = new Date();
+  return mapHotspotDoc(hotspotId, {
+    ...hotspotData,
+    createdAt: now,
+    updatedAt: now,
+  });
 }
 
 /**

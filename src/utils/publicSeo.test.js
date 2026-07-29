@@ -29,17 +29,17 @@ describe("buildPortfolioTitle", () => {
   it("uses company name with portfolio suffix", () => {
     expect(
       buildPortfolioTitle({ companyName: "Panema Arquitetura" }),
-    ).toBe("Panema Arquitetura | Portfólio 360°");
+    ).toBe("Panema Arquitetura | Portfólio Público");
   });
 
   it("uses display name when company is missing", () => {
     expect(buildPortfolioTitle({ displayName: "João Silva" })).toBe(
-      "João Silva | Portfólio 360°",
+      "João Silva | Portfólio Público",
     );
   });
 
   it("falls back to portfolio suffix only", () => {
-    expect(buildPortfolioTitle({})).toBe("Portfólio 360°");
+    expect(buildPortfolioTitle({})).toBe("Portfólio Público");
   });
 });
 

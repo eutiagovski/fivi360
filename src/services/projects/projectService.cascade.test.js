@@ -19,9 +19,21 @@ jest.mock("firebase/firestore", () => ({
   serverTimestamp: jest.fn(),
   updateDoc: jest.fn(),
   where: (...args) => mockWhere(...args),
+  Timestamp: {
+    fromMillis: (ms) => ({ __millis: ms }),
+    fromDate: (date) => ({ __date: date }),
+  },
+  startAfter: jest.fn(),
+  limit: jest.fn(),
+  orderBy: jest.fn(),
+  increment: jest.fn(),
 }));
 
-jest.mock("../../config/firebase", () => ({ db: {} }));
+jest.mock("../../config/firebase", () => ({
+  __esModule: true,
+  default: {},
+  db: {},
+}));
 
 jest.mock("../images/imageService", () => ({
   getImagesByProjectId: jest.fn(),
@@ -36,6 +48,15 @@ jest.mock("../storage/storageService", () => ({
     image.storagePath ? [image.storagePath] : [],
   ),
   deleteImageFilesTolerant: jest.fn(),
+}));
+
+jest.mock("../plans/planService", () => ({
+  assertCanCreateProject: jest.fn(),
+  assertPublicVisibilityEnabled: jest.fn(),
+}));
+
+jest.mock("../workspaces/workspaceService", () => ({
+  getActiveWorkspaceIdForUser: jest.fn(),
 }));
 
 const { getImagesByProjectId } = require("../images/imageService");

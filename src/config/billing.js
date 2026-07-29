@@ -9,6 +9,7 @@ import {
   PLAN_IDS,
   PLAN_LIMITS,
 } from "@/config/planLimits";
+import { toAppDate } from "@/services/firebase/dates";
 
 /** Único provedor de billing suportado. */
 export const BILLING_PROVIDER = "stripe";
@@ -55,13 +56,13 @@ export const BILLING_PLANS = {
  * @property {string} subscriptionId
  * @property {string} planId
  * @property {SubscriptionStatus} subscriptionStatus
- * @property {import("firebase/firestore").Timestamp | Date | string | null} currentPeriodStart
- * @property {import("firebase/firestore").Timestamp | Date | string | null} currentPeriodEnd
- * @property {import("firebase/firestore").Timestamp | Date | string | null} nextInvoiceDate
+ * @property {Date | null} currentPeriodStart
+ * @property {Date | null} currentPeriodEnd
+ * @property {Date | null} nextInvoiceDate
  * @property {boolean} cancelAtPeriodEnd
  * @property {string} lastInvoiceUrl
  * @property {string} lastPaymentStatus
- * @property {import("firebase/firestore").Timestamp | Date | string | null} updatedAt
+ * @property {Date | null} updatedAt
  */
 
 /**
@@ -495,15 +496,15 @@ export function normalizeBilling(raw) {
       typeof data.subscriptionStatus === "string"
         ? data.subscriptionStatus
         : BILLING_UI_DEFAULTS.subscriptionStatus,
-    currentPeriodStart: data.currentPeriodStart ?? null,
-    currentPeriodEnd: data.currentPeriodEnd ?? null,
-    nextInvoiceDate: data.nextInvoiceDate ?? null,
+    currentPeriodStart: toAppDate(data.currentPeriodStart),
+    currentPeriodEnd: toAppDate(data.currentPeriodEnd),
+    nextInvoiceDate: toAppDate(data.nextInvoiceDate),
     cancelAtPeriodEnd: Boolean(data.cancelAtPeriodEnd),
     lastInvoiceUrl:
       typeof data.lastInvoiceUrl === "string" ? data.lastInvoiceUrl : "",
     lastPaymentStatus:
       typeof data.lastPaymentStatus === "string" ? data.lastPaymentStatus : "",
-    updatedAt: data.updatedAt ?? null,
+    updatedAt: toAppDate(data.updatedAt),
   };
 }
 
@@ -563,25 +564,13 @@ export function formatInvoiceAmount(amountCents, currency = "brl") {
 }
 
 /**
- * @param {import("firebase/firestore").Timestamp | Date | string | number | null | undefined} value
+ * @param {unknown} value
  * @returns {string}
  */
 export function formatBillingDate(value) {
-  if (value == null) {
-    return "—";
-  }
+  const date = toAppDate(value);
 
-  let date;
-
-  if (typeof value === "object" && value !== null && "toDate" in value) {
-    date = value.toDate();
-  } else if (value instanceof Date) {
-    date = value;
-  } else {
-    date = new Date(value);
-  }
-
-  if (Number.isNaN(date.getTime())) {
+  if (!date) {
     return "—";
   }
 

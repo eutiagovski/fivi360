@@ -26,6 +26,7 @@ import {
   query,
   serverTimestamp,
   startAfter,
+  Timestamp,
   updateDoc,
   where,
 } from "firebase/firestore";
@@ -41,6 +42,11 @@ import {
   deleteImageFilesTolerant,
 } from "@/services/storage/storageService";
 import { getActiveWorkspaceIdForUser } from "@/services/workspaces/workspaceService";
+import {
+  buildPaginationCursor,
+  isPaginationCursor,
+  toAppDate,
+} from "@/services/firebase/dates";
 import { sortByRecency } from "@/utils/recencySort";
 import { visibilityToLabel } from "@/utils/visibility";
 
@@ -54,8 +60,8 @@ import { visibilityToLabel } from "@/utils/visibility";
  * @property {'private' | 'shared' | 'public'} visibility
  * @property {string} coverImage
  * @property {number} imageCount
- * @property {import("firebase/firestore").Timestamp | null} [createdAt]
- * @property {import("firebase/firestore").Timestamp | null} [updatedAt]
+ * @property {Date | null} [createdAt]
+ * @property {Date | null} [updatedAt]
  * @property {string} [workspaceId]
  */
 
@@ -74,8 +80,8 @@ function mapProjectDoc(projectId, data) {
     visibility: data.visibility ?? "private",
     coverImage: data.coverImage ?? "",
     imageCount: data.imageCount ?? 0,
-    createdAt: data.createdAt ?? null,
-    updatedAt: data.updatedAt ?? null,
+    createdAt: toAppDate(data.createdAt),
+    updatedAt: toAppDate(data.updatedAt),
     workspaceId: data.workspaceId ?? "",
   };
 }
@@ -101,7 +107,7 @@ export async function getProjectsByUserId(userId) {
 /**
  * @typedef {Object} ProjectsPageResult
  * @property {Project[]} items
- * @property {import("firebase/firestore").QueryDocumentSnapshot | null} lastDoc
+ * @property {import("@/services/firebase/dates").PaginationCursor | null} cursor
  * @property {boolean} hasMore
  */
 
@@ -110,20 +116,25 @@ export async function getProjectsByUserId(userId) {
  * Requer índice composto: projects — userId ASC, updatedAt DESC.
  *
  * @param {string} userId
- * @param {{ limitCount: number, startAfterDoc?: import("firebase/firestore").QueryDocumentSnapshot | null }} options
+ * @param {{ limitCount: number, cursor?: import("@/services/firebase/dates").PaginationCursor | null }} options
  * @returns {Promise<ProjectsPageResult>}
  */
 export async function getProjectsPageByUserId(
   userId,
-  { limitCount, startAfterDoc = null },
+  { limitCount, cursor = null },
 ) {
   const constraints = [
     where("userId", "==", userId),
     orderBy("updatedAt", "desc"),
   ];
 
-  if (startAfterDoc) {
-    constraints.push(startAfter(startAfterDoc));
+  if (isPaginationCursor(cursor)) {
+    const cursorSnap = await getDoc(doc(db, "projects", cursor.id));
+    if (cursorSnap.exists()) {
+      constraints.push(startAfter(cursorSnap));
+    } else if (cursor.sortValue != null) {
+      constraints.push(startAfter(Timestamp.fromMillis(cursor.sortValue)));
+    }
   }
 
   constraints.push(limit(limitCount + 1));
@@ -140,9 +151,13 @@ export async function getProjectsPageByUserId(
       pageDocs.map((docSnap) => mapProjectDoc(docSnap.id, docSnap.data())),
     );
 
+    const last = pageDocs.at(-1);
+
     return {
       items,
-      lastDoc: pageDocs.at(-1) ?? null,
+      cursor: last
+        ? buildPaginationCursor(last.id, last.data().updatedAt)
+        : null,
       hasMore,
     };
   } catch (error) {

@@ -22,6 +22,10 @@ jest.mock("firebase/firestore", () => {
     updateDoc: (...args) => mockUpdateDoc(...args),
     where: jest.fn(),
     writeBatch: () => batch,
+    Timestamp: {
+      fromMillis: (ms) => ({ __millis: ms }),
+      fromDate: (date) => ({ __date: date }),
+    },
     __mockBatch: batch,
   };
 });
