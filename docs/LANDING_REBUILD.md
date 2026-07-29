@@ -545,7 +545,7 @@ Reutilizar `displayName`, `priceLabel` e `featureBullets` de:
 |----------|-------------------|
 | O que é uma imagem panorâmica 360°? | Formato equirectangular que permite olhar em todas as direções, como estar no ambiente. |
 | Preciso de equipamento especial? | Câmera 360° ou render equirectangular de softwares de visualização. |
-| O plano gratuito tem limites? | Sim: 3 projetos, 10 imagens, 50 MB. Veja a tabela de planos. |
+| O plano gratuito tem limites? | Sim: 2 projetos e 25 MB (~5 imagens panorâmicas). Veja a tabela de planos. |
 | O que são hotspots? | Marcadores no viewer com texto ou link para outra cena. Disponível no Professional. |
 | Meus clientes precisam de conta? | Não. Links compartilhados e portfólio são acessíveis sem login. |
 | Posso substituir uma imagem? | Sim, sem perder nome, descrição ou hotspots. |

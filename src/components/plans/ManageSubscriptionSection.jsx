@@ -82,8 +82,8 @@ function StarterSubscriptionView({ onUpgrade, onManageSubscription }) {
             Você está utilizando o plano Starter
           </h3>
           <p className="text-sm text-zinc-400 leading-relaxed max-w-2xl">
-            Faça upgrade para desbloquear projetos ilimitados, imagens ilimitadas,
-            hotspots interativos, portfólio público e mais armazenamento.
+            Faça upgrade para desbloquear mais armazenamento, hotspots
+            interativos, portfólio público e projetos ilimitados.
           </p>
         </div>
         <button

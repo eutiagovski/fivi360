@@ -22,8 +22,9 @@ export function StarterPlanInfoBanner({ className = "" }) {
             Você está usando o plano Starter
           </p>
           <p className="text-sm text-zinc-400 leading-relaxed">
-            O plano Starter possui limites de projetos, imagens e armazenamento.
-            Atualize para o plano Pro para liberar todos os recursos do FIVI360.
+            O plano Starter possui limites de projetos e armazenamento
+            (aproximadamente 5 imagens panorâmicas). Atualize para o plano
+            Professional para liberar mais espaço e recursos do FIVI360.
           </p>
           <Link
             to="/plan"

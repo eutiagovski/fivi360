@@ -14,7 +14,12 @@ import {
   getUpgradePlanButtonState,
   UPGRADE_PLAN_PRICES,
 } from "@/config/billing";
-import { PLAN_IDS, PLAN_LIMITS, PLAN_ORDER } from "@/config/planLimits";
+import {
+  PLAN_IDS,
+  PLAN_LIMITS,
+  PLAN_ORDER,
+  STORAGE_IMAGE_ESTIMATE_NOTE,
+} from "@/config/planLimits";
 
 /**
  * Modal de upgrade / alteração de plano.
@@ -103,11 +108,9 @@ export function UpgradePlanModal({
                 className={`
                   rounded-2xl p-5 border relative transition-shadow flex flex-col
                   ${
-                    isEnterprise
-                      ? "border border-zinc-800/80 bg-zinc-900/30 opacity-75"
-                      : isHighlighted
-                        ? "border-2 border-white bg-zinc-900/80 ring-1 ring-white/20"
-                        : "border border-zinc-800 bg-zinc-900/50"
+                    isHighlighted
+                      ? "border-2 border-white bg-zinc-900/80 ring-1 ring-white/20"
+                      : "border border-zinc-800 bg-zinc-900/50"
                   }
                 `}
               >
@@ -197,11 +200,18 @@ export function UpgradePlanModal({
         </div>
 
         <p
+          className="text-center text-xs text-zinc-500 max-w-3xl mx-auto"
+          data-testid="upgrade-modal-estimate-note"
+        >
+          {STORAGE_IMAGE_ESTIMATE_NOTE}
+        </p>
+
+        <p
           className="text-center text-sm text-amber-200/90 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3"
           data-testid="upgrade-modal-billing-notice"
         >
           Planos pagos são processados via checkout seguro Stripe. O Enterprise
-          estará disponível em breve — entre em contato para saber mais.
+          é sob consulta — fale conosco para uma proposta personalizada.
         </p>
       </DialogContent>
     </Dialog>

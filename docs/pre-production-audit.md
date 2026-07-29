@@ -494,11 +494,15 @@ Os bloqueadores para produção pública concentram-se em **segurança backend**
 
 ### 6. Planos e limites
 
-| Plano | Projetos | Imagens | Storage | Hotspots | Portfólio | Public visibility |
-|-------|----------|---------|---------|----------|-----------|-------------------|
-| Starter | 3 | 10 | 50 MB | Não | Não | Não (`public` oculto na UI) |
-| Professional | ∞ | ∞ | 500 MB | Sim | Sim | Sim |
-| Enterprise | ∞ | ∞ | 5 GB | Sim | Sim | Sim |
+Fonte: `src/config/planLimits.js` (`PLAN_LIMITS` / `PLAN_CONFIG`).
+Estimativa comercial: ~5 MB por imagem panorâmica.
+
+| Plano | Preço | Projetos | Storage | Imagens (aprox.) | Hotspots | Portfólio | Public visibility | Checkout |
+|-------|-------|----------|---------|------------------|----------|-----------|-------------------|----------|
+| Starter | Grátis | 2 | 25 MB | ~5 | Não | Não | Não | Não |
+| Professional | R$ 49/mês | ∞ | 250 MB | ~50 | Sim | Sim | Sim | Stripe |
+| Studio | R$ 199/mês | ∞ | 2 GB | ~400 | Sim | Sim | Sim | Stripe |
+| Enterprise | Sob consulta | ∞ | a partir de 10 GB | personalizado | Sim | Sim | Sim | Comercial |
 
 - UI: `PlanLimitButton`, toasts, modais premium — OK.
 - Server-side enforcement em services — OK para uso honesto.

@@ -179,6 +179,14 @@ export function LandingPricing() {
         <p className="text-sm text-zinc-500 text-center mt-10 max-w-2xl mx-auto">
           {LANDING_PRICING_SECTION.footnote}
         </p>
+        {LANDING_PRICING_SECTION.estimateNote ? (
+          <p
+            className="text-xs text-zinc-600 text-center mt-3 max-w-2xl mx-auto"
+            data-testid="landing-pricing-estimate-note"
+          >
+            {LANDING_PRICING_SECTION.estimateNote}
+          </p>
+        ) : null}
       </div>
     </section>
   );

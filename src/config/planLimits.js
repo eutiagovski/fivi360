@@ -1,6 +1,6 @@
 /**
- * Definição central dos planos e limites do FIVI360.
- * Fonte única de verdade para enforcement e UI.
+ * Definição central dos planos, preços e limites do FIVI360 (Beta).
+ * Fonte única de verdade para enforcement, checkout UX e copy comercial.
  *
  * Formato persistido em `users.plan`:
  *   - Bootstrap Starter: `"starter"`
@@ -8,6 +8,9 @@
  *
  * IDs reconhecidos: starter | professional | studio | enterprise.
  * Valores desconhecidos → Starter (sem entitlement pago).
+ *
+ * Estimativa de imagens: ~5 MB por panorama. Quantidade aproximada;
+ * consumo real varia com resolução, formato e compressão.
  */
 
 export const PLAN_IDS = {
@@ -37,8 +40,12 @@ export const PLAN_IDS = {
  * @property {string} tagline
  * @property {string} description
  * @property {string | null} [badge]
+ * @property {number | null} monthlyPrice — BRL; 0 = grátis; null = sob consulta
+ * @property {number | null} approximateImageCount — estimativa (~5 MB/imagem); null = personalizado
+ * @property {boolean} checkoutEnabled
+ * @property {boolean} [contactOnly]
  * @property {number | null} maxProjects — null = ilimitado
- * @property {number | null} maxTotalImages — null = ilimitado
+ * @property {number | null} maxTotalImages — null = ilimitado (enforcement; distinto da estimativa)
  * @property {number} maxStorageBytes
  * @property {boolean} hotspotsEnabled
  * @property {boolean} publicPortfolioEnabled
@@ -58,6 +65,61 @@ export const PLAN_IDS = {
 const MB = 1024 * 1024;
 const GB = 1024 * 1024 * 1024;
 
+/** Bytes de referência por imagem panorâmica para estimativas comerciais. */
+export const APPROX_IMAGE_BYTES = 5 * MB;
+
+/**
+ * Texto padrão sobre estimativa de quantidade de imagens.
+ * Exibir junto a tabelas/cards de planos.
+ */
+export const STORAGE_IMAGE_ESTIMATE_NOTE =
+  "Quantidade aproximada considerando imagens de até 5 MB. O consumo pode variar conforme a resolução e a compressão dos arquivos.";
+
+/**
+ * @param {number | null} monthlyPrice
+ * @returns {string}
+ */
+export function formatMonthlyPriceLabel(monthlyPrice) {
+  if (monthlyPrice === null || monthlyPrice === undefined) {
+    return "Sob consulta";
+  }
+
+  if (monthlyPrice === 0) {
+    return "Grátis";
+  }
+
+  return `R$ ${monthlyPrice}`;
+}
+
+/**
+ * @param {number | null} approximateImageCount
+ * @returns {string | null}
+ */
+export function formatApproximateImageCountLabel(approximateImageCount) {
+  if (approximateImageCount == null) {
+    return "Quantidade de imagens personalizada";
+  }
+
+  return `Aproximadamente ${approximateImageCount} imagens panorâmicas`;
+}
+
+/**
+ * @param {number} bytes
+ * @param {{ from?: boolean }} [options]
+ * @returns {string}
+ */
+export function formatStorageLimitLabel(bytes, options = {}) {
+  const prefix = options.from ? "A partir de " : "";
+
+  if (bytes >= GB) {
+    const gb = bytes / GB;
+    const label = Number.isInteger(gb) ? `${gb}` : gb.toFixed(2);
+    return `${prefix}${label} GB de armazenamento`;
+  }
+
+  return `${prefix}${Math.round(bytes / MB)} MB de armazenamento`;
+}
+
 /** @type {Record<PlanId, PlanLimits>} */
 export const PLAN_LIMITS = {
   [PLAN_IDS.STARTER]: {
@@ -67,6 +129,10 @@ export const PLAN_LIMITS = {
     description:
       "Ideal para conhecer a plataforma e criar suas primeiras apresentações em 360°.",
     badge: null,
+    monthlyPrice: 0,
+    approximateImageCount: 5,
+    checkoutEnabled: false,
+    contactOnly: false,
     maxProjects: 2,
     maxTotalImages: 10,
     maxStorageBytes: 25 * MB,
@@ -84,12 +150,9 @@ export const PLAN_LIMITS = {
     periodLabel: "",
     featureBullets: [
       "2 projetos",
-      "10 imagens",
       "25 MB de armazenamento",
+      "Aproximadamente 5 imagens panorâmicas",
       "Links compartilhados",
-      // "Sem portfólio público",
-      // "Sem hotspots",
-      // "Sem analytics",
     ],
   },
   [PLAN_IDS.PROFESSIONAL]: {
@@ -99,9 +162,13 @@ export const PLAN_LIMITS = {
     description:
       "Transforme suas apresentações em uma experiência profissional e compartilhe seus projetos com clientes de forma imersiva.",
     badge: "Mais popular",
+    monthlyPrice: 49,
+    approximateImageCount: 50,
+    checkoutEnabled: true,
+    contactOnly: false,
     maxProjects: null,
     maxTotalImages: null,
-    maxStorageBytes: 500 * MB,
+    maxStorageBytes: 250 * MB,
     hotspotsEnabled: true,
     publicPortfolioEnabled: true,
     publicVisibilityEnabled: true,
@@ -116,8 +183,8 @@ export const PLAN_LIMITS = {
     periodLabel: "/mês",
     featureBullets: [
       "Projetos ilimitados",
-      "Imagens ilimitadas",
-      "500 MB de armazenamento",
+      "250 MB de armazenamento",
+      "Aproximadamente 50 imagens panorâmicas",
       "Portfólio público",
       "Informações interativas",
       "Navegação entre imagens",
@@ -132,6 +199,10 @@ export const PLAN_LIMITS = {
     description:
       "Mais espaço, mais capacidade e recursos preparados para equipes que gerenciam múltiplos projetos simultaneamente.",
     badge: "Recomendado",
+    monthlyPrice: 199,
+    approximateImageCount: 400,
+    checkoutEnabled: true,
+    contactOnly: false,
     maxProjects: null,
     maxTotalImages: null,
     maxStorageBytes: 2 * GB,
@@ -150,10 +221,7 @@ export const PLAN_LIMITS = {
     featureBullets: [
       "Tudo do Professional",
       "2 GB de armazenamento",
-      // "Projetos ilimitados",
-      // "Imagens ilimitadas",
-      // "Informações interativas (hotspots — info)",
-      // "Navegação entre imagens (hotspot — scene)",
+      "Aproximadamente 400 imagens panorâmicas",
       "Analytics avançado",
       "Suporte prioritário",
       "White label parcial (em breve)",
@@ -165,7 +233,11 @@ export const PLAN_LIMITS = {
     tagline: "Para incorporadoras e construtoras",
     description:
       "Uma solução corporativa para equipes, empreendimentos e operações em escala.",
-    badge: "Em breve",
+    badge: null,
+    monthlyPrice: null,
+    approximateImageCount: null,
+    checkoutEnabled: false,
+    contactOnly: true,
     maxProjects: null,
     maxTotalImages: null,
     maxStorageBytes: 10 * GB,
@@ -178,21 +250,23 @@ export const PLAN_LIMITS = {
     multiuserEnabled: true,
     customDomainEnabled: true,
     whiteLabelEnabled: true,
-    status: "coming_soon",
-    priceLabel: "R$ 499",
-    periodLabel: "/mês",
+    status: null,
+    priceLabel: "Sob consulta",
+    periodLabel: "",
     featureBullets: [
       "Tudo do Studio",
-      "10 GB de armazenamento",
+      "A partir de 10 GB de armazenamento",
+      "Quantidade de imagens personalizada",
       "Multiusuário",
       "Workspaces compartilhados",
       "Permissões e equipe",
       "Domínio personalizado",
-      // "White-label parcial",
-      // "Suporte prioritário",
     ],
   },
 };
+
+/** Alias explícito da fonte comercial central. */
+export const PLAN_CONFIG = PLAN_LIMITS;
 
 /** Ordem de exibição na página de planos e landing */
 export const PLAN_ORDER = [

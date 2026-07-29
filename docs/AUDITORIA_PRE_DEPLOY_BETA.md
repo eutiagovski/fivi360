@@ -448,7 +448,7 @@ Antes de qualquer exclusão:
 21. Projeto private → mensagem “não disponível”.  
 22. Standalone share.  
 23. Legacy `/share/image/:id` redirect.  
-24. Limites Starter (2 projetos / 10 imagens / 25MB) na UI.  
+24. Limites Starter (2 projetos / 25MB ≈ 5 imagens) na UI.  
 25. Upgrade Stripe test → plano atualiza (Professional **e** Studio se habilitado).  
 26. Cancel at period end.  
 27. Excluir projeto (cascade) e imagem (observar hotspots — bug conhecido).  
@@ -626,7 +626,7 @@ Após validação:
 | Portal | Stub | Gap produto |
 | Plano no Firestore | Webhook escreve `users.plan` + `subscriptions` | Cliente ainda pode sobrescrever (C-01) |
 | Limites | `planLimits.js` + `planService` | Só cliente (C-02) |
-| Starter | 2 projetos, 10 imagens, 25MB, share OK, sem hotspots/portfólio público | — |
+| Starter | 2 projetos, 25MB (~5 imagens), share OK, sem hotspots/portfólio público | — |
 
 **Exclusão de usuário com Stripe:** preservar `customerId` no novo `users.billing` **ou** cancelar subscription no Stripe antes; evitar dois customers para o mesmo e-mail sem limpeza.
 

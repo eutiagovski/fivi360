@@ -105,9 +105,14 @@ Mover imagem da galeria para um projeto **não** cria hotspots automaticamente �
 
 # Planos
 
+Fonte comercial e limites: `src/config/planLimits.js` (`PLAN_LIMITS` / `PLAN_CONFIG`).
+Estimativa de imagens: ~5 MB por panorama (quantidade aproximada).
+
 ## Starter
 
-* limite de imagens
+* gratuito
+* 25 MB de armazenamento (~5 imagens)
+* limite de projetos (2)
 * sem hotspots
 * sem portfólio público
 
@@ -115,11 +120,29 @@ Mover imagem da galeria para um projeto **não** cria hotspots automaticamente �
 
 ## Professional
 
+* R$ 49/mês
+* 250 MB de armazenamento (~50 imagens)
 * hotspots
 * portfólio público
-* maior limite de imagens
+* checkout Stripe
 
 ---
+
+## Studio
+
+* R$ 199/mês
+* 2 GB de armazenamento (~400 imagens)
+* recursos avançados
+* checkout Stripe
+
+---
+
+## Enterprise
+
+* sob consulta
+* a partir de 10 GB
+* quantidade de imagens personalizada
+* sem checkout automático — CTA comercial
 
 # Portfólio Público
 

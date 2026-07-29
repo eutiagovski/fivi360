@@ -3,7 +3,11 @@
  * Fonte: docs/LANDING_REBUILD.md §7.3, §7.1.1, §7.4
  */
 
-import { PLAN_LIMITS, PLAN_IDS } from "@/config/planLimits";
+import {
+  PLAN_LIMITS,
+  PLAN_IDS,
+  STORAGE_IMAGE_ESTIMATE_NOTE,
+} from "@/config/planLimits";
 import { CONTACT_EMAIL } from "@/config/billing";
 
 export const LANDING_FEATURES_SECTION = {
@@ -110,55 +114,56 @@ export const LANDING_PRICING_SECTION = {
   subtitle: "Comece grátis e evolua conforme sua demanda cresce.",
   footnote:
     "Cobrança online via Stripe. Limites do plano Starter já estão ativos.",
+  estimateNote: STORAGE_IMAGE_ESTIMATE_NOTE,
 };
 
-/** Bullets de marketing por plano (complementa PLAN_LIMITS na landing). */
+/** Bullets de marketing por plano (preços e bullets derivados de PLAN_LIMITS). */
 export const LANDING_PRICING_MARKETING = {
   [PLAN_IDS.STARTER]: {
     headline: PLAN_LIMITS[PLAN_IDS.STARTER].tagline,
     description: PLAN_LIMITS[PLAN_IDS.STARTER].description,
-    priceLabel: "Grátis",
-    periodLabel: "",
+    priceLabel: PLAN_LIMITS[PLAN_IDS.STARTER].priceLabel,
+    periodLabel: PLAN_LIMITS[PLAN_IDS.STARTER].periodLabel ?? "",
     featureBullets: PLAN_LIMITS[PLAN_IDS.STARTER].featureBullets,
     ctaLabel: "Começar gratuitamente",
     ctaTo: "/register",
     ctaDisabled: false,
     highlighted: false,
-    badge: null,
+    badge: PLAN_LIMITS[PLAN_IDS.STARTER].badge,
   },
   [PLAN_IDS.PROFESSIONAL]: {
     headline: PLAN_LIMITS[PLAN_IDS.PROFESSIONAL].tagline,
     description: PLAN_LIMITS[PLAN_IDS.PROFESSIONAL].description,
-    priceLabel: "R$ 49",
-    periodLabel: "/mês",
+    priceLabel: PLAN_LIMITS[PLAN_IDS.PROFESSIONAL].priceLabel,
+    periodLabel: PLAN_LIMITS[PLAN_IDS.PROFESSIONAL].periodLabel ?? "",
     featureBullets: PLAN_LIMITS[PLAN_IDS.PROFESSIONAL].featureBullets,
     ctaLabel: "Assinar Professional",
     ctaTo: "/register",
     highlighted: true,
-    badge: "Mais popular",
+    badge: PLAN_LIMITS[PLAN_IDS.PROFESSIONAL].badge,
   },
   [PLAN_IDS.STUDIO]: {
     headline: PLAN_LIMITS[PLAN_IDS.STUDIO].tagline,
     description: PLAN_LIMITS[PLAN_IDS.STUDIO].description,
-    priceLabel: "R$ 199",
-    periodLabel: "/mês",
+    priceLabel: PLAN_LIMITS[PLAN_IDS.STUDIO].priceLabel,
+    periodLabel: PLAN_LIMITS[PLAN_IDS.STUDIO].periodLabel ?? "",
     featureBullets: PLAN_LIMITS[PLAN_IDS.STUDIO].featureBullets,
     ctaLabel: "Assinar Studio",
     ctaTo: "/register",
     highlighted: false,
-    badge: "Recomendado",
+    badge: PLAN_LIMITS[PLAN_IDS.STUDIO].badge,
   },
   [PLAN_IDS.ENTERPRISE]: {
     headline: PLAN_LIMITS[PLAN_IDS.ENTERPRISE].tagline,
     description: PLAN_LIMITS[PLAN_IDS.ENTERPRISE].description,
-    priceLabel: "R$ 499",
-    periodLabel: "/mês",
+    priceLabel: PLAN_LIMITS[PLAN_IDS.ENTERPRISE].priceLabel,
+    periodLabel: PLAN_LIMITS[PLAN_IDS.ENTERPRISE].periodLabel ?? "",
     featureBullets: PLAN_LIMITS[PLAN_IDS.ENTERPRISE].featureBullets,
     ctaLabel: "Fale conosco",
     ctaTo: `mailto:${CONTACT_EMAIL}?subject=Plano%20Enterprise%20FIVI360`,
     ctaDisabled: true,
     highlighted: false,
-    badge: "Em breve",
+    badge: PLAN_LIMITS[PLAN_IDS.ENTERPRISE].badge,
   },
 };
 
@@ -181,7 +186,7 @@ export const LANDING_FAQ_ITEMS = [
   {
     question: "O plano gratuito tem limites?",
     answer:
-      "Sim: 2 projetos, 10 imagens e 25 MB de armazenamento. Consulte a tabela de planos acima para comparar.",
+      "Sim: 2 projetos e 25 MB de armazenamento (aproximadamente 5 imagens panorâmicas). Consulte a tabela de planos acima para comparar.",
   },
   {
     question: "O que são hotspots?",

@@ -24,23 +24,23 @@ export const BILLING_STATUS = {
 
 export const BILLING_PLANS = {
   professional: {
-    id: "professional",
-    name: "Professional",
-    price: 49,
+    id: PLAN_IDS.PROFESSIONAL,
+    name: PLAN_LIMITS[PLAN_IDS.PROFESSIONAL].displayName,
+    price: PLAN_LIMITS[PLAN_IDS.PROFESSIONAL].monthlyPrice,
     currency: "BRL",
     interval: "month",
   },
   studio: {
-    id: "studio",
-    name: "Studio",
-    price: 199,
+    id: PLAN_IDS.STUDIO,
+    name: PLAN_LIMITS[PLAN_IDS.STUDIO].displayName,
+    price: PLAN_LIMITS[PLAN_IDS.STUDIO].monthlyPrice,
     currency: "BRL",
     interval: "month",
   },
   enterprise: {
-    id: "enterprise",
-    name: "Enterprise",
-    price: 499,
+    id: PLAN_IDS.ENTERPRISE,
+    name: PLAN_LIMITS[PLAN_IDS.ENTERPRISE].displayName,
+    price: PLAN_LIMITS[PLAN_IDS.ENTERPRISE].monthlyPrice,
     currency: "BRL",
     interval: "month",
   },
@@ -91,32 +91,32 @@ const BILLING_UI_DEFAULTS = Object.freeze({
 
 export const CONTACT_EMAIL = "contato@fivi360.com.br";
 
-/** Valores exibidos no modal de upgrade (checkout). */
+/** Valores exibidos no modal de upgrade (derivados de PLAN_LIMITS). */
 export const UPGRADE_PLAN_PRICES = {
   [PLAN_IDS.STARTER]: {
     priceLabel: PLAN_LIMITS[PLAN_IDS.STARTER].priceLabel,
-    periodLabel: "",
+    periodLabel: PLAN_LIMITS[PLAN_IDS.STARTER].periodLabel ?? "",
   },
   [PLAN_IDS.PROFESSIONAL]: {
-    priceLabel: "R$ 49",
-    periodLabel: "/mês",
+    priceLabel: PLAN_LIMITS[PLAN_IDS.PROFESSIONAL].priceLabel,
+    periodLabel: PLAN_LIMITS[PLAN_IDS.PROFESSIONAL].periodLabel ?? "",
   },
   [PLAN_IDS.STUDIO]: {
-    priceLabel: "R$ 199",
-    periodLabel: "/mês",
+    priceLabel: PLAN_LIMITS[PLAN_IDS.STUDIO].priceLabel,
+    periodLabel: PLAN_LIMITS[PLAN_IDS.STUDIO].periodLabel ?? "",
   },
   [PLAN_IDS.ENTERPRISE]: {
-    priceLabel: "A partir de R$ 499",
-    periodLabel: "/mês",
+    priceLabel: PLAN_LIMITS[PLAN_IDS.ENTERPRISE].priceLabel,
+    periodLabel: PLAN_LIMITS[PLAN_IDS.ENTERPRISE].periodLabel ?? "",
   },
 };
 
-/** Rótulos mensais na seção Gerenciar assinatura. */
+/** Rótulos mensais na seção Gerenciar assinatura (derivados de PLAN_LIMITS). */
 export const PLAN_MONTHLY_PRICE_LABELS = {
-  [PLAN_IDS.STARTER]: "Grátis",
-  [PLAN_IDS.PROFESSIONAL]: "R$ 49",
-  [PLAN_IDS.STUDIO]: "R$ 199",
-  [PLAN_IDS.ENTERPRISE]: "A partir de R$ 499",
+  [PLAN_IDS.STARTER]: PLAN_LIMITS[PLAN_IDS.STARTER].priceLabel,
+  [PLAN_IDS.PROFESSIONAL]: PLAN_LIMITS[PLAN_IDS.PROFESSIONAL].priceLabel,
+  [PLAN_IDS.STUDIO]: PLAN_LIMITS[PLAN_IDS.STUDIO].priceLabel,
+  [PLAN_IDS.ENTERPRISE]: PLAN_LIMITS[PLAN_IDS.ENTERPRISE].priceLabel,
 };
 
 export const SUBSCRIPTION_STATUS_LABELS = {
