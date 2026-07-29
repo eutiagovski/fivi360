@@ -79,13 +79,13 @@ export function PageActionHeader({
     >
       <div className="min-w-0">
         <h1
-          className="text-4xl sm:text-5xl lg:text-6xl font-light tracking-tighter text-white mb-2"
+          className="text-3xl sm:text-4xl lg:text-5xl font-light tracking-tighter text-white mb-2"
           data-testid={dataTestId}
         >
           {title}
         </h1>
         {subtitle ? (
-          <p className="text-base text-zinc-400">{subtitle}</p>
+          <p className="text-sm text-zinc-400">{subtitle}</p>
         ) : null}
       </div>
       {showAction ? (

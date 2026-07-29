@@ -52,7 +52,7 @@ export function LandingFeatures() {
                     <Icon className="h-5 w-5 text-zinc-300" strokeWidth={1.5} />
                   </div>
                   <div className="min-w-0">
-                    <h3 className="text-base font-medium text-white mb-2">
+                    <h3 className="text-sm font-medium text-white mb-2">
                       {feature.title}
                     </h3>
                     <p className="text-sm text-zinc-400 leading-relaxed">

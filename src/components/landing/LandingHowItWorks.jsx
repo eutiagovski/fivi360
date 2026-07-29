@@ -38,7 +38,7 @@ export function LandingHowItWorks() {
                 {index + 1}
               </Badge>
 
-              <h3 className="text-base font-medium text-white mb-2">
+              <h3 className="text-sm font-medium text-white mb-2">
                 {step.title}
               </h3>
               <p className="text-sm text-zinc-400 leading-relaxed">

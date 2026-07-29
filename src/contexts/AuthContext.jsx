@@ -57,6 +57,11 @@ export function AuthProvider({ children }) {
     const unsubscribe = subscribeToAuthChanges((nextUser) => {
       setUser(nextUser);
       setLoading(false);
+      // Garante que signUpInProgress não sobreviva a logout / sessão nula
+      // (RC-BUG-002 — não deve bloquear login normal nas guards).
+      if (!nextUser) {
+        setSignUpInProgress(false);
+      }
       setAnalyticsUser(nextUser ? { uid: nextUser.uid } : null);
     });
 
@@ -71,14 +76,14 @@ export function AuthProvider({ children }) {
       trackEvent("login", { method: "email" });
 
       if (canReceiveWelcomeEmail(authUser)) {
-        const profile = await getUserFirestoreData(authUser.uid);
+        try {
+          const profile = await getUserFirestoreData(authUser.uid);
 
-        if (profile) {
-          try {
+          if (profile) {
             await maybeEnqueueWelcomeEmailForAuthUser(authUser);
-          } catch {
-            // Não bloqueia o login.
           }
+        } catch {
+          // Não bloqueia o login (perfil/welcome são best-effort).
         }
       }
     } catch (err) {
@@ -190,14 +195,14 @@ export function AuthProvider({ children }) {
       const { user: authUser, isNewUser } = await signInWithGoogle();
       trackEvent(isNewUser ? "sign_up" : "login", { method: "google" });
 
-      const profile = await getUserFirestoreData(authUser.uid);
+      try {
+        const profile = await getUserFirestoreData(authUser.uid);
 
-      if (profile) {
-        try {
+        if (profile) {
           await maybeEnqueueWelcomeEmailForAuthUser(authUser);
-        } catch {
-          // Não bloqueia o login.
         }
+      } catch {
+        // Não bloqueia o login (perfil/welcome são best-effort).
       }
     } catch (err) {
       setError(err);
@@ -207,6 +212,7 @@ export function AuthProvider({ children }) {
 
   const signOut = useCallback(async () => {
     setError(null);
+    setSignUpInProgress(false);
 
     try {
       await authLogout();

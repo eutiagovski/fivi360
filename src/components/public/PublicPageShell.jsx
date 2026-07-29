@@ -6,7 +6,7 @@ function PublicPlatformHeader() {
     <header className="border-b border-zinc-800 p-6">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <h1
-          className="text-2xl font-light tracking-tighter text-white"
+          className="text-xl font-light tracking-tighter text-white"
           data-testid="public-logo"
         >
           FIVI<span className="font-medium">360</span>
@@ -67,13 +67,13 @@ export function PublicPageMessage({
     <PublicPageShell headerMode={headerMode}>
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <h1
-          className="text-3xl sm:text-4xl font-light tracking-tighter text-white mb-4"
+          className="text-2xl sm:text-3xl font-light tracking-tighter text-white mb-4"
           data-testid={dataTestId}
         >
           {title}
         </h1>
         {description && (
-          <p className="text-base text-zinc-400 max-w-md">{description}</p>
+          <p className="text-sm text-zinc-400 max-w-md">{description}</p>
         )}
       </div>
     </PublicPageShell>

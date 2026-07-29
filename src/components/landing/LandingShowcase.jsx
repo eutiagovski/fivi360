@@ -33,10 +33,10 @@ const PanoramaViewer = lazy(() =>
 );
 
 const primaryBtnClass =
-  "bg-white text-black rounded-full px-6 py-3 font-medium btn-scale hover:bg-zinc-200 h-auto text-base";
+  "bg-white text-black rounded-full px-6 py-3 font-medium btn-scale hover:bg-zinc-200 h-auto text-sm";
 
 const secondaryBtnClass =
-  "border border-zinc-700 text-white rounded-full px-6 py-3 hover:bg-zinc-900 bg-transparent h-auto text-base";
+  "border border-zinc-700 text-white rounded-full px-6 py-3 hover:bg-zinc-900 bg-transparent h-auto text-sm";
 
 function DemoPlaceholder() {
   return (

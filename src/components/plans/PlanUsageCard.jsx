@@ -41,7 +41,7 @@ export function PlanUsageCard({ limits, usageStats, usage }) {
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
         <div>
           <p className="text-sm text-zinc-400 mb-1">Seu plano</p>
-          <h2 className="text-2xl font-light text-white">
+          <h2 className="text-xl font-light text-white">
             Plano {limits.displayName}
           </h2>
         </div>
@@ -113,7 +113,7 @@ function UsageMetric({
   return (
     <div data-testid={dataTestId}>
       <p className="text-sm text-zinc-400 mb-2">{label}</p>
-      <p className={`text-xl font-light tabular-nums ${valueClassName}`}>{value}</p>
+      <p className={`text-lg font-light tabular-nums ${valueClassName}`}>{value}</p>
       {showBar && (
         <div className="mt-3 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
           <div

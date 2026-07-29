@@ -50,7 +50,7 @@ export const ImageCard = ({
           </div>
         </div>
         <div className="p-4">
-          <h3 className="text-lg font-medium text-white">{image.name}</h3>
+          <h3 className="text-base font-medium text-white">{image.name}</h3>
         </div>
       </Link>
     );
@@ -79,7 +79,7 @@ export const ImageCard = ({
           />
         </div>
         <div className="p-4">
-          <h3 className="text-lg font-medium text-white break-words">{image.name}</h3>
+          <h3 className="text-base font-medium text-white break-words">{image.name}</h3>
         </div>
       </Link>
 

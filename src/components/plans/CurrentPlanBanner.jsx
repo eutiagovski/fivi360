@@ -66,7 +66,7 @@ export function CurrentPlanBanner({
             {content.badge}
           </span>
           <h2
-            className="text-xl font-light text-white tracking-tight"
+            className="text-lg font-light text-white tracking-tight"
             data-testid="current-plan-banner-title"
           >
             {content.title}

@@ -42,7 +42,7 @@ export function ViewerPageHeader({
       <span className="hidden md:inline">{backLabel}</span>
     </Link>
   ) : (
-    <FiviLogo className="text-lg md:text-2xl" />
+    <FiviLogo className="text-base md:text-xl" />
   );
 
   return (
@@ -73,7 +73,7 @@ export function ViewerPageHeader({
             </p>
           ) : null}
           <h1
-            className="text-xl font-light text-white truncate"
+            className="text-lg font-light text-white truncate"
             data-testid={titleTestId}
           >
             {displayTitle}

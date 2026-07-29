@@ -106,18 +106,18 @@ export function LandingPricing() {
                 ) : null}
 
                 <div className="mb-4">
-                  <h3 className="text-2xl font-medium text-white mb-2">
+                  <h3 className="text-xl font-medium text-white mb-2">
                     {plan.displayName}
                   </h3>
                   <p className="text-sm text-zinc-400 leading-relaxed mb-4 min-h-[2.75rem]">
                     {marketing.headline}
                   </p>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-light text-white">
+                    <span className="text-3xl font-light text-white">
                       {marketing.priceLabel}
                     </span>
                     {marketing.periodLabel ? (
-                      <span className="text-lg text-zinc-400">
+                      <span className="text-base text-zinc-400">
                         {marketing.periodLabel}
                       </span>
                     ) : null}

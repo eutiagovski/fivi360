@@ -47,11 +47,11 @@ export function LegalSection({ id, title, children }) {
     >
       <h2
         id={`${id}-heading`}
-        className="text-xl sm:text-2xl font-light text-white mb-5 tracking-tight"
+        className="text-lg sm:text-xl font-light text-white mb-5 tracking-tight"
       >
         {title}
       </h2>
-      <div className="space-y-4 text-zinc-300 leading-relaxed text-[15px] sm:text-base [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-2 [&_a]:text-white [&_a]:underline [&_a]:underline-offset-2 [&_a]:hover:text-zinc-200">
+      <div className="space-y-4 text-zinc-300 leading-relaxed text-sm sm:text-base [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-2 [&_a]:text-white [&_a]:underline [&_a]:underline-offset-2 [&_a]:hover:text-zinc-200">
         {children}
       </div>
     </section>
@@ -155,7 +155,7 @@ export function LegalPageLayout({ title, sections, children, lastUpdated }) {
             </Link>
 
             <header>
-              <h1 className="text-3xl sm:text-4xl font-light text-white tracking-tight mb-2 sm:mb-3">
+              <h1 className="text-2xl sm:text-3xl font-light text-white tracking-tight mb-2 sm:mb-3">
                 {title}
               </h1>
               {lastUpdated && (

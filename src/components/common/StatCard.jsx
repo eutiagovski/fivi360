@@ -22,7 +22,7 @@ export const StatCard = ({
       >
         <p className="text-sm text-zinc-400 mb-2">{label}</p>
         <div className="flex items-baseline gap-2">
-          <span className={`text-3xl font-light tabular-nums ${valueClassName}`}>
+          <span className={`text-2xl font-light tabular-nums ${valueClassName}`}>
             {current}
           </span>
           <span className="text-sm text-zinc-500">{limit}</span>
@@ -48,17 +48,17 @@ export const StatCard = ({
           <span className="text-sm text-zinc-400">{label}</span>
         </div>
         <div className="flex items-baseline flex-wrap gap-x-1">
-          <span className="text-5xl font-light tabular-nums text-white">
+          <span className="text-4xl font-light tabular-nums text-white">
             {value}
           </span>
           {limitDisplay != null && limitDisplay !== "" && (
-            <span className="text-lg font-light tabular-nums text-zinc-500">
+            <span className="text-base font-light tabular-nums text-zinc-500">
               {" / "}
               {limitDisplay}
             </span>
           )}
           {suffix && (
-            <span className="text-lg font-light text-zinc-500 ml-2">{suffix}</span>
+            <span className="text-base font-light text-zinc-500 ml-2">{suffix}</span>
           )}
         </div>
       </div>
@@ -74,10 +74,10 @@ export const StatCard = ({
         <div className="p-2 bg-zinc-800 rounded-xl">{icon}</div>
         <span className="text-sm text-zinc-400">{label}</span>
       </div>
-      <div className="text-5xl font-light text-white">
+      <div className="text-4xl font-light text-white">
         {value}
         {suffix && (
-          <span className="text-2xl text-zinc-400 ml-2">{suffix}</span>
+          <span className="text-xl text-zinc-400 ml-2">{suffix}</span>
         )}
       </div>
     </div>

@@ -509,7 +509,7 @@ export const ProjectDetail = () => {
           <ArrowLeft size={20} />
           Voltar para projetos
         </Link>
-        <h1 className="text-3xl font-light text-white mb-2" data-testid="project-not-found">
+        <h1 className="text-2xl font-light text-white mb-2" data-testid="project-not-found">
           Projeto não encontrado
         </h1>
         <p className="text-zinc-400">Este projeto não existe ou você não tem acesso.</p>
@@ -566,11 +566,11 @@ export const ProjectDetail = () => {
                     value={editForm.title}
                     onChange={handleEditChange}
                     data-testid="edit-project-title"
-                    className="w-full text-4xl sm:text-5xl font-light tracking-tighter text-white mb-2 bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2 focus:outline-none focus:ring-1 focus:ring-white"
+                    className="w-full text-3xl sm:text-4xl font-light tracking-tighter text-white mb-2 bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2 focus:outline-none focus:ring-1 focus:ring-white"
                   />
                 ) : (
                   <h1
-                    className="text-4xl sm:text-5xl font-light tracking-tighter text-white mb-2 break-words"
+                    className="text-3xl sm:text-4xl font-light tracking-tighter text-white mb-2 break-words"
                     data-testid="project-name"
                   >
                     {project.title || 'Sem título'}
@@ -783,7 +783,7 @@ export const ProjectDetail = () => {
               />
             ) : (
               <p
-                className="hidden lg:block text-base text-zinc-300 leading-relaxed"
+                className="hidden lg:block text-sm text-zinc-300 leading-relaxed"
                 data-testid="project-description"
               >
                 {project.description || 'Sem descrição.'}

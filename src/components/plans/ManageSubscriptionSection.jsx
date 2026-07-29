@@ -76,7 +76,7 @@ function StarterSubscriptionView({ onUpgrade, onManageSubscription }) {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
         <div className="min-w-0">
           <h3
-            className="text-xl font-medium text-white mb-2"
+            className="text-lg font-medium text-white mb-2"
             data-testid="manage-subscription-starter-title"
           >
             Você está utilizando o plano Starter
@@ -157,7 +157,7 @@ function SubscriptionInfoItem({ label, value, dataTestId }) {
   return (
     <div data-testid={dataTestId}>
       <p className="text-sm text-zinc-400 mb-1">{label}</p>
-      <p className="text-lg font-light text-white">{value}</p>
+      <p className="text-base font-light text-white">{value}</p>
     </div>
   );
 }

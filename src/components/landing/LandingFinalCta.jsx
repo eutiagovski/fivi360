@@ -4,7 +4,7 @@ import { LANDING_FINAL_CTA } from "@/config/landingContent";
 import { trackEvent } from "@/services/analytics/analyticsService";
 
 const primaryBtnClass =
-  "bg-white text-black rounded-full px-8 py-3 font-medium btn-scale hover:bg-zinc-200 h-auto text-base";
+  "bg-white text-black rounded-full px-8 py-3 font-medium btn-scale hover:bg-zinc-200 h-auto text-sm";
 
 export function LandingFinalCta() {
   return (
@@ -12,12 +12,12 @@ export function LandingFinalCta() {
       <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16">
         <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 px-8 py-12 md:px-16 md:py-16 text-center">
           <h2
-            className="text-2xl sm:text-3xl font-light tracking-tight text-white mb-4"
+            className="text-xl sm:text-2xl font-light tracking-tight text-white mb-4"
             data-testid="landing-final-cta-title"
           >
             {LANDING_FINAL_CTA.title}
           </h2>
-          <p className="text-base text-zinc-400 mb-8 max-w-xl mx-auto leading-relaxed">
+          <p className="text-sm text-zinc-400 mb-8 max-w-xl mx-auto leading-relaxed">
             {LANDING_FINAL_CTA.description}
           </p>
 

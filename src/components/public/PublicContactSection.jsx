@@ -68,13 +68,13 @@ export function PublicContactSection({
           <>
             <h2
               id={`${testIdPrefix}-heading`}
-              className="text-2xl sm:text-3xl font-light tracking-tight text-white mb-3"
+              className="text-xl sm:text-2xl font-light tracking-tight text-white mb-3"
               data-testid={`${testIdPrefix}-title`}
             >
               Vamos conversar sobre o seu projeto
             </h2>
             <p
-              className="text-base text-zinc-400 leading-relaxed mb-8"
+              className="text-sm text-zinc-400 leading-relaxed mb-8"
               data-testid={`${testIdPrefix}-description`}
             >
               Entre em contato com o escritório para solicitar um orçamento ou
@@ -99,7 +99,7 @@ export function PublicContactSection({
         ) : (
           <h2
             id={`${testIdPrefix}-heading`}
-            className="text-2xl sm:text-3xl font-light tracking-tight text-white mb-6"
+            className="text-xl sm:text-2xl font-light tracking-tight text-white mb-6"
             data-testid={`${testIdPrefix}-title`}
           >
             Contato

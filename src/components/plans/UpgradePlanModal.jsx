@@ -68,7 +68,7 @@ export function UpgradePlanModal({
         data-testid="upgrade-plan-modal"
       >
         <DialogHeader>
-          <DialogTitle className="text-white text-xl font-medium">
+          <DialogTitle className="text-white text-lg font-medium">
             Escolha seu plano
           </DialogTitle>
           <DialogDescription className="text-zinc-400 text-left">
@@ -122,7 +122,7 @@ export function UpgradePlanModal({
                   </div>
                 ) : null}
 
-                <h3 className="text-lg font-medium text-white mb-1">
+                <h3 className="text-base font-medium text-white mb-1">
                   {plan.displayName}
                 </h3>
 
@@ -131,7 +131,7 @@ export function UpgradePlanModal({
                 </p>
 
                 <div className="flex items-baseline gap-1 mb-4">
-                  <span className="text-2xl font-light text-white">
+                  <span className="text-xl font-light text-white">
                     {pricing.priceLabel}
                   </span>
                   {pricing.periodLabel ? (

@@ -5,10 +5,10 @@ import { LANDING_PORTFOLIO } from "@/config/landingContent";
 import { LANDING_DEMO } from "@/config/landingDemo";
 
 const primaryBtnClass =
-  "bg-white text-black rounded-full px-6 py-3 font-medium btn-scale hover:bg-zinc-200 h-auto text-base";
+  "bg-white text-black rounded-full px-6 py-3 font-medium btn-scale hover:bg-zinc-200 h-auto text-sm";
 
 const secondaryBtnClass =
-  "border border-zinc-700 text-white rounded-full px-6 py-3 hover:bg-zinc-900 bg-transparent h-auto text-base";
+  "border border-zinc-700 text-white rounded-full px-6 py-3 hover:bg-zinc-900 bg-transparent h-auto text-sm";
 
 export function LandingPortfolio() {
   return (
@@ -17,12 +17,12 @@ export function LandingPortfolio() {
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <div>
             <h2
-              className="text-2xl sm:text-3xl font-light tracking-tight text-white mb-4"
+              className="text-xl sm:text-2xl font-light tracking-tight text-white mb-4"
               data-testid="landing-portfolio-title"
             >
               {LANDING_PORTFOLIO.title}
             </h2>
-            <p className="text-base text-zinc-400 mb-8 leading-relaxed">
+            <p className="text-sm text-zinc-400 mb-8 leading-relaxed">
               {LANDING_PORTFOLIO.description}
             </p>
 

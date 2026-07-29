@@ -24,18 +24,18 @@ export const NotFound = () => {
     >
       <div className="w-full max-w-lg text-center">
         <h1
-          className="text-3xl font-light tracking-tighter text-white mb-10"
+          className="text-2xl font-light tracking-tighter text-white mb-10"
           data-testid="not-found-logo"
         >
           FIVI<span className="font-medium">360</span>
         </h1>
 
-        <p className="text-6xl font-light text-zinc-700 mb-6" aria-hidden="true">
+        <p className="text-5xl font-light text-zinc-700 mb-6" aria-hidden="true">
           404
         </p>
 
         <h2
-          className="text-2xl font-light text-white mb-4 tracking-tight"
+          className="text-xl font-light text-white mb-4 tracking-tight"
           data-testid="not-found-title"
         >
           Página não encontrada

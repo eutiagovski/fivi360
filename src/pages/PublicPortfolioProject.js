@@ -285,7 +285,7 @@ export const PublicPortfolioProject = () => {
         </div>
 
         <h1
-          className="text-4xl sm:text-5xl lg:text-6xl font-light tracking-tighter text-white mb-4"
+          className="text-3xl sm:text-4xl lg:text-5xl font-light tracking-tighter text-white mb-4"
           data-testid="portfolio-project-name"
         >
           {project.title}
@@ -301,7 +301,7 @@ export const PublicPortfolioProject = () => {
         )}
 
         <p
-          className="text-lg text-zinc-300 leading-relaxed max-w-3xl"
+          className="text-base text-zinc-300 leading-relaxed max-w-3xl"
           data-testid="portfolio-project-description"
         >
           {project.description || "Sem descrição."}

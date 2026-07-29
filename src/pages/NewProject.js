@@ -104,7 +104,7 @@ export const NewProject = () => {
           data-testid="new-project-limit-blocked"
         >
           <h2
-            className="text-2xl font-light text-white mb-4 tracking-tight"
+            className="text-xl font-light text-white mb-4 tracking-tight"
             data-testid="new-project-limit-title"
           >
             Limite de projetos atingido

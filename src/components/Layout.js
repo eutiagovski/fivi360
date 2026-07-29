@@ -50,7 +50,7 @@ export const Layout = ({ children }) => {
         <div className="h-full flex flex-col p-6">
           {/* Logo */}
           <div className="mb-12 flex-shrink-0">
-            <h1 className="text-2xl font-light tracking-tighter text-white" data-testid="app-logo">
+            <h1 className="text-xl font-light tracking-tighter text-white" data-testid="app-logo">
               FIVI<span className="font-medium">360</span>
             </h1>
           </div>

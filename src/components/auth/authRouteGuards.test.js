@@ -105,4 +105,52 @@ describe("auth route guards — RC-BUG-001", () => {
       }),
     ).toBe("children");
   });
+
+  it("RC-BUG-002 — loading true shows spinner decision", () => {
+    expect(
+      resolveProtectedRoute({
+        user: null,
+        loading: true,
+        signUpInProgress: false,
+      }),
+    ).toBe("loading");
+  });
+
+  it("RC-BUG-002 — loading false + user shows protected children", () => {
+    expect(
+      resolveProtectedRoute({
+        user: verified,
+        loading: false,
+        signUpInProgress: false,
+      }),
+    ).toBe("children");
+  });
+
+  it("RC-BUG-002 — loading false + no user redirects to login", () => {
+    expect(
+      resolveProtectedRoute({
+        user: null,
+        loading: false,
+        signUpInProgress: false,
+      }),
+    ).toBe("login");
+  });
+
+  it("RC-BUG-002 — signUpInProgress does not block when false on normal login", () => {
+    expect(
+      resolveProtectedRoute({
+        user: verified,
+        loading: false,
+        signUpInProgress: false,
+      }),
+    ).toBe("children");
+
+    expect(
+      resolvePublicRoute({
+        user: verified,
+        loading: false,
+        signUpInProgress: false,
+      }),
+    ).toBe("dashboard");
+  });
 });

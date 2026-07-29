@@ -5,10 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { trackEvent } from "@/services/analytics/analyticsService";
 
 const primaryBtnClass =
-  "bg-white text-black rounded-full px-6 py-3 font-medium btn-scale hover:bg-zinc-200 h-auto text-base";
+  "bg-white text-black rounded-full px-6 py-3 font-medium btn-scale hover:bg-zinc-200 h-auto text-sm";
 
 const secondaryBtnClass =
-  "border border-zinc-700 text-white rounded-full px-6 py-3 hover:bg-zinc-900 bg-transparent h-auto text-base";
+  "border border-zinc-700 text-white rounded-full px-6 py-3 hover:bg-zinc-900 bg-transparent h-auto text-sm";
 
 export function LandingHero() {
   return (
@@ -24,13 +24,13 @@ export function LandingHero() {
             </Badge>
 
             <h1
-              className="text-4xl sm:text-5xl lg:text-6xl font-light tracking-tighter text-white mb-6"
+              className="text-3xl sm:text-4xl lg:text-5xl font-light tracking-tighter text-white mb-6"
               data-testid="landing-hero-title"
             >
               Apresente projetos em 360°
             </h1>
 
-            <p className="text-base sm:text-lg text-zinc-400 max-w-xl mx-auto lg:mx-0 mb-8 leading-relaxed">
+            <p className="text-sm sm:text-base text-zinc-400 max-w-xl mx-auto lg:mx-0 mb-8 leading-relaxed">
               Transforme panoramas em experiências imersivas. Organize por projetos, adicione
               hotspots e compartilhe com clientes por link — ou publique seu portfólio online.
             </p>

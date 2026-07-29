@@ -7,6 +7,18 @@ module.exports = {
   ],
   theme: {
   	extend: {
+  		// Densidade tipográfica SaaS: escala levemente menor que o default Tailwind,
+  		// mantendo xs/sm intactos para captions, labels e UI densa.
+  		fontSize: {
+  			base: ['0.9375rem', { lineHeight: '1.5' }],   // 15px
+  			lg: ['1.0625rem', { lineHeight: '1.5' }],     // 17px
+  			xl: ['1.1875rem', { lineHeight: '1.4' }],     // 19px
+  			'2xl': ['1.375rem', { lineHeight: '1.35' }],  // 22px
+  			'3xl': ['1.625rem', { lineHeight: '1.3' }],   // 26px
+  			'4xl': ['2rem', { lineHeight: '1.2' }],       // 32px
+  			'5xl': ['2.5rem', { lineHeight: '1.15' }],    // 40px
+  			'6xl': ['3rem', { lineHeight: '1.1' }],       // 48px
+  		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',

@@ -23,13 +23,13 @@ function PublicMessage({ title, description, dataTestId }) {
   return (
     <div className="flex flex-col items-center justify-center py-24 text-center">
       <h1
-        className="text-3xl sm:text-4xl font-light tracking-tighter text-white mb-4"
+        className="text-2xl sm:text-3xl font-light tracking-tighter text-white mb-4"
         data-testid={dataTestId}
       >
         {title}
       </h1>
       {description && (
-        <p className="text-base text-zinc-400 max-w-md">{description}</p>
+        <p className="text-sm text-zinc-400 max-w-md">{description}</p>
       )}
     </div>
   );
@@ -187,7 +187,7 @@ export const PublicPortfolio = () => {
               className="text-center px-4 py-12 sm:px-6 sm:py-16 bg-zinc-900/50 border border-zinc-800 rounded-2xl"
               data-testid="portfolio-empty"
             >
-              <p className="text-base font-medium text-white mb-2">
+              <p className="text-sm font-medium text-white mb-2">
                 Nenhum projeto público disponível.
               </p>
               <p className="text-sm text-zinc-400 max-w-md mx-auto">

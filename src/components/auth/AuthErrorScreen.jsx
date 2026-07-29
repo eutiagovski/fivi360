@@ -36,7 +36,7 @@ export function AuthErrorScreen({
       <div className="w-full max-w-md space-y-6 text-center">
         <div className="space-y-2">
           <h1
-            className="text-xl font-medium text-white"
+            className="text-lg font-medium text-white"
             data-testid="auth-error-title"
           >
             {title}

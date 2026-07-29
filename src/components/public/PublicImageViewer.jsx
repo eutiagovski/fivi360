@@ -244,7 +244,7 @@ export function PublicImageViewer({
         className="min-h-screen bg-[#050505] flex flex-col items-center justify-center gap-6 px-6 fade-in"
         data-testid="public-viewer-error"
       >
-        <p className="text-lg text-white text-center">
+        <p className="text-base text-white text-center">
           {ERROR_MESSAGES[error] ?? ERROR_MESSAGES.load_failed}
         </p>
         {isProjectContext && backHref ? (

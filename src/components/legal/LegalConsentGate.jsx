@@ -27,6 +27,10 @@ const LOAD_ERROR_MESSAGE =
  * Bloqueia o app autenticado até o aceite legal estar registrado e atualizado.
  *
  * Máquina de estados: loading | ready | consent_required | saving | error
+ *
+ * RC-BUG-002: o load é cancelável via cleanup do effect (StrictMode-safe).
+ * Não usa um lock global que sobreviva ao invalidate do requestId — isso
+ * deixava o gate em LOADING para sempre após o double-invoke do React 18+.
  */
 export function LegalConsentGate({ children }) {
   const { user, signOut } = useAuth();
@@ -36,11 +40,11 @@ export function LegalConsentGate({ children }) {
     createInitialLegalConsentGateState,
   );
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [isRetrying, setIsRetrying] = useState(false);
 
   const userRef = useRef(user);
   const loadRequestIdRef = useRef(0);
   const mountedRef = useRef(true);
-  const loadingRef = useRef(false);
 
   userRef.current = user;
 
@@ -49,22 +53,13 @@ export function LegalConsentGate({ children }) {
 
     return () => {
       mountedRef.current = false;
-      loadRequestIdRef.current += 1;
     };
   }, []);
 
-  const loadProfile = useCallback(async (userId, { clearError = true } = {}) => {
+  const runLoad = useCallback(async (userId, requestId, { clearError = true } = {}) => {
     if (!userId) {
       return;
     }
-
-    if (loadingRef.current) {
-      return;
-    }
-
-    loadingRef.current = true;
-    const requestId = loadRequestIdRef.current + 1;
-    loadRequestIdRef.current = requestId;
 
     if (mountedRef.current) {
       dispatch({ type: "LOAD_START", clearError });
@@ -112,10 +107,6 @@ export function LegalConsentGate({ children }) {
             : technicalMessage,
         },
       });
-    } finally {
-      if (requestId === loadRequestIdRef.current) {
-        loadingRef.current = false;
-      }
     }
   }, []);
 
@@ -125,18 +116,34 @@ export function LegalConsentGate({ children }) {
       return undefined;
     }
 
-    loadProfile(user.uid);
+    const requestId = loadRequestIdRef.current + 1;
+    loadRequestIdRef.current = requestId;
 
-    return undefined;
-  }, [user?.uid, loadProfile]);
+    runLoad(user.uid, requestId, { clearError: true });
+
+    return () => {
+      // Invalida o request em voo e libera o remount (StrictMode / troca de uid).
+      if (loadRequestIdRef.current === requestId) {
+        loadRequestIdRef.current += 1;
+      }
+    };
+  }, [user?.uid, runLoad]);
 
   const handleRetry = useCallback(() => {
-    if (!user?.uid || !canRetryLegalConsentLoad(state.status) || loadingRef.current) {
+    if (!user?.uid || !canRetryLegalConsentLoad(state.status)) {
       return;
     }
 
-    loadProfile(user.uid, { clearError: true });
-  }, [loadProfile, state.status, user?.uid]);
+    const requestId = loadRequestIdRef.current + 1;
+    loadRequestIdRef.current = requestId;
+    setIsRetrying(true);
+
+    runLoad(user.uid, requestId, { clearError: true }).finally(() => {
+      if (mountedRef.current && requestId === loadRequestIdRef.current) {
+        setIsRetrying(false);
+      }
+    });
+  }, [runLoad, state.status, user?.uid]);
 
   const handleAccept = async () => {
     if (!user?.uid) {
@@ -262,7 +269,7 @@ export function LegalConsentGate({ children }) {
         technicalMessage={state.error?.technicalMessage ?? null}
         onRetry={handleRetry}
         onSignOut={handleSignOut}
-        isRetrying={false}
+        isRetrying={isRetrying}
         isSigningOut={isSigningOut}
       />
     );

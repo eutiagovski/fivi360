@@ -23,7 +23,7 @@ export function PublicPortfolioHeader({ user }) {
           ) : null}
 
           <h1
-            className="text-4xl sm:text-5xl lg:text-6xl font-light tracking-tighter text-white mb-6"
+            className="text-3xl sm:text-4xl lg:text-5xl font-light tracking-tighter text-white mb-6"
             data-testid="portfolio-user-name"
           >
             {displayName}
@@ -31,7 +31,7 @@ export function PublicPortfolioHeader({ user }) {
 
           {hasBio ? (
             <p
-              className="text-lg text-zinc-300 leading-relaxed whitespace-pre-wrap   mb-6"
+              className="text-base text-zinc-300 leading-relaxed whitespace-pre-wrap   mb-6"
               data-testid="portfolio-company-bio"
             >
               {bio}

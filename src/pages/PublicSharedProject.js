@@ -197,7 +197,7 @@ export const PublicSharedProject = () => {
         </div>
 
         <h1
-          className="text-4xl sm:text-5xl lg:text-6xl font-light tracking-tighter text-white mb-4"
+          className="text-3xl sm:text-4xl lg:text-5xl font-light tracking-tighter text-white mb-4"
           data-testid="public-project-name"
         >
           {project.title}
@@ -213,7 +213,7 @@ export const PublicSharedProject = () => {
         )}
 
         <p
-          className="text-lg text-zinc-300 leading-relaxed max-w-3xl"
+          className="text-base text-zinc-300 leading-relaxed max-w-3xl"
           data-testid="public-project-description"
         >
           {project.description || "Sem descrição."}
@@ -228,14 +228,14 @@ export const PublicSharedProject = () => {
               Escritório
             </p>
             <h2
-              className="text-xl font-light text-white mb-2"
+              className="text-lg font-light text-white mb-2"
               data-testid="public-project-office-name"
             >
               {officeName}
             </h2>
             {officeBio && (
               <p
-                className="text-base text-zinc-400 leading-relaxed"
+                className="text-sm text-zinc-400 leading-relaxed"
                 data-testid="public-project-office-bio"
               >
                 {officeBio}
