@@ -3,6 +3,7 @@ import "pannellum/build/pannellum.css";
 import "@/components/viewer/panorama-viewer.css";
 import { ViewerInteractionHint } from "@/components/viewer/ViewerInteractionHint";
 import { useViewerInteractionHint } from "@/hooks/useViewerInteractionHint";
+import { cn } from "@/lib/utils";
 import { mapHotspotsToPannellum } from "@/utils/hotspotPannellum";
 
 const CONTEXT_MENU_DEBUG = process.env.NODE_ENV === "development";
@@ -126,6 +127,7 @@ export function PanoramaViewer({
         compass: false,
         showControls: false,
         mouseZoom: true,
+        hfov: 180,
         draggable: true,
         hotSpots: initialHotspots,
       });
@@ -259,10 +261,16 @@ export function PanoramaViewer({
   }, [panoramaUrl, viewerReady, mouseEventToCoords]);
 
   return (
-    <div className={`relative ${className}`.trim()} data-testid="panorama-viewer-wrapper">
+    <div
+      className={cn("relative h-full w-full", className)}
+      data-testid="panorama-viewer-wrapper"
+    >
       <div
         ref={containerRef}
-        className={`panorama-viewer absolute inset-0 ${placementMode ? "panorama-viewer--placing" : ""}`.trim()}
+        className={cn(
+          "h-full w-full panorama-viewer",
+          placementMode && "panorama-viewer--placing",
+        )}
         data-testid="panorama-viewer"
         data-placing={placementMode ? "true" : "false"}
       />
