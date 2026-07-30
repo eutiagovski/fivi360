@@ -59,6 +59,7 @@ Sincronizado em `createUserProfile` e `saveUserSettings`.
 - `email`
 - `plan`, `billing`
 - `legalConsent`
+- `marketingPreferences` (RC-MARKETING-CONSENT-1)
 - timestamps internos
 
 ---

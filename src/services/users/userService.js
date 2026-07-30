@@ -35,6 +35,7 @@ import { assertPublicPortfolioEnabled } from "@/services/plans/planService";
 import { computePortfolioAvailable } from "@/utils/portfolio";
 import { isValidSlugFormat, normalizeSlug } from "@/utils/slug";
 import { LEGAL_VERSIONS } from "@/config/legal";
+import { buildMarketingPreferencesPayload } from "@/services/users/marketingPreferences";
 import {
   buildSocialLinksPayload,
   mapToPublicUser,
@@ -48,6 +49,14 @@ import {
 } from "@/services/workspaces/workspaceService";
 
 export { SlugTakenError, SlugValidationError };
+export {
+  DEFAULT_MARKETING_PREFERENCES,
+  MARKETING_CONSENT_VERSION,
+  buildMarketingPreferencesFlags,
+  buildMarketingPreferencesPayload,
+  mapMarketingPreferences,
+  resolveMarketingPreferences,
+} from "@/services/users/marketingPreferences";
 
 /**
  * @param {unknown} error
@@ -87,6 +96,7 @@ function isFirestorePermissionDenied(error) {
  * @property {import("@/config/billing").UserBilling} billing
  * @property {string} defaultWorkspaceId
  * @property {string} activeWorkspaceId
+ * @property {import("@/services/users/marketingPreferences").MarketingPreferencesApp} marketingPreferences
  */
 
 /**
@@ -140,6 +150,8 @@ export function buildLegalConsent(acceptedSource) {
  *   displayName: string,
  *   email: string,
  *   acceptedSource?: "signup" | "modal_existing_user",
+ *   marketingConsent?: boolean,
+ *   marketingConsentSource?: string,
  *   enqueueVerifyEmail?: boolean,
  * }} data
  * @returns {Promise<CreateUserProfileResult>}
@@ -150,6 +162,8 @@ export async function createUserProfile(
     displayName,
     email,
     acceptedSource,
+    marketingConsent = false,
+    marketingConsentSource = "signup",
     enqueueVerifyEmail: shouldEnqueueVerifyEmail = false,
   },
 ) {
@@ -169,6 +183,13 @@ export async function createUserProfile(
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   };
+
+  const marketingTs = serverTimestamp();
+  userPayload.marketingPreferences = buildMarketingPreferencesPayload({
+    enabled: marketingConsent === true,
+    consentSource: marketingConsentSource,
+    timestamp: marketingTs,
+  });
 
   if (acceptedSource) {
     userPayload.legalConsent = buildLegalConsent(acceptedSource);
@@ -341,17 +362,34 @@ export async function maybeEnqueueWelcomeEmail({
 
 /**
  * Registra ou atualiza o aceite legal no documento do usuário.
+ * Opcionalmente persiste `marketingPreferences` (ex.: modal Google).
  *
  * @param {string} userId
  * @param {"signup" | "modal_existing_user"} acceptedSource
+ * @param {{
+ *   marketingConsent?: boolean,
+ *   marketingConsentSource?: string,
+ * }} [options]
  */
-export async function saveLegalConsent(userId, acceptedSource) {
+export async function saveLegalConsent(userId, acceptedSource, options = {}) {
   const userRef = doc(db, "users", userId);
+  const marketingTs = serverTimestamp();
 
-  await updateDoc(userRef, {
+  /** @type {Record<string, unknown>} */
+  const updates = {
     legalConsent: buildLegalConsent(acceptedSource),
     updatedAt: serverTimestamp(),
-  });
+  };
+
+  if (typeof options.marketingConsent === "boolean") {
+    updates.marketingPreferences = buildMarketingPreferencesPayload({
+      enabled: options.marketingConsent === true,
+      consentSource: options.marketingConsentSource ?? "google_terms_modal",
+      timestamp: marketingTs,
+    });
+  }
+
+  await updateDoc(userRef, updates);
 }
 
 /**

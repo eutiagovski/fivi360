@@ -101,13 +101,18 @@ export function AuthProvider({ children }) {
    * Auth → Firestore → enqueue → logout → resultado estruturado.
    * A navegação para `/verify-email-sent` fica a cargo da UI.
    *
+   * @param {string} email
+   * @param {string} password
+   * @param {string} name
+   * @param {{ marketingConsent?: boolean }} [options]
    * @returns {Promise<SignUpResult>}
    */
-  const signUp = useCallback(async (email, password, name) => {
+  const signUp = useCallback(async (email, password, name, options = {}) => {
     setError(null);
     setSignUpInProgress(true);
 
     let userCreated = false;
+    const marketingConsent = options.marketingConsent === true;
 
     try {
       const authUser = await signUpWithEmail(email, password);
@@ -127,6 +132,8 @@ export function AuthProvider({ children }) {
         displayName: name,
         email: canonicalEmail,
         acceptedSource: "signup",
+        marketingConsent,
+        marketingConsentSource: "signup",
         enqueueVerifyEmail: true,
       });
 

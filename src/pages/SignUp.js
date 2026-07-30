@@ -5,6 +5,7 @@ import { AuthCard } from "@/components/auth/AuthCard";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { LegalConsentCheckbox } from "@/components/legal/LegalConsentCheckbox";
+import { MarketingConsentCheckbox } from "@/components/legal/MarketingConsentCheckbox";
 import { CONSENT_REQUIRED_MESSAGE } from "@/components/legal/LegalConsentModal";
 import { useAuth } from "@/hooks/useAuth";
 import { getAuthErrorMessage } from "@/utils/authErrors";
@@ -24,6 +25,7 @@ export const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [acceptedLegal, setAcceptedLegal] = useState(false);
+  const [marketingConsent, setMarketingConsent] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState(null);
 
@@ -69,7 +71,7 @@ export const SignUp = () => {
     setIsSubmitting(true);
 
     try {
-      const result = await signUp(email, password, name);
+      const result = await signUp(email, password, name, { marketingConsent });
 
       persistVerifyEmailSentState({
         email: result.email,
@@ -182,18 +184,35 @@ export const SignUp = () => {
             />
           </div>
 
-          <LegalConsentCheckbox
-            id="signup-legal-consent"
-            checked={acceptedLegal}
-            onCheckedChange={(value) => {
-              setAcceptedLegal(value === true);
-              if (formError) {
-                setFormError(null);
-              }
-            }}
-            disabled={isSubmitting}
-            testId="signup-legal-consent-checkbox"
-          />
+          <div className="space-y-4">
+            <LegalConsentCheckbox
+              id="signup-legal-consent"
+              checked={acceptedLegal}
+              onCheckedChange={(value) => {
+                setAcceptedLegal(value === true);
+                if (formError) {
+                  setFormError(null);
+                }
+              }}
+              disabled={isSubmitting}
+              testId="signup-legal-consent-checkbox"
+            />
+
+            <div
+              className="border-t border-zinc-800 pt-4"
+              data-testid="signup-marketing-consent-section"
+            >
+              <MarketingConsentCheckbox
+                id="signup-marketing-consent"
+                checked={marketingConsent}
+                onCheckedChange={(value) => {
+                  setMarketingConsent(value === true);
+                }}
+                disabled={isSubmitting}
+                testId="signup-marketing-consent-checkbox"
+              />
+            </div>
+          </div>
 
           <button
             type="submit"

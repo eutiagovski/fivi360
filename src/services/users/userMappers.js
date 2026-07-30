@@ -1,5 +1,6 @@
 import { normalizeBilling } from "@/config/billing";
 import { normalizeUserPlan } from "@/config/planLimits";
+import { mapMarketingPreferences } from "@/services/users/marketingPreferences";
 import { getPersonalWorkspaceId } from "@/utils/workspace";
 
 export const EMPTY_SOCIAL_LINKS = Object.freeze({
@@ -111,6 +112,7 @@ export function mapUserDoc(userId, userData, publicProfileData = null) {
       userData.activeWorkspaceId
       ?? userData.defaultWorkspaceId
       ?? getPersonalWorkspaceId(userId),
+    marketingPreferences: mapMarketingPreferences(userData.marketingPreferences),
   };
 }
 

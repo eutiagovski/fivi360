@@ -93,6 +93,19 @@ describe("ensureUserStructure", () => {
     expect(JSON.stringify(userPayload)).not.toMatch(/mercado_pago/i);
     expect(userPayload).not.toHaveProperty("legalConsent");
     expect(userPayload.defaultWorkspaceId).toBe("uid-1");
+    expect(userPayload.marketingPreferences).toMatchObject({
+      enabled: false,
+      productUpdates: false,
+      offers: false,
+      tips: false,
+      newsletter: false,
+      research: false,
+      consentVersion: "beta-2026-01",
+      consentSource: "google_signup_default",
+      consentedAt: null,
+      revokedAt: null,
+    });
+    expect(userPayload.marketingPreferences.updatedAt).toBe(userPayload.createdAt);
 
     const publicPayload = mockBatchSet.mock.calls[1][1];
     expect(publicPayload.portfolioAvailable).toBe(false);

@@ -22,6 +22,7 @@ import {
 } from "firebase/firestore";
 import { db } from "@/config/firebase";
 import { DEFAULT_BILLING } from "@/config/billing";
+import { buildMarketingPreferencesPayload } from "@/services/users/marketingPreferences";
 import { buildSocialLinksPayload } from "@/services/users/userMappers";
 import { repairUserWorkspaceFields } from "@/services/users/repairUserWorkspaceFields";
 import { analyzeUserStructureGaps } from "@/utils/userStructure";
@@ -116,6 +117,7 @@ async function attemptClientWorkspaceBootstrap(userId, displayName, flags) {
  *   displayName?: string,
  *   email?: string,
  *   skipServerWorkspaceRepair?: boolean,
+ *   marketingConsentSource?: string,
  * }} [options]
  * @returns {Promise<{
  *   profile: Awaited<ReturnType<typeof readUserDoc>>,
@@ -129,6 +131,7 @@ export async function ensureUserStructure(
     displayName = "",
     email = "",
     skipServerWorkspaceRepair = false,
+    marketingConsentSource = "google_signup_default",
   } = {},
 ) {
   if (!userId) {
@@ -180,6 +183,7 @@ export async function ensureUserStructure(
   const repaired = [];
 
   if (gaps.needsUser) {
+    const marketingTs = serverTimestamp();
     batch.set(userRef, {
       displayName: resolvedDisplayName,
       email: resolvedEmail,
@@ -188,6 +192,12 @@ export async function ensureUserStructure(
       defaultWorkspaceId: workspaceId,
       activeWorkspaceId: workspaceId,
       welcomeEmailQueuedAt: null,
+      // Sem formulário de marketing neste fluxo (ex.: Google) — nunca presume consentimento.
+      marketingPreferences: buildMarketingPreferencesPayload({
+        enabled: false,
+        consentSource: marketingConsentSource,
+        timestamp: marketingTs,
+      }),
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });

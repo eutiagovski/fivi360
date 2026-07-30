@@ -50,8 +50,27 @@ jest.mock("@/components/auth/AuthErrorScreen", () => ({
 }));
 
 jest.mock("@/components/legal/LegalConsentModal", () => ({
-  LegalConsentModal: () =>
-    require("react").createElement("div", { "data-testid": "legal-consent-modal" }),
+  LegalConsentModal: (props) =>
+    require("react").createElement(
+      "div",
+      { "data-testid": "legal-consent-modal" },
+      require("react").createElement("button", {
+        type: "button",
+        "data-testid": "legal-consent-accept-btn",
+        onClick: () => props.onAccept({ marketingConsent: false }),
+      }),
+      require("react").createElement("button", {
+        type: "button",
+        "data-testid": "legal-consent-accept-marketing-on-btn",
+        onClick: () => props.onAccept({ marketingConsent: true }),
+      }),
+      props.showMarketingConsent
+        ? require("react").createElement("div", {
+            "data-testid": "legal-consent-modal-marketing-checkbox",
+            "data-state": "unchecked",
+          })
+        : null,
+    ),
 }));
 
 const React = require("react");
@@ -59,6 +78,10 @@ const { createRoot } = require("react-dom/client");
 const { act } = require("react");
 const { LegalConsentGate } = require("./LegalConsentGate");
 const { LEGAL_VERSIONS } = require("@/config/legal");
+const {
+  createUserProfile,
+  saveLegalConsent,
+} = require("@/services/users/userService");
 
 const verifiedProfile = {
   id: "uid-1",
@@ -81,6 +104,34 @@ const authUser = {
   emailVerified: true,
   usesPasswordAuth: true,
   usesGoogleAuth: false,
+};
+
+const googleUser = {
+  uid: "g-1",
+  email: "g@example.com",
+  displayName: "Google User",
+  emailVerified: true,
+  usesPasswordAuth: false,
+  usesGoogleAuth: true,
+};
+
+const googleProfilePendingConsent = {
+  id: "g-1",
+  email: "g@example.com",
+  displayName: "Google User",
+  marketingPreferences: {
+    enabled: false,
+    productUpdates: false,
+    offers: false,
+    tips: false,
+    newsletter: false,
+    research: false,
+    consentVersion: "beta-2026-01",
+    consentSource: "google_signup_default",
+    consentedAt: null,
+    revokedAt: null,
+    updatedAt: null,
+  },
 };
 
 function mountGate(user, { strict = false } = {}) {
@@ -205,6 +256,167 @@ describe("LegalConsentGate — RC-BUG-002", () => {
     await flushMicrotasks();
 
     expect(mounted.container.querySelector('[data-testid="auth-loading"]')).toBeNull();
+    expect(mounted.container.querySelector('[data-testid="dashboard-child"]')).toBeTruthy();
+    mounted.unmount();
+  });
+});
+
+describe("LegalConsentGate — RC-MARKETING-CONSENT-GOOGLE-1", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    global.IS_REACT_ACT_ENVIRONMENT = true;
+    saveLegalConsent.mockResolvedValue(undefined);
+    createUserProfile.mockResolvedValue({
+      profileCreated: true,
+      verificationEmailQueued: false,
+    });
+  });
+
+  it("Google pending consent shows marketing checkbox", async () => {
+    mockEnsureUserStructure.mockResolvedValue({
+      profile: googleProfilePendingConsent,
+      gaps: {},
+      repaired: [],
+    });
+
+    const mounted = mountGate(googleUser);
+    await flushMicrotasks();
+
+    expect(mounted.container.querySelector('[data-testid="legal-consent-modal"]')).toBeTruthy();
+    expect(
+      mounted.container.querySelector(
+        '[data-testid="legal-consent-modal-marketing-checkbox"]',
+      ),
+    ).toBeTruthy();
+    expect(mounted.container.querySelector('[data-testid="dashboard-child"]')).toBeNull();
+    mounted.unmount();
+  });
+
+  it("password user modal does not show marketing checkbox", async () => {
+    mockEnsureUserStructure.mockResolvedValue({
+      profile: { id: "uid-1", email: "ana@example.com" },
+      gaps: {},
+      repaired: [],
+    });
+
+    const mounted = mountGate(authUser);
+    await flushMicrotasks();
+
+    expect(mounted.container.querySelector('[data-testid="legal-consent-modal"]')).toBeTruthy();
+    expect(
+      mounted.container.querySelector(
+        '[data-testid="legal-consent-modal-marketing-checkbox"]',
+      ),
+    ).toBeNull();
+    mounted.unmount();
+  });
+
+  it("Google accept with marketing false saves google_terms_modal opt-out", async () => {
+    mockEnsureUserStructure.mockResolvedValue({
+      profile: googleProfilePendingConsent,
+      gaps: {},
+      repaired: [],
+    });
+
+    const mounted = mountGate(googleUser);
+    await flushMicrotasks();
+
+    await act(async () => {
+      mounted.container
+        .querySelector('[data-testid="legal-consent-accept-btn"]')
+        .dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    expect(saveLegalConsent).toHaveBeenCalledWith(
+      "g-1",
+      "modal_existing_user",
+      {
+        marketingConsent: false,
+        marketingConsentSource: "google_terms_modal",
+      },
+    );
+    mounted.unmount();
+  });
+
+  it("Google accept with marketing true saves google_terms_modal opt-in", async () => {
+    mockEnsureUserStructure.mockResolvedValue({
+      profile: googleProfilePendingConsent,
+      gaps: {},
+      repaired: [],
+    });
+
+    const mounted = mountGate(googleUser);
+    await flushMicrotasks();
+
+    await act(async () => {
+      mounted.container
+        .querySelector('[data-testid="legal-consent-accept-marketing-on-btn"]')
+        .dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    expect(saveLegalConsent).toHaveBeenCalledWith(
+      "g-1",
+      "modal_existing_user",
+      {
+        marketingConsent: true,
+        marketingConsentSource: "google_terms_modal",
+      },
+    );
+    mounted.unmount();
+  });
+
+  it("Google createUserProfile fallback uses google_terms_modal", async () => {
+    mockEnsureUserStructure.mockResolvedValue({
+      profile: null,
+      gaps: {},
+      repaired: [],
+    });
+
+    const mounted = mountGate(googleUser);
+    await flushMicrotasks();
+
+    await act(async () => {
+      mounted.container
+        .querySelector('[data-testid="legal-consent-accept-btn"]')
+        .dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    expect(createUserProfile).toHaveBeenCalledWith(
+      "g-1",
+      expect.objectContaining({
+        marketingConsent: false,
+        marketingConsentSource: "google_terms_modal",
+        acceptedSource: "signup",
+      }),
+    );
+    mounted.unmount();
+  });
+
+  it("completed Google consent does not re-show modal", async () => {
+    mockEnsureUserStructure.mockResolvedValue({
+      profile: {
+        ...googleProfilePendingConsent,
+        legalConsent: {
+          termsAccepted: true,
+          privacyAccepted: true,
+          termsVersion: LEGAL_VERSIONS.termsVersion,
+          privacyVersion: LEGAL_VERSIONS.privacyVersion,
+          acceptedAt: new Date(),
+          acceptedSource: "modal_existing_user",
+        },
+        marketingPreferences: {
+          ...googleProfilePendingConsent.marketingPreferences,
+          consentSource: "google_terms_modal",
+        },
+      },
+      gaps: {},
+      repaired: [],
+    });
+
+    const mounted = mountGate(googleUser);
+    await flushMicrotasks();
+
+    expect(mounted.container.querySelector('[data-testid="legal-consent-modal"]')).toBeNull();
     expect(mounted.container.querySelector('[data-testid="dashboard-child"]')).toBeTruthy();
     mounted.unmount();
   });

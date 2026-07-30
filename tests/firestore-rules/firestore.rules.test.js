@@ -176,6 +176,109 @@ describe("users/{uid} — allow", () => {
       }),
     );
   });
+
+  test("RC-MARKETING-CONSENT-1 — create with marketingPreferences opt-out succeeds", async () => {
+    const uid = "user-mkt-out";
+    const db = authContext(uid).firestore();
+
+    await assertSucceeds(
+      setDoc(
+        doc(db, "users", uid),
+        buildUserCreate(uid, {
+          marketingPreferences: {
+            enabled: false,
+            productUpdates: false,
+            offers: false,
+            tips: false,
+            newsletter: false,
+            research: false,
+            consentVersion: "beta-2026-01",
+            consentSource: "signup",
+            consentedAt: null,
+            revokedAt: null,
+            updatedAt: Timestamp.now(),
+          },
+        }),
+      ),
+    );
+  });
+
+  test("RC-MARKETING-CONSENT-1 — create with marketingPreferences opt-in succeeds", async () => {
+    const uid = "user-mkt-in";
+    const db = authContext(uid).firestore();
+
+    await assertSucceeds(
+      setDoc(
+        doc(db, "users", uid),
+        buildUserCreate(uid, {
+          marketingPreferences: {
+            enabled: true,
+            productUpdates: true,
+            offers: false,
+            tips: true,
+            newsletter: false,
+            research: false,
+            consentVersion: "beta-2026-01",
+            consentSource: "signup",
+            consentedAt: Timestamp.now(),
+            revokedAt: null,
+            updatedAt: Timestamp.now(),
+          },
+        }),
+      ),
+    );
+  });
+
+  test("RC-MARKETING-CONSENT-1 — owner may update own marketingPreferences", async () => {
+    const uid = "user-a";
+    await seedOwnerDocs(uid);
+
+    const db = authContext(uid).firestore();
+    await assertSucceeds(
+      updateDoc(doc(db, "users", uid), {
+        marketingPreferences: {
+          enabled: true,
+          productUpdates: true,
+          offers: false,
+          tips: true,
+          newsletter: false,
+          research: false,
+          consentVersion: "beta-2026-01",
+          consentSource: "signup",
+          consentedAt: Timestamp.now(),
+          revokedAt: null,
+          updatedAt: Timestamp.now(),
+        },
+        updatedAt: Timestamp.now(),
+      }),
+    );
+  });
+
+  test("RC-MARKETING-CONSENT-1 — enabled true without consentedAt is denied", async () => {
+    const uid = "user-mkt-invalid";
+    const db = authContext(uid).firestore();
+
+    await assertFails(
+      setDoc(
+        doc(db, "users", uid),
+        buildUserCreate(uid, {
+          marketingPreferences: {
+            enabled: true,
+            productUpdates: true,
+            offers: false,
+            tips: true,
+            newsletter: false,
+            research: false,
+            consentVersion: "beta-2026-01",
+            consentSource: "signup",
+            consentedAt: null,
+            revokedAt: null,
+            updatedAt: Timestamp.now(),
+          },
+        }),
+      ),
+    );
+  });
 });
 
 describe("publicProfiles/{uid} — allow", () => {

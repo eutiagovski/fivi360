@@ -104,6 +104,8 @@ describe("AuthContext.signUp — RC-BUG-001", () => {
       displayName: "Ana",
       email: "usuario@email.com",
       acceptedSource: "signup",
+      marketingConsent: false,
+      marketingConsentSource: "signup",
       enqueueVerifyEmail: true,
     });
     expect(mockAuthLogout).toHaveBeenCalled();
@@ -115,6 +117,22 @@ describe("AuthContext.signUp — RC-BUG-001", () => {
       email: "usuario@email.com",
       logoutCompleted: true,
     });
+  });
+
+  it("passes marketingConsent true to createUserProfile", async () => {
+    await act(async () => {
+      await mounted.getCtx().signUp("Usuario@Email.com", "secret1", "Ana", {
+        marketingConsent: true,
+      });
+    });
+
+    expect(mockCreateUserProfile).toHaveBeenCalledWith(
+      "uid-1",
+      expect.objectContaining({
+        marketingConsent: true,
+        marketingConsentSource: "signup",
+      }),
+    );
   });
 
   it("C — partial failure: profile ok, queue failed, still logs out with errorCode", async () => {

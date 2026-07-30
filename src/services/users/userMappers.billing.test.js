@@ -170,4 +170,43 @@ describe("current billing / plan mapping", () => {
     expect(publicUser).not.toHaveProperty("billing");
     expect(publicUser).not.toHaveProperty("email");
   });
+
+  test("RC-MARKETING-CONSENT-1 — mapUserDoc maps marketingPreferences dates; absence → defaults", () => {
+    const withoutField = mapUserDoc("uid-legacy", {
+      displayName: "Legacy",
+      email: "legacy@example.com",
+      plan: "starter",
+    });
+
+    expect(withoutField.marketingPreferences.enabled).toBe(false);
+    expect(withoutField.marketingPreferences.consentVersion).toBeNull();
+    expect(withoutField.marketingPreferences.consentedAt).toBeNull();
+
+    const consentedAt = { toDate: () => new Date("2026-03-01T10:00:00.000Z") };
+    const withConsent = mapUserDoc("uid-new", {
+      displayName: "New",
+      email: "new@example.com",
+      plan: "starter",
+      marketingPreferences: {
+        enabled: true,
+        productUpdates: true,
+        offers: false,
+        tips: true,
+        newsletter: false,
+        research: false,
+        consentVersion: "beta-2026-01",
+        consentSource: "signup",
+        consentedAt,
+        revokedAt: null,
+        updatedAt: consentedAt,
+      },
+    });
+
+    expect(withConsent.marketingPreferences.enabled).toBe(true);
+    expect(withConsent.marketingPreferences.offers).toBe(false);
+    expect(withConsent.marketingPreferences.consentedAt).toEqual(
+      new Date("2026-03-01T10:00:00.000Z"),
+    );
+    expect(withConsent.marketingPreferences.consentedAt).toBeInstanceOf(Date);
+  });
 });

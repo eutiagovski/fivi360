@@ -114,6 +114,39 @@ service cloud.firestore {
         && consent.acceptedSource in ['signup', 'modal_existing_user'];
     }
 
+    // RC-MARKETING-CONSENT-1 — preferências de marketing (opt-in explícito).
+    function isValidMarketingPreferences(prefs) {
+      return prefs is map
+        && prefs.keys().hasOnly([
+          'enabled',
+          'productUpdates',
+          'offers',
+          'tips',
+          'newsletter',
+          'research',
+          'consentVersion',
+          'consentSource',
+          'consentedAt',
+          'revokedAt',
+          'updatedAt'
+        ])
+        && prefs.enabled is bool
+        && prefs.productUpdates is bool
+        && prefs.offers is bool
+        && prefs.tips is bool
+        && prefs.newsletter is bool
+        && prefs.research is bool
+        && (prefs.consentVersion == null || prefs.consentVersion is string)
+        && (prefs.consentSource == null || prefs.consentSource is string)
+        && (prefs.consentedAt == null || prefs.consentedAt is timestamp)
+        && (prefs.revokedAt == null || prefs.revokedAt is timestamp)
+        && prefs.updatedAt is timestamp
+        && (
+          prefs.enabled == false
+          || prefs.consentedAt is timestamp
+        );
+    }
+
     function isValidSocialLinks(links) {
       return links is map
         && links.keys().hasOnly([
@@ -143,7 +176,8 @@ service cloud.firestore {
           'welcomeEmailQueuedAt',
           'createdAt',
           'updatedAt',
-          'legalConsent'
+          'legalConsent',
+          'marketingPreferences'
         ])
         && data.displayName is string
         && data.email is string
@@ -162,6 +196,10 @@ service cloud.firestore {
         && (
           !data.keys().hasAny(['legalConsent'])
           || isValidLegalConsent(data.legalConsent)
+        )
+        && (
+          !data.keys().hasAny(['marketingPreferences'])
+          || isValidMarketingPreferences(data.marketingPreferences)
         );
     }
 
@@ -174,7 +212,8 @@ service cloud.firestore {
           'displayName',
           'updatedAt',
           'legalConsent',
-          'welcomeEmailQueuedAt'
+          'welcomeEmailQueuedAt',
+          'marketingPreferences'
         ])
         && data.updatedAt is timestamp
         && (
@@ -189,6 +228,10 @@ service cloud.firestore {
           !affected.hasAny(['welcomeEmailQueuedAt'])
           || data.welcomeEmailQueuedAt == null
           || data.welcomeEmailQueuedAt is timestamp
+        )
+        && (
+          !affected.hasAny(['marketingPreferences'])
+          || isValidMarketingPreferences(data.marketingPreferences)
         );
     }
 
@@ -594,7 +637,8 @@ service cloud.firestore {
 
     // ---------- users (dados privados — owner only) ----------
     // plan / billing: bootstrap starter no create; updates só via Admin SDK.
-    // Allowlist de update: displayName, legalConsent, welcomeEmailQueuedAt, updatedAt.
+    // Allowlist de update: displayName, legalConsent, welcomeEmailQueuedAt,
+    // marketingPreferences, updatedAt.
 
     match /users/{userId} {
 

@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { LegalConsentCheckbox } from "@/components/legal/LegalConsentCheckbox";
+import { MarketingConsentCheckbox } from "@/components/legal/MarketingConsentCheckbox";
 
 const CONSENT_REQUIRED_MESSAGE =
   "Você precisa aceitar os Termos de Uso e a Política de Privacidade para continuar.";
@@ -17,10 +18,11 @@ const CONSENT_REQUIRED_MESSAGE =
  *
  * @param {{
  *   open: boolean,
- *   onAccept: () => Promise<void>,
+ *   onAccept: (payload: { marketingConsent: boolean }) => Promise<void>,
  *   onSignOut: () => Promise<void>,
  *   isSubmitting?: boolean,
  *   errorMessage?: string | null,
+ *   showMarketingConsent?: boolean,
  * }} props
  */
 export function LegalConsentModal({
@@ -29,8 +31,10 @@ export function LegalConsentModal({
   onSignOut,
   isSubmitting = false,
   errorMessage = null,
+  showMarketingConsent = false,
 }) {
   const [accepted, setAccepted] = useState(false);
+  const [marketingConsent, setMarketingConsent] = useState(false);
   const [error, setError] = useState(null);
   const displayError = errorMessage || error;
 
@@ -43,8 +47,11 @@ export function LegalConsentModal({
     setError(null);
 
     try {
-      await onAccept();
+      await onAccept({
+        marketingConsent: showMarketingConsent ? marketingConsent === true : false,
+      });
       setAccepted(false);
+      setMarketingConsent(false);
     } catch {
       setError("Não foi possível registrar o aceite. Tente novamente.");
     }
@@ -56,6 +63,7 @@ export function LegalConsentModal({
     try {
       await onSignOut();
       setAccepted(false);
+      setMarketingConsent(false);
     } catch {
       setError("Não foi possível sair da conta. Tente novamente.");
     }
@@ -89,24 +97,43 @@ export function LegalConsentModal({
           </div>
         )}
 
-        <LegalConsentCheckbox
-          id="legal-consent-modal"
-          checked={accepted}
-          onCheckedChange={(value) => {
-            setAccepted(value === true);
-            if (error) {
-              setError(null);
-            }
-          }}
-          disabled={isSubmitting}
-          testId="legal-consent-modal-checkbox"
-        />
+        <div className="space-y-4">
+          <LegalConsentCheckbox
+            id="legal-consent-modal"
+            checked={accepted}
+            onCheckedChange={(value) => {
+              setAccepted(value === true);
+              if (error) {
+                setError(null);
+              }
+            }}
+            disabled={isSubmitting}
+            testId="legal-consent-modal-checkbox"
+          />
+
+          {showMarketingConsent && (
+            <div
+              className="border-t border-zinc-800 pt-4"
+              data-testid="legal-consent-modal-marketing-section"
+            >
+              <MarketingConsentCheckbox
+                id="legal-consent-modal-marketing"
+                checked={marketingConsent}
+                onCheckedChange={(value) => {
+                  setMarketingConsent(value === true);
+                }}
+                disabled={isSubmitting}
+                testId="legal-consent-modal-marketing-checkbox"
+              />
+            </div>
+          )}
+        </div>
 
         <DialogFooter className="flex-col sm:flex-col gap-2 sm:gap-2">
           <button
             type="button"
             onClick={handleAccept}
-            disabled={isSubmitting}
+            disabled={isSubmitting || !accepted}
             data-testid="legal-consent-accept-btn"
             className="w-full px-8 py-3 bg-white text-black rounded-full font-medium btn-scale hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >

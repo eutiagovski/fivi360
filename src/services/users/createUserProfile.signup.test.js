@@ -89,6 +89,57 @@ describe("createUserProfile — RC-BUG-001", () => {
       verificationEmailQueued: true,
       verificationEmailId: "email-doc-1",
     });
+
+    const userPayload = mockBatchSet.mock.calls[0][1];
+    expect(userPayload.marketingPreferences).toMatchObject({
+      enabled: false,
+      productUpdates: false,
+      offers: false,
+      tips: false,
+      newsletter: false,
+      research: false,
+      consentVersion: "beta-2026-01",
+      consentSource: "signup",
+      consentedAt: null,
+      revokedAt: null,
+    });
+    expect(userPayload.marketingPreferences.updatedAt).toBe(userPayload.createdAt);
+  });
+
+  it("RC-MARKETING-CONSENT-1 — opt-in persists enabled + consentedAt serverTimestamp", async () => {
+    await createUserProfile("uid-1", {
+      displayName: "Ana",
+      email: "ana@example.com",
+      acceptedSource: "signup",
+      marketingConsent: true,
+      marketingConsentSource: "signup",
+      enqueueVerifyEmail: false,
+    });
+
+    const userPayload = mockBatchSet.mock.calls[0][1];
+    expect(userPayload.marketingPreferences.enabled).toBe(true);
+    expect(userPayload.marketingPreferences.productUpdates).toBe(true);
+    expect(userPayload.marketingPreferences.tips).toBe(true);
+    expect(userPayload.marketingPreferences.offers).toBe(false);
+    expect(userPayload.marketingPreferences.newsletter).toBe(false);
+    expect(userPayload.marketingPreferences.research).toBe(false);
+    expect(userPayload.marketingPreferences.consentedAt).toBe(userPayload.createdAt);
+    expect(userPayload.marketingPreferences.updatedAt).toBe(userPayload.createdAt);
+    expect(userPayload.marketingPreferences.consentSource).toBe("signup");
+  });
+
+  it("RC-MARKETING-CONSENT-1 — opt-out keeps consentedAt null", async () => {
+    await createUserProfile("uid-1", {
+      displayName: "Ana",
+      email: "ana@example.com",
+      marketingConsent: false,
+      enqueueVerifyEmail: false,
+    });
+
+    const userPayload = mockBatchSet.mock.calls[0][1];
+    expect(userPayload.marketingPreferences.enabled).toBe(false);
+    expect(userPayload.marketingPreferences.consentedAt).toBeNull();
+    expect(userPayload.marketingPreferences.updatedAt).toBe(userPayload.createdAt);
   });
 
   it("B — casing: uses auth email as provided (caller must pass canonical)", async () => {

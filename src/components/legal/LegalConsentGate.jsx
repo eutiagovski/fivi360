@@ -70,6 +70,9 @@ export function LegalConsentGate({ children }) {
       const { profile } = await ensureUserStructure(userId, {
         displayName: currentUser?.displayName?.trim() || "",
         email: currentUser?.email ?? "",
+        marketingConsentSource: currentUser?.usesGoogleAuth
+          ? "google_signup_default"
+          : "signup",
       });
 
       if (!mountedRef.current || requestId !== loadRequestIdRef.current) {
@@ -145,7 +148,7 @@ export function LegalConsentGate({ children }) {
     });
   }, [runLoad, state.status, user?.uid]);
 
-  const handleAccept = async () => {
+  const handleAccept = async ({ marketingConsent = false } = {}) => {
     if (!user?.uid) {
       return;
     }
@@ -160,16 +163,31 @@ export function LegalConsentGate({ children }) {
       const acceptedSource = state.profileData
         ? "modal_existing_user"
         : "signup";
+      const persistMarketing = user.usesGoogleAuth === true;
+      const marketingConsentSource = "google_terms_modal";
 
       if (!state.profileData) {
         await createUserProfile(user.uid, {
           displayName: user.displayName?.trim() || "",
           email: user.email ?? "",
           acceptedSource,
+          marketingConsent: persistMarketing ? marketingConsent === true : false,
+          marketingConsentSource: persistMarketing
+            ? marketingConsentSource
+            : "signup",
           enqueueVerifyEmail: user.usesPasswordAuth && !user.usesGoogleAuth,
         });
       } else {
-        await saveLegalConsent(user.uid, acceptedSource);
+        await saveLegalConsent(
+          user.uid,
+          acceptedSource,
+          persistMarketing
+            ? {
+                marketingConsent: marketingConsent === true,
+                marketingConsentSource,
+              }
+            : {},
+        );
       }
 
       if (canReceiveWelcomeEmail(user)) {
@@ -290,6 +308,7 @@ export function LegalConsentGate({ children }) {
           open
           onAccept={handleAccept}
           onSignOut={handleSignOut}
+          showMarketingConsent={user?.usesGoogleAuth === true}
           isSubmitting={
             state.status === LEGAL_CONSENT_GATE_STATUS.SAVING || isSigningOut
           }
