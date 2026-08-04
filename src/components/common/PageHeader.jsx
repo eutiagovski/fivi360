@@ -1,4 +1,11 @@
-export const PageHeader = ({ title, subtitle, actions, align = 'left', dataTestId }) => {
+export const PageHeader = ({
+  title,
+  subtitle,
+  actions,
+  align = 'left',
+  dataTestId,
+  className = '',
+}) => {
   const isCenter = align === 'center';
 
   const titleContent = (
@@ -15,8 +22,9 @@ export const PageHeader = ({ title, subtitle, actions, align = 'left', dataTestI
 
   const containerClass = [
     isCenter ? 'text-center' : '',
-    'mb-12',
+    className.includes('mb-') ? '' : 'mb-12',
     actions ? 'flex items-center justify-between' : '',
+    className,
   ]
     .filter(Boolean)
     .join(' ');

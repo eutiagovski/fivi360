@@ -36,12 +36,12 @@ export const Layout = ({ children }) => {
 
   return (
     <TooltipProvider delayDuration={200}>
-    <div className="flex min-h-screen bg-[#050505]">
+    <div className="flex h-dvh max-h-dvh overflow-hidden bg-[#050505]">
       {/* Sidebar */}
       <aside
         className={`
           fixed lg:sticky inset-y-0 left-0 z-40 top-0
-          lg:h-screen lg:flex lg:flex-col lg:flex-shrink-0
+          lg:h-dvh lg:flex lg:flex-col lg:flex-shrink-0
           w-64 bg-[#050505] border-r border-zinc-800
           transform transition-transform duration-200 ease-in-out
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
@@ -105,13 +105,13 @@ export const Layout = ({ children }) => {
         />
       )}
 
-      {/* Main column: header + page content */}
-      <div className="flex flex-1 flex-col min-w-0 min-h-screen">
+      {/* Main column: header + page content (altura viewport; scroll no main ou na página) */}
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <AppHeader
           onMenuClick={() => setSidebarOpen((open) => !open)}
           isMenuOpen={sidebarOpen}
         />
-        <main className="flex-1 overflow-auto">
+        <main className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden">
           {children}
         </main>
       </div>

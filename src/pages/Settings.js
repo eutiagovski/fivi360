@@ -11,7 +11,8 @@ import {
   MessageCircle,
   Copy,
 } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { PageHeader } from '@/components/common/PageHeader';
 import { Switch } from '@/components/ui/switch';
 import { toast } from '@/hooks/use-toast';
@@ -27,6 +28,15 @@ import {
   SlugValidationError,
 } from '@/services/users/userService';
 import { SocialPrefixedInput } from '@/components/settings/SocialPrefixedInput';
+import { SettingsLayout } from '@/components/settings/SettingsLayout';
+import { SettingsNav } from '@/components/settings/SettingsNav';
+import { SettingsSection } from '@/components/settings/SettingsSection';
+import { SettingsCard } from '@/components/settings/SettingsCard';
+import { SettingsSaveActions } from '@/components/settings/SettingsSaveActions';
+import {
+  SETTINGS_SECTIONS,
+  resolveSettingsSection,
+} from '@/components/settings/settingsSections';
 import { showPlanLimitToast } from '@/utils/planToast';
 import {
   isBrazilWhatsappStored,
@@ -44,6 +54,7 @@ import {
 } from '@/utils/socialLinks';
 import { trackEvent } from '@/services/analytics/analyticsService';
 import { buildPortfolioUrl, normalizeSlug } from '@/utils/slug';
+import { cn } from '@/lib/utils';
 
 const initialFormData = {
   name: '',
@@ -61,10 +72,22 @@ const initialFormData = {
 
 const SLUG_CHECK_DEBOUNCE_MS = 400;
 
+const inputClassName =
+  'w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-white focus:outline-none focus:ring-1 focus:ring-white transition-all disabled:opacity-50';
+
+const fieldMax = 'max-w-xl';
+const textareaMax = 'max-w-2xl';
+const formMax = 'max-w-3xl';
+
 export const Settings = () => {
   const { user } = useAuth();
   const { publicPortfolioEnabled } = usePlanLimits();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeSection, setActiveSectionState] = useState(() =>
+    resolveSettingsSection(searchParams.get('section')),
+  );
   const [formData, setFormData] = useState(initialFormData);
+  const [companyLogo, setCompanyLogo] = useState('');
   const [savedSlug, setSavedSlug] = useState('');
   const [savedPortfolioEnabled, setSavedPortfolioEnabled] = useState(false);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
@@ -73,6 +96,33 @@ export const Settings = () => {
   const [slugAvailability, setSlugAvailability] = useState(null);
   const [portfolioPremiumModalOpen, setPortfolioPremiumModalOpen] = useState(false);
   const [whatsappBrazilLocal, setWhatsappBrazilLocal] = useState(true);
+  const contentRef = useRef(null);
+
+  useEffect(() => {
+    setActiveSectionState(resolveSettingsSection(searchParams.get('section')));
+  }, [searchParams]);
+
+  const setActiveSection = (sectionId) => {
+    const next = resolveSettingsSection(sectionId);
+    setActiveSectionState(next);
+    setSearchParams(
+      (current) => {
+        const params = new URLSearchParams(current);
+        if (next === 'profile') {
+          params.delete('section');
+        } else {
+          params.set('section', next);
+        }
+        return params;
+      },
+      { replace: true },
+    );
+    if (typeof contentRef.current?.scrollTo === 'function') {
+      contentRef.current.scrollTo({ top: 0 });
+    } else if (contentRef.current) {
+      contentRef.current.scrollTop = 0;
+    }
+  };
 
   const normalizedSlugPreview = useMemo(
     () => normalizeSlug(formData.publicSlug),
@@ -107,6 +157,7 @@ export const Settings = () => {
         const storedWhatsappUrl = socialLinks.whatsapp ?? '';
 
         setWhatsappBrazilLocal(isBrazilWhatsappStored(storedWhatsappUrl));
+        setCompanyLogo(profile?.companyLogo ?? '');
         setFormData({
           name: profile?.displayName ?? user.displayName ?? '',
           email: profile?.email ?? user.email ?? '',
@@ -302,27 +353,61 @@ export const Settings = () => {
     }
   };
 
-  return (
-    <div className="p-8 md:p-12 lg:p-16 fade-in">
-      <PageHeader
-        title="Configurações"
-        subtitle="Gerencie suas informações pessoais e do escritório"
-        dataTestId="settings-title"
-      />
+  const portfolioStatusLabel = formData.portfolioEnabled ? 'Ativo' : 'Inativo';
+  const portfolioStatusHint = formData.portfolioEnabled
+    ? 'Portfólio público habilitado'
+    : 'Portfólio público desabilitado';
 
-      <div className="w-full mx-auto flex gap-4">
-        {isLoadingProfile ? (
-          <div
-            className="flex items-center justify-center py-24"
-            data-testid="settings-loading"
-          >
-            <Loader2
-              className="h-8 w-8 animate-spin text-zinc-400"
-              aria-label="Carregando configurações"
+  return (
+    <div
+      className="flex min-h-0 flex-1 flex-col overflow-hidden p-6 sm:p-8 md:px-12 md:pt-10 md:pb-6 lg:px-16 lg:pt-12 fade-in"
+      data-testid="settings-page"
+    >
+      <header
+        className="shrink-0 min-w-0"
+        data-testid="settings-page-header"
+      >
+        <PageHeader
+          title="Configurações"
+          subtitle="Gerencie suas informações, preferências e presença pública no FIVI360."
+          dataTestId="settings-title"
+          className="mb-4 sm:mb-5"
+        />
+        <div className="lg:hidden pb-4">
+          <SettingsNav
+            variant="mobile"
+            activeSection={activeSection}
+            onSectionChange={setActiveSection}
+          />
+        </div>
+      </header>
+
+      {isLoadingProfile ? (
+        <div
+          className="flex min-h-0 flex-1 items-center justify-center"
+          data-testid="settings-loading"
+        >
+          <Loader2
+            className="h-8 w-8 animate-spin text-zinc-400"
+            aria-label="Carregando configurações"
+          />
+        </div>
+      ) : (
+        <SettingsLayout
+          contentRef={contentRef}
+          nav={
+            <SettingsNav
+              variant="desktop"
+              activeSection={activeSection}
+              onSectionChange={setActiveSection}
             />
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-8 flex-1">
+          }
+        >
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-8 pb-8"
+            data-testid="settings-form"
+          >
             {loadError && (
               <div
                 role="alert"
@@ -333,353 +418,461 @@ export const Settings = () => {
               </div>
             )}
 
-            <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-4 md:p-8">
-              <h2 className="text-xl font-light tracking-tight text-white mb-6">Perfil</h2>
+            {SETTINGS_SECTIONS.map((section) => {
+              const isHidden = activeSection !== section.id;
 
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-zinc-400 mb-3">
-                  Logo do escritório
-                </label>
-                <div className="flex items-center gap-4">
-                  <div className="w-24 h-24 bg-zinc-800 border border-zinc-700 rounded-xl flex items-center justify-center overflow-hidden">
-                    <Upload className="text-zinc-600" size={32} />
-                  </div>
-                  <button
-                    type="button"
-                    data-testid="upload-logo-btn"
-                    className="px-6 py-2 bg-zinc-800 border border-zinc-700 text-white rounded-xl hover:bg-zinc-700 transition-colors"
+              if (section.id === 'profile') {
+                return (
+                  <SettingsSection
+                    key={section.id}
+                    id={section.id}
+                    title={section.title}
+                    description={section.description}
+                    hidden={isHidden}
                   >
-                    Fazer upload
-                  </button>
-                </div>
-              </div>
+                    <SettingsCard data-testid="settings-card-profile">
+                      <div className={cn('space-y-5', formMax)}>
+                        <div className={fieldMax}>
+                          <label
+                            htmlFor="name"
+                            className="mb-2 block text-sm font-medium text-zinc-400"
+                          >
+                            <span className="flex items-center gap-2">
+                              <User size={16} aria-hidden="true" />
+                              Nome completo
+                            </span>
+                          </label>
+                          <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            data-testid="input-name"
+                            value={formData.name}
+                            onChange={handleChange}
+                            disabled={isSaving}
+                            className={inputClassName}
+                          />
+                        </div>
 
-              <div className="mb-6">
-                <label htmlFor="name" className="block text-sm font-medium text-zinc-400 mb-2">
-                  <div className="flex items-center gap-2">
-                    <User size={16} />
-                    Nome completo
-                  </div>
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  data-testid="input-name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  disabled={isSaving}
-                  className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-white focus:outline-none focus:ring-1 focus:ring-white transition-all disabled:opacity-50"
-                />
-              </div>
+                        <div className={fieldMax}>
+                          <label
+                            htmlFor="email"
+                            className="mb-2 block text-sm font-medium text-zinc-400"
+                          >
+                            <span className="flex items-center gap-2">
+                              <Mail size={16} aria-hidden="true" />
+                              E-mail
+                            </span>
+                          </label>
+                          <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            data-testid="input-email"
+                            value={formData.email}
+                            readOnly
+                            disabled
+                            className={cn(
+                              inputClassName,
+                              'text-zinc-500 cursor-not-allowed',
+                            )}
+                          />
+                        </div>
+                      </div>
+                    </SettingsCard>
+                  </SettingsSection>
+                );
+              }
 
-              <div className="mb-6">
-                <label htmlFor="email" className="block text-sm font-medium text-zinc-400 mb-2">
-                  <div className="flex items-center gap-2">
-                    <Mail size={16} />
-                    Email
-                  </div>
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  data-testid="input-email"
-                  value={formData.email}
-                  readOnly
-                  disabled
-                  className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-500 cursor-not-allowed"
-                />
-              </div>
-            </div>
-
-            <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-4 md:p-8">
-              <h2 className="text-xl font-light tracking-tight text-white mb-2">
-                Informações públicas
-              </h2>
-              <p className="text-sm text-zinc-500 mb-6">
-                Exibidas no topo do seu portfólio público
-              </p>
-
-              <div className="mb-6">
-                <label
-                  htmlFor="companyName"
-                  className="block text-sm font-medium text-zinc-400 mb-2"
-                >
-                  <div className="flex items-center gap-2">
-                    <Building2 size={16} />
-                    Nome do escritório
-                  </div>
-                </label>
-                <input
-                  type="text"
-                  id="companyName"
-                  name="companyName"
-                  data-testid="input-office-name"
-                  value={formData.companyName}
-                  onChange={handleChange}
-                  disabled={isSaving}
-                  className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-white focus:outline-none focus:ring-1 focus:ring-white transition-all disabled:opacity-50"
-                />
-              </div>
-
-              <div className="mb-6">
-                <label
-                  htmlFor="companyBio"
-                  className="block text-sm font-medium text-zinc-400 mb-2"
-                >
-                  Bio / descrição curta
-                </label>
-                <textarea
-                  id="companyBio"
-                  name="companyBio"
-                  data-testid="input-company-bio"
-                  value={formData.companyBio}
-                  onChange={handleChange}
-                  rows={10}
-                  disabled={isSaving}
-                  placeholder="Conte um pouco sobre o seu escritório..."
-                  className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-white focus:outline-none focus:ring-1 focus:ring-white transition-all disabled:opacity-50 resize-none"
-                />
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label
-                    htmlFor="websiteUrl"
-                    className="block text-sm font-medium text-zinc-400 mb-2"
+              if (section.id === 'office') {
+                return (
+                  <SettingsSection
+                    key={section.id}
+                    id={section.id}
+                    title={section.title}
+                    description={section.description}
+                    hidden={isHidden}
                   >
-                    <div className="flex items-center gap-2">
-                      <Globe size={16} />
-                      Site
-                    </div>
-                  </label>
-                  <SocialPrefixedInput
-                    id="websiteUrl"
-                    name="websiteUrl"
-                    testId="input-website-url"
-                    value={formData.websiteUrl}
-                    onChange={handleChange}
-                    prefix={SOCIAL_LINK_PREFIXES.website}
-                    placeholder="seusite.com.br"
-                    disabled={isSaving}
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="instagramUrl"
-                    className="block text-sm font-medium text-zinc-400 mb-2"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Instagram size={16} />
-                      Instagram
-                    </div>
-                  </label>
-                  <SocialPrefixedInput
-                    id="instagramUrl"
-                    name="instagramUrl"
-                    testId="input-instagram-url"
-                    value={formData.instagramUrl}
-                    onChange={handleChange}
-                    prefix={SOCIAL_LINK_PREFIXES.instagram}
-                    placeholder="seuusuario"
-                    disabled={isSaving}
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="youtubeUrl"
-                    className="block text-sm font-medium text-zinc-400 mb-2"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Youtube size={16} />
-                      YouTube
-                    </div>
-                  </label>
-                  <SocialPrefixedInput
-                    id="youtubeUrl"
-                    name="youtubeUrl"
-                    testId="input-youtube-url"
-                    value={formData.youtubeUrl}
-                    onChange={handleChange}
-                    prefix={SOCIAL_LINK_PREFIXES.youtube}
-                    placeholder="@seucanal"
-                    disabled={isSaving}
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="linkedinUrl"
-                    className="block text-sm font-medium text-zinc-400 mb-2"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Linkedin size={16} />
-                      LinkedIn
-                    </div>
-                  </label>
-                  <SocialPrefixedInput
-                    id="linkedinUrl"
-                    name="linkedinUrl"
-                    testId="input-linkedin-url"
-                    value={formData.linkedinUrl}
-                    onChange={handleChange}
-                    prefix={SOCIAL_LINK_PREFIXES.linkedin}
-                    placeholder="seu-perfil"
-                    disabled={isSaving}
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="whatsappUrl"
-                    className="block text-sm font-medium text-zinc-400 mb-2"
-                  >
-                    <div className="flex items-center gap-2">
-                      <MessageCircle size={16} />
-                      WhatsApp
-                    </div>
-                  </label>
-                  <SocialPrefixedInput
-                    id="whatsappUrl"
-                    name="whatsappUrl"
-                    testId="input-whatsapp-url"
-                    value={formData.whatsappUrl}
-                    onChange={handleChange}
-                    prefix={
-                      whatsappBrazilLocal ? (
-                        <span className="inline-flex items-center gap-1.5">
-                          <span aria-hidden="true">🇧🇷</span>
-                          <span>+55</span>
-                        </span>
-                      ) : (
-                        '+'
-                      )
-                    }
-                    placeholder={whatsappBrazilLocal ? '11987654321' : '14155551234'}
-                    inputMode="tel"
-                    disabled={isSaving}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-4 md:p-8">
-              <h2 className="text-xl font-light tracking-tight text-white mb-6">Portfólio</h2>
-
-              <div className="mb-6">
-                <label
-                  htmlFor="publicSlug"
-                  className="block text-sm font-medium text-zinc-400 mb-2"
-                >
-                  <div className="flex items-center gap-2">
-                    <Globe size={16} />
-                    Slug público
-                  </div>
-                </label>
-                <input
-                  type="text"
-                  id="publicSlug"
-                  name="publicSlug"
-                  data-testid="input-public-slug"
-                  value={formData.publicSlug}
-                  onChange={handleChange}
-                  placeholder="meu-estudio"
-                  disabled={isSaving}
-                  className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-white focus:outline-none focus:ring-1 focus:ring-white transition-all disabled:opacity-50"
-                />
-                {normalizedSlugPreview && slugAvailability === 'checking' && (
-                  <p
-                    className="mt-2 text-sm text-zinc-500"
-                    data-testid="slug-availability-checking"
-                  >
-                    Verificando disponibilidade...
-                  </p>
-                )}
-                {normalizedSlugPreview && slugAvailability === 'available' && (
-                  <p
-                    className="mt-2 text-sm text-emerald-400"
-                    data-testid="slug-availability-available"
-                  >
-                    Disponível
-                  </p>
-                )}
-                {normalizedSlugPreview && slugAvailability === 'unavailable' && (
-                  <p
-                    className="mt-2 text-sm text-red-400"
-                    data-testid="slug-availability-unavailable"
-                  >
-                    Indisponível
-                  </p>
-                )}
-                <div className="mt-2" data-testid="slug-preview-url">
-                  <p className="text-sm text-zinc-500 mb-2">
-                    Seu portfólio ficará disponível em:
-                  </p>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      readOnly
-                      value={portfolioPreviewUrl}
-                      data-testid="slug-preview-url-input"
-                      className="flex-1 min-w-0 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-xl text-sm text-zinc-300 focus:outline-none"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleCopyPortfolioUrl}
-                      data-testid="slug-copy-url"
-                      className="flex items-center gap-2 px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-xl text-sm text-white hover:bg-zinc-700 transition-colors shrink-0"
+                    <SettingsCard
+                      title="Identidade do escritório"
+                      description="Logo, nome e descrição usados na presença pública."
+                      data-testid="settings-card-office-identity"
                     >
-                      <Copy size={16} />
-                      Copiar
-                    </button>
-                  </div>
-                </div>
-              </div>
+                      <div className={cn('space-y-5', formMax)}>
+                        <div>
+                          <p className="mb-3 text-sm font-medium text-zinc-400">
+                            Logo do escritório
+                          </p>
+                          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                            <div
+                              className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-zinc-700 bg-zinc-800"
+                              data-testid="settings-logo-preview"
+                            >
+                              {companyLogo ? (
+                                <img
+                                  src={companyLogo}
+                                  alt="Logo do escritório"
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : (
+                                <Upload
+                                  className="text-zinc-600"
+                                  size={32}
+                                  aria-hidden="true"
+                                />
+                              )}
+                            </div>
+                            <div className="space-y-2">
+                              <button
+                                type="button"
+                                data-testid="upload-logo-btn"
+                                className="inline-flex px-5 py-2 bg-zinc-800 border border-zinc-700 text-white rounded-xl hover:bg-zinc-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                              >
+                                {companyLogo ? 'Alterar logo' : 'Fazer upload'}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
 
-              {!publicPortfolioEnabled && (
-                <UpgradePrompt
-                  compact
-                  showUpgradeButton={false}
-                  message="O portfólio público está disponível nos planos Professional e Studio."
-                  className="mb-4"
-                />
-              )}
+                        <div className="grid gap-5 md:grid-cols-2">
+                          <div>
+                            <label
+                              htmlFor="companyName"
+                              className="mb-2 block text-sm font-medium text-zinc-400"
+                            >
+                              <span className="flex items-center gap-2">
+                                <Building2 size={16} aria-hidden="true" />
+                                Nome do escritório
+                              </span>
+                            </label>
+                            <input
+                              type="text"
+                              id="companyName"
+                              name="companyName"
+                              data-testid="input-office-name"
+                              value={formData.companyName}
+                              onChange={handleChange}
+                              disabled={isSaving}
+                              className={inputClassName}
+                            />
+                          </div>
 
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-sm font-medium text-white">Portfólio público</p>
-                  <p className="text-sm text-zinc-500">
-                    Exibir seus projetos públicos em uma página dedicada
-                  </p>
-                </div>
-                <Switch
-                  id="portfolioEnabled"
-                  data-testid="input-portfolio-enabled"
-                  checked={formData.portfolioEnabled}
-                  onCheckedChange={handlePortfolioToggle}
-                  disabled={isSaving}
-                  className="data-[state=checked]:bg-white data-[state=unchecked]:bg-zinc-700"
-                />
-              </div>
-            </div>
+                          <div>
+                            <label
+                              htmlFor="websiteUrl"
+                              className="mb-2 block text-sm font-medium text-zinc-400"
+                            >
+                              <span className="flex items-center gap-2">
+                                <Globe size={16} aria-hidden="true" />
+                                Website
+                              </span>
+                            </label>
+                            <SocialPrefixedInput
+                              id="websiteUrl"
+                              name="websiteUrl"
+                              testId="input-website-url"
+                              value={formData.websiteUrl}
+                              onChange={handleChange}
+                              prefix={SOCIAL_LINK_PREFIXES.website}
+                              placeholder="seusite.com.br"
+                              disabled={isSaving}
+                            />
+                          </div>
+                        </div>
 
-           <div className="flex justify-end">
-           <button
-              type="submit"
-              data-testid="save-settings-btn"
-              disabled={isSaving || slugAvailability === 'unavailable'}
-              className="px-8 py-3 bg-white text-black rounded-full font-medium btn-scale hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSaving ? 'Salvando...' : 'Salvar alterações'}
-            </button>
+                        <div className={textareaMax}>
+                          <label
+                            htmlFor="companyBio"
+                            className="mb-2 block text-sm font-medium text-zinc-400"
+                          >
+                            Descrição
+                          </label>
+                          <textarea
+                            id="companyBio"
+                            name="companyBio"
+                            data-testid="input-company-bio"
+                            value={formData.companyBio}
+                            onChange={handleChange}
+                            rows={5}
+                            disabled={isSaving}
+                            placeholder="Conte um pouco sobre o seu escritório..."
+                            className={cn(inputClassName, 'resize-none')}
+                          />
+                        </div>
+                      </div>
+                    </SettingsCard>
+                  </SettingsSection>
+                );
+              }
 
-           </div>
+              return (
+                <SettingsSection
+                  key={section.id}
+                  id={section.id}
+                  title={section.title}
+                  description={section.description}
+                  hidden={isHidden}
+                >
+                  <SettingsCard
+                    title="Presença pública"
+                    description="Status, endereço e redes exibidas no portfólio."
+                    data-testid="settings-card-portfolio"
+                  >
+                    <div className={cn('space-y-6', formMax)}>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <p className="text-sm font-medium text-zinc-400">Status</p>
+                        <span
+                          className={cn(
+                            'inline-flex items-center gap-1.5 rounded-md border px-2.5 py-0.5 text-xs font-semibold',
+                            formData.portfolioEnabled
+                              ? 'border-emerald-800/60 bg-emerald-950/40 text-emerald-300'
+                              : 'border-zinc-700 bg-zinc-900 text-zinc-400',
+                          )}
+                          data-testid="portfolio-status-badge"
+                          title={portfolioStatusHint}
+                        >
+                          <span
+                            className={cn(
+                              'h-1.5 w-1.5 rounded-full',
+                              formData.portfolioEnabled
+                                ? 'bg-emerald-400'
+                                : 'bg-zinc-500',
+                            )}
+                            aria-hidden="true"
+                          />
+                          {portfolioStatusLabel}
+                        </span>
+                        <span className="sr-only">{portfolioStatusHint}</span>
+                      </div>
+
+                      <div>
+                        <p className="mb-2 text-sm font-medium text-zinc-400">
+                          Endereço
+                        </p>
+                        <div
+                          className="flex flex-col gap-2 sm:flex-row"
+                          data-testid="slug-preview-url"
+                        >
+                          <input
+                            type="text"
+                            readOnly
+                            value={portfolioPreviewUrl}
+                            data-testid="slug-preview-url-input"
+                            aria-label="Link público do portfólio"
+                            className="min-w-0 flex-1 rounded-xl border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-300 focus:outline-none"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleCopyPortfolioUrl}
+                            data-testid="slug-copy-url"
+                            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-2 text-sm text-white transition-colors hover:bg-zinc-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                          >
+                            <Copy size={16} aria-hidden="true" />
+                            Copiar link
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className={fieldMax}>
+                        <label
+                          htmlFor="publicSlug"
+                          className="mb-2 block text-sm font-medium text-zinc-400"
+                        >
+                          <span className="flex items-center gap-2">
+                            <Globe size={16} aria-hidden="true" />
+                            Slug
+                          </span>
+                        </label>
+                        <input
+                          type="text"
+                          id="publicSlug"
+                          name="publicSlug"
+                          data-testid="input-public-slug"
+                          value={formData.publicSlug}
+                          onChange={handleChange}
+                          placeholder="meu-estudio"
+                          disabled={isSaving}
+                          className={inputClassName}
+                        />
+                        {normalizedSlugPreview && slugAvailability === 'checking' && (
+                          <p
+                            className="mt-2 text-sm text-zinc-500"
+                            data-testid="slug-availability-checking"
+                          >
+                            Verificando disponibilidade...
+                          </p>
+                        )}
+                        {normalizedSlugPreview && slugAvailability === 'available' && (
+                          <p
+                            className="mt-2 text-sm text-emerald-400"
+                            data-testid="slug-availability-available"
+                          >
+                            Disponível
+                          </p>
+                        )}
+                        {normalizedSlugPreview &&
+                          slugAvailability === 'unavailable' && (
+                            <p
+                              className="mt-2 text-sm text-red-400"
+                              data-testid="slug-availability-unavailable"
+                            >
+                              Indisponível
+                            </p>
+                          )}
+                      </div>
+
+                      {!publicPortfolioEnabled && (
+                        <UpgradePrompt
+                          compact
+                          showUpgradeButton={false}
+                          message="O portfólio público está disponível nos planos Professional e Studio."
+                        />
+                      )}
+
+                      <div className="flex items-center justify-between gap-4 rounded-xl border border-zinc-800 bg-zinc-950/40 px-4 py-3">
+                        <div>
+                          <p className="text-sm font-medium text-white">
+                            Portfólio público
+                          </p>
+                          <p className="text-sm text-zinc-500">
+                            Exibir seus projetos públicos em uma página dedicada
+                          </p>
+                        </div>
+                        <Switch
+                          id="portfolioEnabled"
+                          data-testid="input-portfolio-enabled"
+                          checked={formData.portfolioEnabled}
+                          onCheckedChange={handlePortfolioToggle}
+                          disabled={isSaving}
+                          className="data-[state=checked]:bg-white data-[state=unchecked]:bg-zinc-700"
+                        />
+                      </div>
+                    </div>
+                  </SettingsCard>
+
+                  <SettingsCard
+                    title="Redes sociais"
+                    description="Links exibidos no topo do portfólio público."
+                    data-testid="settings-card-social"
+                  >
+                    <div
+                      className={cn(
+                        'grid gap-5 sm:grid-cols-1 md:grid-cols-2',
+                        formMax,
+                      )}
+                    >
+                      <div>
+                        <label
+                          htmlFor="instagramUrl"
+                          className="mb-2 block text-sm font-medium text-zinc-400"
+                        >
+                          <span className="flex items-center gap-2">
+                            <Instagram size={16} aria-hidden="true" />
+                            Instagram
+                          </span>
+                        </label>
+                        <SocialPrefixedInput
+                          id="instagramUrl"
+                          name="instagramUrl"
+                          testId="input-instagram-url"
+                          value={formData.instagramUrl}
+                          onChange={handleChange}
+                          prefix={SOCIAL_LINK_PREFIXES.instagram}
+                          placeholder="seuusuario"
+                          disabled={isSaving}
+                        />
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="youtubeUrl"
+                          className="mb-2 block text-sm font-medium text-zinc-400"
+                        >
+                          <span className="flex items-center gap-2">
+                            <Youtube size={16} aria-hidden="true" />
+                            YouTube
+                          </span>
+                        </label>
+                        <SocialPrefixedInput
+                          id="youtubeUrl"
+                          name="youtubeUrl"
+                          testId="input-youtube-url"
+                          value={formData.youtubeUrl}
+                          onChange={handleChange}
+                          prefix={SOCIAL_LINK_PREFIXES.youtube}
+                          placeholder="@seucanal"
+                          disabled={isSaving}
+                        />
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="linkedinUrl"
+                          className="mb-2 block text-sm font-medium text-zinc-400"
+                        >
+                          <span className="flex items-center gap-2">
+                            <Linkedin size={16} aria-hidden="true" />
+                            LinkedIn
+                          </span>
+                        </label>
+                        <SocialPrefixedInput
+                          id="linkedinUrl"
+                          name="linkedinUrl"
+                          testId="input-linkedin-url"
+                          value={formData.linkedinUrl}
+                          onChange={handleChange}
+                          prefix={SOCIAL_LINK_PREFIXES.linkedin}
+                          placeholder="seu-perfil"
+                          disabled={isSaving}
+                        />
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="whatsappUrl"
+                          className="mb-2 block text-sm font-medium text-zinc-400"
+                        >
+                          <span className="flex items-center gap-2">
+                            <MessageCircle size={16} aria-hidden="true" />
+                            WhatsApp
+                          </span>
+                        </label>
+                        <SocialPrefixedInput
+                          id="whatsappUrl"
+                          name="whatsappUrl"
+                          testId="input-whatsapp-url"
+                          value={formData.whatsappUrl}
+                          onChange={handleChange}
+                          prefix={
+                            whatsappBrazilLocal ? (
+                              <span className="inline-flex items-center gap-1.5">
+                                <span aria-hidden="true">🇧🇷</span>
+                                <span>+55</span>
+                              </span>
+                            ) : (
+                              '+'
+                            )
+                          }
+                          placeholder={
+                            whatsappBrazilLocal ? '11987654321' : '14155551234'
+                          }
+                          inputMode="tel"
+                          disabled={isSaving}
+                        />
+                      </div>
+                    </div>
+                  </SettingsCard>
+                </SettingsSection>
+              );
+            })}
+
+            <SettingsSaveActions
+              isSaving={isSaving}
+              disabled={slugAvailability === 'unavailable'}
+            />
           </form>
-        )}
-      </div>
+        </SettingsLayout>
+      )}
 
       <PremiumFeatureModal
         open={portfolioPremiumModalOpen}
