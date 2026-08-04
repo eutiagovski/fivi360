@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "pannellum/build/pannellum.css";
 import "@/components/viewer/panorama-viewer.css";
 import { ViewerInteractionHint } from "@/components/viewer/ViewerInteractionHint";
@@ -7,6 +7,45 @@ import { cn } from "@/lib/utils";
 import { mapHotspotsToPannellum } from "@/utils/hotspotPannellum";
 
 const CONTEXT_MENU_DEBUG = process.env.NODE_ENV === "development";
+const PREVIEW_HOTSPOT_CSS_CLASS = "pnlm-hotspot--preview-ref";
+
+/**
+ * Capacidades por modo do viewer.
+ * upload-preview: fullscreen + hotspots de referência inertes; sem analytics/edição/navegação.
+ *
+ * @param {'default' | 'embed' | 'upload-preview'} mode
+ * @param {{
+ *   hotspotsInteractive?: boolean,
+ *   showFullscreenCtrl?: boolean,
+ * }} [overrides]
+ */
+export function getPanoramaViewerCapabilities(mode, overrides = {}) {
+  if (mode === "upload-preview") {
+    return {
+      showHotspots: true,
+      hotspotsInteractive: overrides.hotspotsInteractive === true,
+      allowFullscreen: overrides.showFullscreenCtrl !== false,
+      trackAnalytics: false,
+      allowSceneNavigation: false,
+      allowEditing: false,
+      showInteractionHint: false,
+      allowPlacement: false,
+      allowContextMenu: false,
+    };
+  }
+
+  return {
+    showHotspots: true,
+    hotspotsInteractive: overrides.hotspotsInteractive !== false,
+    allowFullscreen: overrides.showFullscreenCtrl === true,
+    trackAnalytics: mode !== "embed" ? true : false,
+    allowSceneNavigation: true,
+    allowEditing: true,
+    showInteractionHint: true,
+    allowPlacement: true,
+    allowContextMenu: true,
+  };
+}
 
 /**
  * Viewer 360° com Pannellum (equirectangular) e hotspots (info e scene).
@@ -23,7 +62,10 @@ const CONTEXT_MENU_DEBUG = process.env.NODE_ENV === "development";
  *   getSceneHotspotLabel?: (hotspot: import("@/services/hotspots/hotspotService").SceneHotspot) => string,
  *   showZoomCtrl?: boolean,
  *   showFullscreenCtrl?: boolean,
- *   mode?: 'default' | 'embed',
+ *   hotspotsInteractive?: boolean,
+ *   mode?: 'default' | 'embed' | 'upload-preview',
+ *   onReady?: () => void,
+ *   onError?: (error?: unknown) => void,
  * }} props
  */
 export function PanoramaViewer({
@@ -38,8 +80,26 @@ export function PanoramaViewer({
   getSceneHotspotLabel,
   showZoomCtrl = false,
   showFullscreenCtrl = false,
+  hotspotsInteractive,
   mode = "default",
+  onReady,
+  onError,
 }) {
+  const capabilities = useMemo(
+    () =>
+      getPanoramaViewerCapabilities(mode, {
+        hotspotsInteractive,
+        showFullscreenCtrl,
+      }),
+    [mode, hotspotsInteractive, showFullscreenCtrl],
+  );
+
+  const effectiveHotspots = capabilities.showHotspots ? hotspots : [];
+  const effectivePlacementMode =
+    capabilities.allowPlacement && placementMode;
+  const effectiveShowFullscreen = capabilities.allowFullscreen;
+  const effectiveInteractive = capabilities.hotspotsInteractive;
+
   const containerRef = useRef(null);
   const viewerRef = useRef(null);
   const [viewerReady, setViewerReady] = useState(false);
@@ -49,13 +109,20 @@ export function PanoramaViewer({
   const getSceneHotspotLabelRef = useRef(getSceneHotspotLabel);
   const onPlacementClickRef = useRef(onPlacementClick);
   const onPanoramaContextMenuRef = useRef(onPanoramaContextMenu);
-  const hintVisible = useViewerInteractionHint(viewerRef, viewerReady);
+  const onReadyRef = useRef(onReady);
+  const onErrorRef = useRef(onError);
+  const hintVisible = useViewerInteractionHint(
+    viewerRef,
+    viewerReady && capabilities.showInteractionHint,
+  );
 
   onInfoHotspotClickRef.current = onInfoHotspotClick;
   onSceneHotspotClickRef.current = onSceneHotspotClick;
   getSceneHotspotLabelRef.current = getSceneHotspotLabel;
   onPlacementClickRef.current = onPlacementClick;
   onPanoramaContextMenuRef.current = onPanoramaContextMenu;
+  onReadyRef.current = onReady;
+  onErrorRef.current = onError;
 
   const mouseEventToCoords = useCallback((viewer, event) => {
     const coords = viewer?.mouseEventToCoords?.(event);
@@ -68,33 +135,41 @@ export function PanoramaViewer({
   const mapToPannellum = useCallback(
     (hotspotList) =>
       mapHotspotsToPannellum(hotspotList, {
-        onInfoClick: (hs) => onInfoHotspotClickRef.current?.(hs),
-        onSceneClick: (hs) => onSceneHotspotClickRef.current?.(hs),
-        getSceneLabel: (hs) => getSceneHotspotLabelRef.current?.(hs),
+        interactive: effectiveInteractive,
+        cssClass: effectiveInteractive ? undefined : PREVIEW_HOTSPOT_CSS_CLASS,
+        onInfoClick: effectiveInteractive
+          ? (hs) => onInfoHotspotClickRef.current?.(hs)
+          : undefined,
+        onSceneClick: effectiveInteractive
+          ? (hs) => onSceneHotspotClickRef.current?.(hs)
+          : undefined,
+        getSceneLabel: (hs) =>
+          getSceneHotspotLabelRef.current?.(hs) ||
+          (effectiveInteractive ? "Ir para" : "Hotspot existente"),
       }),
-    [],
+    [effectiveInteractive],
   );
 
   const syncHotspots = useCallback(
     (viewer, hotspotList) => {
-    if (!viewer?.removeHotSpot || !viewer?.addHotSpot) {
-      return;
-    }
-
-    renderedHotspotIdsRef.current.forEach((id) => {
-      viewer.removeHotSpot(id);
-    });
-    renderedHotspotIdsRef.current = [];
-
-    const pannellumHotspots = mapToPannellum(hotspotList);
-
-    pannellumHotspots.forEach((hs) => {
-      viewer.addHotSpot(hs);
-      if (hs.id) {
-        renderedHotspotIdsRef.current.push(hs.id);
+      if (!viewer?.removeHotSpot || !viewer?.addHotSpot) {
+        return;
       }
-    });
-  },
+
+      renderedHotspotIdsRef.current.forEach((id) => {
+        viewer.removeHotSpot(id);
+      });
+      renderedHotspotIdsRef.current = [];
+
+      const pannellumHotspots = mapToPannellum(hotspotList);
+
+      pannellumHotspots.forEach((hs) => {
+        viewer.addHotSpot(hs);
+        if (hs.id) {
+          renderedHotspotIdsRef.current.push(hs.id);
+        }
+      });
+    },
     [mapToPannellum],
   );
 
@@ -141,16 +216,16 @@ export function PanoramaViewer({
 
       viewerRef.current?.destroy?.();
 
-      const initialHotspots = mapToPannellum(hotspots);
+      const initialHotspots = mapToPannellum(effectiveHotspots);
 
       viewerRef.current = pannellum.viewer(containerRef.current, {
         type: "equirectangular",
         panorama: panoramaUrl,
         autoLoad: true,
         showZoomCtrl: showZoomCtrl === true,
-        showFullscreenCtrl: showFullscreenCtrl === true,
+        showFullscreenCtrl: effectiveShowFullscreen,
         compass: false,
-        showControls: showZoomCtrl === true || showFullscreenCtrl === true,
+        showControls: showZoomCtrl === true || effectiveShowFullscreen,
         mouseZoom: true,
         hfov: 180,
         draggable: true,
@@ -166,7 +241,16 @@ export function PanoramaViewer({
           return;
         }
         setViewerReady(true);
-        syncHotspots(viewerRef.current, hotspots);
+        onReadyRef.current?.();
+        syncHotspots(viewerRef.current, effectiveHotspots);
+      });
+
+      viewerRef.current.on("error", (err) => {
+        if (cancelled) {
+          return;
+        }
+        setViewerReady(false);
+        onErrorRef.current?.(err);
       });
     }
 
@@ -180,7 +264,7 @@ export function PanoramaViewer({
       renderedHotspotIdsRef.current = [];
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- panoramaUrl recria o viewer
-  }, [panoramaUrl, showZoomCtrl, showFullscreenCtrl, mode]);
+  }, [panoramaUrl, showZoomCtrl, effectiveShowFullscreen, mode]);
 
   useEffect(() => {
     const viewer = viewerRef.current;
@@ -188,19 +272,19 @@ export function PanoramaViewer({
       return;
     }
 
-    syncHotspots(viewer, hotspots);
-  }, [hotspots, syncHotspots]);
+    syncHotspots(viewer, effectiveHotspots);
+  }, [effectiveHotspots, syncHotspots]);
 
   useEffect(() => {
     const viewer = viewerRef.current;
-    if (!viewer?.on) {
+    if (!viewer?.on || !capabilities.allowPlacement) {
       return undefined;
     }
 
     let pointerDown = null;
 
     const handleMouseDown = (event) => {
-      if (!placementMode || event.button !== 0) {
+      if (!effectivePlacementMode || event.button !== 0) {
         pointerDown = null;
         return;
       }
@@ -209,7 +293,11 @@ export function PanoramaViewer({
     };
 
     const handleMouseUp = (event) => {
-      if (!placementMode || !onPlacementClickRef.current || !pointerDown) {
+      if (
+        !effectivePlacementMode ||
+        !onPlacementClickRef.current ||
+        !pointerDown
+      ) {
         pointerDown = null;
         return;
       }
@@ -237,12 +325,22 @@ export function PanoramaViewer({
       viewer.off?.("mousedown", handleMouseDown);
       viewer.off?.("mouseup", handleMouseUp);
     };
-  }, [placementMode, panoramaUrl, mouseEventToCoords]);
+  }, [
+    effectivePlacementMode,
+    panoramaUrl,
+    mouseEventToCoords,
+    capabilities.allowPlacement,
+  ]);
 
   useEffect(() => {
     const container = containerRef.current;
     const viewer = viewerRef.current;
-    if (!container || !viewer || !viewerReady) {
+    if (
+      !container ||
+      !viewer ||
+      !viewerReady ||
+      !capabilities.allowContextMenu
+    ) {
       return undefined;
     }
 
@@ -277,32 +375,68 @@ export function PanoramaViewer({
       });
     };
 
-    // Capture no container raiz (.pnlm-container) antes do handler do Pannellum em .pnlm-dragfix
     container.addEventListener("contextmenu", handleContextMenu, true);
 
     return () => {
       container.removeEventListener("contextmenu", handleContextMenu, true);
     };
-  }, [panoramaUrl, viewerReady, mouseEventToCoords]);
+  }, [
+    panoramaUrl,
+    viewerReady,
+    mouseEventToCoords,
+    capabilities.allowContextMenu,
+  ]);
+
+  // Redimensiona o Pannellum ao entrar/sair do fullscreen nativo.
+  useEffect(() => {
+    if (!effectiveShowFullscreen) {
+      return undefined;
+    }
+
+    const handleFullscreenChange = () => {
+      const viewer = viewerRef.current;
+      if (typeof viewer?.resize === "function") {
+        // Aguarda o layout estabilizar após a transição.
+        requestAnimationFrame(() => {
+          viewer.resize?.();
+        });
+      }
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener(
+        "webkitfullscreenchange",
+        handleFullscreenChange,
+      );
+    };
+  }, [effectiveShowFullscreen, panoramaUrl, viewerReady]);
 
   return (
     <div
       className={cn("relative h-full w-full", className)}
       data-testid="panorama-viewer-wrapper"
       data-mode={mode}
+      data-hotspots-interactive={effectiveInteractive ? "true" : "false"}
+      data-fullscreen-enabled={effectiveShowFullscreen ? "true" : "false"}
     >
       <div
         ref={containerRef}
         className={cn(
           "h-full w-full panorama-viewer",
-          placementMode && "panorama-viewer--placing",
-          (showZoomCtrl || showFullscreenCtrl) &&
+          effectivePlacementMode && "panorama-viewer--placing",
+          (showZoomCtrl || effectiveShowFullscreen) &&
             "panorama-viewer--native-controls",
         )}
         data-testid="panorama-viewer"
-        data-placing={placementMode ? "true" : "false"}
+        data-placing={effectivePlacementMode ? "true" : "false"}
       />
-      <ViewerInteractionHint visible={hintVisible} />
+      {capabilities.showInteractionHint ? (
+        <ViewerInteractionHint visible={hintVisible} />
+      ) : null}
     </div>
   );
 }

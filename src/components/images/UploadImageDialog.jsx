@@ -1,24 +1,32 @@
 import { useEffect, useRef, useState } from "react";
-import { AlertTriangle, ImagePlus, Loader2 } from "lucide-react";
+import { ImagePlus, Loader2 } from "lucide-react";
 import { AppModal } from "@/components/common/AppModal";
-import { IMAGE_ACCEPT, LOW_QUALITY_WARNING_MESSAGE } from "@/utils/imageConstants";
+import { PanoramaUploadPreview } from "@/components/images/PanoramaUploadPreview";
+import { useUploadPreview } from "@/hooks/useUploadPreview";
+import { IMAGE_ACCEPT } from "@/utils/imageConstants";
 import {
-  formatFileSize,
   getDefaultImageTitle,
-  getImageFormat,
   getOriginalFileType,
-  isBelowRecommendedResolution,
-  loadImagePreview,
   validateImageFile,
 } from "@/utils/imageValidation";
 import { trackEvent } from "@/services/analytics/analyticsService";
 import { uploadImage } from "@/services/images/imageService";
-import { isPlanLimitError } from "@/services/plans/planService";
+import {
+  assertCanUploadImage,
+  isPlanLimitError,
+} from "@/services/plans/planService";
+
+function isDocumentFullscreenActive() {
+  return Boolean(
+    document.fullscreenElement || document.webkitFullscreenElement,
+  );
+}
 
 /**
- * Modal de preview e upload de imagem panorâmica.
+ * Modal de prévia 360° e upload de imagem panorâmica.
  *
- * Fluxo: preview → nome → salvar → conversão WEBP → Storage → Firestore.
+ * Fluxo: seleção → validação/quota → processar WebP → prévia PanoramaViewer →
+ * confirmar → Storage → Firestore.
  */
 export const UploadImageDialog = ({
   open,
@@ -30,124 +38,64 @@ export const UploadImageDialog = ({
   onPlanLimitReached,
 }) => {
   const replaceInputRef = useRef(null);
+  const confirmLockRef = useRef(false);
   const titleCustomizedRef = useRef(false);
-  const [currentFile, setCurrentFile] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState("");
   const [title, setTitle] = useState("");
-  const [imageMeta, setImageMeta] = useState(null);
-  const [showQualityWarning, setShowQualityWarning] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [processingStep, setProcessingStep] = useState("");
-  const [error, setError] = useState("");
   const [replaceError, setReplaceError] = useState("");
-  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const [processingStep, setProcessingStep] = useState("");
+  const preview = useUploadPreview();
 
   useEffect(() => {
-    if (open && file) {
-      setCurrentFile(file);
-      titleCustomizedRef.current = false;
-    }
-  }, [open, file]);
-
-  useEffect(() => {
-    if (!open || !currentFile) {
+    if (!open || !file || !userId) {
       return;
     }
 
-    let cancelled = false;
-    let objectUrl = "";
-
-    async function preparePreview() {
-      setIsLoadingPreview(true);
-      setError("");
-      setReplaceError("");
-      setShowQualityWarning(false);
-      setImageMeta(null);
-
-      setPreviewUrl((previousUrl) => {
-        if (previousUrl) {
-          URL.revokeObjectURL(previousUrl);
-        }
-        return "";
-      });
-
-      if (!titleCustomizedRef.current) {
-        setTitle(getDefaultImageTitle(currentFile.name));
-      }
-
-      try {
-        const preview = await loadImagePreview(currentFile);
-        if (cancelled) {
-          URL.revokeObjectURL(preview.previewUrl);
-          return;
-        }
-
-        objectUrl = preview.previewUrl;
-        setPreviewUrl(preview.previewUrl);
-        setImageMeta({
-          format: getImageFormat(currentFile),
-          sizeBytes: currentFile.size,
-          width: preview.width,
-          height: preview.height,
-        });
-        setShowQualityWarning(
-          isBelowRecommendedResolution(preview.width, preview.height),
-        );
-      } catch (previewError) {
-        if (!cancelled) {
-          setError(
-            previewError instanceof Error
-              ? previewError.message
-              : "Não foi possível carregar a pré-visualização.",
-          );
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoadingPreview(false);
-        }
-      }
-    }
-
-    preparePreview();
-
-    return () => {
-      cancelled = true;
-      if (objectUrl) {
-        URL.revokeObjectURL(objectUrl);
-      }
-    };
-  }, [open, currentFile]);
-
-  const resetState = () => {
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-    }
-    setCurrentFile(null);
-    setPreviewUrl("");
-    setTitle("");
     titleCustomizedRef.current = false;
-    setImageMeta(null);
-    setShowQualityWarning(false);
-    setIsProcessing(false);
-    setProcessingStep("");
-    setError("");
+    setTitle(getDefaultImageTitle(file.name));
     setReplaceError("");
-    setIsLoadingPreview(false);
-  };
+    setProcessingStep("");
+    confirmLockRef.current = false;
+
+    preview.prepareFile(file, {
+      beforeProcess: async (nextFile) => {
+        try {
+          await assertCanUploadImage(userId, nextFile.size);
+        } catch (quotaError) {
+          if (isPlanLimitError(quotaError)) {
+            onPlanLimitReached?.();
+          }
+          throw quotaError;
+        }
+      },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- prepara só ao abrir/arquivo inicial
+  }, [open, file, userId]);
 
   const handleOpenChange = (nextOpen) => {
-    if (isProcessing) {
+    if (preview.phase === "uploading") {
+      return;
+    }
+
+    if (!nextOpen && isDocumentFullscreenActive()) {
       return;
     }
 
     if (!nextOpen) {
-      resetState();
+      preview.reset();
+      setTitle("");
+      titleCustomizedRef.current = false;
+      setReplaceError("");
+      setProcessingStep("");
+      confirmLockRef.current = false;
     }
 
     onOpenChange(nextOpen);
   };
 
   const handleCancel = () => {
+    if (isDocumentFullscreenActive()) {
+      return;
+    }
     handleOpenChange(false);
   };
 
@@ -155,19 +103,33 @@ export const UploadImageDialog = ({
     const newFile = event.target.files?.[0];
     event.target.value = "";
 
-    if (!newFile) {
+    if (!newFile || preview.phase === "uploading") {
       return;
     }
 
     const validation = validateImageFile(newFile);
     if (!validation.valid) {
-      setReplaceError(validation.error ?? "Formato não suportado.");
+      setReplaceError(validation.error ?? "Este formato de arquivo não é compatível.");
       return;
     }
 
     setReplaceError("");
-    setError("");
-    setCurrentFile(newFile);
+    if (!titleCustomizedRef.current) {
+      setTitle(getDefaultImageTitle(newFile.name));
+    }
+
+    preview.prepareFile(newFile, {
+      beforeProcess: async (nextFile) => {
+        try {
+          await assertCanUploadImage(userId, nextFile.size);
+        } catch (quotaError) {
+          if (isPlanLimitError(quotaError)) {
+            onPlanLimitReached?.();
+          }
+          throw quotaError;
+        }
+      },
+    });
   };
 
   const handleTitleChange = (event) => {
@@ -176,26 +138,48 @@ export const UploadImageDialog = ({
   };
 
   const canUpload = projectId !== undefined;
+  const isUploading = preview.phase === "uploading";
+  const previewValid =
+    preview.phase === "preview_ready" &&
+    Boolean(preview.previewUrl) &&
+    Boolean(preview.processedBlob) &&
+    Boolean(preview.imageMeta) &&
+    preview.viewerReady &&
+    !preview.viewerError;
 
-  const handleSave = async () => {
-    if (!currentFile || !userId || !canUpload || !title.trim() || !imageMeta) {
+  const canConfirm =
+    Boolean(title.trim()) &&
+    Boolean(userId) &&
+    canUpload &&
+    previewValid &&
+    !isUploading;
+
+  const handleConfirm = async () => {
+    if (
+      !canConfirm ||
+      !preview.file ||
+      !preview.processedBlob ||
+      !preview.imageMeta ||
+      confirmLockRef.current
+    ) {
       return;
     }
 
-    setIsProcessing(true);
-    setProcessingStep("Preparando imagem...");
-    setError("");
+    confirmLockRef.current = true;
+    preview.markUploading();
+    setProcessingStep("Enviando para o servidor...");
 
     try {
       const uploadedImage = await uploadImage(
         userId,
         projectId,
-        currentFile,
+        preview.file,
         title.trim(),
         {
-          width: imageMeta.width,
-          height: imageMeta.height,
-          originalFileType: getOriginalFileType(currentFile),
+          width: preview.imageMeta.width,
+          height: preview.imageMeta.height,
+          originalFileType: getOriginalFileType(preview.file),
+          processedBlob: preview.processedBlob,
           onProgress: setProcessingStep,
         },
       );
@@ -206,46 +190,53 @@ export const UploadImageDialog = ({
       });
 
       onUploadComplete(uploadedImage);
-      resetState();
+      preview.reset();
+      setTitle("");
+      titleCustomizedRef.current = false;
+      setReplaceError("");
+      setProcessingStep("");
+      confirmLockRef.current = false;
       onOpenChange(false);
     } catch (uploadError) {
+      confirmLockRef.current = false;
+
       if (isPlanLimitError(uploadError)) {
         onPlanLimitReached?.();
       }
 
-      setError(
+      preview.setError(
         uploadError instanceof Error
           ? uploadError.message
           : "Não foi possível enviar a imagem.",
       );
-      setIsProcessing(false);
+      preview.markPreviewReady();
       setProcessingStep("");
     }
   };
-
-  const canSave =
-    Boolean(title.trim()) &&
-    Boolean(previewUrl) &&
-    Boolean(imageMeta) &&
-    !isProcessing &&
-    !isLoadingPreview &&
-    !error;
 
   return (
     <AppModal
       open={open}
       onOpenChange={handleOpenChange}
-      title="Nova imagem"
-      size="lg"
+      title="Visualizar antes de enviar"
+      description="Explore a imagem em 360° e confirme se ela está posicionada corretamente antes de enviar."
+      size="xl"
       testId="upload-image-dialog"
-      dismissLocked={isProcessing}
+      dismissLocked={isUploading}
       bodyClassName="space-y-4 min-w-0"
+      contentProps={{
+        onEscapeKeyDown: (event) => {
+          if (isDocumentFullscreenActive()) {
+            event.preventDefault();
+          }
+        },
+      }}
       footer={
         <>
           <button
             type="button"
             onClick={handleCancel}
-            disabled={isProcessing}
+            disabled={isUploading}
             data-testid="upload-image-cancel-btn"
             className="px-4 py-2 bg-zinc-800 border border-zinc-700 text-white rounded-xl font-medium btn-scale hover:bg-zinc-700 transition-colors disabled:opacity-50"
           >
@@ -253,145 +244,97 @@ export const UploadImageDialog = ({
           </button>
           <button
             type="button"
-            onClick={handleSave}
-            disabled={!canSave}
+            onClick={() => replaceInputRef.current?.click()}
+            disabled={isUploading || preview.phase === "processing" || preview.phase === "validating"}
+            data-testid="upload-image-replace-btn"
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-zinc-800 border border-zinc-700 text-white rounded-xl font-medium btn-scale hover:bg-zinc-700 transition-colors disabled:opacity-50"
+          >
+            <ImagePlus size={16} />
+            Escolher outra imagem
+          </button>
+          <button
+            type="button"
+            onClick={handleConfirm}
+            disabled={!canConfirm}
             data-testid="upload-image-save-btn"
             className="flex items-center justify-center gap-2 px-4 py-2 bg-white text-black rounded-xl font-medium btn-scale hover:bg-zinc-200 transition-colors disabled:opacity-50"
           >
-            {isProcessing && <Loader2 size={16} className="animate-spin" />}
-            {isProcessing ? "Processando..." : "Salvar"}
+            {isUploading && <Loader2 size={16} className="animate-spin" />}
+            {isUploading ? "Enviando..." : "Confirmar upload"}
           </button>
         </>
       }
     >
-          <div className="space-y-2 min-w-0">
-            <div className="relative w-full h-48 bg-zinc-800 border border-zinc-700 rounded-xl overflow-hidden">
-              {isLoadingPreview ? (
-                <div className="flex items-center justify-center h-full">
-                  <Loader2 size={24} className="animate-spin text-zinc-400" />
-                </div>
-              ) : previewUrl ? (
-                <img
-                  src={previewUrl}
-                  alt="Pré-visualização"
-                  className="w-full h-full object-cover"
-                  data-testid="upload-image-preview"
-                />
-              ) : (
-                <div className="flex items-center justify-center h-full text-sm text-zinc-500">
-                  Pré-visualização indisponível
-                </div>
-              )}
-            </div>
+      <input
+        ref={replaceInputRef}
+        type="file"
+        accept={IMAGE_ACCEPT}
+        className="hidden"
+        onChange={handleReplaceFile}
+        data-testid="upload-image-replace-input"
+      />
 
-            <input
-              ref={replaceInputRef}
-              type="file"
-              accept={IMAGE_ACCEPT}
-              className="hidden"
-              onChange={handleReplaceFile}
-              data-testid="upload-image-replace-input"
-            />
+      <PanoramaUploadPreview
+        previewUrl={preview.previewUrl}
+        phase={preview.phase}
+        imageMeta={preview.imageMeta}
+        showQualityWarning={preview.showQualityWarning}
+        showAspectWarning={preview.showAspectWarning}
+        viewerError={preview.viewerError}
+        viewerReady={preview.viewerReady}
+        onViewerReady={preview.handleViewerReady}
+        onViewerError={preview.handleViewerError}
+        testIdPrefix="upload-image"
+      />
 
-            <button
-              type="button"
-              onClick={() => replaceInputRef.current?.click()}
-              disabled={isProcessing || isLoadingPreview}
-              data-testid="upload-image-replace-btn"
-              className="flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors disabled:opacity-50"
-            >
-              <ImagePlus size={16} />
-              Trocar imagem
-            </button>
+      <div>
+        <label
+          htmlFor="image-title"
+          className="block text-xs text-zinc-500 mb-1"
+        >
+          Nome da imagem
+        </label>
+        <input
+          id="image-title"
+          type="text"
+          value={title}
+          onChange={handleTitleChange}
+          disabled={isUploading || preview.phase === "processing" || preview.phase === "validating"}
+          data-testid="upload-image-title"
+          className="w-full px-4 py-2 bg-zinc-900 border border-zinc-700 rounded-xl text-white focus:outline-none focus:ring-1 focus:ring-white disabled:opacity-50"
+          placeholder="Ex.: Sala de estar"
+        />
+      </div>
 
-            {replaceError && (
-              <p
-                className="text-sm text-red-400"
-                data-testid="upload-image-replace-error"
-              >
-                {replaceError}
-              </p>
-            )}
-          </div>
+      {isUploading && processingStep ? (
+        <div
+          className="flex items-center gap-3 p-3 bg-zinc-800/80 border border-zinc-700 rounded-xl"
+          data-testid="upload-image-processing"
+        >
+          <Loader2 size={18} className="animate-spin text-zinc-300" />
+          <p
+            className="text-sm text-zinc-300"
+            data-testid="upload-image-processing-step"
+          >
+            {processingStep}
+          </p>
+        </div>
+      ) : null}
 
-          {imageMeta && !isLoadingPreview && (
-            <dl
-              className="grid grid-cols-3 gap-3 text-xs min-w-0"
-              data-testid="upload-image-meta"
-            >
-              <div className="min-w-0">
-                <dt className="text-zinc-500 mb-0.5">Formato</dt>
-                <dd className="text-zinc-300">{imageMeta.format}</dd>
-              </div>
-              <div className="min-w-0">
-                <dt className="text-zinc-500 mb-0.5">Tamanho</dt>
-                <dd className="text-zinc-300">
-                  {formatFileSize(imageMeta.sizeBytes)}
-                </dd>
-              </div>
-              <div className="min-w-0">
-                <dt className="text-zinc-500 mb-0.5">Resolução</dt>
-                <dd className="text-zinc-300">
-                  {imageMeta.width} × {imageMeta.height}
-                </dd>
-              </div>
-            </dl>
-          )}
+      {replaceError ? (
+        <p
+          className="text-sm text-red-400"
+          data-testid="upload-image-replace-error"
+        >
+          {replaceError}
+        </p>
+      ) : null}
 
-          <div>
-            <label
-              htmlFor="image-title"
-              className="block text-xs text-zinc-500 mb-1"
-            >
-              Nome da imagem
-            </label>
-            <input
-              id="image-title"
-              type="text"
-              value={title}
-              onChange={handleTitleChange}
-              disabled={isProcessing || isLoadingPreview}
-              data-testid="upload-image-title"
-              className="w-full px-4 py-2 bg-zinc-900 border border-zinc-700 rounded-xl text-white focus:outline-none focus:ring-1 focus:ring-white disabled:opacity-50"
-              placeholder="Ex.: Sala de estar"
-            />
-          </div>
-
-          {showQualityWarning && (
-            <div
-              className="flex items-start gap-3 p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl"
-              data-testid="upload-image-quality-warning"
-            >
-              <AlertTriangle
-                size={18}
-                className="text-amber-400 shrink-0 mt-0.5"
-              />
-              <p className="text-sm text-amber-200/90">
-                {LOW_QUALITY_WARNING_MESSAGE}
-              </p>
-            </div>
-          )}
-
-          {isProcessing && processingStep && (
-            <div
-              className="flex items-center gap-3 p-3 bg-zinc-800/80 border border-zinc-700 rounded-xl"
-              data-testid="upload-image-processing"
-            >
-              <Loader2 size={18} className="animate-spin text-zinc-300" />
-              <p
-                className="text-sm text-zinc-300"
-                data-testid="upload-image-processing-step"
-              >
-                {processingStep}
-              </p>
-            </div>
-          )}
-
-          {error && (
-            <p className="text-sm text-red-400 break-words" data-testid="upload-image-error">
-              {error}
-            </p>
-          )}
+      {preview.error ? (
+        <p className="text-sm text-red-400 break-words" data-testid="upload-image-error">
+          {preview.error}
+        </p>
+      ) : null}
     </AppModal>
   );
 };

@@ -34,3 +34,15 @@
 .panorama-viewer .pnlm-hotspot.pnlm-scene {
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.45));
 }
+
+/* Referência inerte na prévia de upload/substituição */
+.panorama-viewer .pnlm-hotspot.pnlm-hotspot--preview-ref,
+.panorama-viewer .pnlm-hotspot--preview-ref {
+  cursor: default !important;
+  pointer-events: auto;
+}
+
+.panorama-viewer .pnlm-hotspot.pnlm-hotspot--preview-ref:hover,
+.panorama-viewer .pnlm-hotspot--preview-ref:hover {
+  cursor: default !important;
+}

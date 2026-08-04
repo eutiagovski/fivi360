@@ -235,6 +235,27 @@ describe("uploadImage storage path", () => {
     expect(convertToWebp).not.toHaveBeenCalled();
     expect(mockSetDoc).not.toHaveBeenCalled();
   });
+
+  it("reuses processedBlob from preview and skips convertToWebp", async () => {
+    const preparedBlob = { size: 2048, type: "image/webp" };
+
+    await uploadImage(userId, null, buildFile(ORIGINAL_FILE_SIZE), "Preview", {
+      processedBlob: preparedBlob,
+    });
+
+    expect(convertToWebp).not.toHaveBeenCalled();
+    expect(assertCanUploadImage).toHaveBeenCalledWith(
+      userId,
+      ORIGINAL_FILE_SIZE,
+    );
+    expect(mockSetDoc).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        originalSizeBytes: ORIGINAL_FILE_SIZE,
+        storedSizeBytes: preparedBlob.size,
+      }),
+    );
+  });
 });
 
 describe("replaceImageFile storage path", () => {
@@ -341,6 +362,58 @@ describe("replaceImageFile storage path", () => {
       expect.anything(),
       expect.objectContaining({
         storagePath: unifiedPath,
+      }),
+    );
+  });
+
+  it("deletes legacy path only after firestore update", async () => {
+    const legacyPath = `users/${userId}/projects/${projectId}/images/${imageId}.webp`;
+    const callOrder = [];
+
+    mockGetDoc.mockResolvedValue({
+      exists: () => true,
+      id: imageId,
+      data: () =>
+        buildExistingImage({
+          projectId,
+          storagePath: legacyPath,
+        }),
+    });
+    mockUpdateDoc.mockImplementation(async () => {
+      callOrder.push("updateDoc");
+    });
+    deleteImageFile.mockImplementation(async () => {
+      callOrder.push("delete");
+      return { success: true };
+    });
+
+    await replaceImageFile(userId, projectId, imageId, buildFile());
+
+    expect(callOrder).toEqual(["updateDoc", "delete"]);
+  });
+
+  it("reuses processedBlob on replace and skips convertToWebp", async () => {
+    const preparedBlob = { size: 3333, type: "image/webp" };
+
+    mockGetDoc.mockResolvedValue({
+      exists: () => true,
+      id: imageId,
+      data: () =>
+        buildExistingImage({
+          storagePath: `users/${userId}/images/${imageId}.webp`,
+        }),
+    });
+
+    await replaceImageFile(userId, null, imageId, buildFile(9000), "", {
+      processedBlob: preparedBlob,
+    });
+
+    expect(convertToWebp).not.toHaveBeenCalled();
+    expect(mockUpdateDoc).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        originalSizeBytes: 9000,
+        storedSizeBytes: preparedBlob.size,
       }),
     );
   });

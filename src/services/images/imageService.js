@@ -94,6 +94,7 @@ const FIRESTORE_BATCH_LIMIT = 500;
  * @property {number} [width]
  * @property {number} [height]
  * @property {string} [originalFileType]
+ * @property {Blob} [processedBlob] — WebP já processado na prévia (evita reconversão)
  * @property {(step: string) => void} [onProgress]
  */
 
@@ -103,6 +104,7 @@ const FIRESTORE_BATCH_LIMIT = 500;
  * @property {number} [height]
  * @property {string} [originalFileType]
  * @property {string} [title]
+ * @property {Blob} [processedBlob] — WebP já processado na prévia (evita reconversão)
  * @property {(step: string) => void} [onProgress]
  */
 
@@ -629,7 +631,13 @@ export async function deleteImage(
  * @returns {Promise<Image>}
  */
 export async function uploadImage(userId, projectId, file, title, options = {}) {
-  const { width = 0, height = 0, originalFileType = "", onProgress } = options;
+  const {
+    width = 0,
+    height = 0,
+    originalFileType = "",
+    processedBlob = null,
+    onProgress,
+  } = options;
   const normalizedProjectId = normalizeProjectId(projectId);
   const originalSizeBytes = file?.size ?? 0;
 
@@ -637,8 +645,11 @@ export async function uploadImage(userId, projectId, file, title, options = {}) 
 
   await assertCanUploadImage(userId, originalSizeBytes);
 
-  onProgress?.("Convertendo imagem...");
-  const webpBlob = await convertToWebp(file);
+  let webpBlob = processedBlob;
+  if (!webpBlob) {
+    onProgress?.("Convertendo imagem...");
+    webpBlob = await convertToWebp(file);
+  }
   const storedSizeBytes = webpBlob.size;
 
   const imageRef = doc(collection(db, "images"));
@@ -732,6 +743,7 @@ export async function replaceImageFile(
     height = 0,
     originalFileType = "",
     title: newTitle,
+    processedBlob = null,
     onProgress,
   } = options;
 
@@ -763,8 +775,11 @@ export async function replaceImageFile(
     previousQuotaBytes,
   );
 
-  onProgress?.("Convertendo imagem...");
-  const webpBlob = await convertToWebp(file);
+  let webpBlob = processedBlob;
+  if (!webpBlob) {
+    onProgress?.("Convertendo imagem...");
+    webpBlob = await convertToWebp(file);
+  }
   const storedSizeBytes = webpBlob.size;
 
   const storagePath = getImageStoragePath(userId, imageId);
@@ -774,18 +789,6 @@ export async function replaceImageFile(
   onProgress?.("Enviando para o servidor...");
   await uploadBytes(storageRef, webpBlob, { contentType: "image/webp" });
   const downloadUrl = await getDownloadURL(storageRef);
-
-  if (oldStoragePath && oldStoragePath !== storagePath) {
-    onProgress?.("Removendo arquivo antigo...");
-    const deleteResult = await deleteImageFile(oldStoragePath);
-    if (!deleteResult.success) {
-      console.error(
-        "[replaceImageFile] Falha ao remover arquivo antigo — edição mantida:",
-        oldStoragePath,
-        deleteResult.error,
-      );
-    }
-  }
 
   onProgress?.("Salvando informações...");
 
@@ -808,6 +811,19 @@ export async function replaceImageFile(
   }
 
   await updateDoc(imageRef, firestoreUpdates);
+
+  // Só remove legado após persistência do novo arquivo + doc.
+  if (oldStoragePath && oldStoragePath !== storagePath) {
+    onProgress?.("Removendo arquivo antigo...");
+    const deleteResult = await deleteImageFile(oldStoragePath);
+    if (!deleteResult.success) {
+      console.error(
+        "[replaceImageFile] Falha ao remover arquivo antigo — edição mantida:",
+        oldStoragePath,
+        deleteResult.error,
+      );
+    }
+  }
 
   const updatedImage = mapImageDoc(imageId, {
     ...existingImage,

@@ -3,6 +3,8 @@ import {
   BLOCKED_IMAGE_EXTENSIONS,
   MIN_RECOMMENDED_HEIGHT,
   MIN_RECOMMENDED_WIDTH,
+  PANORAMA_ASPECT_RATIO_TARGET,
+  PANORAMA_ASPECT_RATIO_TOLERANCE,
   UNSUPPORTED_FORMAT_MESSAGE,
 } from "@/utils/imageConstants";
 
@@ -74,6 +76,22 @@ export function validateImageFile(file) {
  */
 export function isBelowRecommendedResolution(width, height) {
   return width < MIN_RECOMMENDED_WIDTH || height < MIN_RECOMMENDED_HEIGHT;
+}
+
+/**
+ * Aviso (não bloqueante) quando a proporção foge do equirectangular ~2:1.
+ *
+ * @param {number} width
+ * @param {number} height
+ * @returns {boolean}
+ */
+export function isAtypicalPanoramaAspectRatio(width, height) {
+  if (!width || !height) {
+    return false;
+  }
+
+  const ratio = width / height;
+  return Math.abs(ratio - PANORAMA_ASPECT_RATIO_TARGET) > PANORAMA_ASPECT_RATIO_TOLERANCE;
 }
 
 /**
