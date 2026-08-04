@@ -104,14 +104,18 @@ describe("deleteProjectCascade", () => {
         userId,
         projectId,
         storagePath: "users/user-1/projects/project-1/images/img-1.webp",
+        originalSizeBytes: 5000,
         sizeBytes: 1000,
+        storedSizeBytes: 1000,
       },
       {
         id: "img-2",
         userId,
         projectId,
         storagePath: "users/user-1/projects/project-1/images/img-2.webp",
+        originalSizeBytes: 7000,
         sizeBytes: 2000,
+        storedSizeBytes: 2000,
       },
     ]);
 
@@ -127,10 +131,32 @@ describe("deleteProjectCascade", () => {
     expect(mockDoc).toHaveBeenCalledWith({}, "projects", projectId);
     expect(result).toEqual({
       deletedImageCount: 2,
-      deletedStorageBytes: 3000,
+      deletedStorageBytes: 12000,
       deletedHotspotCount: 2,
       imageIds: ["img-1", "img-2"],
     });
+  });
+
+  it("falls back to legacy sizeBytes when originalSizeBytes is missing", async () => {
+    mockGetDoc.mockResolvedValue({
+      exists: () => true,
+      id: projectId,
+      data: () => ({ userId, title: "Projeto Legado" }),
+    });
+
+    getImagesByProjectId.mockResolvedValue([
+      {
+        id: "img-legacy",
+        userId,
+        projectId,
+        storagePath: "legacy.webp",
+        sizeBytes: 3000,
+      },
+    ]);
+
+    const result = await deleteProjectCascade(projectId, userId);
+
+    expect(result.deletedStorageBytes).toBe(3000);
   });
 
   it("continues cascade when storage deletion is tolerant", async () => {

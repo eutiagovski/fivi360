@@ -14,6 +14,7 @@ import {
 } from "@/config/planLimits";
 import { getProjectsByUserId } from "@/services/projects/projectService";
 import { getUser } from "@/services/users/userService";
+import { getQuotaSizeBytes } from "@/utils/storageQuota";
 
 export const PLAN_LIMIT_CODES = {
   PROJECT_LIMIT: "PROJECT_LIMIT",
@@ -31,7 +32,7 @@ const FRIENDLY_MESSAGES = {
   [PLAN_LIMIT_CODES.IMAGE_LIMIT]:
     "Você atingiu o limite de imagens do seu plano. Faça upgrade para enviar mais imagens.",
   [PLAN_LIMIT_CODES.STORAGE_LIMIT]:
-    "Você atingiu o limite de armazenamento do seu plano. Faça upgrade ou remova imagens antigas.",
+    "Este upload ultrapassa o limite de armazenamento disponível no seu plano. Libere espaço excluindo imagens ou faça upgrade para continuar.",
   [PLAN_LIMIT_CODES.HOTSPOTS_DISABLED]:
     "Hotspots estão disponíveis a partir do plano Professional. Faça upgrade para usar marcadores no panorama.",
   [PLAN_LIMIT_CODES.PORTFOLIO_DISABLED]:
@@ -70,10 +71,12 @@ export function isPlanLimitError(error) {
  */
 
 /**
- * Lista todas as imagens do usuário (para contagem e armazenamento).
+ * Lista todas as imagens do usuário (para contagem e armazenamento comercial).
+ *
+ * `quotaBytes` usa originalSizeBytes (com fallback legado). Ver storageQuota.js.
  *
  * @param {string} userId
- * @returns {Promise<{ sizeBytes: number }[]>}
+ * @returns {Promise<{ quotaBytes: number }[]>}
  */
 async function fetchUserImageSizes(userId) {
   const imagesQuery = query(
@@ -84,11 +87,13 @@ async function fetchUserImageSizes(userId) {
 
   return snapshot.docs.map((docSnap) => {
     const data = docSnap.data();
-    return { sizeBytes: data.sizeBytes ?? 0 };
+    return { quotaBytes: getQuotaSizeBytes(data) };
   });
 }
 
 /**
+ * Uso comercial do plano. `storageBytes` = soma de tamanhos originais (quota).
+ *
  * @param {string} userId
  * @returns {Promise<UserUsage>}
  */
@@ -99,7 +104,7 @@ export async function getUserUsage(userId) {
   ]);
 
   const storageBytes = imageSizes.reduce(
-    (sum, img) => sum + (img.sizeBytes || 0),
+    (sum, img) => sum + (img.quotaBytes || 0),
     0,
   );
 
@@ -162,8 +167,11 @@ export async function assertCanCreateProject(userId) {
 }
 
 /**
+ * Valida quota comercial antes do upload.
+ * `additionalBytes` deve ser o tamanho original (`File.size`), não o comprimido.
+ *
  * @param {string} userId
- * @param {number} additionalBytes
+ * @param {number} additionalBytes — originalSizeBytes do arquivo selecionado
  * @returns {Promise<void>}
  */
 export async function assertCanUploadImage(userId, additionalBytes = 0) {
@@ -185,9 +193,12 @@ export async function assertCanUploadImage(userId, additionalBytes = 0) {
 }
 
 /**
+ * Valida quota comercial na substituição de arquivo.
+ * `newSizeBytes` / `previousSizeBytes` devem ser tamanhos originais (quota).
+ *
  * @param {string} userId
- * @param {number} newSizeBytes
- * @param {number} previousSizeBytes
+ * @param {number} newSizeBytes — originalSizeBytes do novo arquivo
+ * @param {number} previousSizeBytes — quota da imagem existente
  * @returns {Promise<void>}
  */
 export async function assertCanReplaceImageStorage(

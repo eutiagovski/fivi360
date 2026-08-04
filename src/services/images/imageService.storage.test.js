@@ -59,18 +59,32 @@ jest.mock("../storage/storageService", () => ({
   deleteImageFile: jest.fn(() => Promise.resolve({ success: true })),
 }));
 
+jest.mock("@/services/workspaces/workspaceService", () => ({
+  getActiveWorkspaceIdForUser: jest.fn(async () => "user-1"),
+}));
+
 const { getProjectById, updateProject } = require("../projects/projectService");
 const { deleteImageFile } = require("../storage/storageService");
 const { convertToWebp } = require("@/utils/imageConversion");
+const {
+  assertCanReplaceImageStorage,
+  assertCanUploadImage,
+} = require("../plans/planService");
+const {
+  getActiveWorkspaceIdForUser,
+} = require("@/services/workspaces/workspaceService");
 
 const webpBlob = { size: 1024, type: "image/webp" };
+const ORIGINAL_FILE_SIZE = 5000;
 
 const userId = "user-1";
 const projectId = "project-1";
 const imageId = "image-new";
 
-function buildFile() {
-  return new File(["data"], "panorama.jpg", { type: "image/jpeg" });
+function buildFile(size = ORIGINAL_FILE_SIZE) {
+  const file = new File(["x"], "panorama.jpg", { type: "image/jpeg" });
+  Object.defineProperty(file, "size", { value: size });
+  return file;
 }
 
 function buildExistingImage(overrides = {}) {
@@ -82,6 +96,8 @@ function buildExistingImage(overrides = {}) {
     previewUrl: "https://storage.example/old.webp",
     storagePath: `users/${userId}/images/${imageId}.webp`,
     sizeBytes: 512,
+    originalSizeBytes: 2048,
+    storedSizeBytes: 512,
     width: 4000,
     height: 2000,
     originalFileType: "image/jpeg",
@@ -95,7 +111,12 @@ function buildExistingImage(overrides = {}) {
 
 describe("uploadImage storage path", () => {
   beforeEach(() => {
+    convertToWebp.mockReset();
     convertToWebp.mockResolvedValue(webpBlob);
+    assertCanUploadImage.mockReset();
+    assertCanUploadImage.mockResolvedValue(undefined);
+    getActiveWorkspaceIdForUser.mockReset();
+    getActiveWorkspaceIdForUser.mockResolvedValue(userId);
     mockDoc.mockReset();
     mockCollection.mockReset();
     mockSetDoc.mockReset();
@@ -161,11 +182,67 @@ describe("uploadImage storage path", () => {
       }),
     );
   });
+
+  it("validates quota with original File.size before compression", async () => {
+    const callOrder = [];
+    assertCanUploadImage.mockImplementation(async () => {
+      callOrder.push("assert");
+    });
+    convertToWebp.mockImplementation(async () => {
+      callOrder.push("convert");
+      return webpBlob;
+    });
+
+    await uploadImage(userId, null, buildFile(ORIGINAL_FILE_SIZE), "Quota");
+
+    expect(assertCanUploadImage).toHaveBeenCalledWith(
+      userId,
+      ORIGINAL_FILE_SIZE,
+    );
+    expect(callOrder).toEqual(["assert", "convert"]);
+  });
+
+  it("persists originalSizeBytes and storedSizeBytes separately", async () => {
+    const result = await uploadImage(
+      userId,
+      null,
+      buildFile(ORIGINAL_FILE_SIZE),
+      "Sizes",
+    );
+
+    expect(mockSetDoc).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        originalSizeBytes: ORIGINAL_FILE_SIZE,
+        storedSizeBytes: webpBlob.size,
+        sizeBytes: webpBlob.size,
+      }),
+    );
+    expect(result.originalSizeBytes).toBe(ORIGINAL_FILE_SIZE);
+    expect(result.storedSizeBytes).toBe(webpBlob.size);
+    expect(result.sizeBytes).toBe(webpBlob.size);
+  });
+
+  it("does not upload when quota assert rejects", async () => {
+    assertCanUploadImage.mockRejectedValue(
+      Object.assign(new Error("storage"), { code: "STORAGE_LIMIT" }),
+    );
+
+    await expect(
+      uploadImage(userId, null, buildFile(), "Blocked"),
+    ).rejects.toMatchObject({ code: "STORAGE_LIMIT" });
+
+    expect(convertToWebp).not.toHaveBeenCalled();
+    expect(mockSetDoc).not.toHaveBeenCalled();
+  });
 });
 
 describe("replaceImageFile storage path", () => {
   beforeEach(() => {
+    convertToWebp.mockReset();
     convertToWebp.mockResolvedValue(webpBlob);
+    assertCanReplaceImageStorage.mockReset();
+    assertCanReplaceImageStorage.mockResolvedValue(undefined);
     mockDoc.mockReset();
     mockGetDoc.mockReset();
     mockUpdateDoc.mockReset();
@@ -210,6 +287,40 @@ describe("replaceImageFile storage path", () => {
         storagePath: `users/${userId}/images/${imageId}.webp`,
         originalUrl: "https://storage.example/new.webp",
         previewUrl: "https://storage.example/new.webp",
+      }),
+    );
+  });
+
+  it("asserts replace quota with original sizes before compression", async () => {
+    mockGetDoc.mockResolvedValue({
+      exists: () => true,
+      id: imageId,
+      data: () => buildExistingImage({ storagePath: `users/${userId}/images/${imageId}.webp` }),
+    });
+
+    const callOrder = [];
+    assertCanReplaceImageStorage.mockImplementation(async () => {
+      callOrder.push("assert");
+    });
+    convertToWebp.mockImplementation(async () => {
+      callOrder.push("convert");
+      return webpBlob;
+    });
+
+    await replaceImageFile(userId, null, imageId, buildFile(9000));
+
+    expect(assertCanReplaceImageStorage).toHaveBeenCalledWith(
+      userId,
+      9000,
+      2048,
+    );
+    expect(callOrder).toEqual(["assert", "convert"]);
+    expect(mockUpdateDoc).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        originalSizeBytes: 9000,
+        storedSizeBytes: webpBlob.size,
+        sizeBytes: webpBlob.size,
       }),
     );
   });

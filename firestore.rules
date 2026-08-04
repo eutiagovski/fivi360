@@ -737,6 +737,8 @@ service cloud.firestore {
         && request.resource.data.previewUrl is string
         && request.resource.data.originalUrl is string
         && request.resource.data.sizeBytes is number
+        && request.resource.data.originalSizeBytes is number
+        && request.resource.data.storedSizeBytes is number
         && isValidVisibility(request.resource.data.visibility)
         && (
           !request.resource.data.keys().hasAny(['projectId'])

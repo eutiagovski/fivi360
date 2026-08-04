@@ -54,6 +54,7 @@ import { ShareProjectDialog } from '@/components/projects/ShareProjectDialog';
 import { PlanLimitButton } from '@/components/plans/PlanLimitButton';
 import { UpgradePrompt } from '@/components/plans/UpgradePrompt';
 import { showImageUploadBlockedToast, showPlanLimitToast } from '@/utils/planToast';
+import { getQuotaSizeBytes } from '@/utils/storageQuota';
 import {
   getVisibilityOptionsForPlan,
   visibilityToLabel,
@@ -217,7 +218,7 @@ export const ProjectDetail = () => {
     addImage(uploadedImage);
     applyUsageDelta({
       imageCount: 1,
-      storageBytes: uploadedImage.sizeBytes ?? 0,
+      storageBytes: getQuotaSizeBytes(uploadedImage),
     });
     void refreshUsage();
 
@@ -296,6 +297,8 @@ export const ProjectDetail = () => {
       updates.previewUrl = image.previewUrl;
       updates.storagePath = image.storagePath;
       updates.sizeBytes = image.sizeBytes;
+      updates.originalSizeBytes = image.originalSizeBytes;
+      updates.storedSizeBytes = image.storedSizeBytes;
       updates.width = image.width;
       updates.height = image.height;
       updates.originalFileType = image.originalFileType;
@@ -312,8 +315,8 @@ export const ProjectDetail = () => {
     setEditOpenFilePicker(false);
 
     if (image) {
-      const previousSizeBytes = imageToEdit.sizeBytes ?? 0;
-      const nextSizeBytes = image.sizeBytes ?? 0;
+      const previousSizeBytes = getQuotaSizeBytes(imageToEdit);
+      const nextSizeBytes = getQuotaSizeBytes(image);
       applyUsageDelta({ storageBytes: nextSizeBytes - previousSizeBytes });
       void refreshUsage();
     }
@@ -424,7 +427,7 @@ export const ProjectDetail = () => {
       removeImage(imageToDelete.id);
       applyUsageDelta({
         imageCount: -1,
-        storageBytes: -(imageToDelete.sizeBytes ?? 0),
+        storageBytes: -getQuotaSizeBytes(imageToDelete),
       });
       void refreshUsage();
 
@@ -903,7 +906,7 @@ export const ProjectDetail = () => {
         }
         currentWidth={imageToEdit?.width ?? 0}
         currentHeight={imageToEdit?.height ?? 0}
-        currentSizeBytes={imageToEdit?.sizeBytes ?? 0}
+        currentSizeBytes={getQuotaSizeBytes(imageToEdit)}
         currentFileType={
           imageToEdit?.optimizedFileType || imageToEdit?.originalFileType || ''
         }

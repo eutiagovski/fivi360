@@ -59,6 +59,10 @@ import {
   isPaginationCursor,
   toAppDate,
 } from "@/services/firebase/dates";
+import {
+  getQuotaSizeBytes,
+  getStoredSizeBytes,
+} from "@/utils/storageQuota";
 
 /** Limite de operações por `writeBatch` do Firestore. */
 const FIRESTORE_BATCH_LIMIT = 500;
@@ -72,7 +76,9 @@ const FIRESTORE_BATCH_LIMIT = 500;
  * @property {string} originalUrl
  * @property {string} previewUrl
  * @property {string} storagePath
- * @property {number} sizeBytes
+ * @property {number} sizeBytes — tamanho físico (legado; espelha storedSizeBytes)
+ * @property {number | null} originalSizeBytes — File.size original (quota comercial)
+ * @property {number} storedSizeBytes — tamanho físico no Storage
  * @property {number} width
  * @property {number} height
  * @property {string} originalFileType
@@ -125,6 +131,11 @@ function getImageStoragePath(userId, imageId) {
 }
 
 function mapImageDoc(imageId, data) {
+  const storedSizeBytes = getStoredSizeBytes(data);
+  const hasOriginal =
+    typeof data.originalSizeBytes === "number" &&
+    Number.isFinite(data.originalSizeBytes);
+
   return {
     id: imageId,
     userId: data.userId ?? "",
@@ -133,7 +144,9 @@ function mapImageDoc(imageId, data) {
     originalUrl: data.originalUrl ?? "",
     previewUrl: data.previewUrl ?? "",
     storagePath: data.storagePath ?? "",
-    sizeBytes: data.sizeBytes ?? 0,
+    sizeBytes: storedSizeBytes,
+    originalSizeBytes: hasOriginal ? data.originalSizeBytes : null,
+    storedSizeBytes,
     width: data.width ?? 0,
     height: data.height ?? 0,
     originalFileType: data.originalFileType ?? "",
@@ -467,7 +480,9 @@ async function deleteImageStatsDocTolerant(userId, imageId) {
  * @property {number} deletedOwnHotspotCount
  * @property {number} deletedIncomingSceneHotspotCount
  * @property {number} deletedStoragePathCount
- * @property {number} sizeBytes
+ * @property {number} sizeBytes — bytes de quota liberados (originalSizeBytes com fallback)
+ * @property {number} originalSizeBytes
+ * @property {number} storedSizeBytes
  * @property {boolean} deletedImageStats
  */
 
@@ -587,12 +602,17 @@ export async function deleteImage(
 
   await deleteImageFilesTolerant(storagePaths);
 
+  const quotaBytes = getQuotaSizeBytes(image);
+  const storedBytes = getStoredSizeBytes(image);
+
   return {
     coverImage: coverImageResult,
     deletedOwnHotspotCount: ownRefs.length,
     deletedIncomingSceneHotspotCount: incomingRefs.length,
     deletedStoragePathCount: storagePaths.length,
-    sizeBytes: image.sizeBytes ?? 0,
+    sizeBytes: quotaBytes,
+    originalSizeBytes: quotaBytes,
+    storedSizeBytes: storedBytes,
     deletedImageStats,
   };
 }
@@ -611,13 +631,15 @@ export async function deleteImage(
 export async function uploadImage(userId, projectId, file, title, options = {}) {
   const { width = 0, height = 0, originalFileType = "", onProgress } = options;
   const normalizedProjectId = normalizeProjectId(projectId);
+  const originalSizeBytes = file?.size ?? 0;
 
   onProgress?.("Preparando imagem...");
 
+  await assertCanUploadImage(userId, originalSizeBytes);
+
   onProgress?.("Convertendo imagem...");
   const webpBlob = await convertToWebp(file);
-
-  await assertCanUploadImage(userId, webpBlob.size);
+  const storedSizeBytes = webpBlob.size;
 
   const imageRef = doc(collection(db, "images"));
   const imageId = imageRef.id;
@@ -649,7 +671,10 @@ export async function uploadImage(userId, projectId, file, title, options = {}) 
     originalUrl: downloadUrl,
     previewUrl: downloadUrl,
     storagePath,
-    sizeBytes: webpBlob.size,
+    originalSizeBytes,
+    storedSizeBytes,
+    // Legado: sizeBytes permanece como tamanho físico armazenado.
+    sizeBytes: storedSizeBytes,
     width,
     height,
     originalFileType,
@@ -729,14 +754,18 @@ export async function replaceImageFile(
 
   onProgress?.("Preparando imagem...");
 
-  onProgress?.("Convertendo imagem...");
-  const webpBlob = await convertToWebp(file);
+  const originalSizeBytes = file?.size ?? 0;
+  const previousQuotaBytes = getQuotaSizeBytes(existingImage);
 
   await assertCanReplaceImageStorage(
     userId,
-    webpBlob.size,
-    existingImage.sizeBytes,
+    originalSizeBytes,
+    previousQuotaBytes,
   );
+
+  onProgress?.("Convertendo imagem...");
+  const webpBlob = await convertToWebp(file);
+  const storedSizeBytes = webpBlob.size;
 
   const storagePath = getImageStoragePath(userId, imageId);
   const oldStoragePath = existingImage.storagePath;
@@ -764,7 +793,9 @@ export async function replaceImageFile(
     originalUrl: downloadUrl,
     previewUrl: downloadUrl,
     storagePath,
-    sizeBytes: webpBlob.size,
+    originalSizeBytes,
+    storedSizeBytes,
+    sizeBytes: storedSizeBytes,
     width,
     height,
     originalFileType,

@@ -179,6 +179,41 @@ describe("deleteImage cascade", () => {
     expect(result.deletedIncomingSceneHotspotCount).toBe(0);
   });
 
+  it("returns originalSizeBytes for commercial quota release", async () => {
+    mockExistingImage(
+      buildImageDoc({
+        originalSizeBytes: 5_000_000,
+        sizeBytes: 1_400_000,
+        storedSizeBytes: 1_400_000,
+      }),
+    );
+
+    const result = await deleteImage(
+      userId,
+      projectId,
+      imageId,
+      "https://storage.example/other-cover.webp",
+    );
+
+    expect(result.sizeBytes).toBe(5_000_000);
+    expect(result.originalSizeBytes).toBe(5_000_000);
+    expect(result.storedSizeBytes).toBe(1_400_000);
+  });
+
+  it("falls back to legacy sizeBytes when originalSizeBytes is missing", async () => {
+    mockExistingImage(buildImageDoc({ sizeBytes: 2048 }));
+
+    const result = await deleteImage(
+      userId,
+      projectId,
+      imageId,
+      "https://storage.example/other-cover.webp",
+    );
+
+    expect(result.sizeBytes).toBe(2048);
+    expect(result.originalSizeBytes).toBe(2048);
+  });
+
   it("exclui hotspots próprios (info + scene)", async () => {
     mockExistingImage(buildImageDoc());
     const ownRefs = [

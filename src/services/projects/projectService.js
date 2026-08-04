@@ -48,6 +48,7 @@ import {
   isPaginationCursor,
   toAppDate,
 } from "@/services/firebase/dates";
+import { getQuotaSizeBytes } from "@/utils/storageQuota";
 import {
   normalizeEmbedSettings,
   resolveInitialImageId,
@@ -369,7 +370,7 @@ export async function adjustProjectImageCount(projectId, delta, extraUpdates = {
 /**
  * @typedef {Object} DeleteProjectCascadeResult
  * @property {number} deletedImageCount
- * @property {number} deletedStorageBytes
+ * @property {number} deletedStorageBytes — soma de quota comercial (originalSizeBytes)
  * @property {number} deletedHotspotCount
  * @property {string[]} imageIds
  */
@@ -414,7 +415,7 @@ export async function deleteProjectCascade(projectId, userId) {
     try {
       await deleteDoc(doc(db, "images", image.id));
       deletedImageCount += 1;
-      deletedStorageBytes += image.sizeBytes ?? 0;
+      deletedStorageBytes += getQuotaSizeBytes(image);
     } catch (error) {
       console.error(
         "[deleteProjectCascade] Falha ao excluir imagem do Firestore:",
