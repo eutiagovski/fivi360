@@ -1,8 +1,10 @@
 import { Plus, Loader2 } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { PageActionHeader } from '@/components/common/PageActionHeader';
 import { EmptyStateCard } from '@/components/common/EmptyStateCard';
 import { ProjectCard } from '@/components/common/ProjectCard';
+import { CreateProjectDialog } from '@/components/projects/CreateProjectDialog';
+import { EditProjectDialog } from '@/components/projects/EditProjectDialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,13 +32,16 @@ import { emitProjectDeleted } from '@/utils/dataSyncEvents';
 export const Projects = () => {
   const { user } = useAuth();
   const {
+    projects,
     cardProjects,
     loadingInitial,
     loadingMore,
     hasMore,
     error,
     loadMore,
+    refreshSilently,
     removeProject,
+    patchProject,
   } = useProjectsPage();
   const sentinelRef = useInfiniteScrollSentinel({
     hasMore,
@@ -47,6 +52,16 @@ export const Projects = () => {
   const [openMenu, setOpenMenu] = useState(null);
   const [projectToDelete, setProjectToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [projectToEdit, setProjectToEdit] = useState(null);
+
+  const projectById = useMemo(() => {
+    const map = new Map();
+    projects.forEach((project) => {
+      map.set(project.id, project);
+    });
+    return map;
+  }, [projects]);
 
   const handleDelete = async () => {
     if (!projectToDelete || !user?.uid) {
@@ -92,6 +107,13 @@ export const Projects = () => {
     }
   };
 
+  const openCreate = () => {
+    if (!canCreateProject) {
+      return;
+    }
+    setShowCreateDialog(true);
+  };
+
   if (loadingInitial) {
     return <AuthLoadingScreen />;
   }
@@ -103,7 +125,7 @@ export const Projects = () => {
         subtitle="Gerencie seus projetos e imagens"
         actionLabel="Criar projeto"
         actionIcon={<Plus size={20} />}
-        actionHref="/projects/new"
+        onAction={openCreate}
         actionDisabled={!canCreateProject}
         dataTestId="projects-title"
         actionDataTestId="create-project-btn"
@@ -132,7 +154,7 @@ export const Projects = () => {
           description="Crie seu primeiro projeto para organizar imagens 360° e compartilhar apresentações completas."
           actionLabel="Criar projeto"
           actionIcon={<Plus size={20} />}
-          actionHref="/projects/new"
+          onAction={openCreate}
           actionDisabled={!canCreateProject}
           actionDataTestId="projects-empty-create-btn"
         />
@@ -149,6 +171,13 @@ export const Projects = () => {
                 showMenu
                 isMenuOpen={openMenu === project.id}
                 onMenuToggle={() => setOpenMenu(openMenu === project.id ? null : project.id)}
+                onEdit={() => {
+                  const full = projectById.get(project.id);
+                  if (full) {
+                    setProjectToEdit(full);
+                    setOpenMenu(null);
+                  }
+                }}
                 onDelete={() => setProjectToDelete(project)}
                 dataTestId={`project-card-${project.id}`}
               />
@@ -165,17 +194,33 @@ export const Projects = () => {
               <Loader2 size={20} className="animate-spin text-zinc-400" />
             </div>
           )}
-
-          {/* {!hasMore && !loadingMore && (
-            <p
-              className="text-center text-sm text-zinc-500 py-8"
-              data-testid="projects-all-loaded"
-            >
-              Todos os itens foram carregados.
-            </p>
-          )} */}
         </>
       )}
+
+      <CreateProjectDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+        onCreated={() => {
+          void refreshSilently();
+        }}
+      />
+
+      <EditProjectDialog
+        open={Boolean(projectToEdit)}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) {
+            setProjectToEdit(null);
+          }
+        }}
+        project={projectToEdit}
+        onUpdated={(updates) => {
+          if (!projectToEdit) {
+            return;
+          }
+          patchProject(projectToEdit.id, updates);
+          setProjectToEdit(null);
+        }}
+      />
 
       <AlertDialog open={Boolean(projectToDelete)} onOpenChange={(open) => !open && setProjectToDelete(null)}>
         <AlertDialogContent className={appAlertContentClassName('lg')}>

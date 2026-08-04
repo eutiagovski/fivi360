@@ -6,8 +6,6 @@ import {
   Trash2,
   Pencil,
   Loader2,
-  X,
-  Check,
   MoreHorizontal,
 } from 'lucide-react';
 import { useRef, useState } from 'react';
@@ -40,10 +38,7 @@ import {
 } from '@/components/common/AppModal';
 import { toast } from '@/hooks/use-toast';
 import { useProject } from '@/hooks/useProject';
-import {
-  deleteProjectCascade,
-  updateProject,
-} from '@/services/projects/projectService';
+import { deleteProjectCascade } from '@/services/projects/projectService';
 import { emitProjectDeleted } from '@/utils/dataSyncEvents';
 import {
   hasProjectCover,
@@ -51,15 +46,12 @@ import {
 } from '@/components/common/ProjectCoverPlaceholder';
 import { ShareImageDialog } from '@/components/images/ShareImageDialog';
 import { ShareProjectDialog } from '@/components/projects/ShareProjectDialog';
+import { EditProjectDialog } from '@/components/projects/EditProjectDialog';
 import { PlanLimitButton } from '@/components/plans/PlanLimitButton';
 import { UpgradePrompt } from '@/components/plans/UpgradePrompt';
-import { showImageUploadBlockedToast, showPlanLimitToast } from '@/utils/planToast';
+import { showImageUploadBlockedToast } from '@/utils/planToast';
 import { getQuotaSizeBytes } from '@/utils/storageQuota';
-import {
-  getVisibilityOptionsForPlan,
-  visibilityToLabel,
-  VISIBILITY_OPTIONS,
-} from '@/utils/visibility';
+import { visibilityToLabel } from '@/utils/visibility';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -78,12 +70,10 @@ export const ProjectDetail = () => {
     canUploadImage,
     limits,
     usage,
-    publicVisibilityEnabled,
     refreshUsage,
     applyUsageDelta,
   } = usePlanLimits();
   const { project, loading, notFound, refetch, patchProject } = useProject(id);
-  const visibilityOptions = getVisibilityOptionsForPlan(publicVisibilityEnabled);
   const {
     cardImages,
     images,
@@ -93,11 +83,9 @@ export const ProjectDetail = () => {
     removeImage,
   } = useProjectImages(id);
   const fileInputRef = useRef(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [editForm, setEditForm] = useState(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [openImageMenu, setOpenImageMenu] = useState(null);
@@ -113,68 +101,6 @@ export const ProjectDetail = () => {
   const [showMoveToLooseDialog, setShowMoveToLooseDialog] = useState(false);
   const [moveToLooseHasSceneHotspots, setMoveToLooseHasSceneHotspots] = useState(false);
   const [isMovingToLoose, setIsMovingToLoose] = useState(false);
-
-  const startEditing = () => {
-    if (!project) {
-      return;
-    }
-
-    setEditForm({
-      title: project.title,
-      clientName: project.clientName,
-      description: project.description,
-      visibility: project.visibility,
-    });
-    setIsEditing(true);
-  };
-
-  const cancelEditing = () => {
-    setIsEditing(false);
-    setEditForm(null);
-  };
-
-  const handleEditChange = (e) => {
-    setEditForm({
-      ...editForm,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSave = async () => {
-    if (!project || !editForm) {
-      return;
-    }
-
-    setIsSaving(true);
-
-    try {
-      await updateProject(project.id, {
-        title: editForm.title,
-        clientName: editForm.clientName,
-        description: editForm.description,
-        visibility: editForm.visibility,
-      });
-
-      toast({
-        title: 'Projeto atualizado',
-        description: 'As alterações foram salvas.',
-      });
-
-      setIsEditing(false);
-      setEditForm(null);
-      await refetch();
-    } catch (error) {
-      if (!showPlanLimitToast(error, toast)) {
-        toast({
-          title: 'Erro ao salvar',
-          description: 'Não foi possível atualizar o projeto.',
-          variant: 'destructive',
-        });
-      }
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   const handleAddImageClick = () => {
     if (!canUploadImage) {
@@ -521,9 +447,6 @@ export const ProjectDetail = () => {
   }
 
   const hasCover = hasProjectCover(project.coverImage);
-  const selectedVisibility = VISIBILITY_OPTIONS.find(
-    (option) => option.value === (editForm?.visibility ?? project.visibility),
-  );
 
   return (
     <div className="p-8 md:p-12 lg:p-16 fade-in">
@@ -562,194 +485,110 @@ export const ProjectDetail = () => {
           <div className="flex-1">
             <div className="flex flex-col gap-4 mb-4 lg:flex-row lg:items-start lg:justify-between lg:gap-4 min-w-0">
               <div className="min-w-0 flex-1 w-full">
-                {isEditing ? (
-                  <input
-                    type="text"
-                    name="title"
-                    value={editForm.title}
-                    onChange={handleEditChange}
-                    data-testid="edit-project-title"
-                    className="w-full text-3xl sm:text-4xl font-light tracking-tighter text-white mb-2 bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2 focus:outline-none focus:ring-1 focus:ring-white"
-                  />
-                ) : (
-                  <h1
-                    className="text-3xl sm:text-4xl font-light tracking-tighter text-white mb-2 break-words"
-                    data-testid="project-name"
-                  >
-                    {project.title || 'Sem título'}
-                  </h1>
-                )}
+                <h1
+                  className="text-3xl sm:text-4xl font-light tracking-tighter text-white mb-2 break-words"
+                  data-testid="project-name"
+                >
+                  {project.title || 'Sem título'}
+                </h1>
 
-                {isEditing ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2">
-                    {visibilityOptions.map((option) => (
-                      <label
-                        key={option.value}
-                        className={`flex items-center justify-center p-2 rounded-lg cursor-pointer text-xs font-medium ${
-                          editForm.visibility === option.value
-                            ? 'bg-white text-black'
-                            : 'bg-zinc-800 text-zinc-300'
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          name="visibility"
-                          value={option.value}
-                          checked={editForm.visibility === option.value}
-                          onChange={handleEditChange}
-                          className="sr-only"
-                        />
-                        {option.label}
-                      </label>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="inline-block px-3 py-1 bg-zinc-800 border border-zinc-700 rounded-full text-xs text-zinc-300">
-                    {visibilityToLabel(project.visibility)}
-                  </div>
-                )}
+                <div className="inline-block px-3 py-1 bg-zinc-800 border border-zinc-700 rounded-full text-xs text-zinc-300">
+                  {visibilityToLabel(project.visibility)}
+                </div>
 
-                {!isEditing && (
-                  <div className="lg:hidden mt-2 space-y-1">
-                    {project.clientName && (
-                      <p className="text-sm text-zinc-400" data-testid="project-client-mobile">
-                        Cliente: {project.clientName}
-                      </p>
-                    )}
-                    {project.description && (
-                      <p
-                        className="text-sm text-zinc-400 line-clamp-2"
-                        data-testid="project-description-mobile-short"
-                      >
-                        {project.description}
-                      </p>
-                    )}
-                  </div>
-                )}
+                <div className="lg:hidden mt-2 space-y-1">
+                  {project.clientName && (
+                    <p className="text-sm text-zinc-400" data-testid="project-client-mobile">
+                      Cliente: {project.clientName}
+                    </p>
+                  )}
+                  {project.description && (
+                    <p
+                      className="text-sm text-zinc-400 line-clamp-2"
+                      data-testid="project-description-mobile-short"
+                    >
+                      {project.description}
+                    </p>
+                  )}
+                </div>
               </div>
 
               <div className="hidden lg:flex items-center gap-2 shrink-0">
-                {isEditing ? (
-                  <>
-                    <button
-                      onClick={handleSave}
-                      disabled={isSaving}
-                      data-testid="save-project-btn"
-                      className="flex items-center gap-2 px-4 py-2 bg-white text-black rounded-xl font-medium btn-scale hover:bg-zinc-200 transition-colors disabled:opacity-50"
-                    >
-                      {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Check size={18} />}
-                      Salvar
-                    </button>
-                    <button
-                      onClick={cancelEditing}
-                      data-testid="cancel-edit-project-btn"
-                      className="flex items-center gap-2 px-4 py-2 bg-zinc-800 border border-zinc-700 text-white rounded-xl font-medium btn-scale hover:bg-zinc-700 transition-colors"
-                    >
-                      <X size={18} />
-                      Cancelar
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      onClick={startEditing}
-                      data-testid="edit-project-btn"
-                      className="flex items-center gap-2 px-4 py-2 bg-zinc-800 border border-zinc-700 text-white rounded-xl font-medium btn-scale hover:bg-zinc-700 transition-colors"
-                    >
-                      <Pencil size={18} />
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => setShowShareDialog(true)}
-                      data-testid="share-project-btn"
-                      className="flex items-center gap-2 px-4 py-2 bg-white text-black rounded-xl font-medium btn-scale hover:bg-zinc-200 transition-colors"
-                    >
-                      <Share2 size={18} />
-                      Compartilhar
-                    </button>
-                    <button
-                      onClick={() => setShowDeleteDialog(true)}
-                      data-testid="delete-project-btn"
-                      className="flex items-center gap-2 px-4 py-2 bg-zinc-800 border border-zinc-700 text-red-400 rounded-xl font-medium btn-scale hover:bg-zinc-700 transition-colors"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </>
-                )}
+                <button
+                  onClick={() => setShowEditDialog(true)}
+                  data-testid="edit-project-btn"
+                  className="flex items-center gap-2 px-4 py-2 bg-zinc-800 border border-zinc-700 text-white rounded-xl font-medium btn-scale hover:bg-zinc-700 transition-colors"
+                >
+                  <Pencil size={18} />
+                  Editar
+                </button>
+                <button
+                  onClick={() => setShowShareDialog(true)}
+                  data-testid="share-project-btn"
+                  className="flex items-center gap-2 px-4 py-2 bg-white text-black rounded-xl font-medium btn-scale hover:bg-zinc-200 transition-colors"
+                >
+                  <Share2 size={18} />
+                  Compartilhar
+                </button>
+                <button
+                  onClick={() => setShowDeleteDialog(true)}
+                  data-testid="delete-project-btn"
+                  className="flex items-center gap-2 px-4 py-2 bg-zinc-800 border border-zinc-700 text-red-400 rounded-xl font-medium btn-scale hover:bg-zinc-700 transition-colors"
+                >
+                  <Trash2 size={18} />
+                </button>
               </div>
 
-              {isEditing ? (
-                <div className="flex lg:hidden items-center gap-2 w-full min-w-0">
-                  <button
-                    onClick={handleSave}
-                    disabled={isSaving}
-                    data-testid="save-project-btn-mobile"
-                    className="flex flex-1 min-w-0 items-center justify-center gap-2 px-4 py-2 bg-white text-black rounded-xl font-medium btn-scale hover:bg-zinc-200 transition-colors disabled:opacity-50"
-                  >
-                    {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Check size={18} />}
-                    Salvar
-                  </button>
-                  <button
-                    onClick={cancelEditing}
-                    data-testid="cancel-edit-project-btn-mobile"
-                    className="flex flex-1 min-w-0 items-center justify-center gap-2 px-4 py-2 bg-zinc-800 border border-zinc-700 text-white rounded-xl font-medium btn-scale hover:bg-zinc-700 transition-colors"
-                  >
-                    <X size={18} />
-                    Cancelar
-                  </button>
-                </div>
-              ) : (
-                <div className="flex lg:hidden items-center gap-2 w-full min-w-0">
-                  <button
-                    onClick={() => setShowShareDialog(true)}
-                    data-testid="share-project-btn-mobile"
-                    className="flex flex-1 min-w-0 items-center justify-center gap-2 px-4 py-2 bg-white text-black rounded-xl font-medium btn-scale hover:bg-zinc-200 transition-colors"
-                  >
-                    <Share2 size={18} className="shrink-0" />
-                    Compartilhar
-                  </button>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button
-                        type="button"
-                        data-testid="project-more-menu-btn"
-                        aria-label="Mais opções do projeto"
-                        className="flex shrink-0 items-center justify-center p-2 px-3 bg-zinc-800 border border-zinc-700 text-white rounded-xl font-medium btn-scale hover:bg-zinc-700 transition-colors"
-                      >
-                        <MoreHorizontal size={20} />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align="end"
-                      side="bottom"
-                      sideOffset={8}
-                      collisionPadding={16}
-                      className="w-52 min-w-0 max-w-[min(13rem,calc(100vw-2rem))] rounded-xl border-zinc-800 bg-zinc-900 p-1 text-zinc-300 shadow-xl z-50"
-                      data-testid="project-more-menu-content"
+              <div className="flex lg:hidden items-center gap-2 w-full min-w-0">
+                <button
+                  onClick={() => setShowShareDialog(true)}
+                  data-testid="share-project-btn-mobile"
+                  className="flex flex-1 min-w-0 items-center justify-center gap-2 px-4 py-2 bg-white text-black rounded-xl font-medium btn-scale hover:bg-zinc-200 transition-colors"
+                >
+                  <Share2 size={18} className="shrink-0" />
+                  Compartilhar
+                </button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      data-testid="project-more-menu-btn"
+                      aria-label="Mais opções do projeto"
+                      className="flex shrink-0 items-center justify-center p-2 px-3 bg-zinc-800 border border-zinc-700 text-white rounded-xl font-medium btn-scale hover:bg-zinc-700 transition-colors"
                     >
-                      <DropdownMenuItem
-                        className={PROJECT_MENU_ITEM_CLASS}
-                        onSelect={startEditing}
-                        data-testid="edit-project-menu-item"
-                      >
-                        <Pencil size={16} />
-                        Editar projeto
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className={`${PROJECT_MENU_ITEM_CLASS} text-red-400 focus:text-red-300`}
-                        onSelect={() => setShowDeleteDialog(true)}
-                        data-testid="delete-project-menu-item"
-                      >
-                        <Trash2 size={16} />
-                        Excluir projeto
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              )}
+                      <MoreHorizontal size={20} />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="end"
+                    side="bottom"
+                    sideOffset={8}
+                    collisionPadding={16}
+                    className="w-52 min-w-0 max-w-[min(13rem,calc(100vw-2rem))] rounded-xl border-zinc-800 bg-zinc-900 p-1 text-zinc-300 shadow-xl z-50"
+                    data-testid="project-more-menu-content"
+                  >
+                    <DropdownMenuItem
+                      className={PROJECT_MENU_ITEM_CLASS}
+                      onSelect={() => setShowEditDialog(true)}
+                      data-testid="edit-project-menu-item"
+                    >
+                      <Pencil size={16} />
+                      Editar projeto
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className={`${PROJECT_MENU_ITEM_CLASS} text-red-400 focus:text-red-300`}
+                      onSelect={() => setShowDeleteDialog(true)}
+                      data-testid="delete-project-menu-item"
+                    >
+                      <Trash2 size={16} />
+                      Excluir projeto
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
 
-            {project.clientName && !isEditing && (
+            {project.clientName && (
               <p
                 className="hidden lg:block text-sm text-zinc-400 mb-3"
                 data-testid="project-client"
@@ -758,44 +597,12 @@ export const ProjectDetail = () => {
               </p>
             )}
 
-            {isEditing && (
-              <div className="mb-4">
-                <label htmlFor="clientName" className="block text-xs text-zinc-500 mb-1">
-                  Cliente
-                </label>
-                <input
-                  type="text"
-                  id="clientName"
-                  name="clientName"
-                  value={editForm.clientName}
-                  onChange={handleEditChange}
-                  data-testid="edit-project-client"
-                  className="w-full px-4 py-2 bg-zinc-900 border border-zinc-700 rounded-xl text-white focus:outline-none focus:ring-1 focus:ring-white"
-                />
-              </div>
-            )}
-
-            {isEditing ? (
-              <textarea
-                name="description"
-                value={editForm.description}
-                onChange={handleEditChange}
-                rows={4}
-                data-testid="edit-project-description"
-                className="w-full px-4 py-3 bg-zinc-900 border border-zinc-700 rounded-xl text-white focus:outline-none focus:ring-1 focus:ring-white resize-none"
-              />
-            ) : (
-              <p
-                className="hidden lg:block text-sm text-zinc-300 leading-relaxed"
-                data-testid="project-description"
-              >
-                {project.description || 'Sem descrição.'}
-              </p>
-            )}
-
-            {isEditing && selectedVisibility && (
-              <p className="text-xs text-zinc-500 mt-2">{selectedVisibility.description}</p>
-            )}
+            <p
+              className="hidden lg:block text-sm text-zinc-300 leading-relaxed"
+              data-testid="project-description"
+            >
+              {project.description || 'Sem descrição.'}
+            </p>
 
             <div className="mt-6 flex items-center gap-4 text-sm text-zinc-400">
               <span data-testid="project-image-count">
@@ -1026,6 +833,16 @@ export const ProjectDetail = () => {
         project={project}
         images={images}
         onVisibilitySaved={refetch}
+      />
+
+      <EditProjectDialog
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        project={project}
+        onUpdated={async (updates) => {
+          patchProject(updates);
+          await refetch();
+        }}
       />
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>

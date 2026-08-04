@@ -88,6 +88,34 @@ export function useProjectsPage() {
     setProjects((current) => current.filter((project) => project.id !== projectId));
   }, []);
 
+  const patchProject = useCallback((projectId, updates) => {
+    setProjects((current) =>
+      current.map((project) =>
+        project.id === projectId ? { ...project, ...updates } : project,
+      ),
+    );
+  }, []);
+
+  /** Recarrega a primeira página sem ligar `loadingInitial` (sem AuthLoadingScreen). */
+  const refreshSilently = useCallback(async () => {
+    if (!user?.uid) {
+      return;
+    }
+
+    try {
+      const result = await getProjectsPageByUserId(user.uid, {
+        limitCount: LIST_INITIAL_PAGE_SIZE,
+      });
+
+      setProjects(result.items);
+      cursorRef.current = result.cursor;
+      setHasMore(result.hasMore);
+      setError(null);
+    } catch (err) {
+      setError(err);
+    }
+  }, [user?.uid]);
+
   useEffect(() => {
     const handleProjectDeleted = (event) => {
       const { projectId } = event.detail ?? {};
@@ -170,6 +198,8 @@ export function useProjectsPage() {
     error,
     loadMore,
     reloadFirstPage: loadFirstPage,
+    refreshSilently,
     removeProject,
+    patchProject,
   };
 }

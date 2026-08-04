@@ -1,4 +1,5 @@
 import { Plus, Image, Link2, HardDrive, FolderOpen } from 'lucide-react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PlanLimitButton } from '@/components/plans/PlanLimitButton';
 import { PageHeader } from '@/components/common/PageHeader';
@@ -7,6 +8,7 @@ import { EmptyStateCard } from '@/components/common/EmptyStateCard';
 import { StatCard } from '@/components/common/StatCard';
 import { ProjectCard } from '@/components/common/ProjectCard';
 import { ImageCard } from '@/components/common/ImageCard';
+import { CreateProjectDialog } from '@/components/projects/CreateProjectDialog';
 import { AuthLoadingScreen } from '@/components/auth/ProtectedRoute';
 import { PlanUpgradeHint } from '@/components/plans/PlanUpgradeHint';
 import { StarterPlanInfoBanner } from '@/components/plans/StarterPlanInfoBanner';
@@ -39,7 +41,15 @@ export const Dashboard = () => {
     canCreateProject,
     canUploadImage,
   } = usePlanLimits();
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
   const recentProjects = cardProjects.slice(0, 3);
+
+  const openCreate = () => {
+    if (!canCreateProject) {
+      return;
+    }
+    setShowCreateDialog(true);
+  };
 
   const showStarterLimitBanner =
     planId === PLAN_IDS.STARTER &&
@@ -167,7 +177,7 @@ export const Dashboard = () => {
           actions={
             <PlanLimitButton
               disabled={!canCreateProject}
-              onClick={() => navigate('/projects/new')}
+              onClick={openCreate}
               dataTestId="create-project-btn"
             >
               <Plus size={20} />
@@ -184,7 +194,7 @@ export const Dashboard = () => {
             actionLabel="Criar projeto"
             actionIcon={<Plus size={20} />}
             actionDisabled={!canCreateProject}
-            onAction={() => navigate('/projects/new')}
+            onAction={openCreate}
             actionDataTestId="dashboard-empty-create-project-btn"
           />
         ) : (
@@ -200,6 +210,11 @@ export const Dashboard = () => {
           </div>
         )}
       </div>
+
+      <CreateProjectDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+      />
     </div>
   );
 };

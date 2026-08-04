@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { MoreVertical, Eye, Trash2 } from 'lucide-react';
+import { MoreVertical, Eye, Pencil, Trash2 } from 'lucide-react';
 import {
   hasProjectCover,
   ProjectCoverPlaceholder,
@@ -11,6 +11,7 @@ export const ProjectCard = ({
   showMenu = false,
   isMenuOpen = false,
   onMenuToggle,
+  onEdit,
   onDelete,
   dataTestId,
 }) => {
@@ -81,6 +82,20 @@ export const ProjectCard = ({
               <Eye size={16} />
               Ver projeto
             </Link>
+            {onEdit ? (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onEdit();
+                }}
+                data-testid={`edit-project-menu-${project.id}`}
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors"
+              >
+                <Pencil size={16} />
+                Editar
+              </button>
+            ) : null}
             <button
               type="button"
               onClick={(e) => {
