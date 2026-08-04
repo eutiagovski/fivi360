@@ -46,9 +46,14 @@ export function ShareProjectDialog({
   useEffect(() => {
     if (project && open) {
       setVisibility(project.visibility ?? "private");
-      setActiveTab(SHARE_TAB);
     }
   }, [project, open]);
+
+  useEffect(() => {
+    if (open) {
+      setActiveTab(SHARE_TAB);
+    }
+  }, [open]);
 
   if (!project) {
     return null;

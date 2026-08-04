@@ -1,0 +1,741 @@
+[debug] [2026-08-04T21:35:55.481Z] ----------------------------------------------------------------------
+[debug] [2026-08-04T21:35:55.483Z] Command:       C:\Users\Tiago Machado\AppData\Local\fnm_multishells\25412_1785858133284\node.exe C:\Users\Tiago Machado\AppData\Local\fnm_multishells\25412_1785858133284\node_modules\firebase-tools\lib\bin\firebase.js emulators:start --export-on-exit --import=./firebase-data
+[debug] [2026-08-04T21:35:55.483Z] CLI Version:   15.24.0
+[debug] [2026-08-04T21:35:55.483Z] Platform:      win32
+[debug] [2026-08-04T21:35:55.483Z] Node Version:  v22.23.1
+[debug] [2026-08-04T21:35:55.483Z] Detected Agent: unknown
+[debug] [2026-08-04T21:35:55.483Z] Time:          Tue Aug 04 2026 18:35:55 GMT-0300 (Horário Padrão de Brasília)
+[debug] [2026-08-04T21:35:55.484Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-08-04T21:35:56.334Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-08-04T21:35:56.334Z] > authorizing via signed-in user (tiagomachadodev@gmail.com)
+[debug] [2026-08-04T21:35:56.377Z] openjdk version "21.0.11" 2026-04-21 LTS
+
+[debug] [2026-08-04T21:35:56.378Z] OpenJDK Runtime Environment Microsoft-13877171 (build 21.0.11+10-LTS)
+OpenJDK 64-Bit Server VM Microsoft-13877171 (build 21.0.11+10-LTS, mixed mode, sharing)
+
+[debug] [2026-08-04T21:35:56.383Z] Parsed Java major version: 21
+[info] i  emulators: Starting emulators: auth, functions, firestore, hosting, storage, extensions {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth, functions, firestore, hosting, storage, extensions"}}
+[debug] [2026-08-04T21:35:56.385Z] Checked if tokens are valid: false, expires at: 1785878502389
+[debug] [2026-08-04T21:35:56.385Z] Checked if tokens are valid: false, expires at: 1785878502389
+[debug] [2026-08-04T21:35:56.385Z] > refreshing access token with scopes: []
+[debug] [2026-08-04T21:35:56.387Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-08-04T21:35:56.387Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-04T21:35:56.558Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-08-04T21:35:56.558Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-08-04T21:35:56.571Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/fivi360 [none]
+[debug] [2026-08-04T21:35:57.478Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/fivi360 200
+[debug] [2026-08-04T21:35:57.479Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/fivi360 {"projectNumber":"61026306739","projectId":"fivi360","lifecycleState":"ACTIVE","name":"FIVI360","labels":{"firebase":"enabled"},"createTime":"2022-09-22T16:15:05.792Z"}
+[debug] [2026-08-04T21:35:57.490Z] [logging] Logging Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-08-04T21:35:57.490Z] [auth] Authentication Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-08-04T21:35:57.490Z] [firestore] Firestore Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-08-04T21:35:57.490Z] [firestore.websocket] websocket server for firestore only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-08-04T21:35:57.491Z] [hosting] Hosting Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-08-04T21:35:57.491Z] [storage] Storage Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-08-04T21:35:57.491Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}],"firestore":[{"address":"127.0.0.1","family":"IPv4","port":8080}],"firestore.websocket":[{"address":"127.0.0.1","family":"IPv4","port":9150}],"hosting":[{"address":"127.0.0.1","family":"IPv4","port":5000}],"storage":[{"address":"127.0.0.1","family":"IPv4","port":9199}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[debug] [2026-08-04T21:35:57.494Z] Write emulator hub locator at C:\Users\TIAGOM~1\AppData\Local\Temp\hub-fivi360.json
+[debug] [2026-08-04T21:35:57.500Z] [Extensions] Started Extensions emulator, this is a noop.
+[debug] [2026-08-04T21:35:57.504Z] [functions] Functions Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-08-04T21:35:57.504Z] [eventarc] Eventarc Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-08-04T21:35:57.504Z] [tasks] Cloud Tasks Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-08-04T21:35:57.504Z] late-assigned ports for functions and eventarc emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}],"firestore":[{"address":"127.0.0.1","family":"IPv4","port":8080}],"firestore.websocket":[{"address":"127.0.0.1","family":"IPv4","port":9150}],"hosting":[{"address":"127.0.0.1","family":"IPv4","port":5000}],"storage":[{"address":"127.0.0.1","family":"IPv4","port":9199}],"functions":[{"address":"127.0.0.1","family":"IPv4","port":5001}],"eventarc":[{"address":"127.0.0.1","family":"IPv4","port":9299}],"tasks":[{"address":"127.0.0.1","family":"IPv4","port":9499}]},"metadata":{"message":"late-assigned ports for functions and eventarc emulators"}}
+[warn] !  functions: The following emulators are not running, calls to these services from the Functions emulator will affect production: apphosting, database, pubsub, dataconnect {"metadata":{"emulator":{"name":"functions"},"message":"The following emulators are not running, calls to these services from the Functions emulator will affect production: \u001b[1mapphosting, database, pubsub, dataconnect\u001b[22m"}}
+[debug] [2026-08-04T21:35:57.523Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
+[debug] [2026-08-04T21:35:57.525Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
+[debug] [2026-08-04T21:35:57.525Z] Checked if tokens are valid: true, expires at: 1785882955558
+[debug] [2026-08-04T21:35:57.525Z] Checked if tokens are valid: true, expires at: 1785882955558
+[debug] [2026-08-04T21:35:57.525Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/fivi360/adminSdkConfig [none]
+[debug] [2026-08-04T21:35:58.022Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/fivi360/adminSdkConfig 200
+[debug] [2026-08-04T21:35:58.022Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/fivi360/adminSdkConfig {"projectId":"fivi360","storageBucket":"fivi360.appspot.com","locationId":"us-west2"}
+[info] i  firestore: Importing data from C:\Workspace\01_Products\FIVI360\Software\fivi360\firebase-data\firestore_export\firestore_export.overall_export_metadata {"metadata":{"emulator":{"name":"firestore"},"message":"Importing data from C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\firebase-data\\firestore_export\\firestore_export.overall_export_metadata"}}
+[debug] [2026-08-04T21:35:58.038Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2026-08-04T21:35:58.038Z] Ignoring unsupported arg: single_project_mode_error {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: single_project_mode_error"}}
+[debug] [2026-08-04T21:35:58.038Z] Starting Firestore Emulator with command {"binary":"java","args":["-Dgoogle.cloud_firestore.debug_log_level=FINE","-Duser.language=en","-jar","C:\\Users\\Tiago Machado\\.cache\\firebase\\emulators\\cloud-firestore-emulator-v1.21.0.jar","--host","127.0.0.1","--port",8080,"--websocket_port",9150,"--database-edition","standard","--project_id","fivi360","--seed_from_export","C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\firebase-data\\firestore_export\\firestore_export.overall_export_metadata","--rules","C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\firestore.rules","--single_project_mode",true,"--functions_emulator","127.0.0.1:5001"],"optionalArgs":["port","webchannel_port","host","rules","websocket_port","database-edition","functions_emulator","seed_from_export","project_id","single_project_mode"],"joinArgs":false,"shell":false,"port":8080} {"metadata":{"emulator":{"name":"firestore"},"message":"Starting Firestore Emulator with command {\"binary\":\"java\",\"args\":[\"-Dgoogle.cloud_firestore.debug_log_level=FINE\",\"-Duser.language=en\",\"-jar\",\"C:\\\\Users\\\\Tiago Machado\\\\.cache\\\\firebase\\\\emulators\\\\cloud-firestore-emulator-v1.21.0.jar\",\"--host\",\"127.0.0.1\",\"--port\",8080,\"--websocket_port\",9150,\"--database-edition\",\"standard\",\"--project_id\",\"fivi360\",\"--seed_from_export\",\"C:\\\\Workspace\\\\01_Products\\\\FIVI360\\\\Software\\\\fivi360\\\\firebase-data\\\\firestore_export\\\\firestore_export.overall_export_metadata\",\"--rules\",\"C:\\\\Workspace\\\\01_Products\\\\FIVI360\\\\Software\\\\fivi360\\\\firestore.rules\",\"--single_project_mode\",true,\"--functions_emulator\",\"127.0.0.1:5001\"],\"optionalArgs\":[\"port\",\"webchannel_port\",\"host\",\"rules\",\"websocket_port\",\"database-edition\",\"functions_emulator\",\"seed_from_export\",\"project_id\",\"single_project_mode\"],\"joinArgs\":false,\"shell\":false,\"port\":8080}"}}
+[info] i  firestore: Firestore Emulator logging to firestore-debug.log {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator logging to \u001b[1mfirestore-debug.log\u001b[22m"}}
+[info] +  firestore: Firestore Emulator was started in standard edition. {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator was started in standard edition."}}
+[info] +  firestore: Firestore Emulator UI websocket is running on 9150. {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator UI websocket is running on 9150."}}
+[debug] [2026-08-04T21:36:01.385Z] Aug 04, 2026 6:35:59 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketServer start
+INFO: Started WebSocket server on ws://127.0.0.1:9150
+Aug 04, 2026 6:35:59 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel
+INFO: Connected to new websocket client
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:35:59 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketServer start\r\nINFO: Started WebSocket server on ws://127.0.0.1:9150\r\nAug 04, 2026 6:35:59 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel\r\nINFO: Connected to new websocket client\r\n"}}
+[debug] [2026-08-04T21:36:01.386Z] 
+API endpoint: http://127.0.0.1:8080
+Database Edition: STANDARD
+Database Mode: CLOUD_FIRESTORE
+
+If you are using a library that supports the FIRESTORE_EMULATOR_HOST environment variable, run:
+
+   export FIRESTORE_EMULATOR_HOST=127.0.0.1:8080
+
+If you are running a Firestore in Datastore Mode project, run:
+
+   export DATASTORE_EMULATOR_HOST=127.0.0.1:8080
+
+Note: Support for Datastore Mode is in preview. If you encounter any bugs please file at https://github.com/firebase/firebase-tools/issues.
+Dev App Server is now running.
+
+ {"metadata":{"emulator":{"name":"firestore"},"message":"\nAPI endpoint: http://127.0.0.1:8080\nDatabase Edition: STANDARD\nDatabase Mode: CLOUD_FIRESTORE\n\nIf you are using a library that supports the FIRESTORE_EMULATOR_HOST environment variable, run:\r\n\n   export FIRESTORE_EMULATOR_HOST=127.0.0.1:8080\n\nIf you are running a Firestore in Datastore Mode project, run:\r\n\n   export DATASTORE_EMULATOR_HOST=127.0.0.1:8080\n\nNote: Support for Datastore Mode is in preview. If you encounter any bugs please file at https://github.com/firebase/firebase-tools/issues.\r\nDev App Server is now running.\n\r\n"}}
+[info] i  auth: Importing config from C:\Workspace\01_Products\FIVI360\Software\fivi360\firebase-data\auth_export\config.json {"metadata":{"emulator":{"name":"auth"},"message":"Importing config from C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\firebase-data\\auth_export\\config.json"}}
+[info] i  auth: Importing accounts from C:\Workspace\01_Products\FIVI360\Software\fivi360\firebase-data\auth_export\accounts.json {"metadata":{"emulator":{"name":"auth"},"message":"Importing accounts from C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\firebase-data\\auth_export\\accounts.json"}}
+[debug] [2026-08-04T21:36:01.412Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"storage"},"message":"Ignoring unsupported arg: port"}}
+[debug] [2026-08-04T21:36:01.990Z] Temp file directory for storage emulator: C:\Users\TIAGOM~1\AppData\Local\Temp/firebase/storage/blobs {"metadata":{"emulator":{"name":"storage"},"message":"Temp file directory for storage emulator: C:\\Users\\TIAGOM~1\\AppData\\Local\\Temp/firebase/storage/blobs"}}
+[debug] [2026-08-04T21:36:01.999Z] Checked if tokens are valid: true, expires at: 1785882955558
+[debug] [2026-08-04T21:36:01.999Z] Checked if tokens are valid: true, expires at: 1785882955558
+[debug] [2026-08-04T21:36:01.999Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/fivi360/sites 
+[debug] [2026-08-04T21:36:03.520Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/fivi360/sites 200
+[debug] [2026-08-04T21:36:03.520Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/fivi360/sites {"sites":[{"name":"projects/fivi360/sites/fivi360","defaultUrl":"https://fivi360.web.app","type":"DEFAULT_SITE"}]}
+[debug] [2026-08-04T21:36:03.520Z] Checked if tokens are valid: true, expires at: 1785882955558
+[debug] [2026-08-04T21:36:03.521Z] Checked if tokens are valid: true, expires at: 1785882955558
+[debug] [2026-08-04T21:36:03.521Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/fivi360/webApps/-/config [none]
+[debug] [2026-08-04T21:36:04.521Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/fivi360/webApps/-/config 200
+[debug] [2026-08-04T21:36:04.521Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/fivi360/webApps/-/config {"projectId":"fivi360","appId":"1:61026306739:web:c7ecdf4615abf357a1bec6","storageBucket":"fivi360.appspot.com","locationId":"us-west2","apiKey":"AIzaSyAHnGVoqIHc6OkGBOscRJG3sVdeGv5URDA","authDomain":"fivi360.firebaseapp.com","messagingSenderId":"61026306739","measurementId":"G-TZVXFJ54Q6","projectNumber":"61026306739","version":"2"}
+[debug] [2026-08-04T21:36:04.529Z] Checked if tokens are valid: true, expires at: 1785882955558
+[debug] [2026-08-04T21:36:04.529Z] Checked if tokens are valid: true, expires at: 1785882955558
+[debug] [2026-08-04T21:36:04.529Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/fivi360 [none]
+[debug] [2026-08-04T21:36:04.947Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/fivi360 200
+[debug] [2026-08-04T21:36:04.947Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/fivi360 {"projectId":"fivi360","projectNumber":"61026306739","displayName":"FIVI360","name":"projects/fivi360","resources":{"hostingSite":"fivi360","locationId":"us-west2"},"state":"ACTIVE","labels":{"firebase":"enabled","firebaseworkflows/environment":"production"},"etag":"1_6ccba432-9b81-4399-8728-7d73cdd7784f"}
+[info] i  hosting[fivi360]: Serving hosting files from: build {"metadata":{"emulator":{"name":"hosting"},"message":"Serving hosting files from: \u001b[1mbuild\u001b[22m"}}
+[info] +  hosting[fivi360]: Local server: http://127.0.0.1:5000 {"metadata":{"emulator":{"name":"hosting"},"message":"Local server: \u001b[4m\u001b[1mhttp://127.0.0.1:5000\u001b[22m\u001b[24m"}}
+[debug] [2026-08-04T21:36:04.967Z] [Extensions] Connecting Extensions emulator, this is a noop.
+[info] i  functions: Watching "C:\Workspace\01_Products\FIVI360\Software\fivi360\functions" for Cloud Functions... {"metadata":{"emulator":{"name":"functions"},"message":"Watching \"C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\functions\" for Cloud Functions..."}}
+[debug] [2026-08-04T21:36:04.969Z] Validating nodejs source
+[debug] [2026-08-04T21:36:05.487Z] > [functions] package.json contents: {
+  "name": "fivi360-functions",
+  "description": "Cloud Functions for FIVI360",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^7.3.2",
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
+  }
+}
+[debug] [2026-08-04T21:36:05.487Z] Building nodejs source
+[debug] [2026-08-04T21:36:05.487Z] Failed to find version of module node: reached end of search path C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\node_modules
+[info] +  functions: Using node@22 from host. 
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-08-04T21:36:05.490Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-08-04T21:36:05.494Z] Found firebase-functions binary at 'C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\node_modules\.bin\firebase-functions'
+[info] Serving at port 8594
+
+[debug] [2026-08-04T21:36:05.978Z] Got response from /__/functions.yaml {"endpoints":{"processEmailQueue":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"RESEND_API_KEY"}],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"emailQueue/{emailId}"},"retry":false},"entryPoint":"processEmailQueue"},"requestPasswordResetEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"requestPasswordResetEmail"},"completeEmailVerification":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"completeEmailVerification"},"createStripeCheckoutSession":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"createStripeCheckoutSession"},"cancelStripeSubscription":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"cancelStripeSubscription"},"stripeWebhook":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_WEBHOOK_SECRET"},{"key":"STRIPE_SECRET_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"stripeWebhook"},"syncPublicPortfolioAvailability":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"syncPublicPortfolioAvailability"},"repairUserWorkspaceFields":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"repairUserWorkspaceFields"},"getPublicEmbeddedProject":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"httpsTrigger":{},"entryPoint":"getPublicEmbeddedProject"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{},"params":[{"type":"secret","name":"RESEND_API_KEY"},{"type":"secret","name":"STRIPE_SECRET_KEY"},{"type":"secret","name":"STRIPE_WEBHOOK_SECRET"},{"name":"STRIPE_PRICE_PROFESSIONAL","type":"string"},{"name":"STRIPE_PRICE_STUDIO","type":"string","default":""}]}
+[debug] [2026-08-04T21:36:09.020Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
+[debug] [2026-08-04T21:36:09.020Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
+[info] +  functions: Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, completeEmailVerification, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook, syncPublicPortfolioAvailability, repairUserWorkspaceFields, getPublicEmbeddedProject. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, completeEmailVerification, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook, syncPublicPortfolioAvailability, repairUserWorkspaceFields, getPublicEmbeddedProject."}}
+[debug] [2026-08-04T21:36:09.023Z] Found a v2 firestore trigger.
+[debug] [2026-08-04T21:36:09.023Z] addFirestoreTrigger "{\"eventType\":\"google.cloud.firestore.document.v1.created\",\"database\":\"(default)\",\"namespace\":\"(default)\",\"document\":{\"value\":\"emailQueue/{emailId}\",\"matchType\":\"PATH_PATTERN\"}}"
+[debug] [2026-08-04T21:36:09.023Z] >>> [apiv2][query] POST http://127.0.0.1:8080/emulator/v1/projects/fivi360/eventarcTrigger?eventarcTriggerId=southamerica-east1-processEmailQueue-0 [none]
+[debug] [2026-08-04T21:36:09.023Z] >>> [apiv2][body] POST http://127.0.0.1:8080/emulator/v1/projects/fivi360/eventarcTrigger?eventarcTriggerId=southamerica-east1-processEmailQueue-0 "{\"eventType\":\"google.cloud.firestore.document.v1.created\",\"database\":\"(default)\",\"namespace\":\"(default)\",\"document\":{\"value\":\"emailQueue/{emailId}\",\"matchType\":\"PATH_PATTERN\"}}"
+[debug] [2026-08-04T21:36:09.028Z] Aug 04, 2026 6:36:09 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:36:09 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:36:09.111Z] Aug 04, 2026 6:36:09 PM io.grpc.netty.TcpMetrics loadEpollInfo
+INFO: Epoll available during static init of TcpMetrics:false
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:36:09 PM io.grpc.netty.TcpMetrics loadEpollInfo\r\nINFO: Epoll available during static init of TcpMetrics:false\r\n"}}
+[debug] [2026-08-04T21:36:09.120Z] Aug 04, 2026 6:36:09 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:36:09 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:36:10.323Z] <<< [apiv2][status] POST http://127.0.0.1:8080/emulator/v1/projects/fivi360/eventarcTrigger?eventarcTriggerId=southamerica-east1-processEmailQueue-0 200
+[debug] [2026-08-04T21:36:10.323Z] <<< [apiv2][body] POST http://127.0.0.1:8080/emulator/v1/projects/fivi360/eventarcTrigger?eventarcTriggerId=southamerica-east1-processEmailQueue-0 {"eventType":"google.cloud.firestore.document.v1.created","database":"(default)","namespace":"(default)","document":{"value":"emailQueue/{emailId}","matchType":"PATH_PATTERN"}}
+[info] +  functions[southamerica-east1-processEmailQueue]: firestore function initialized. {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mfirestore\u001b[22m function initialized."}}
+[info] +  functions[southamerica-east1-requestPasswordResetEmail]: http function initialized (http://127.0.0.1:5001/fivi360/southamerica-east1/requestPasswordResetEmail). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://127.0.0.1:5001/fivi360/southamerica-east1/requestPasswordResetEmail)."}}
+[info] +  functions[southamerica-east1-completeEmailVerification]: http function initialized (http://127.0.0.1:5001/fivi360/southamerica-east1/completeEmailVerification). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://127.0.0.1:5001/fivi360/southamerica-east1/completeEmailVerification)."}}
+[info] +  functions[southamerica-east1-createStripeCheckoutSession]: http function initialized (http://127.0.0.1:5001/fivi360/southamerica-east1/createStripeCheckoutSession). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://127.0.0.1:5001/fivi360/southamerica-east1/createStripeCheckoutSession)."}}
+[info] +  functions[southamerica-east1-cancelStripeSubscription]: http function initialized (http://127.0.0.1:5001/fivi360/southamerica-east1/cancelStripeSubscription). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://127.0.0.1:5001/fivi360/southamerica-east1/cancelStripeSubscription)."}}
+[info] +  functions[southamerica-east1-stripeWebhook]: http function initialized (http://127.0.0.1:5001/fivi360/southamerica-east1/stripeWebhook). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://127.0.0.1:5001/fivi360/southamerica-east1/stripeWebhook)."}}
+[info] +  functions[southamerica-east1-syncPublicPortfolioAvailability]: http function initialized (http://127.0.0.1:5001/fivi360/southamerica-east1/syncPublicPortfolioAvailability). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://127.0.0.1:5001/fivi360/southamerica-east1/syncPublicPortfolioAvailability)."}}
+[info] +  functions[southamerica-east1-repairUserWorkspaceFields]: http function initialized (http://127.0.0.1:5001/fivi360/southamerica-east1/repairUserWorkspaceFields). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://127.0.0.1:5001/fivi360/southamerica-east1/repairUserWorkspaceFields)."}}
+[info] +  functions[southamerica-east1-getPublicEmbeddedProject]: http function initialized (http://127.0.0.1:5001/fivi360/southamerica-east1/getPublicEmbeddedProject). {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mhttp\u001b[22m function initialized (http://127.0.0.1:5001/fivi360/southamerica-east1/getPublicEmbeddedProject)."}}
+[debug] [2026-08-04T21:36:10.334Z] Could not find VSCode notification endpoint: TypeError: fetch failed. If you are not running the Firebase SQL Connect VSCode extension, this is expected and not an issue.
+[info] 
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+│ i  View Emulator UI at http://127.0.0.1:4000/               │
+└─────────────────────────────────────────────────────────────┘
+
+┌────────────────┬────────────────┬──────────────────────────────────┐
+│ Emulator       │ Host:Port      │ View in Emulator UI              │
+├────────────────┼────────────────┼──────────────────────────────────┤
+│ Authentication │ 127.0.0.1:9099 │ http://127.0.0.1:4000/auth       │
+├────────────────┼────────────────┼──────────────────────────────────┤
+│ Functions      │ 127.0.0.1:5001 │ http://127.0.0.1:4000/functions  │
+├────────────────┼────────────────┼──────────────────────────────────┤
+│ Firestore      │ 127.0.0.1:8080 │ http://127.0.0.1:4000/firestore  │
+├────────────────┼────────────────┼──────────────────────────────────┤
+│ Hosting        │ 127.0.0.1:5000 │ n/a                              │
+├────────────────┼────────────────┼──────────────────────────────────┤
+│ Storage        │ 127.0.0.1:9199 │ http://127.0.0.1:4000/storage    │
+├────────────────┼────────────────┼──────────────────────────────────┤
+│ Extensions     │ 127.0.0.1:5001 │ http://127.0.0.1:4000/extensions │
+└────────────────┴────────────────┴──────────────────────────────────┘
+  Emulator Hub host: 127.0.0.1 port: 4400
+  Other reserved ports: 4500, 9150
+┌─────────────────────────┬───────────────┬─────────────────────┐
+│ Extension Instance Name │ Extension Ref │ View in Emulator UI │
+└─────────────────────────┴───────────────┴─────────────────────┘
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 
+[debug] [2026-08-04T21:36:31.660Z] [work-queue] {"queuedWork":["/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:36:31.660Z"],"queueLength":1,"runningWork":[],"workRunningCount":0}
+[debug] [2026-08-04T21:36:31.661Z] [work-queue] {"queuedWork":[],"queueLength":0,"runningWork":["/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:36:31.660Z"],"workRunningCount":1}
+[debug] [2026-08-04T21:36:31.661Z] Accepted request GET /fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq --> southamerica-east1-getPublicEmbeddedProject
+[debug] [2026-08-04T21:36:31.663Z] [functions] Runtime ready! Sending request! {"metadata":{"emulator":{"name":"functions"},"message":"[functions] Runtime ready! Sending request!"}}
+[debug] [2026-08-04T21:36:31.663Z] [functions] Got req.url=/fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq, mapping to path=/?projectId=sFnkiYkceMH3heyOEshq {"metadata":{"emulator":{"name":"functions"},"message":"[functions] Got req.url=/fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq, mapping to path=/?projectId=sFnkiYkceMH3heyOEshq"}}
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-08-04T21:36:31.722Z] [worker-pool] addWorker(southamerica-east1-getPublicEmbeddedProject) {"metadata":{"emulator":{"name":"functions"},"message":"[worker-pool] addWorker(southamerica-east1-getPublicEmbeddedProject)"}}
+[debug] [2026-08-04T21:36:31.722Z] [worker-pool] Adding worker with key southamerica-east1-getPublicEmbeddedProject, total=1 {"metadata":{"emulator":{"name":"functions"},"message":"[worker-pool] Adding worker with key southamerica-east1-getPublicEmbeddedProject, total=1"}}
+[debug] [2026-08-04T21:36:32.399Z] [runtime-status] [1104] Resolved module firebase-admin {"declared":true,"installed":true,"version":"13.10.0","resolution":"C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\functions\\node_modules\\firebase-admin\\lib\\index.js"} {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[runtime-status] [1104] Resolved module firebase-admin {\"declared\":true,\"installed\":true,\"version\":\"13.10.0\",\"resolution\":\"C:\\\\Workspace\\\\01_Products\\\\FIVI360\\\\Software\\\\fivi360\\\\functions\\\\node_modules\\\\firebase-admin\\\\lib\\\\index.js\"}"}}
+[debug] [2026-08-04T21:36:32.400Z] [runtime-status] [1104] Resolved module firebase-functions {"declared":true,"installed":true,"version":"7.3.2","resolution":"C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\functions\\node_modules\\firebase-functions\\lib\\v2\\index.js"} {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[runtime-status] [1104] Resolved module firebase-functions {\"declared\":true,\"installed\":true,\"version\":\"7.3.2\",\"resolution\":\"C:\\\\Workspace\\\\01_Products\\\\FIVI360\\\\Software\\\\fivi360\\\\functions\\\\node_modules\\\\firebase-functions\\\\lib\\\\v2\\\\index.js\"}"}}
+[debug] [2026-08-04T21:36:32.400Z] [runtime-status] [1104] Outgoing network have been stubbed. [{"name":"http","status":"mocked"},{"name":"http","status":"mocked"},{"name":"https","status":"mocked"},{"name":"https","status":"mocked"},{"name":"net","status":"mocked"}] {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[runtime-status] [1104] Outgoing network have been stubbed. [{\"name\":\"http\",\"status\":\"mocked\"},{\"name\":\"http\",\"status\":\"mocked\"},{\"name\":\"https\",\"status\":\"mocked\"},{\"name\":\"https\",\"status\":\"mocked\"},{\"name\":\"net\",\"status\":\"mocked\"}]"}}
+[debug] [2026-08-04T21:36:32.400Z] [runtime-status] [1104] Resolved module firebase-functions {"declared":true,"installed":true,"version":"7.3.2","resolution":"C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\functions\\node_modules\\firebase-functions\\lib\\v2\\index.js"} {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[runtime-status] [1104] Resolved module firebase-functions {\"declared\":true,\"installed\":true,\"version\":\"7.3.2\",\"resolution\":\"C:\\\\Workspace\\\\01_Products\\\\FIVI360\\\\Software\\\\fivi360\\\\functions\\\\node_modules\\\\firebase-functions\\\\lib\\\\v2\\\\index.js\"}"}}
+[debug] [2026-08-04T21:36:32.401Z] [runtime-status] [1104] Detected firebase-functions v7+, skipping legacy stubs. {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[runtime-status] [1104] Detected firebase-functions v7+, skipping legacy stubs."}}
+[debug] [2026-08-04T21:36:32.401Z] [runtime-status] [1104] Resolved module firebase-admin {"declared":true,"installed":true,"version":"13.10.0","resolution":"C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\functions\\node_modules\\firebase-admin\\lib\\index.js"} {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[runtime-status] [1104] Resolved module firebase-admin {\"declared\":true,\"installed\":true,\"version\":\"13.10.0\",\"resolution\":\"C:\\\\Workspace\\\\01_Products\\\\FIVI360\\\\Software\\\\fivi360\\\\functions\\\\node_modules\\\\firebase-admin\\\\lib\\\\index.js\"}"}}
+[debug] [2026-08-04T21:36:32.620Z] [runtime-status] [1104] Resolved module firebase-functions {"declared":true,"installed":true,"version":"7.3.2","resolution":"C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\functions\\node_modules\\firebase-functions\\lib\\v2\\index.js"} {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[runtime-status] [1104] Resolved module firebase-functions {\"declared\":true,\"installed\":true,\"version\":\"7.3.2\",\"resolution\":\"C:\\\\Workspace\\\\01_Products\\\\FIVI360\\\\Software\\\\fivi360\\\\functions\\\\node_modules\\\\firebase-functions\\\\lib\\\\v2\\\\index.js\"}"}}
+[debug] [2026-08-04T21:36:32.795Z] [runtime-status] [1104] firebase-admin has been stubbed. {"adminResolution":{"declared":true,"installed":true,"version":"13.10.0","resolution":"C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\functions\\node_modules\\firebase-admin\\lib\\index.js"}} {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[runtime-status] [1104] firebase-admin has been stubbed. {\"adminResolution\":{\"declared\":true,\"installed\":true,\"version\":\"13.10.0\",\"resolution\":\"C:\\\\Workspace\\\\01_Products\\\\FIVI360\\\\Software\\\\fivi360\\\\functions\\\\node_modules\\\\firebase-admin\\\\lib\\\\index.js\"}}"}}
+[debug] [2026-08-04T21:36:32.878Z] [runtime-status] [1104] Functions runtime initialized. {"cwd":"C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\functions","node_version":"22.23.1"} {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[runtime-status] [1104] Functions runtime initialized. {\"cwd\":\"C:\\\\Workspace\\\\01_Products\\\\FIVI360\\\\Software\\\\fivi360\\\\functions\",\"node_version\":\"22.23.1\"}"}}
+[debug] [2026-08-04T21:36:32.879Z] [runtime-status] [1104] Listening to port: \\?\pipe\fire_emu_d719341cd3ed043a {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[runtime-status] [1104] Listening to port: \\\\?\\pipe\\fire_emu_d719341cd3ed043a"}}
+[debug] [2026-08-04T21:36:32.908Z] [worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: IDLE {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: IDLE"}}
+[debug] [2026-08-04T21:36:32.908Z] [worker-pool] submitRequest(triggerId=southamerica-east1-getPublicEmbeddedProject) {"metadata":{"emulator":{"name":"functions"},"message":"[worker-pool] submitRequest(triggerId=southamerica-east1-getPublicEmbeddedProject)"}}
+[info] i  functions: Beginning execution of "southamerica-east1-getPublicEmbeddedProject" {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Beginning execution of \"southamerica-east1-getPublicEmbeddedProject\""}}
+[debug] [2026-08-04T21:36:32.910Z] [worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: BUSY {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: BUSY"}}
+[debug] [2026-08-04T21:36:36.745Z] Aug 04, 2026 6:36:36 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:36:36 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:36:37.563Z] Aug 04, 2026 6:36:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:36:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:36:37.565Z] Aug 04, 2026 6:36:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:36:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:36:37.944Z] Aug 04, 2026 6:36:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:36:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:36:37.945Z] Aug 04, 2026 6:36:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:36:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:36:37.968Z] Aug 04, 2026 6:36:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:36:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:36:37.972Z] Aug 04, 2026 6:36:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:36:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:36:38.063Z] Aug 04, 2026 6:36:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:36:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:36:38.082Z] Aug 04, 2026 6:36:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:36:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:36:38.644Z] Aug 04, 2026 6:36:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:36:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:36:40.250Z] Aug 04, 2026 6:36:40 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:36:40 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:36:40.286Z] Aug 04, 2026 6:36:40 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:36:40 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:36:40.387Z] Aug 04, 2026 6:36:40 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:36:40 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:36:40.403Z] Aug 04, 2026 6:36:40 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:36:40 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:36:40.488Z] Aug 04, 2026 6:36:40 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:36:40 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:36:40.501Z] Aug 04, 2026 6:36:40 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:36:40 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:36:40.560Z] Aug 04, 2026 6:36:40 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:36:40 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:36:40.575Z] Aug 04, 2026 6:36:40 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:36:40 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:36:41.901Z] Aug 04, 2026 6:36:41 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:36:41 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:36:41.930Z] Aug 04, 2026 6:36:41 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:36:41 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:36:41.963Z] Aug 04, 2026 6:36:41 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:36:41 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:36:41.976Z] Aug 04, 2026 6:36:41 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:36:41 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:36:42.035Z] Aug 04, 2026 6:36:42 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:36:42 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:36:42.049Z] Aug 04, 2026 6:36:42 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:36:42 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:36:44.451Z] [work-queue] {"queuedWork":["/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:36:44.450Z"],"queueLength":1,"runningWork":["/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:36:31.660Z"],"workRunningCount":1}
+[debug] [2026-08-04T21:36:44.451Z] [work-queue] {"queuedWork":[],"queueLength":0,"runningWork":["/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:36:31.660Z","/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:36:44.450Z"],"workRunningCount":2}
+[debug] [2026-08-04T21:36:44.451Z] Accepted request GET /fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq --> southamerica-east1-getPublicEmbeddedProject
+[debug] [2026-08-04T21:36:44.452Z] [functions] Runtime ready! Sending request! {"metadata":{"emulator":{"name":"functions"},"message":"[functions] Runtime ready! Sending request!"}}
+[debug] [2026-08-04T21:36:44.452Z] [functions] Got req.url=/fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq, mapping to path=/?projectId=sFnkiYkceMH3heyOEshq {"metadata":{"emulator":{"name":"functions"},"message":"[functions] Got req.url=/fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq, mapping to path=/?projectId=sFnkiYkceMH3heyOEshq"}}
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-08-04T21:36:44.469Z] [worker-pool] addWorker(southamerica-east1-getPublicEmbeddedProject) {"metadata":{"emulator":{"name":"functions"},"message":"[worker-pool] addWorker(southamerica-east1-getPublicEmbeddedProject)"}}
+[debug] [2026-08-04T21:36:44.469Z] [worker-pool] Adding worker with key southamerica-east1-getPublicEmbeddedProject, total=2 {"metadata":{"emulator":{"name":"functions"},"message":"[worker-pool] Adding worker with key southamerica-east1-getPublicEmbeddedProject, total=2"}}
+[debug] [2026-08-04T21:36:45.125Z] [runtime-status] [23368] Resolved module firebase-admin {"declared":true,"installed":true,"version":"13.10.0","resolution":"C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\functions\\node_modules\\firebase-admin\\lib\\index.js"} {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[runtime-status] [23368] Resolved module firebase-admin {\"declared\":true,\"installed\":true,\"version\":\"13.10.0\",\"resolution\":\"C:\\\\Workspace\\\\01_Products\\\\FIVI360\\\\Software\\\\fivi360\\\\functions\\\\node_modules\\\\firebase-admin\\\\lib\\\\index.js\"}"}}
+[debug] [2026-08-04T21:36:45.126Z] [runtime-status] [23368] Resolved module firebase-functions {"declared":true,"installed":true,"version":"7.3.2","resolution":"C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\functions\\node_modules\\firebase-functions\\lib\\v2\\index.js"} {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[runtime-status] [23368] Resolved module firebase-functions {\"declared\":true,\"installed\":true,\"version\":\"7.3.2\",\"resolution\":\"C:\\\\Workspace\\\\01_Products\\\\FIVI360\\\\Software\\\\fivi360\\\\functions\\\\node_modules\\\\firebase-functions\\\\lib\\\\v2\\\\index.js\"}"}}
+[debug] [2026-08-04T21:36:45.126Z] [runtime-status] [23368] Outgoing network have been stubbed. [{"name":"http","status":"mocked"},{"name":"http","status":"mocked"},{"name":"https","status":"mocked"},{"name":"https","status":"mocked"},{"name":"net","status":"mocked"}] {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[runtime-status] [23368] Outgoing network have been stubbed. [{\"name\":\"http\",\"status\":\"mocked\"},{\"name\":\"http\",\"status\":\"mocked\"},{\"name\":\"https\",\"status\":\"mocked\"},{\"name\":\"https\",\"status\":\"mocked\"},{\"name\":\"net\",\"status\":\"mocked\"}]"}}
+[debug] [2026-08-04T21:36:45.126Z] [runtime-status] [23368] Resolved module firebase-functions {"declared":true,"installed":true,"version":"7.3.2","resolution":"C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\functions\\node_modules\\firebase-functions\\lib\\v2\\index.js"} {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[runtime-status] [23368] Resolved module firebase-functions {\"declared\":true,\"installed\":true,\"version\":\"7.3.2\",\"resolution\":\"C:\\\\Workspace\\\\01_Products\\\\FIVI360\\\\Software\\\\fivi360\\\\functions\\\\node_modules\\\\firebase-functions\\\\lib\\\\v2\\\\index.js\"}"}}
+[debug] [2026-08-04T21:36:45.127Z] [runtime-status] [23368] Detected firebase-functions v7+, skipping legacy stubs. {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[runtime-status] [23368] Detected firebase-functions v7+, skipping legacy stubs."}}
+[debug] [2026-08-04T21:36:45.127Z] [runtime-status] [23368] Resolved module firebase-admin {"declared":true,"installed":true,"version":"13.10.0","resolution":"C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\functions\\node_modules\\firebase-admin\\lib\\index.js"} {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[runtime-status] [23368] Resolved module firebase-admin {\"declared\":true,\"installed\":true,\"version\":\"13.10.0\",\"resolution\":\"C:\\\\Workspace\\\\01_Products\\\\FIVI360\\\\Software\\\\fivi360\\\\functions\\\\node_modules\\\\firebase-admin\\\\lib\\\\index.js\"}"}}
+[debug] [2026-08-04T21:36:45.167Z] [runtime-status] [23368] Resolved module firebase-functions {"declared":true,"installed":true,"version":"7.3.2","resolution":"C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\functions\\node_modules\\firebase-functions\\lib\\v2\\index.js"} {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[runtime-status] [23368] Resolved module firebase-functions {\"declared\":true,\"installed\":true,\"version\":\"7.3.2\",\"resolution\":\"C:\\\\Workspace\\\\01_Products\\\\FIVI360\\\\Software\\\\fivi360\\\\functions\\\\node_modules\\\\firebase-functions\\\\lib\\\\v2\\\\index.js\"}"}}
+[debug] [2026-08-04T21:36:45.341Z] [runtime-status] [23368] firebase-admin has been stubbed. {"adminResolution":{"declared":true,"installed":true,"version":"13.10.0","resolution":"C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\functions\\node_modules\\firebase-admin\\lib\\index.js"}} {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[runtime-status] [23368] firebase-admin has been stubbed. {\"adminResolution\":{\"declared\":true,\"installed\":true,\"version\":\"13.10.0\",\"resolution\":\"C:\\\\Workspace\\\\01_Products\\\\FIVI360\\\\Software\\\\fivi360\\\\functions\\\\node_modules\\\\firebase-admin\\\\lib\\\\index.js\"}}"}}
+[debug] [2026-08-04T21:36:45.425Z] [runtime-status] [23368] Functions runtime initialized. {"cwd":"C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\functions","node_version":"22.23.1"} {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[runtime-status] [23368] Functions runtime initialized. {\"cwd\":\"C:\\\\Workspace\\\\01_Products\\\\FIVI360\\\\Software\\\\fivi360\\\\functions\",\"node_version\":\"22.23.1\"}"}}
+[debug] [2026-08-04T21:36:45.426Z] [runtime-status] [23368] Listening to port: \\?\pipe\fire_emu_85b78bd04fbdb8e6 {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[runtime-status] [23368] Listening to port: \\\\?\\pipe\\fire_emu_85b78bd04fbdb8e6"}}
+[debug] [2026-08-04T21:36:45.430Z] [worker-southamerica-east1-getPublicEmbeddedProject-ffa700a9-f6e9-42c1-b665-c5a0f54238d8]: IDLE {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[worker-southamerica-east1-getPublicEmbeddedProject-ffa700a9-f6e9-42c1-b665-c5a0f54238d8]: IDLE"}}
+[debug] [2026-08-04T21:36:45.430Z] [worker-pool] submitRequest(triggerId=southamerica-east1-getPublicEmbeddedProject) {"metadata":{"emulator":{"name":"functions"},"message":"[worker-pool] submitRequest(triggerId=southamerica-east1-getPublicEmbeddedProject)"}}
+[info] i  functions: Beginning execution of "southamerica-east1-getPublicEmbeddedProject" {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Beginning execution of \"southamerica-east1-getPublicEmbeddedProject\""}}
+[debug] [2026-08-04T21:36:45.431Z] [worker-southamerica-east1-getPublicEmbeddedProject-ffa700a9-f6e9-42c1-b665-c5a0f54238d8]: BUSY {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[worker-southamerica-east1-getPublicEmbeddedProject-ffa700a9-f6e9-42c1-b665-c5a0f54238d8]: BUSY"}}
+[debug] [2026-08-04T21:36:46.015Z] Aug 04, 2026 6:36:46 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel
+INFO: Connected to new websocket client
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:36:46 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel\r\nINFO: Connected to new websocket client\r\n"}}
+[debug] [2026-08-04T21:36:48.500Z] Aug 04, 2026 6:36:48 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:36:48 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:36:48.551Z] Aug 04, 2026 6:36:48 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:36:48 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:36:48.674Z] Finishing up request with event=pause {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=pause"}}
+[info] i  functions: Finished "southamerica-east1-getPublicEmbeddedProject" in 3242.6071ms {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finished \"southamerica-east1-getPublicEmbeddedProject\" in 3242.6071ms"}}
+[debug] [2026-08-04T21:36:48.675Z] [worker-southamerica-east1-getPublicEmbeddedProject-ffa700a9-f6e9-42c1-b665-c5a0f54238d8]: IDLE {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[worker-southamerica-east1-getPublicEmbeddedProject-ffa700a9-f6e9-42c1-b665-c5a0f54238d8]: IDLE"}}
+[debug] [2026-08-04T21:36:48.675Z] Finishing up request with event=finish {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=finish"}}
+[debug] [2026-08-04T21:36:48.675Z] Finishing up request with event=close {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=close"}}
+[debug] [2026-08-04T21:36:48.676Z] [work-queue] {"queuedWork":[],"queueLength":0,"runningWork":["/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:36:31.660Z"],"workRunningCount":1}
+[debug] [2026-08-04T21:36:48.677Z] [work-queue] {"queuedWork":["/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:36:48.677Z"],"queueLength":1,"runningWork":["/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:36:31.660Z"],"workRunningCount":1}
+[debug] [2026-08-04T21:36:48.677Z] [work-queue] {"queuedWork":[],"queueLength":0,"runningWork":["/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:36:31.660Z","/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:36:48.677Z"],"workRunningCount":2}
+[debug] [2026-08-04T21:36:48.677Z] Accepted request GET /fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq --> southamerica-east1-getPublicEmbeddedProject
+[debug] [2026-08-04T21:36:48.679Z] [functions] Runtime ready! Sending request! {"metadata":{"emulator":{"name":"functions"},"message":"[functions] Runtime ready! Sending request!"}}
+[debug] [2026-08-04T21:36:48.679Z] [functions] Got req.url=/fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq, mapping to path=/?projectId=sFnkiYkceMH3heyOEshq {"metadata":{"emulator":{"name":"functions"},"message":"[functions] Got req.url=/fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq, mapping to path=/?projectId=sFnkiYkceMH3heyOEshq"}}
+[debug] [2026-08-04T21:36:48.679Z] [worker-pool] submitRequest(triggerId=southamerica-east1-getPublicEmbeddedProject) {"metadata":{"emulator":{"name":"functions"},"message":"[worker-pool] submitRequest(triggerId=southamerica-east1-getPublicEmbeddedProject)"}}
+[info] i  functions: Beginning execution of "southamerica-east1-getPublicEmbeddedProject" {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Beginning execution of \"southamerica-east1-getPublicEmbeddedProject\""}}
+[debug] [2026-08-04T21:36:48.680Z] [worker-southamerica-east1-getPublicEmbeddedProject-ffa700a9-f6e9-42c1-b665-c5a0f54238d8]: BUSY {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[worker-southamerica-east1-getPublicEmbeddedProject-ffa700a9-f6e9-42c1-b665-c5a0f54238d8]: BUSY"}}
+[debug] [2026-08-04T21:36:48.686Z] Finishing up request with event=pause {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=pause"}}
+[info] i  functions: Finished "southamerica-east1-getPublicEmbeddedProject" in 15776.6503ms {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finished \"southamerica-east1-getPublicEmbeddedProject\" in 15776.6503ms"}}
+[debug] [2026-08-04T21:36:48.688Z] [worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: IDLE {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: IDLE"}}
+[debug] [2026-08-04T21:36:48.689Z] Finishing up request with event=close {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=close"}}
+[debug] [2026-08-04T21:36:48.690Z] [work-queue] {"queuedWork":[],"queueLength":0,"runningWork":["/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:36:48.677Z"],"workRunningCount":1}
+[debug] [2026-08-04T21:36:48.760Z] Finishing up request with event=pause {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=pause"}}
+[info] i  functions: Finished "southamerica-east1-getPublicEmbeddedProject" in 80.015ms {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finished \"southamerica-east1-getPublicEmbeddedProject\" in 80.015ms"}}
+[debug] [2026-08-04T21:36:48.761Z] [worker-southamerica-east1-getPublicEmbeddedProject-ffa700a9-f6e9-42c1-b665-c5a0f54238d8]: IDLE {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[worker-southamerica-east1-getPublicEmbeddedProject-ffa700a9-f6e9-42c1-b665-c5a0f54238d8]: IDLE"}}
+[debug] [2026-08-04T21:36:48.762Z] Finishing up request with event=finish {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=finish"}}
+[debug] [2026-08-04T21:36:48.762Z] Finishing up request with event=close {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=close"}}
+[debug] [2026-08-04T21:36:48.762Z] [work-queue] {"queuedWork":[],"queueLength":0,"runningWork":[],"workRunningCount":0}
+[debug] [2026-08-04T21:36:48.764Z] [work-queue] {"queuedWork":["/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:36:48.764Z"],"queueLength":1,"runningWork":[],"workRunningCount":0}
+[debug] [2026-08-04T21:36:48.764Z] [work-queue] {"queuedWork":[],"queueLength":0,"runningWork":["/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:36:48.764Z"],"workRunningCount":1}
+[debug] [2026-08-04T21:36:48.764Z] Accepted request GET /fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq --> southamerica-east1-getPublicEmbeddedProject
+[debug] [2026-08-04T21:36:48.766Z] [functions] Runtime ready! Sending request! {"metadata":{"emulator":{"name":"functions"},"message":"[functions] Runtime ready! Sending request!"}}
+[debug] [2026-08-04T21:36:48.766Z] [functions] Got req.url=/fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq, mapping to path=/?projectId=sFnkiYkceMH3heyOEshq {"metadata":{"emulator":{"name":"functions"},"message":"[functions] Got req.url=/fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq, mapping to path=/?projectId=sFnkiYkceMH3heyOEshq"}}
+[debug] [2026-08-04T21:36:48.766Z] [worker-pool] submitRequest(triggerId=southamerica-east1-getPublicEmbeddedProject) {"metadata":{"emulator":{"name":"functions"},"message":"[worker-pool] submitRequest(triggerId=southamerica-east1-getPublicEmbeddedProject)"}}
+[info] i  functions: Beginning execution of "southamerica-east1-getPublicEmbeddedProject" {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Beginning execution of \"southamerica-east1-getPublicEmbeddedProject\""}}
+[debug] [2026-08-04T21:36:48.768Z] [worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: BUSY {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: BUSY"}}
+[debug] [2026-08-04T21:36:48.862Z] Finishing up request with event=pause {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=pause"}}
+[info] i  functions: Finished "southamerica-east1-getPublicEmbeddedProject" in 94.3075ms {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finished \"southamerica-east1-getPublicEmbeddedProject\" in 94.3075ms"}}
+[debug] [2026-08-04T21:36:48.864Z] [worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: IDLE {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: IDLE"}}
+[debug] [2026-08-04T21:36:48.864Z] Finishing up request with event=finish {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=finish"}}
+[debug] [2026-08-04T21:36:48.864Z] Finishing up request with event=close {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=close"}}
+[debug] [2026-08-04T21:36:48.865Z] [work-queue] {"queuedWork":[],"queueLength":0,"runningWork":[],"workRunningCount":0}
+[debug] [2026-08-04T21:36:48.868Z] [work-queue] {"queuedWork":["/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:36:48.868Z"],"queueLength":1,"runningWork":[],"workRunningCount":0}
+[debug] [2026-08-04T21:36:48.868Z] [work-queue] {"queuedWork":[],"queueLength":0,"runningWork":["/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:36:48.868Z"],"workRunningCount":1}
+[debug] [2026-08-04T21:36:48.868Z] Accepted request GET /fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq --> southamerica-east1-getPublicEmbeddedProject
+[debug] [2026-08-04T21:36:48.870Z] [functions] Runtime ready! Sending request! {"metadata":{"emulator":{"name":"functions"},"message":"[functions] Runtime ready! Sending request!"}}
+[debug] [2026-08-04T21:36:48.871Z] [functions] Got req.url=/fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq, mapping to path=/?projectId=sFnkiYkceMH3heyOEshq {"metadata":{"emulator":{"name":"functions"},"message":"[functions] Got req.url=/fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq, mapping to path=/?projectId=sFnkiYkceMH3heyOEshq"}}
+[debug] [2026-08-04T21:36:48.871Z] [worker-pool] submitRequest(triggerId=southamerica-east1-getPublicEmbeddedProject) {"metadata":{"emulator":{"name":"functions"},"message":"[worker-pool] submitRequest(triggerId=southamerica-east1-getPublicEmbeddedProject)"}}
+[info] i  functions: Beginning execution of "southamerica-east1-getPublicEmbeddedProject" {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Beginning execution of \"southamerica-east1-getPublicEmbeddedProject\""}}
+[debug] [2026-08-04T21:36:48.873Z] [worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: BUSY {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: BUSY"}}
+[debug] [2026-08-04T21:36:48.945Z] Finishing up request with event=pause {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=pause"}}
+[info] i  functions: Finished "southamerica-east1-getPublicEmbeddedProject" in 72.7829ms {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finished \"southamerica-east1-getPublicEmbeddedProject\" in 72.7829ms"}}
+[debug] [2026-08-04T21:36:48.946Z] [worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: IDLE {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: IDLE"}}
+[debug] [2026-08-04T21:36:48.947Z] Finishing up request with event=finish {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=finish"}}
+[debug] [2026-08-04T21:36:48.947Z] Finishing up request with event=close {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=close"}}
+[debug] [2026-08-04T21:36:48.947Z] [work-queue] {"queuedWork":[],"queueLength":0,"runningWork":[],"workRunningCount":0}
+[debug] [2026-08-04T21:37:07.023Z] Aug 04, 2026 6:37:07 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler channelClosed
+INFO: Websocket client disconnected
+Aug 04, 2026 6:37:07 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel
+INFO: Connected to new websocket client
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:37:07 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler channelClosed\r\nINFO: Websocket client disconnected\r\nAug 04, 2026 6:37:07 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel\r\nINFO: Connected to new websocket client\r\n"}}
+[debug] [2026-08-04T21:37:42.077Z] Aug 04, 2026 6:37:42 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:37:42 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:37:43.006Z] Aug 04, 2026 6:37:43 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:37:43 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:37:43.010Z] Aug 04, 2026 6:37:43 PM com.google.cloud.datastore.emulator.firestore.webchannel.FirestoreV1WebChannelAdapter$FirestoreListenHandler onClose
+INFO: channel closed
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:37:43 PM com.google.cloud.datastore.emulator.firestore.webchannel.FirestoreV1WebChannelAdapter$FirestoreListenHandler onClose\r\nINFO: channel closed\r\n"}}
+[debug] [2026-08-04T21:38:27.747Z] Aug 04, 2026 6:38:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:27.788Z] Aug 04, 2026 6:38:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:27.803Z] Aug 04, 2026 6:38:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:27.817Z] Aug 04, 2026 6:38:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:27.863Z] Aug 04, 2026 6:38:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:27.877Z] Aug 04, 2026 6:38:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:27.915Z] Aug 04, 2026 6:38:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:27.915Z] Aug 04, 2026 6:38:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:27.972Z] Aug 04, 2026 6:38:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:27.989Z] Aug 04, 2026 6:38:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:28.102Z] Aug 04, 2026 6:38:28 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:28 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:28.150Z] Aug 04, 2026 6:38:28 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:28 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:28.181Z] Aug 04, 2026 6:38:28 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:28 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:28.220Z] Aug 04, 2026 6:38:28 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:28 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:28.231Z] Aug 04, 2026 6:38:28 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:28 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:28.295Z] Aug 04, 2026 6:38:28 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:28 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:28.308Z] Aug 04, 2026 6:38:28 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:28 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:32.329Z] [work-queue] {"queuedWork":["/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:38:32.329Z"],"queueLength":1,"runningWork":[],"workRunningCount":0}
+[debug] [2026-08-04T21:38:32.329Z] [work-queue] {"queuedWork":[],"queueLength":0,"runningWork":["/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:38:32.329Z"],"workRunningCount":1}
+[debug] [2026-08-04T21:38:32.329Z] Accepted request GET /fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq --> southamerica-east1-getPublicEmbeddedProject
+[debug] [2026-08-04T21:38:32.330Z] [functions] Runtime ready! Sending request! {"metadata":{"emulator":{"name":"functions"},"message":"[functions] Runtime ready! Sending request!"}}
+[debug] [2026-08-04T21:38:32.330Z] [functions] Got req.url=/fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq, mapping to path=/?projectId=sFnkiYkceMH3heyOEshq {"metadata":{"emulator":{"name":"functions"},"message":"[functions] Got req.url=/fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq, mapping to path=/?projectId=sFnkiYkceMH3heyOEshq"}}
+[debug] [2026-08-04T21:38:32.330Z] [worker-pool] submitRequest(triggerId=southamerica-east1-getPublicEmbeddedProject) {"metadata":{"emulator":{"name":"functions"},"message":"[worker-pool] submitRequest(triggerId=southamerica-east1-getPublicEmbeddedProject)"}}
+[info] i  functions: Beginning execution of "southamerica-east1-getPublicEmbeddedProject" {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Beginning execution of \"southamerica-east1-getPublicEmbeddedProject\""}}
+[debug] [2026-08-04T21:38:32.332Z] [worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: BUSY {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: BUSY"}}
+[debug] [2026-08-04T21:38:32.358Z] Finishing up request with event=pause {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=pause"}}
+[info] i  functions: Finished "southamerica-east1-getPublicEmbeddedProject" in 26.1894ms {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finished \"southamerica-east1-getPublicEmbeddedProject\" in 26.1894ms"}}
+[debug] [2026-08-04T21:38:32.360Z] [worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: IDLE {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: IDLE"}}
+[debug] [2026-08-04T21:38:32.360Z] Finishing up request with event=finish {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=finish"}}
+[debug] [2026-08-04T21:38:32.360Z] Finishing up request with event=close {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=close"}}
+[debug] [2026-08-04T21:38:32.360Z] [work-queue] {"queuedWork":[],"queueLength":0,"runningWork":[],"workRunningCount":0}
+[debug] [2026-08-04T21:38:32.361Z] [work-queue] {"queuedWork":["/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:38:32.361Z"],"queueLength":1,"runningWork":[],"workRunningCount":0}
+[debug] [2026-08-04T21:38:32.361Z] [work-queue] {"queuedWork":[],"queueLength":0,"runningWork":["/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:38:32.361Z"],"workRunningCount":1}
+[debug] [2026-08-04T21:38:32.361Z] Accepted request GET /fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq --> southamerica-east1-getPublicEmbeddedProject
+[debug] [2026-08-04T21:38:32.363Z] [functions] Runtime ready! Sending request! {"metadata":{"emulator":{"name":"functions"},"message":"[functions] Runtime ready! Sending request!"}}
+[debug] [2026-08-04T21:38:32.363Z] [functions] Got req.url=/fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq, mapping to path=/?projectId=sFnkiYkceMH3heyOEshq {"metadata":{"emulator":{"name":"functions"},"message":"[functions] Got req.url=/fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq, mapping to path=/?projectId=sFnkiYkceMH3heyOEshq"}}
+[debug] [2026-08-04T21:38:32.363Z] [worker-pool] submitRequest(triggerId=southamerica-east1-getPublicEmbeddedProject) {"metadata":{"emulator":{"name":"functions"},"message":"[worker-pool] submitRequest(triggerId=southamerica-east1-getPublicEmbeddedProject)"}}
+[info] i  functions: Beginning execution of "southamerica-east1-getPublicEmbeddedProject" {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Beginning execution of \"southamerica-east1-getPublicEmbeddedProject\""}}
+[debug] [2026-08-04T21:38:32.364Z] [worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: BUSY {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: BUSY"}}
+[debug] [2026-08-04T21:38:32.391Z] Finishing up request with event=pause {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=pause"}}
+[info] i  functions: Finished "southamerica-east1-getPublicEmbeddedProject" in 27.2557ms {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finished \"southamerica-east1-getPublicEmbeddedProject\" in 27.2557ms"}}
+[debug] [2026-08-04T21:38:32.392Z] [worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: IDLE {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: IDLE"}}
+[debug] [2026-08-04T21:38:32.393Z] Finishing up request with event=finish {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=finish"}}
+[debug] [2026-08-04T21:38:32.393Z] Finishing up request with event=close {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=close"}}
+[debug] [2026-08-04T21:38:32.393Z] [work-queue] {"queuedWork":[],"queueLength":0,"runningWork":[],"workRunningCount":0}
+[debug] [2026-08-04T21:38:37.160Z] Aug 04, 2026 6:38:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:37.188Z] Aug 04, 2026 6:38:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:37.218Z] Aug 04, 2026 6:38:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:37.229Z] Aug 04, 2026 6:38:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:37.268Z] Aug 04, 2026 6:38:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:37.282Z] Aug 04, 2026 6:38:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:37.314Z] Aug 04, 2026 6:38:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:37.314Z] Aug 04, 2026 6:38:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:37.364Z] Aug 04, 2026 6:38:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:37.413Z] Aug 04, 2026 6:38:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:37.440Z] Aug 04, 2026 6:38:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:37.497Z] Aug 04, 2026 6:38:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:37.511Z] Aug 04, 2026 6:38:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:37.558Z] Aug 04, 2026 6:38:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:37.571Z] Aug 04, 2026 6:38:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:41.348Z] [work-queue] {"queuedWork":["/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:38:41.348Z"],"queueLength":1,"runningWork":[],"workRunningCount":0}
+[debug] [2026-08-04T21:38:41.348Z] [work-queue] {"queuedWork":[],"queueLength":0,"runningWork":["/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:38:41.348Z"],"workRunningCount":1}
+[debug] [2026-08-04T21:38:41.348Z] Accepted request GET /fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq --> southamerica-east1-getPublicEmbeddedProject
+[debug] [2026-08-04T21:38:41.349Z] [functions] Runtime ready! Sending request! {"metadata":{"emulator":{"name":"functions"},"message":"[functions] Runtime ready! Sending request!"}}
+[debug] [2026-08-04T21:38:41.350Z] [functions] Got req.url=/fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq, mapping to path=/?projectId=sFnkiYkceMH3heyOEshq {"metadata":{"emulator":{"name":"functions"},"message":"[functions] Got req.url=/fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq, mapping to path=/?projectId=sFnkiYkceMH3heyOEshq"}}
+[debug] [2026-08-04T21:38:41.350Z] [worker-pool] submitRequest(triggerId=southamerica-east1-getPublicEmbeddedProject) {"metadata":{"emulator":{"name":"functions"},"message":"[worker-pool] submitRequest(triggerId=southamerica-east1-getPublicEmbeddedProject)"}}
+[info] i  functions: Beginning execution of "southamerica-east1-getPublicEmbeddedProject" {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Beginning execution of \"southamerica-east1-getPublicEmbeddedProject\""}}
+[debug] [2026-08-04T21:38:41.351Z] [worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: BUSY {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: BUSY"}}
+[debug] [2026-08-04T21:38:41.412Z] Finishing up request with event=pause {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=pause"}}
+[info] i  functions: Finished "southamerica-east1-getPublicEmbeddedProject" in 62.0107ms {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finished \"southamerica-east1-getPublicEmbeddedProject\" in 62.0107ms"}}
+[debug] [2026-08-04T21:38:41.415Z] [worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: IDLE {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: IDLE"}}
+[debug] [2026-08-04T21:38:41.415Z] Finishing up request with event=finish {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=finish"}}
+[debug] [2026-08-04T21:38:41.415Z] Finishing up request with event=close {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=close"}}
+[debug] [2026-08-04T21:38:41.415Z] [work-queue] {"queuedWork":[],"queueLength":0,"runningWork":[],"workRunningCount":0}
+[debug] [2026-08-04T21:38:41.416Z] [work-queue] {"queuedWork":["/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:38:41.416Z"],"queueLength":1,"runningWork":[],"workRunningCount":0}
+[debug] [2026-08-04T21:38:41.417Z] [work-queue] {"queuedWork":[],"queueLength":0,"runningWork":["/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:38:41.416Z"],"workRunningCount":1}
+[debug] [2026-08-04T21:38:41.417Z] Accepted request GET /fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq --> southamerica-east1-getPublicEmbeddedProject
+[debug] [2026-08-04T21:38:41.418Z] [functions] Runtime ready! Sending request! {"metadata":{"emulator":{"name":"functions"},"message":"[functions] Runtime ready! Sending request!"}}
+[debug] [2026-08-04T21:38:41.418Z] [functions] Got req.url=/fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq, mapping to path=/?projectId=sFnkiYkceMH3heyOEshq {"metadata":{"emulator":{"name":"functions"},"message":"[functions] Got req.url=/fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq, mapping to path=/?projectId=sFnkiYkceMH3heyOEshq"}}
+[debug] [2026-08-04T21:38:41.418Z] [worker-pool] submitRequest(triggerId=southamerica-east1-getPublicEmbeddedProject) {"metadata":{"emulator":{"name":"functions"},"message":"[worker-pool] submitRequest(triggerId=southamerica-east1-getPublicEmbeddedProject)"}}
+[info] i  functions: Beginning execution of "southamerica-east1-getPublicEmbeddedProject" {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Beginning execution of \"southamerica-east1-getPublicEmbeddedProject\""}}
+[debug] [2026-08-04T21:38:41.420Z] [worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: BUSY {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: BUSY"}}
+[debug] [2026-08-04T21:38:41.485Z] Finishing up request with event=pause {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=pause"}}
+[info] i  functions: Finished "southamerica-east1-getPublicEmbeddedProject" in 65.7234ms {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finished \"southamerica-east1-getPublicEmbeddedProject\" in 65.7234ms"}}
+[debug] [2026-08-04T21:38:41.487Z] [worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: IDLE {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: IDLE"}}
+[debug] [2026-08-04T21:38:41.487Z] Finishing up request with event=finish {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=finish"}}
+[debug] [2026-08-04T21:38:41.487Z] Finishing up request with event=close {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=close"}}
+[debug] [2026-08-04T21:38:41.488Z] [work-queue] {"queuedWork":[],"queueLength":0,"runningWork":[],"workRunningCount":0}
+[debug] [2026-08-04T21:38:49.679Z] Aug 04, 2026 6:38:49 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:49 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:49.701Z] Aug 04, 2026 6:38:49 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:49 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:49.744Z] Aug 04, 2026 6:38:49 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:49 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:49.753Z] Aug 04, 2026 6:38:49 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:49 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:49.801Z] Aug 04, 2026 6:38:49 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:49 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:49.832Z] Aug 04, 2026 6:38:49 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:49 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:49.855Z] Aug 04, 2026 6:38:49 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+Aug 04, 2026 6:38:49 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:49 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\nAug 04, 2026 6:38:49 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:49.914Z] Aug 04, 2026 6:38:49 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:49 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:49.978Z] Aug 04, 2026 6:38:49 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:49 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:50.004Z] Aug 04, 2026 6:38:50 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:50 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:50.034Z] Aug 04, 2026 6:38:50 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:50 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:50.041Z] Aug 04, 2026 6:38:50 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:50 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:50.076Z] Aug 04, 2026 6:38:50 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:50 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:50.123Z] Aug 04, 2026 6:38:50 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:38:50 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:38:53.275Z] [work-queue] {"queuedWork":["/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:38:53.275Z"],"queueLength":1,"runningWork":[],"workRunningCount":0}
+[debug] [2026-08-04T21:38:53.276Z] [work-queue] {"queuedWork":[],"queueLength":0,"runningWork":["/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:38:53.275Z"],"workRunningCount":1}
+[debug] [2026-08-04T21:38:53.276Z] Accepted request GET /fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq --> southamerica-east1-getPublicEmbeddedProject
+[debug] [2026-08-04T21:38:53.276Z] [functions] Runtime ready! Sending request! {"metadata":{"emulator":{"name":"functions"},"message":"[functions] Runtime ready! Sending request!"}}
+[debug] [2026-08-04T21:38:53.276Z] [functions] Got req.url=/fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq, mapping to path=/?projectId=sFnkiYkceMH3heyOEshq {"metadata":{"emulator":{"name":"functions"},"message":"[functions] Got req.url=/fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq, mapping to path=/?projectId=sFnkiYkceMH3heyOEshq"}}
+[debug] [2026-08-04T21:38:53.277Z] [worker-pool] submitRequest(triggerId=southamerica-east1-getPublicEmbeddedProject) {"metadata":{"emulator":{"name":"functions"},"message":"[worker-pool] submitRequest(triggerId=southamerica-east1-getPublicEmbeddedProject)"}}
+[info] i  functions: Beginning execution of "southamerica-east1-getPublicEmbeddedProject" {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Beginning execution of \"southamerica-east1-getPublicEmbeddedProject\""}}
+[debug] [2026-08-04T21:38:53.278Z] [worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: BUSY {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: BUSY"}}
+[debug] [2026-08-04T21:38:53.346Z] Finishing up request with event=pause {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=pause"}}
+[info] i  functions: Finished "southamerica-east1-getPublicEmbeddedProject" in 67.725ms {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finished \"southamerica-east1-getPublicEmbeddedProject\" in 67.725ms"}}
+[debug] [2026-08-04T21:38:53.347Z] [worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: IDLE {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: IDLE"}}
+[debug] [2026-08-04T21:38:53.347Z] Finishing up request with event=finish {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=finish"}}
+[debug] [2026-08-04T21:38:53.347Z] Finishing up request with event=close {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=close"}}
+[debug] [2026-08-04T21:38:53.348Z] [work-queue] {"queuedWork":[],"queueLength":0,"runningWork":[],"workRunningCount":0}
+[debug] [2026-08-04T21:38:53.348Z] [work-queue] {"queuedWork":["/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:38:53.348Z"],"queueLength":1,"runningWork":[],"workRunningCount":0}
+[debug] [2026-08-04T21:38:53.349Z] [work-queue] {"queuedWork":[],"queueLength":0,"runningWork":["/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:38:53.348Z"],"workRunningCount":1}
+[debug] [2026-08-04T21:38:53.349Z] Accepted request GET /fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq --> southamerica-east1-getPublicEmbeddedProject
+[debug] [2026-08-04T21:38:53.349Z] [functions] Runtime ready! Sending request! {"metadata":{"emulator":{"name":"functions"},"message":"[functions] Runtime ready! Sending request!"}}
+[debug] [2026-08-04T21:38:53.350Z] [functions] Got req.url=/fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq, mapping to path=/?projectId=sFnkiYkceMH3heyOEshq {"metadata":{"emulator":{"name":"functions"},"message":"[functions] Got req.url=/fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq, mapping to path=/?projectId=sFnkiYkceMH3heyOEshq"}}
+[debug] [2026-08-04T21:38:53.350Z] [worker-pool] submitRequest(triggerId=southamerica-east1-getPublicEmbeddedProject) {"metadata":{"emulator":{"name":"functions"},"message":"[worker-pool] submitRequest(triggerId=southamerica-east1-getPublicEmbeddedProject)"}}
+[info] i  functions: Beginning execution of "southamerica-east1-getPublicEmbeddedProject" {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Beginning execution of \"southamerica-east1-getPublicEmbeddedProject\""}}
+[debug] [2026-08-04T21:38:53.351Z] [worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: BUSY {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: BUSY"}}
+[debug] [2026-08-04T21:38:53.448Z] Finishing up request with event=pause {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=pause"}}
+[info] i  functions: Finished "southamerica-east1-getPublicEmbeddedProject" in 97.7374ms {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finished \"southamerica-east1-getPublicEmbeddedProject\" in 97.7374ms"}}
+[debug] [2026-08-04T21:38:53.451Z] [worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: IDLE {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: IDLE"}}
+[debug] [2026-08-04T21:38:53.451Z] Finishing up request with event=finish {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=finish"}}
+[debug] [2026-08-04T21:38:53.451Z] Finishing up request with event=close {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=close"}}
+[debug] [2026-08-04T21:38:53.451Z] [work-queue] {"queuedWork":[],"queueLength":0,"runningWork":[],"workRunningCount":0}
+[debug] [2026-08-04T21:39:01.517Z] Aug 04, 2026 6:39:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:39:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:39:01.539Z] Aug 04, 2026 6:39:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:39:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:39:01.561Z] Aug 04, 2026 6:39:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:39:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:39:01.573Z] Aug 04, 2026 6:39:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:39:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:39:01.612Z] Aug 04, 2026 6:39:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:39:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:39:01.624Z] Aug 04, 2026 6:39:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:39:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:39:01.658Z] Aug 04, 2026 6:39:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+Aug 04, 2026 6:39:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:39:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\nAug 04, 2026 6:39:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:39:01.706Z] Aug 04, 2026 6:39:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:39:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:39:01.741Z] Aug 04, 2026 6:39:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:39:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:39:01.765Z] Aug 04, 2026 6:39:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:39:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:39:01.800Z] Aug 04, 2026 6:39:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:39:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:39:01.808Z] Aug 04, 2026 6:39:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:39:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:39:01.851Z] Aug 04, 2026 6:39:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:39:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:39:01.858Z] Aug 04, 2026 6:39:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:39:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:39:04.381Z] [work-queue] {"queuedWork":["/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:39:04.381Z"],"queueLength":1,"runningWork":[],"workRunningCount":0}
+[debug] [2026-08-04T21:39:04.381Z] [work-queue] {"queuedWork":[],"queueLength":0,"runningWork":["/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:39:04.381Z"],"workRunningCount":1}
+[debug] [2026-08-04T21:39:04.381Z] Accepted request GET /fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq --> southamerica-east1-getPublicEmbeddedProject
+[debug] [2026-08-04T21:39:04.382Z] [functions] Runtime ready! Sending request! {"metadata":{"emulator":{"name":"functions"},"message":"[functions] Runtime ready! Sending request!"}}
+[debug] [2026-08-04T21:39:04.382Z] [functions] Got req.url=/fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq, mapping to path=/?projectId=sFnkiYkceMH3heyOEshq {"metadata":{"emulator":{"name":"functions"},"message":"[functions] Got req.url=/fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq, mapping to path=/?projectId=sFnkiYkceMH3heyOEshq"}}
+[debug] [2026-08-04T21:39:04.382Z] [worker-pool] submitRequest(triggerId=southamerica-east1-getPublicEmbeddedProject) {"metadata":{"emulator":{"name":"functions"},"message":"[worker-pool] submitRequest(triggerId=southamerica-east1-getPublicEmbeddedProject)"}}
+[info] i  functions: Beginning execution of "southamerica-east1-getPublicEmbeddedProject" {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Beginning execution of \"southamerica-east1-getPublicEmbeddedProject\""}}
+[debug] [2026-08-04T21:39:04.384Z] [worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: BUSY {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: BUSY"}}
+[debug] [2026-08-04T21:39:04.441Z] Finishing up request with event=pause {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=pause"}}
+[info] i  functions: Finished "southamerica-east1-getPublicEmbeddedProject" in 57.5569ms {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finished \"southamerica-east1-getPublicEmbeddedProject\" in 57.5569ms"}}
+[debug] [2026-08-04T21:39:04.443Z] [worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: IDLE {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: IDLE"}}
+[debug] [2026-08-04T21:39:04.443Z] Finishing up request with event=finish {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=finish"}}
+[debug] [2026-08-04T21:39:04.443Z] Finishing up request with event=close {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=close"}}
+[debug] [2026-08-04T21:39:04.443Z] [work-queue] {"queuedWork":[],"queueLength":0,"runningWork":[],"workRunningCount":0}
+[debug] [2026-08-04T21:39:04.444Z] [work-queue] {"queuedWork":["/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:39:04.444Z"],"queueLength":1,"runningWork":[],"workRunningCount":0}
+[debug] [2026-08-04T21:39:04.445Z] [work-queue] {"queuedWork":[],"queueLength":0,"runningWork":["/fivi360/southamerica-east1/getPublicEmbeddedProject-2026-08-04T21:39:04.444Z"],"workRunningCount":1}
+[debug] [2026-08-04T21:39:04.445Z] Accepted request GET /fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq --> southamerica-east1-getPublicEmbeddedProject
+[debug] [2026-08-04T21:39:04.446Z] [functions] Runtime ready! Sending request! {"metadata":{"emulator":{"name":"functions"},"message":"[functions] Runtime ready! Sending request!"}}
+[debug] [2026-08-04T21:39:04.447Z] [functions] Got req.url=/fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq, mapping to path=/?projectId=sFnkiYkceMH3heyOEshq {"metadata":{"emulator":{"name":"functions"},"message":"[functions] Got req.url=/fivi360/southamerica-east1/getPublicEmbeddedProject?projectId=sFnkiYkceMH3heyOEshq, mapping to path=/?projectId=sFnkiYkceMH3heyOEshq"}}
+[debug] [2026-08-04T21:39:04.447Z] [worker-pool] submitRequest(triggerId=southamerica-east1-getPublicEmbeddedProject) {"metadata":{"emulator":{"name":"functions"},"message":"[worker-pool] submitRequest(triggerId=southamerica-east1-getPublicEmbeddedProject)"}}
+[info] i  functions: Beginning execution of "southamerica-east1-getPublicEmbeddedProject" {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Beginning execution of \"southamerica-east1-getPublicEmbeddedProject\""}}
+[debug] [2026-08-04T21:39:04.448Z] [worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: BUSY {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: BUSY"}}
+[debug] [2026-08-04T21:39:04.509Z] Finishing up request with event=pause {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=pause"}}
+[info] i  functions: Finished "southamerica-east1-getPublicEmbeddedProject" in 61.3654ms {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finished \"southamerica-east1-getPublicEmbeddedProject\" in 61.3654ms"}}
+[debug] [2026-08-04T21:39:04.511Z] [worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: IDLE {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"[worker-southamerica-east1-getPublicEmbeddedProject-d4e8c72a-62bd-494a-9f01-87d6d30334f6]: IDLE"}}
+[debug] [2026-08-04T21:39:04.511Z] Finishing up request with event=finish {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=finish"}}
+[debug] [2026-08-04T21:39:04.511Z] Finishing up request with event=close {"metadata":{"emulator":{"name":"functions"},"function":{"name":"southamerica-east1-getPublicEmbeddedProject"},"extension":{},"message":"Finishing up request with event=close"}}
+[debug] [2026-08-04T21:39:04.512Z] [work-queue] {"queuedWork":[],"queueLength":0,"runningWork":[],"workRunningCount":0}
+[debug] [2026-08-04T21:39:31.728Z] Aug 04, 2026 6:39:31 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:39:31 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:39:31.871Z] Aug 04, 2026 6:39:31 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:39:31 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:40:01.999Z] Aug 04, 2026 6:40:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:40:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:40:01.999Z] Aug 04, 2026 6:40:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:40:01 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:40:02.002Z] Aug 04, 2026 6:40:02 PM com.google.cloud.datastore.emulator.firestore.webchannel.FirestoreV1WebChannelAdapter$FirestoreWriteHandler onClose
+INFO: channel closed
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:40:02 PM com.google.cloud.datastore.emulator.firestore.webchannel.FirestoreV1WebChannelAdapter$FirestoreWriteHandler onClose\r\nINFO: channel closed\r\n"}}
+[debug] [2026-08-04T21:40:02.003Z] Aug 04, 2026 6:40:02 PM com.google.cloud.datastore.emulator.firestore.webchannel.FirestoreV1WebChannelAdapter$FirestoreListenHandler onClose
+INFO: channel closed
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:40:02 PM com.google.cloud.datastore.emulator.firestore.webchannel.FirestoreV1WebChannelAdapter$FirestoreListenHandler onClose\r\nINFO: channel closed\r\n"}}
+[debug] [2026-08-04T21:42:14.895Z] Aug 04, 2026 6:42:14 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler channelClosed
+INFO: Websocket client disconnected
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:42:14 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler channelClosed\r\nINFO: Websocket client disconnected\r\n"}}
+[debug] [2026-08-04T21:42:14.902Z] Aug 04, 2026 6:42:14 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel
+INFO: Connected to new websocket client
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:42:14 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel\r\nINFO: Connected to new websocket client\r\n"}}
+[debug] [2026-08-04T21:43:26.325Z] Aug 04, 2026 6:43:26 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:43:26 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:43:26.361Z] Aug 04, 2026 6:43:26 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:43:26 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:43:26.365Z] Aug 04, 2026 6:43:26 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:43:26 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:43:26.369Z] Aug 04, 2026 6:43:26 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:43:26 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:43:26.400Z] Aug 04, 2026 6:43:26 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:43:26 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:43:26.410Z] Aug 04, 2026 6:43:26 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:43:26 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:43:34.398Z] Aug 04, 2026 6:43:34 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:43:34 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:43:34.420Z] Aug 04, 2026 6:43:34 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:43:34 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:43:34.457Z] Aug 04, 2026 6:43:34 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:43:34 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:43:34.470Z] Aug 04, 2026 6:43:34 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:43:34 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:43:34.522Z] Aug 04, 2026 6:43:34 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:43:34 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:43:34.533Z] Aug 04, 2026 6:43:34 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:43:34 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:44:34.540Z] Aug 04, 2026 6:44:34 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:44:34 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T21:44:34.548Z] Aug 04, 2026 6:44:34 PM com.google.cloud.datastore.emulator.firestore.webchannel.FirestoreV1WebChannelAdapter$FirestoreListenHandler onClose
+INFO: channel closed
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 6:44:34 PM com.google.cloud.datastore.emulator.firestore.webchannel.FirestoreV1WebChannelAdapter$FirestoreListenHandler onClose\r\nINFO: channel closed\r\n"}}

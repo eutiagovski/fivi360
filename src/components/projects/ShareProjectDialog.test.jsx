@@ -337,6 +337,56 @@ describe("ShareProjectDialog — RC-EMBED-UX-REFINE-1", () => {
     ).toBeTruthy();
   });
 
+  test("atualização do projeto não reseta a tab Embed nem fecha o modal", () => {
+    const project = baseProject();
+    act(() => {
+      root.render(
+        React.createElement(ShareProjectDialog, {
+          open: true,
+          onOpenChange: jest.fn(),
+          project,
+          images: sampleImages,
+        }),
+      );
+    });
+
+    act(() => {
+      container.querySelector('[data-testid="share-tab-embed"]').click();
+    });
+    expect(
+      container.querySelector('[data-testid="share-tab-embed"]').getAttribute(
+        "aria-selected",
+      ),
+    ).toBe("true");
+
+    act(() => {
+      root.render(
+        React.createElement(ShareProjectDialog, {
+          open: true,
+          onOpenChange: jest.fn(),
+          project: {
+            ...project,
+            embedSettings: {
+              ...project.embedSettings,
+              allowFullscreen: false,
+            },
+          },
+          images: sampleImages,
+        }),
+      );
+    });
+
+    expect(
+      container.querySelector('[data-testid="share-tab-embed"]').getAttribute(
+        "aria-selected",
+      ),
+    ).toBe("true");
+    expect(
+      container.querySelector('[data-testid="share-project-dialog"]') ||
+        container.querySelector('[data-testid="dialog-root"]'),
+    ).toBeTruthy();
+  });
+
   test("descrição do modal separa as duas jornadas", () => {
     renderDialog();
     expect(container.textContent).toContain(
@@ -666,5 +716,86 @@ describe("ProjectEmbedSettingsSection — RC-EMBED-UX-REFINE-1", () => {
       "user-1",
       { allowNavigation: false },
     );
+  });
+
+  test("alterar fullscreen/navegação não muda src nem key do iframe", async () => {
+    renderSection(
+      baseProject({
+        embedSettings: {
+          enabled: true,
+          initialImageId: "img-1",
+          allowFullscreen: true,
+          allowNavigation: true,
+          showBranding: true,
+          updatedAt: null,
+        },
+      }),
+    );
+
+    act(() => {
+      container.querySelector('[data-testid="embed-toggle-preview"]').click();
+    });
+
+    const preview = container.querySelector('[data-testid="embed-preview"]');
+    const iframe = container.querySelector(
+      '[data-testid="embed-preview-iframe"]',
+    );
+    const srcBefore = iframe.getAttribute("src");
+    const keyBefore = preview.getAttribute("data-preview-key");
+
+    await act(async () => {
+      container.querySelector('[data-testid="embed-allow-fullscreen"]').click();
+    });
+    await act(async () => {
+      container.querySelector('[data-testid="embed-allow-navigation"]').click();
+    });
+
+    const iframeAfter = container.querySelector(
+      '[data-testid="embed-preview-iframe"]',
+    );
+    const previewAfter = container.querySelector('[data-testid="embed-preview"]');
+    expect(iframeAfter).toBeTruthy();
+    expect(iframeAfter.getAttribute("src")).toBe(srcBefore);
+    expect(previewAfter.getAttribute("data-preview-key")).toBe(keyBefore);
+    expect(srcBefore).toBe("https://app.test/embed/proj-1");
+  });
+
+  test("desativar incorporação oculta a prévia", async () => {
+    mockUpdateProjectEmbedSettings.mockResolvedValue({
+      enabled: false,
+      initialImageId: "img-1",
+      allowFullscreen: true,
+      allowNavigation: true,
+      showBranding: true,
+      updatedAt: null,
+    });
+
+    renderSection(
+      baseProject({
+        embedSettings: {
+          enabled: true,
+          initialImageId: "img-1",
+          allowFullscreen: true,
+          allowNavigation: true,
+          showBranding: true,
+          updatedAt: null,
+        },
+      }),
+    );
+
+    act(() => {
+      container.querySelector('[data-testid="embed-toggle-preview"]').click();
+    });
+    expect(
+      container.querySelector('[data-testid="embed-preview-iframe"]'),
+    ).toBeTruthy();
+
+    await act(async () => {
+      container.querySelector('[data-testid="embed-enabled-switch"]').click();
+    });
+
+    expect(
+      container.querySelector('[data-testid="embed-preview-iframe"]'),
+    ).toBeNull();
   });
 });

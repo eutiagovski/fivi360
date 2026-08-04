@@ -49,14 +49,31 @@ export function ProjectEmbedSettingsSection({
   const [copied, setCopied] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [previewStatus, setPreviewStatus] = useState(
-    /** @type {'idle' | 'loading' | 'loaded' | 'error'} */ ("idle"),
+    /** @type {'idle' | 'loading' | 'loaded' | 'error' | 'refreshing'} */ (
+      "idle"
+    ),
   );
   const [previewNonce, setPreviewNonce] = useState(0);
   const snippetRef = useRef(/** @type {HTMLTextAreaElement | null} */ (null));
   const savedFeedbackTimer = useRef(/** @type {number | null} */ (null));
+  const previewInitialImageIdRef = useRef(
+    project.embedSettings?.initialImageId ?? null,
+  );
+  const previewRefreshTimer = useRef(/** @type {number | null} */ (null));
 
   useEffect(() => {
-    setSettings(project.embedSettings ?? { ...DEFAULT_EMBED_SETTINGS });
+    const next = project.embedSettings ?? { ...DEFAULT_EMBED_SETTINGS };
+    setSettings((current) => {
+      if (
+        current.enabled === next.enabled &&
+        current.initialImageId === next.initialImageId &&
+        current.allowFullscreen === next.allowFullscreen &&
+        current.allowNavigation === next.allowNavigation
+      ) {
+        return current;
+      }
+      return next;
+    });
   }, [project]);
 
   useEffect(() => {
@@ -66,10 +83,45 @@ export function ProjectEmbedSettingsSection({
     }
   }, [settings.enabled, modalOpen]);
 
+  // Ambiente inicial: debounce de um único reload da prévia (Option B).
+  // Fullscreen / navegação NÃO alteram src/key — iframe permanece montado.
+  useEffect(() => {
+    if (!showPreview || !settings.enabled) {
+      previewInitialImageIdRef.current = settings.initialImageId ?? null;
+      return undefined;
+    }
+
+    const nextInitialId = settings.initialImageId ?? null;
+    if (nextInitialId === previewInitialImageIdRef.current) {
+      return undefined;
+    }
+
+    previewInitialImageIdRef.current = nextInitialId;
+
+    if (previewRefreshTimer.current != null) {
+      window.clearTimeout(previewRefreshTimer.current);
+    }
+
+    setPreviewStatus("refreshing");
+    previewRefreshTimer.current = window.setTimeout(() => {
+      setPreviewNonce((value) => value + 1);
+    }, 600);
+
+    return () => {
+      if (previewRefreshTimer.current != null) {
+        window.clearTimeout(previewRefreshTimer.current);
+        previewRefreshTimer.current = null;
+      }
+    };
+  }, [settings.initialImageId, settings.enabled, showPreview]);
+
   useEffect(() => {
     return () => {
       if (savedFeedbackTimer.current != null) {
         window.clearTimeout(savedFeedbackTimer.current);
+      }
+      if (previewRefreshTimer.current != null) {
+        window.clearTimeout(previewRefreshTimer.current);
       }
     };
   }, []);
@@ -82,17 +134,25 @@ export function ProjectEmbedSettingsSection({
     [images],
   );
 
-  const embedUrl = buildEmbedProjectUrl(project.id);
-  const snippet = buildEmbedSnippet(project.id, {
-    projectName: project.title,
-  });
-  const previewUrl = embedUrl;
+  const previewUrl = useMemo(
+    () => buildEmbedProjectUrl(project.id),
+    [project.id],
+  );
+  const snippet = useMemo(
+    () =>
+      buildEmbedSnippet(project.id, {
+        projectName: project.title,
+      }),
+    [project.id, project.title],
+  );
   const canShowPreview = Boolean(previewUrl && settings.enabled);
+  const iframeKey = previewUrl ? `${previewUrl}::${previewNonce}` : "";
 
   const openPreview = () => {
     if (!previewUrl) {
       return;
     }
+    previewInitialImageIdRef.current = settings.initialImageId ?? null;
     setShowPreview(true);
     setPreviewStatus("loading");
   };
@@ -109,7 +169,6 @@ export function ProjectEmbedSettingsSection({
     setPreviewStatus("loading");
     setPreviewNonce((value) => value + 1);
   };
-
   const markSaved = () => {
     setSaveStatus("saved");
     if (savedFeedbackTimer.current != null) {
@@ -461,6 +520,8 @@ export function ProjectEmbedSettingsSection({
                         className="relative w-full overflow-hidden rounded-xl border border-zinc-700 bg-zinc-950"
                         style={{ aspectRatio: "16 / 9" }}
                         data-testid="embed-preview"
+                        data-preview-url={previewUrl}
+                        data-preview-key={iframeKey}
                       >
                         {previewStatus === "loading" ? (
                           <div
@@ -469,6 +530,15 @@ export function ProjectEmbedSettingsSection({
                           >
                             <Loader2 size={16} className="animate-spin" />
                             Carregando prévia...
+                          </div>
+                        ) : null}
+                        {previewStatus === "refreshing" ? (
+                          <div
+                            className="absolute inset-x-0 top-0 z-10 flex items-center justify-center gap-2 bg-zinc-950/70 px-3 py-2 text-xs text-zinc-300"
+                            data-testid="embed-preview-refreshing"
+                          >
+                            <Loader2 size={12} className="animate-spin" />
+                            Atualizando prévia…
                           </div>
                         ) : null}
                         {previewStatus === "error" ? (
@@ -490,12 +560,13 @@ export function ProjectEmbedSettingsSection({
                           </div>
                         ) : null}
                         <iframe
-                          key={`${previewUrl}:${previewNonce}`}
+                          key={iframeKey}
                           src={previewUrl}
                           title={`Prévia da visualização 360° — ${project.title || "projeto"}`}
                           className="absolute inset-0 h-full w-full border-0"
                           allow="fullscreen"
                           allowFullScreen
+                          data-testid="embed-preview-iframe"
                           onLoad={() => setPreviewStatus("loaded")}
                           onError={() => setPreviewStatus("error")}
                         />

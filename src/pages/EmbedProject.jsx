@@ -296,23 +296,29 @@ export function EmbedProjectPage() {
       className="h-screen w-screen flex flex-col bg-[#050505] overflow-hidden"
       data-testid="embed-viewer-page"
     >
-      <div className="absolute top-3 left-3 right-3 z-[6] flex items-center justify-between gap-2 pointer-events-none">
+      {/* Título no topo-esquerdo; reserva a direita para zoom/fullscreen do Pannellum */}
+      <div
+        className="pointer-events-none absolute left-3 top-3 z-[6] max-w-[min(70%,calc(100%-5.5rem))]"
+        data-testid="embed-environment-title-wrap"
+      >
         <p
-          className="min-w-0 truncate rounded-lg bg-black/50 px-2.5 py-1.5 text-xs text-zinc-200 backdrop-blur-md"
+          className="line-clamp-2 break-words rounded-lg bg-black/50 px-2.5 py-1.5 text-xs leading-snug text-zinc-200 backdrop-blur-md"
           data-testid="embed-environment-name"
+          title={currentImage.name || project.name || undefined}
         >
           {currentImage.name || project.name}
         </p>
-        {allowNavigation ? (
-          <div className="pointer-events-auto">
-            <ViewerNavControls
-              previousImage={previousImage}
-              nextImage={nextImage}
-              imageBasePath={`/embed/${projectId}/image`}
-            />
-          </div>
-        ) : null}
       </div>
+
+      {allowNavigation ? (
+        <div className="absolute right-14 top-3 z-[6] sm:right-16">
+          <ViewerNavControls
+            previousImage={previousImage}
+            nextImage={nextImage}
+            imageBasePath={`/embed/${projectId}/image`}
+          />
+        </div>
+      ) : null}
 
       <div
         className="relative flex-1 min-h-0 w-full"

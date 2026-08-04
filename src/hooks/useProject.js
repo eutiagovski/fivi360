@@ -20,9 +20,9 @@ export function useProject(projectId) {
       return;
     }
 
-    setLoading(true);
+    // Refetch silencioso: não alterna `loading` para evitar desmontar
+    // diálogos abertos (ex.: compartilhar / prévia do Embed).
     setError(null);
-    setNotFound(false);
 
     try {
       const data = await getProjectById(projectId);
@@ -32,12 +32,11 @@ export function useProject(projectId) {
         setNotFound(true);
       } else {
         setProject(data);
+        setNotFound(false);
       }
     } catch (err) {
       setError(err);
       setProject(null);
-    } finally {
-      setLoading(false);
     }
   }, [projectId]);
 
