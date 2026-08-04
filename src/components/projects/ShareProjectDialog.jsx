@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Copy, Loader2 } from "lucide-react";
 import { AppModal } from "@/components/common/AppModal";
 import { PlanUpgradeHint } from "@/components/plans/PlanUpgradeHint";
+import { ProjectEmbedSettingsSection } from "@/components/projects/ProjectEmbedSettingsSection";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { toast } from "@/hooks/use-toast";
 import {
@@ -21,6 +22,7 @@ import {
  *   open: boolean,
  *   onOpenChange: (open: boolean) => void,
  *   project: import("@/services/projects/projectService").Project | null,
+ *   images?: import("@/services/images/imageService").Image[],
  *   onVisibilitySaved?: () => void | Promise<void>,
  * }} props
  */
@@ -28,6 +30,7 @@ export function ShareProjectDialog({
   open,
   onOpenChange,
   project,
+  images = [],
   onVisibilitySaved,
 }) {
   const { publicVisibilityEnabled } = usePlanLimits();
@@ -106,10 +109,10 @@ export function ShareProjectDialog({
       open={open}
       onOpenChange={onOpenChange}
       title="Compartilhar projeto"
-      description={`Defina quem pode ver "${project.title}" e copie o link público.`}
-      size="md"
+      description={`Defina quem pode ver "${project.title}" e incorpore a visualização no website.`}
+      size="lg"
       testId="share-project-dialog"
-      bodyClassName="space-y-5 min-w-0"
+      bodyClassName="space-y-5 min-w-0 max-h-[70vh] overflow-y-auto"
     >
       <div>
         <p className="text-xs text-zinc-500 mb-2">Visibilidade</p>
@@ -197,6 +200,12 @@ export function ShareProjectDialog({
           </p>
         )}
       </div>
+
+      <ProjectEmbedSettingsSection
+        project={project}
+        images={images}
+        onEmbedSaved={onVisibilitySaved}
+      />
     </AppModal>
   );
 }

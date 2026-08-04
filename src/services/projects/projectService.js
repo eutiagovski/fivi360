@@ -35,6 +35,7 @@ import { getImagesByProjectId } from "@/services/images/imageService";
 import { deleteAllHotspotsForImage } from "@/services/hotspots/hotspotService";
 import {
   assertCanCreateProject,
+  assertProjectEmbedEnabled,
   assertPublicVisibilityEnabled,
 } from "@/services/plans/planService";
 import {
@@ -47,6 +48,10 @@ import {
   isPaginationCursor,
   toAppDate,
 } from "@/services/firebase/dates";
+import {
+  normalizeEmbedSettings,
+  resolveInitialImageId,
+} from "@/services/projects/embedSettings";
 import { sortByRecency } from "@/utils/recencySort";
 import { visibilityToLabel } from "@/utils/visibility";
 
@@ -60,6 +65,7 @@ import { visibilityToLabel } from "@/utils/visibility";
  * @property {'private' | 'shared' | 'public'} visibility
  * @property {string} coverImage
  * @property {number} imageCount
+ * @property {import("@/services/projects/embedSettings").ProjectEmbedSettings} embedSettings
  * @property {Date | null} [createdAt]
  * @property {Date | null} [updatedAt]
  * @property {string} [workspaceId]
@@ -80,6 +86,7 @@ function mapProjectDoc(projectId, data) {
     visibility: data.visibility ?? "private",
     coverImage: data.coverImage ?? "",
     imageCount: data.imageCount ?? 0,
+    embedSettings: normalizeEmbedSettings(data.embedSettings),
     createdAt: toAppDate(data.createdAt),
     updatedAt: toAppDate(data.updatedAt),
     workspaceId: data.workspaceId ?? "",
@@ -261,6 +268,82 @@ export async function updateProject(projectId, data) {
   }
 
   await updateDoc(doc(db, "projects", projectId), updates);
+}
+
+/**
+ * Atualiza embedSettings do projeto (owner + plano Professional+).
+ * showBranding é forçado a true nesta sprint.
+ *
+ * @param {string} projectId
+ * @param {string} userId
+ * @param {Partial<{
+ *   enabled: boolean,
+ *   initialImageId: string | null,
+ *   allowFullscreen: boolean,
+ *   allowNavigation: boolean,
+ * }>} patch
+ * @returns {Promise<import("@/services/projects/embedSettings").ProjectEmbedSettings>}
+ */
+export async function updateProjectEmbedSettings(projectId, userId, patch) {
+  await assertProjectEmbedEnabled(userId);
+
+  const project = await getProjectById(projectId);
+
+  if (!project) {
+    throw new Error("Projeto não encontrado.");
+  }
+
+  if (project.userId !== userId) {
+    throw new Error("Sem permissão para atualizar a incorporação deste projeto.");
+  }
+
+  const current = project.embedSettings;
+  let nextInitialImageId =
+    patch.initialImageId !== undefined
+      ? patch.initialImageId
+      : current.initialImageId;
+
+  if (nextInitialImageId !== null && nextInitialImageId !== undefined) {
+    const images = await getImagesByProjectId(projectId, userId);
+    const resolved = resolveInitialImageId(nextInitialImageId, images);
+
+    if (
+      typeof nextInitialImageId === "string" &&
+      nextInitialImageId &&
+      resolved !== nextInitialImageId
+    ) {
+      throw new Error("A imagem inicial deve pertencer ao projeto.");
+    }
+
+    nextInitialImageId = resolved;
+  } else {
+    nextInitialImageId = null;
+  }
+
+  const nextSettings = {
+    enabled: patch.enabled !== undefined ? patch.enabled === true : current.enabled,
+    initialImageId: nextInitialImageId,
+    allowFullscreen:
+      patch.allowFullscreen !== undefined
+        ? patch.allowFullscreen === true
+        : current.allowFullscreen,
+    allowNavigation:
+      patch.allowNavigation !== undefined
+        ? patch.allowNavigation === true
+        : current.allowNavigation,
+    showBranding: true,
+    updatedAt: serverTimestamp(),
+  };
+
+  await updateDoc(doc(db, "projects", projectId), {
+    embedSettings: nextSettings,
+    updatedAt: serverTimestamp(),
+  });
+
+  return normalizeEmbedSettings({
+    ...nextSettings,
+    updatedAt: new Date(),
+  });
 }
 
 /**

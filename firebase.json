@@ -17,6 +17,80 @@
       "**/.*",
       "**/node_modules/**"
     ],
+    "headers": [
+      {
+        "source": "/embed/**",
+        "headers": [
+          {
+            "key": "Content-Security-Policy",
+            "value": "frame-ancestors *"
+          }
+        ]
+      },
+      {
+        "source": "/dashboard{,/**}",
+        "headers": [
+          {
+            "key": "Content-Security-Policy",
+            "value": "frame-ancestors 'self'"
+          }
+        ]
+      },
+      {
+        "source": "/projects{,/**}",
+        "headers": [
+          {
+            "key": "Content-Security-Policy",
+            "value": "frame-ancestors 'self'"
+          }
+        ]
+      },
+      {
+        "source": "/images{,/**}",
+        "headers": [
+          {
+            "key": "Content-Security-Policy",
+            "value": "frame-ancestors 'self'"
+          }
+        ]
+      },
+      {
+        "source": "/viewer{,/**}",
+        "headers": [
+          {
+            "key": "Content-Security-Policy",
+            "value": "frame-ancestors 'self'"
+          }
+        ]
+      },
+      {
+        "source": "/settings{,/**}",
+        "headers": [
+          {
+            "key": "Content-Security-Policy",
+            "value": "frame-ancestors 'self'"
+          }
+        ]
+      },
+      {
+        "source": "/plan{,/**}",
+        "headers": [
+          {
+            "key": "Content-Security-Policy",
+            "value": "frame-ancestors 'self'"
+          }
+        ]
+      },
+      {
+        "source": "/help{,/**}",
+        "headers": [
+          {
+            "key": "Content-Security-Policy",
+            "value": "frame-ancestors 'self'"
+          }
+        ]
+      }
+    ],
     "rewrites": [
       {
         "source": "**",

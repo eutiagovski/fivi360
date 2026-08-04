@@ -12,6 +12,7 @@ const { cancelStripeSubscription } = require("./cancelStripeSubscription");
 const { stripeWebhook } = require("./stripeWebhook");
 const { syncPublicPortfolioAvailability } = require("./syncPublicPortfolioAvailability");
 const { repairUserWorkspaceFields } = require("./repairUserWorkspaceFields");
+const { getPublicEmbeddedProject } = require("./embed/getPublicEmbeddedProject");
 
 exports.processEmailQueue = processEmailQueue;
 exports.requestPasswordResetEmail = requestPasswordResetEmail;
@@ -21,3 +22,4 @@ exports.cancelStripeSubscription = cancelStripeSubscription;
 exports.stripeWebhook = stripeWebhook;
 exports.syncPublicPortfolioAvailability = syncPublicPortfolioAvailability;
 exports.repairUserWorkspaceFields = repairUserWorkspaceFields;
+exports.getPublicEmbeddedProject = getPublicEmbeddedProject;

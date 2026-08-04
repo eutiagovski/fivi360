@@ -22,6 +22,7 @@ export const PLAN_LIMIT_CODES = {
   HOTSPOTS_DISABLED: "HOTSPOTS_DISABLED",
   PORTFOLIO_DISABLED: "PORTFOLIO_DISABLED",
   PUBLIC_VISIBILITY_DISABLED: "PUBLIC_VISIBILITY_DISABLED",
+  PROJECT_EMBED_DISABLED: "PROJECT_EMBED_DISABLED",
 };
 
 const FRIENDLY_MESSAGES = {
@@ -37,6 +38,8 @@ const FRIENDLY_MESSAGES = {
     "O portfólio público está disponível nos planos Professional e Studio. Faça upgrade para ativar.",
   [PLAN_LIMIT_CODES.PUBLIC_VISIBILITY_DISABLED]:
     "Visibilidade pública (portfólio) está disponível nos planos Professional e Studio. Faça upgrade para publicar.",
+  [PLAN_LIMIT_CODES.PROJECT_EMBED_DISABLED]:
+    "A incorporação em websites está disponível a partir do plano Professional.",
 };
 
 export class PlanLimitError extends Error {
@@ -235,6 +238,18 @@ export async function assertPublicVisibilityEnabled(userId) {
 
   if (!limits.publicVisibilityEnabled) {
     throw new PlanLimitError(PLAN_LIMIT_CODES.PUBLIC_VISIBILITY_DISABLED);
+  }
+}
+
+/**
+ * @param {string} userId
+ * @returns {Promise<void>}
+ */
+export async function assertProjectEmbedEnabled(userId) {
+  const limits = await getLimitsForUser(userId);
+
+  if (!limits.projectEmbedEnabled) {
+    throw new PlanLimitError(PLAN_LIMIT_CODES.PROJECT_EMBED_DISABLED);
   }
 }
 

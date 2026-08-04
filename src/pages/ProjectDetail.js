@@ -1021,6 +1021,7 @@ export const ProjectDetail = () => {
         open={showShareDialog}
         onOpenChange={setShowShareDialog}
         project={project}
+        images={images}
         onVisibilitySaved={refetch}
       />
 

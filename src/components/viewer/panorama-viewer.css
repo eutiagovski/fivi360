@@ -9,9 +9,17 @@
 
 .panorama-viewer .pnlm-about-msg,
 .panorama-viewer .pnlm-load-box,
-.panorama-viewer .pnlm-controls,
 .panorama-viewer .pnlm-compass {
   display: none !important;
+}
+
+.panorama-viewer:not(.panorama-viewer--native-controls) .pnlm-controls {
+  display: none !important;
+}
+
+.panorama-viewer--native-controls .pnlm-controls {
+  display: block;
+  z-index: 4;
 }
 
 .panorama-viewer--placing {

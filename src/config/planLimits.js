@@ -50,6 +50,7 @@ export const PLAN_IDS = {
  * @property {boolean} hotspotsEnabled
  * @property {boolean} publicPortfolioEnabled
  * @property {boolean} publicVisibilityEnabled
+ * @property {boolean} projectEmbedEnabled
  * @property {boolean} analyticsEnabled
  * @property {boolean} advancedAnalytics
  * @property {boolean} prioritySupport
@@ -139,6 +140,7 @@ export const PLAN_LIMITS = {
     hotspotsEnabled: false,
     publicPortfolioEnabled: false,
     publicVisibilityEnabled: false,
+    projectEmbedEnabled: false,
     analyticsEnabled: false,
     advancedAnalytics: false,
     prioritySupport: false,
@@ -172,6 +174,7 @@ export const PLAN_LIMITS = {
     hotspotsEnabled: true,
     publicPortfolioEnabled: true,
     publicVisibilityEnabled: true,
+    projectEmbedEnabled: true,
     analyticsEnabled: true,
     advancedAnalytics: false,
     prioritySupport: false,
@@ -186,6 +189,7 @@ export const PLAN_LIMITS = {
       "250 MB de armazenamento",
       "Aproximadamente 50 imagens panorâmicas",
       "Portfólio público",
+      "Incorporação em websites",
       "Informações interativas",
       "Navegação entre imagens",
       "Hotspots",
@@ -209,6 +213,7 @@ export const PLAN_LIMITS = {
     hotspotsEnabled: true,
     publicPortfolioEnabled: true,
     publicVisibilityEnabled: true,
+    projectEmbedEnabled: true,
     analyticsEnabled: true,
     advancedAnalytics: true,
     prioritySupport: true,
@@ -244,6 +249,7 @@ export const PLAN_LIMITS = {
     hotspotsEnabled: true,
     publicPortfolioEnabled: true,
     publicVisibilityEnabled: true,
+    projectEmbedEnabled: true,
     analyticsEnabled: true,
     advancedAnalytics: true,
     prioritySupport: true,
@@ -370,6 +376,17 @@ export function getPlanTier(planId) {
  */
 export function isPlanAtOrAbove(currentPlanId, targetPlanId) {
   return getPlanTier(currentPlanId) >= getPlanTier(targetPlanId);
+}
+
+/**
+ * Incorporação em websites (Embed) — Professional e planos superiores.
+ * Aceita `users.plan` bruto (string ou objeto com status).
+ *
+ * @param {UserPlanRaw} plan
+ * @returns {boolean}
+ */
+export function canUseProjectEmbed(plan) {
+  return getPlanLimits(plan).projectEmbedEnabled === true;
 }
 
 /**

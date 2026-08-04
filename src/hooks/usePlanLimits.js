@@ -126,6 +126,7 @@ export function usePlanLimits() {
     hotspotsEnabled: limits.hotspotsEnabled,
     publicPortfolioEnabled: limits.publicPortfolioEnabled,
     publicVisibilityEnabled: limits.publicVisibilityEnabled,
+    projectEmbedEnabled: limits.projectEmbedEnabled,
     refresh: load,
     refreshSilent,
     refreshUsage,

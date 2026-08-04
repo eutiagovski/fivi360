@@ -21,6 +21,9 @@ const CONTEXT_MENU_DEBUG = process.env.NODE_ENV === "development";
  *   onInfoHotspotClick?: (hotspot: import("@/services/hotspots/hotspotService").InfoHotspot) => void,
  *   onSceneHotspotClick?: (hotspot: import("@/services/hotspots/hotspotService").SceneHotspot) => void,
  *   getSceneHotspotLabel?: (hotspot: import("@/services/hotspots/hotspotService").SceneHotspot) => string,
+ *   showZoomCtrl?: boolean,
+ *   showFullscreenCtrl?: boolean,
+ *   mode?: 'default' | 'embed',
  * }} props
  */
 export function PanoramaViewer({
@@ -33,6 +36,9 @@ export function PanoramaViewer({
   onInfoHotspotClick,
   onSceneHotspotClick,
   getSceneHotspotLabel,
+  showZoomCtrl = false,
+  showFullscreenCtrl = false,
+  mode = "default",
 }) {
   const containerRef = useRef(null);
   const viewerRef = useRef(null);
@@ -114,6 +120,25 @@ export function PanoramaViewer({
         return;
       }
 
+      const rect = containerRef.current.getBoundingClientRect();
+      if (
+        process.env.NODE_ENV === "development" &&
+        (rect.width <= 0 || rect.height <= 0)
+      ) {
+        console.warn(
+          "[PanoramaViewer] Container possui dimensões inválidas",
+          {
+            width: rect.width,
+            height: rect.height,
+            mode,
+          },
+        );
+      }
+
+      if (rect.width <= 0 || rect.height <= 0) {
+        return;
+      }
+
       viewerRef.current?.destroy?.();
 
       const initialHotspots = mapToPannellum(hotspots);
@@ -122,10 +147,10 @@ export function PanoramaViewer({
         type: "equirectangular",
         panorama: panoramaUrl,
         autoLoad: true,
-        showZoomCtrl: false,
-        showFullscreenCtrl: false,
+        showZoomCtrl: showZoomCtrl === true,
+        showFullscreenCtrl: showFullscreenCtrl === true,
         compass: false,
-        showControls: false,
+        showControls: showZoomCtrl === true || showFullscreenCtrl === true,
         mouseZoom: true,
         hfov: 180,
         draggable: true,
@@ -155,7 +180,7 @@ export function PanoramaViewer({
       renderedHotspotIdsRef.current = [];
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- panoramaUrl recria o viewer
-  }, [panoramaUrl]);
+  }, [panoramaUrl, showZoomCtrl, showFullscreenCtrl, mode]);
 
   useEffect(() => {
     const viewer = viewerRef.current;
@@ -264,12 +289,15 @@ export function PanoramaViewer({
     <div
       className={cn("relative h-full w-full", className)}
       data-testid="panorama-viewer-wrapper"
+      data-mode={mode}
     >
       <div
         ref={containerRef}
         className={cn(
           "h-full w-full panorama-viewer",
           placementMode && "panorama-viewer--placing",
+          (showZoomCtrl || showFullscreenCtrl) &&
+            "panorama-viewer--native-controls",
         )}
         data-testid="panorama-viewer"
         data-placing={placementMode ? "true" : "false"}

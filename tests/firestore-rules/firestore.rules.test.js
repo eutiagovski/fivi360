@@ -778,3 +778,104 @@ describe("workspaces.planId — RC-P0.5A", () => {
     );
   });
 });
+
+describe("projects.embedSettings — RC-PROJECT-EMBED-1", () => {
+  const projectBase = {
+    userId: "owner-embed",
+    title: "Projeto Embed",
+    description: "",
+    clientName: "",
+    visibility: "private",
+    coverImage: "",
+    imageCount: 0,
+    createdAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+  };
+
+  const validEmbedSettings = {
+    enabled: true,
+    initialImageId: "img-1",
+    allowFullscreen: true,
+    allowNavigation: true,
+    showBranding: true,
+    updatedAt: Timestamp.now(),
+  };
+
+  async function seedProject(overrides = {}) {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await setDoc(doc(db, "projects", "proj-embed"), {
+        ...projectBase,
+        ...overrides,
+      });
+    });
+  }
+
+  test("owner pode atualizar embedSettings válidos", async () => {
+    await seedOwnerDocs("owner-embed");
+    await seedProject();
+
+    const db = authContext("owner-embed").firestore();
+    await assertSucceeds(
+      updateDoc(doc(db, "projects", "proj-embed"), {
+        embedSettings: validEmbedSettings,
+        updatedAt: Timestamp.now(),
+      }),
+    );
+  });
+
+  test("outro usuário não pode atualizar embedSettings", async () => {
+    await seedOwnerDocs("owner-embed");
+    await seedOwnerDocs("other-user");
+    await seedProject({
+      embedSettings: { ...validEmbedSettings, enabled: false },
+    });
+
+    const db = authContext("other-user").firestore();
+    await assertFails(
+      updateDoc(doc(db, "projects", "proj-embed"), {
+        embedSettings: validEmbedSettings,
+        updatedAt: Timestamp.now(),
+      }),
+    );
+  });
+
+  test("usuário não autenticado não pode atualizar", async () => {
+    await seedProject({
+      embedSettings: { ...validEmbedSettings, enabled: false },
+    });
+
+    const db = unauthContext().firestore();
+    await assertFails(
+      updateDoc(doc(db, "projects", "proj-embed"), {
+        embedSettings: validEmbedSettings,
+        updatedAt: Timestamp.now(),
+      }),
+    );
+  });
+
+  test("showBranding false é rejeitado", async () => {
+    await seedOwnerDocs("owner-embed");
+    await seedProject();
+
+    const db = authContext("owner-embed").firestore();
+    await assertFails(
+      updateDoc(doc(db, "projects", "proj-embed"), {
+        embedSettings: { ...validEmbedSettings, showBranding: false },
+        updatedAt: Timestamp.now(),
+      }),
+    );
+  });
+
+  test("projeto private sem embed não é legível publicamente", async () => {
+    await seedProject({ visibility: "private" });
+    const db = unauthContext().firestore();
+    await assertFails(getDoc(doc(db, "projects", "proj-embed")));
+  });
+
+  test("projeto shared continua legível publicamente (fluxo share)", async () => {
+    await seedProject({ visibility: "shared" });
+    const db = unauthContext().firestore();
+    await assertSucceeds(getDoc(doc(db, "projects", "proj-embed")));
+  });
+});

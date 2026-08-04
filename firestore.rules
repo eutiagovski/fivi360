@@ -46,6 +46,38 @@ service cloud.firestore {
       return value == 'shared' || value == 'public';
     }
 
+    function isValidEmbedSettings(settings) {
+      return settings is map
+        && settings.keys().hasAll([
+          'enabled',
+          'initialImageId',
+          'allowFullscreen',
+          'allowNavigation',
+          'showBranding',
+          'updatedAt'
+        ])
+        && settings.enabled is bool
+        && (settings.initialImageId == null || settings.initialImageId is string)
+        && settings.allowFullscreen is bool
+        && settings.allowNavigation is bool
+        && settings.showBranding == true
+        && settings.updatedAt is timestamp;
+    }
+
+    function embedSettingsUnchangedOrValid() {
+      return (!('embedSettings' in request.resource.data)
+          && !('embedSettings' in resource.data))
+        || (
+          'embedSettings' in request.resource.data
+          && 'embedSettings' in resource.data
+          && request.resource.data.embedSettings == resource.data.embedSettings
+        )
+        || (
+          'embedSettings' in request.resource.data
+          && isValidEmbedSettings(request.resource.data.embedSettings)
+        );
+    }
+
     function projectDoc(projectId) {
       return get(/databases/$(database)/documents/projects/$(projectId));
     }
@@ -680,7 +712,8 @@ service cloud.firestore {
         && request.resource.data.title is string
         && request.resource.data.description is string
         && request.resource.data.coverImage is string
-        && isValidVisibility(request.resource.data.visibility);
+        && isValidVisibility(request.resource.data.visibility)
+        && embedSettingsUnchangedOrValid();
 
       allow delete: if isOwner(resource.data.userId);
     }

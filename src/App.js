@@ -34,6 +34,7 @@ import { LandingRoute } from './components/auth/LandingRoute';
 import { TermsOfUse } from './pages/TermsOfUse';
 import { PrivacyPolicy } from './pages/PrivacyPolicy';
 import { NotFound } from './pages/NotFound';
+import { EmbedProjectPage } from './pages/EmbedProject';
 
 function App() {
   return (
@@ -50,6 +51,10 @@ function App() {
           <Route path="/verify-email-sent" element={<VerifyEmailSent />} />
           <Route path="/verify-email/action" element={<VerifyEmailAction />} />
           <Route path="/reset-password/action" element={<ResetPasswordAction />} />
+
+          {/* Embed público (iframe) */}
+          <Route path="/embed/:projectId" element={<EmbedProjectPage />} />
+          <Route path="/embed/:projectId/image/:imageId" element={<EmbedProjectPage />} />
 
           {/* Portfólio público */}
           <Route path="/u/:slug" element={<PublicPortfolio />} />
