@@ -4,6 +4,7 @@ const { initializeApp, getApps } = require("firebase-admin/app");
 const { getFirestore, FieldValue, Timestamp } = require("firebase-admin/firestore");
 const Stripe = require("stripe");
 const { STRIPE_WEBHOOK_SECRET, STRIPE_SECRET_KEY, getStripeClient } = require("./stripe/client");
+const { extractSubscriptionPeriodUnix } = require("./stripe/subscriptionPeriod");
 const { resolvePlanIdFromStripePriceId } = require("./config/stripeBilling");
 const { createGetPlanIdFromInvoiceLines } = require("./billing/resolvePlanFromInvoiceLines");
 const { EMAIL_TYPES } = require("./config/email");
@@ -118,9 +119,48 @@ function extractCheckoutSessionData(session) {
  *   planId: string,
  *   customerId: string,
  *   subscriptionId: string,
+ *   currentPeriodStart?: FirebaseFirestore.Timestamp | null,
+ *   currentPeriodEnd?: FirebaseFirestore.Timestamp | null,
+ *   nextBillingAt?: FirebaseFirestore.Timestamp | null,
+ *   cancelAtPeriodEnd?: boolean,
  * }} data
  */
-async function updateUserAfterCheckout(db, uid, { planId, customerId, subscriptionId }) {
+async function updateUserAfterCheckout(
+  db,
+  uid,
+  {
+    planId,
+    customerId,
+    subscriptionId,
+    currentPeriodStart = null,
+    currentPeriodEnd = null,
+    nextBillingAt = null,
+    cancelAtPeriodEnd = false,
+  },
+) {
+  /** @type {Record<string, unknown>} */
+  const billing = {
+    provider: "stripe",
+    stripe: {
+      customerId,
+      subscriptionId,
+    },
+    cancelAtPeriodEnd: cancelAtPeriodEnd === true,
+  };
+
+  if (currentPeriodStart) {
+    billing.currentPeriodStart = currentPeriodStart;
+  }
+
+  if (currentPeriodEnd) {
+    billing.currentPeriodEnd = currentPeriodEnd;
+  }
+
+  const nextInvoiceDate = nextBillingAt ?? currentPeriodEnd;
+  if (nextInvoiceDate) {
+    billing.nextInvoiceDate = nextInvoiceDate;
+  }
+
   await db
     .collection("users")
     .doc(uid)
@@ -132,13 +172,7 @@ async function updateUserAfterCheckout(db, uid, { planId, customerId, subscripti
           source: "stripe",
           updatedAt: FieldValue.serverTimestamp(),
         },
-        billing: {
-          provider: "stripe",
-          stripe: {
-            customerId,
-            subscriptionId,
-          },
-        },
+        billing,
         updatedAt: FieldValue.serverTimestamp(),
       },
       { merge: true },
@@ -146,8 +180,57 @@ async function updateUserAfterCheckout(db, uid, { planId, customerId, subscripti
 }
 
 /**
+ * Espelha período da assinatura em `users.billing` (fonte lida pela UI).
+ * `subscriptions/{uid}` permanece a fonte canônica do webhook.
+ *
+ * @param {import("firebase-admin/firestore").Firestore} db
+ * @param {string} uid
+ * @param {{
+ *   currentPeriodStart?: FirebaseFirestore.Timestamp | null,
+ *   currentPeriodEnd?: FirebaseFirestore.Timestamp | null,
+ *   nextBillingAt?: FirebaseFirestore.Timestamp | null,
+ *   cancelAtPeriodEnd?: boolean,
+ * }} periodFields
+ */
+async function mirrorSubscriptionPeriodToUserBilling(db, uid, periodFields) {
+  if (!uid || !periodFields) {
+    return;
+  }
+
+  /** @type {Record<string, unknown>} */
+  const patch = {
+    updatedAt: FieldValue.serverTimestamp(),
+  };
+
+  if (periodFields.currentPeriodStart) {
+    patch["billing.currentPeriodStart"] = periodFields.currentPeriodStart;
+  }
+
+  if (periodFields.currentPeriodEnd) {
+    patch["billing.currentPeriodEnd"] = periodFields.currentPeriodEnd;
+  }
+
+  const nextInvoiceDate =
+    periodFields.nextBillingAt ?? periodFields.currentPeriodEnd;
+  if (nextInvoiceDate) {
+    patch["billing.nextInvoiceDate"] = nextInvoiceDate;
+  }
+
+  if (typeof periodFields.cancelAtPeriodEnd === "boolean") {
+    patch["billing.cancelAtPeriodEnd"] = periodFields.cancelAtPeriodEnd;
+  }
+
+  if (Object.keys(patch).length <= 1) {
+    return;
+  }
+
+  await db.collection("users").doc(uid).update(patch);
+}
+
+/**
  * @param {string} subscriptionId
  * @returns {Promise<{
+ *   currentPeriodStart: FirebaseFirestore.Timestamp | null,
  *   currentPeriodEnd: FirebaseFirestore.Timestamp | null,
  *   nextBillingAt: FirebaseFirestore.Timestamp | null,
  *   cancelAtPeriodEnd: boolean,
@@ -156,25 +239,29 @@ async function updateUserAfterCheckout(db, uid, { planId, customerId, subscripti
 async function fetchSubscriptionPeriodFields(subscriptionId) {
   const stripe = getStripeClient();
   if (!stripe || !subscriptionId) {
-    return { currentPeriodEnd: null, nextBillingAt: null, cancelAtPeriodEnd: false };
+    return {
+      currentPeriodStart: null,
+      currentPeriodEnd: null,
+      nextBillingAt: null,
+      cancelAtPeriodEnd: false,
+    };
   }
 
   try {
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-    const currentPeriodEnd = toFirestoreTimestamp(subscription.current_period_end);
-
-    return {
-      currentPeriodEnd,
-      nextBillingAt: currentPeriodEnd,
-      cancelAtPeriodEnd: subscription.cancel_at_period_end === true,
-    };
+    return extractSubscriptionPeriodFields(subscription);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     logger.warn("stripeWebhook: failed to retrieve subscription period fields", {
       subscriptionId,
       error: message,
     });
-    return { currentPeriodEnd: null, nextBillingAt: null, cancelAtPeriodEnd: false };
+    return {
+      currentPeriodStart: null,
+      currentPeriodEnd: null,
+      nextBillingAt: null,
+      cancelAtPeriodEnd: false,
+    };
   }
 }
 
@@ -185,6 +272,7 @@ async function fetchSubscriptionPeriodFields(subscriptionId) {
  *   planId: string,
  *   customerId: string,
  *   subscriptionId: string,
+ *   currentPeriodStart?: FirebaseFirestore.Timestamp | null,
  *   currentPeriodEnd?: FirebaseFirestore.Timestamp | null,
  *   nextBillingAt?: FirebaseFirestore.Timestamp | null,
  *   cancelAtPeriodEnd?: boolean,
@@ -193,17 +281,30 @@ async function fetchSubscriptionPeriodFields(subscriptionId) {
 async function upsertSubscriptionDoc(
   db,
   uid,
-  { planId, customerId, subscriptionId, currentPeriodEnd, nextBillingAt, cancelAtPeriodEnd },
+  {
+    planId,
+    customerId,
+    subscriptionId,
+    currentPeriodStart,
+    currentPeriodEnd,
+    nextBillingAt,
+    cancelAtPeriodEnd,
+    status = "active",
+  },
 ) {
   /** @type {Record<string, unknown>} */
   const payload = {
     provider: "stripe",
     planId,
-    status: "active",
+    status,
     providerCustomerId: customerId,
     providerSubscriptionId: subscriptionId,
     updatedAt: FieldValue.serverTimestamp(),
   };
+
+  if (currentPeriodStart) {
+    payload.currentPeriodStart = currentPeriodStart;
+  }
 
   if (currentPeriodEnd) {
     payload.currentPeriodEnd = currentPeriodEnd;
@@ -257,7 +358,12 @@ async function handleCheckoutSessionCompleted(db, session) {
   const { userId, planId, customerId, subscriptionId } = data;
   const periodFields = await fetchSubscriptionPeriodFields(subscriptionId);
 
-  await updateUserAfterCheckout(db, userId, { planId, customerId, subscriptionId });
+  await updateUserAfterCheckout(db, userId, {
+    planId,
+    customerId,
+    subscriptionId,
+    ...periodFields,
+  });
   await upsertSubscriptionDoc(db, userId, {
     planId,
     customerId,
@@ -272,6 +378,7 @@ async function handleCheckoutSessionCompleted(db, session) {
     sessionId: session.id,
     customerId,
     subscriptionId,
+    currentPeriodEnd: periodFields.currentPeriodEnd?.seconds ?? null,
   });
 }
 
@@ -415,22 +522,22 @@ async function fetchStripeSubscriptionById(subscriptionId) {
 /**
  * @param {import("stripe").Stripe.Subscription | null | undefined} stripeSubscription
  * @returns {{
+ *   currentPeriodStart: FirebaseFirestore.Timestamp | null,
  *   currentPeriodEnd: FirebaseFirestore.Timestamp | null,
  *   nextBillingAt: FirebaseFirestore.Timestamp | null,
  *   cancelAtPeriodEnd: boolean,
  * }}
  */
 function extractSubscriptionPeriodFields(stripeSubscription) {
-  if (!stripeSubscription) {
-    return { currentPeriodEnd: null, nextBillingAt: null, cancelAtPeriodEnd: false };
-  }
-
-  const currentPeriodEnd = toFirestoreTimestamp(stripeSubscription.current_period_end);
+  const periodUnix = extractSubscriptionPeriodUnix(stripeSubscription);
+  const currentPeriodEnd = toFirestoreTimestamp(periodUnix.currentPeriodEnd);
+  const currentPeriodStart = toFirestoreTimestamp(periodUnix.currentPeriodStart);
 
   return {
+    currentPeriodStart,
     currentPeriodEnd,
     nextBillingAt: currentPeriodEnd,
-    cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end === true,
+    cancelAtPeriodEnd: periodUnix.cancelAtPeriodEnd,
   };
 }
 
@@ -674,6 +781,74 @@ async function resolveSubscriptionDeletedUserId(db, subscription) {
   }
 
   return null;
+}
+
+/**
+ * Atualiza período / cancelAtPeriodEnd sem alterar entitlement (`users.plan.id`).
+ *
+ * @param {import("firebase-admin/firestore").Firestore} db
+ * @param {import("stripe").Stripe.Subscription} subscription
+ */
+async function handleSubscriptionUpdated(db, subscription) {
+  const userId = await resolveSubscriptionDeletedUserId(db, subscription);
+
+  if (!userId) {
+    logger.warn("stripeWebhook: customer.subscription.updated without resolvable userId", {
+      subscriptionId: subscription.id,
+      customerId: getStripeCustomerId(subscription.customer),
+    });
+    return;
+  }
+
+  const periodFields = extractSubscriptionPeriodFields(subscription);
+  const customerId = getStripeCustomerId(subscription.customer) ?? "";
+  const planIdFromMeta =
+    typeof subscription.metadata?.planId === "string"
+      ? subscription.metadata.planId.trim()
+      : "";
+
+  const subscriptionSnap = await db.collection("subscriptions").doc(userId).get();
+  const existingPlanId =
+    typeof subscriptionSnap.data()?.planId === "string"
+      ? subscriptionSnap.data().planId
+      : null;
+  const planId = planIdFromMeta || existingPlanId || "starter";
+
+  await upsertSubscriptionDoc(db, userId, {
+    planId,
+    customerId,
+    subscriptionId: subscription.id,
+    status:
+      typeof subscription.status === "string" ? subscription.status : "active",
+    ...periodFields,
+  });
+
+  /** @type {Record<string, unknown>} */
+  const userPatch = {
+    "plan.cancelAtPeriodEnd": periodFields.cancelAtPeriodEnd,
+    "plan.updatedAt": FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+  };
+
+  if (periodFields.currentPeriodStart) {
+    userPatch["billing.currentPeriodStart"] = periodFields.currentPeriodStart;
+  }
+  if (periodFields.currentPeriodEnd) {
+    userPatch["billing.currentPeriodEnd"] = periodFields.currentPeriodEnd;
+    userPatch["billing.nextInvoiceDate"] =
+      periodFields.nextBillingAt ?? periodFields.currentPeriodEnd;
+  }
+  userPatch["billing.cancelAtPeriodEnd"] = periodFields.cancelAtPeriodEnd;
+
+  await db.collection("users").doc(userId).update(userPatch);
+
+  logger.info("stripeWebhook: customer.subscription.updated processed", {
+    userId,
+    subscriptionId: subscription.id,
+    status: subscription.status,
+    cancelAtPeriodEnd: periodFields.cancelAtPeriodEnd,
+    currentPeriodEnd: periodFields.currentPeriodEnd?.seconds ?? null,
+  });
 }
 
 /**
@@ -995,6 +1170,7 @@ async function resolveSubscriptionBillingPeriod(db, userId, providerSubscription
     if (currentPeriodEnd) {
       await subscriptionRef.set(
         {
+          currentPeriodStart: periodFields.currentPeriodStart,
           currentPeriodEnd,
           nextBillingAt,
           cancelAtPeriodEnd: periodFields.cancelAtPeriodEnd,
@@ -1002,6 +1178,12 @@ async function resolveSubscriptionBillingPeriod(db, userId, providerSubscription
         },
         { merge: true },
       );
+      await mirrorSubscriptionPeriodToUserBilling(db, userId, {
+        currentPeriodStart: periodFields.currentPeriodStart,
+        currentPeriodEnd,
+        nextBillingAt,
+        cancelAtPeriodEnd: periodFields.cancelAtPeriodEnd,
+      });
     }
   }
 
@@ -1232,6 +1414,13 @@ async function handleInvoicePaid(db, invoice) {
       planId: context.planId,
       customerId: context.customerId ?? "",
       subscriptionId: context.subscriptionId,
+      currentPeriodStart: context.currentPeriodStart,
+      currentPeriodEnd: context.currentPeriodEnd,
+      nextBillingAt: context.nextBillingAt,
+      cancelAtPeriodEnd: context.cancelAtPeriodEnd,
+    });
+    await mirrorSubscriptionPeriodToUserBilling(db, context.userId, {
+      currentPeriodStart: context.currentPeriodStart,
       currentPeriodEnd: context.currentPeriodEnd,
       nextBillingAt: context.nextBillingAt,
       cancelAtPeriodEnd: context.cancelAtPeriodEnd,
@@ -1317,6 +1506,7 @@ async function handleInvoicePaymentFailed(db, invoice) {
 
 const HANDLED_STRIPE_EVENTS = new Set([
   "checkout.session.completed",
+  "customer.subscription.updated",
   "customer.subscription.deleted",
   "invoice.paid",
   "invoice.payment_failed",
@@ -1382,6 +1572,12 @@ exports.stripeWebhook = onRequest(
           await handleCheckoutSessionCompleted(
             db,
             /** @type {import("stripe").Stripe.Checkout.Session} */ (event.data.object),
+          );
+          break;
+        case "customer.subscription.updated":
+          await handleSubscriptionUpdated(
+            db,
+            /** @type {import("stripe").Stripe.Subscription} */ (event.data.object),
           );
           break;
         case "customer.subscription.deleted":

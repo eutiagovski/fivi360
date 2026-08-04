@@ -390,11 +390,24 @@ export function canUseProjectEmbed(plan) {
 }
 
 /**
- * @param {number | null} value
+ * Representação oficial de recurso ilimitado: `null` (ou `undefined` em dados parciais).
+ * Não usar `-1`, `Infinity` nem string `"unlimited"` em componentes.
+ *
+ * @param {number | null | undefined} value
  * @returns {boolean}
  */
 export function isUnlimited(value) {
   return value === null || value === undefined;
+}
+
+/**
+ * Alias explícito para consumo/UI — mesma regra que `isUnlimited`.
+ *
+ * @param {number | null | undefined} limit
+ * @returns {boolean}
+ */
+export function isUnlimitedLimit(limit) {
+  return isUnlimited(limit);
 }
 
 /**
@@ -418,12 +431,18 @@ export function formatStorageBytes(bytes) {
 }
 
 /**
+ * Percentual de uso para barras/alerta. Recursos ilimitados nunca geram % de alerta.
+ *
  * @param {number} current
- * @param {number | null} limit
+ * @param {number | null | undefined} limit
  * @returns {number} 0–100
  */
 export function usagePercentage(current, limit) {
-  if (isUnlimited(limit) || limit <= 0) {
+  if (isUnlimitedLimit(limit)) {
+    return 0;
+  }
+
+  if (limit <= 0) {
     return current > 0 ? 100 : 0;
   }
 

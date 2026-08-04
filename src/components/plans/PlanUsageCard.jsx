@@ -16,11 +16,11 @@ export function PlanUsageCard({ limits, usageStats, usage }) {
   const { atAnyLimit, nearLimit } = analyzePlanUsage(limits, usage, usageStats);
 
   const projectDisplay = isUnlimited(limits.maxProjects)
-    ? `${usageStats.projects.current} / ilimitado`
+    ? `${usageStats.projects.current} / Ilimitado`
     : `${usageStats.projects.current} / ${limits.maxProjects}`;
 
   const imageDisplay = isUnlimited(limits.maxTotalImages)
-    ? `${usageStats.images.current} / ilimitado`
+    ? `${usageStats.images.current} / Ilimitado`
     : `${usageStats.images.current} / ${limits.maxTotalImages}`;
 
   const storageDisplay = `${usageStats.storage.currentLabel} / ${usageStats.storage.limitLabel}`;

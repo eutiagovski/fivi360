@@ -1,9 +1,10 @@
 import { PLAN_IDS } from "@/config/planLimits";
 import {
   BILLING_PORTAL_COMING_SOON_MESSAGE,
-  CANCEL_AT_PERIOD_END_MESSAGE,
   formatBillingDate,
+  getCancelAtPeriodEndAccessMessage,
   getPlanMonthlyPriceLabel,
+  getSubscriptionPeriodDisplay,
   getSubscriptionStatusLabel,
 } from "@/config/billing";
 import { useToast } from "@/hooks/use-toast";
@@ -106,8 +107,12 @@ function StarterSubscriptionView({ onUpgrade, onManageSubscription }) {
 }
 
 function PaidSubscriptionView({ limits, planId, billing, onManageSubscription }) {
-  const nextBillingDate =
-    billing.nextInvoiceDate ?? billing.currentPeriodEnd;
+  const periodDisplay = getSubscriptionPeriodDisplay(billing);
+  const accessMessage = billing.cancelAtPeriodEnd
+    ? getCancelAtPeriodEndAccessMessage(
+        periodDisplay.periodEnd ? formatBillingDate(periodDisplay.periodEnd) : null,
+      )
+    : null;
 
   return (
     <div className="space-y-6">
@@ -122,11 +127,13 @@ function PaidSubscriptionView({ limits, planId, billing, onManageSubscription })
           value={getSubscriptionStatusLabel(billing.subscriptionStatus)}
           dataTestId="manage-subscription-status"
         />
-        <SubscriptionInfoItem
-          label="Próxima cobrança"
-          value={formatBillingDate(nextBillingDate)}
-          dataTestId="manage-subscription-next-billing"
-        />
+        {periodDisplay.visible ? (
+          <SubscriptionInfoItem
+            label={periodDisplay.label}
+            value={periodDisplay.value}
+            dataTestId="manage-subscription-next-billing"
+          />
+        ) : null}
         <SubscriptionInfoItem
           label="Valor mensal"
           value={`${getPlanMonthlyPriceLabel(planId)} /mês`}
@@ -134,14 +141,14 @@ function PaidSubscriptionView({ limits, planId, billing, onManageSubscription })
         />
       </div>
 
-      {billing.cancelAtPeriodEnd && (
+      {billing.cancelAtPeriodEnd && accessMessage ? (
         <p
           className="text-sm text-amber-200/90"
           data-testid="manage-subscription-cancel-pending"
         >
-          {CANCEL_AT_PERIOD_END_MESSAGE}
+          {accessMessage}
         </p>
-      )}
+      ) : null}
 
       <div className="flex flex-col sm:flex-row flex-wrap gap-3 items-start sm:items-center">
         <ManageSubscriptionButton onClick={onManageSubscription} />

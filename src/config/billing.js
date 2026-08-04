@@ -147,6 +147,22 @@ export const BILLING_PORTAL_COMING_SOON_MESSAGE = "Disponível em breve.";
 export const CANCEL_AT_PERIOD_END_MESSAGE =
   "Sua assinatura está programada para cancelamento ao fim do período atual.";
 
+export const NEXT_BILLING_UNAVAILABLE_LABEL = "Próxima cobrança indisponível";
+
+/**
+ * Mensagem de acesso restante quando o cancelamento está agendado.
+ *
+ * @param {string | null | undefined} formattedDate
+ * @returns {string}
+ */
+export function getCancelAtPeriodEndAccessMessage(formattedDate) {
+  if (!formattedDate || formattedDate === "—" || formattedDate === NEXT_BILLING_UNAVAILABLE_LABEL) {
+    return CANCEL_AT_PERIOD_END_MESSAGE;
+  }
+
+  return `Seu acesso permanece disponível até ${formattedDate}.`;
+}
+
 export const CANCEL_SUBSCRIPTION_SUCCESS_MESSAGE =
   "Sua assinatura será cancelada ao fim do período atual.";
 
@@ -497,8 +513,12 @@ export function normalizeBilling(raw) {
         ? data.subscriptionStatus
         : BILLING_UI_DEFAULTS.subscriptionStatus,
     currentPeriodStart: toAppDate(data.currentPeriodStart),
-    currentPeriodEnd: toAppDate(data.currentPeriodEnd),
-    nextInvoiceDate: toAppDate(data.nextInvoiceDate),
+    currentPeriodEnd:
+      toAppDate(data.currentPeriodEnd) ?? toAppDate(data.nextBillingAt),
+    nextInvoiceDate:
+      toAppDate(data.nextInvoiceDate)
+      ?? toAppDate(data.nextBillingAt)
+      ?? toAppDate(data.currentPeriodEnd),
     cancelAtPeriodEnd: Boolean(data.cancelAtPeriodEnd),
     lastInvoiceUrl:
       typeof data.lastInvoiceUrl === "string" ? data.lastInvoiceUrl : "",
@@ -574,11 +594,94 @@ export function formatBillingDate(value) {
     return "—";
   }
 
-  return date.toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    month: "short",
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "numeric",
+    month: "long",
     year: "numeric",
-  });
+    timeZone: "America/Sao_Paulo",
+  }).format(date);
+}
+
+/**
+ * Fonte de verdade da próxima cobrança na UI: `currentPeriodEnd` da assinatura
+ * (com alias `nextInvoiceDate` / `nextBillingAt` já normalizados no DTO).
+ *
+ * @param {UserBilling} billing
+ * @returns {Date | null}
+ */
+export function getSubscriptionPeriodEndDate(billing) {
+  if (!billing || typeof billing !== "object") {
+    return null;
+  }
+
+  return (
+    toAppDate(billing.nextInvoiceDate)
+    ?? toAppDate(billing.currentPeriodEnd)
+  );
+}
+
+/**
+ * Apresentação da data de período conforme status / cancelAtPeriodEnd.
+ *
+ * @param {UserBilling} billing
+ * @returns {{
+ *   visible: boolean,
+ *   label: string,
+ *   value: string,
+ *   periodEnd: Date | null,
+ * }}
+ */
+export function getSubscriptionPeriodDisplay(billing) {
+  const status = (billing?.subscriptionStatus ?? BILLING_STATUS.FREE).toLowerCase();
+  const periodEnd = getSubscriptionPeriodEndDate(billing);
+  const formatted = periodEnd ? formatBillingDate(periodEnd) : null;
+  const value = formatted ?? NEXT_BILLING_UNAVAILABLE_LABEL;
+
+  if (status === BILLING_STATUS.CANCELED) {
+    return {
+      visible: false,
+      label: "Próxima cobrança",
+      value: NEXT_BILLING_UNAVAILABLE_LABEL,
+      periodEnd,
+    };
+  }
+
+  if (
+    status === BILLING_STATUS.PAST_DUE
+    || status === BILLING_STATUS.UNPAID
+  ) {
+    return {
+      visible: true,
+      label: "Próxima cobrança",
+      value: NEXT_BILLING_UNAVAILABLE_LABEL,
+      periodEnd,
+    };
+  }
+
+  if (billing?.cancelAtPeriodEnd) {
+    return {
+      visible: true,
+      label: "Acesso disponível até",
+      value,
+      periodEnd,
+    };
+  }
+
+  if (status === BILLING_STATUS.TRIALING) {
+    return {
+      visible: true,
+      label: "Período de teste até",
+      value,
+      periodEnd,
+    };
+  }
+
+  return {
+    visible: true,
+    label: "Próxima cobrança",
+    value,
+    periodEnd,
+  };
 }
 
 /**

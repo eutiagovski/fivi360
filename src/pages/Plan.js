@@ -198,6 +198,7 @@ export const Plan = () => {
           current={String(usageStats.projects.current)}
           limit={usageStats.projects.limitLabel}
           percentage={usageStats.projects.percentage}
+          unlimited={usageStats.projects.unlimited}
           dataTestId="usage-projects"
         />
         <StatCard
@@ -206,6 +207,7 @@ export const Plan = () => {
           current={String(usageStats.images.current)}
           limit={usageStats.images.limitLabel}
           percentage={usageStats.images.percentage}
+          unlimited={usageStats.images.unlimited}
           dataTestId="usage-images"
         />
         <StatCard
@@ -221,6 +223,7 @@ export const Plan = () => {
           current={usageStats.storage.currentLabel}
           limit={`/ ${usageStats.storage.limitLabel}`}
           percentage={usageStats.storage.percentage}
+          unlimited={false}
           dataTestId="usage-storage"
         />
       </div>

@@ -518,3 +518,807 @@ INFO: Detected non-HTTP/2 connection.
 [debug] [2026-08-04T23:07:31.002Z] Aug 04, 2026 8:07:31 PM com.google.cloud.datastore.emulator.firestore.webchannel.FirestoreV1WebChannelAdapter$FirestoreListenHandler onClose
 INFO: channel closed
  {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:07:31 PM com.google.cloud.datastore.emulator.firestore.webchannel.FirestoreV1WebChannelAdapter$FirestoreListenHandler onClose\r\nINFO: channel closed\r\n"}}
+[debug] [2026-08-04T23:12:09.749Z] Aug 04, 2026 8:12:09 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:09 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:09.781Z] Aug 04, 2026 8:12:09 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:09 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:09.805Z] Aug 04, 2026 8:12:09 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:09 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:09.811Z] Aug 04, 2026 8:12:09 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:09 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:09.825Z] Aug 04, 2026 8:12:09 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:09 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:09.881Z] Aug 04, 2026 8:12:09 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:09 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:09.913Z] Aug 04, 2026 8:12:09 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:09 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:10.014Z] Aug 04, 2026 8:12:10 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:10 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:10.036Z] Aug 04, 2026 8:12:10 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:10 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:10.081Z] Aug 04, 2026 8:12:10 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:10 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:10.099Z] Aug 04, 2026 8:12:10 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:10 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:10.105Z] Aug 04, 2026 8:12:10 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:10 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:11.603Z] Aug 04, 2026 8:12:11 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:11 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:11.623Z] Aug 04, 2026 8:12:11 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:11 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:11.646Z] Aug 04, 2026 8:12:11 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:11 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:11.654Z] Aug 04, 2026 8:12:11 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:11 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:11.663Z] Aug 04, 2026 8:12:11 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:11 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:11.709Z] Aug 04, 2026 8:12:11 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:11 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:11.732Z] Aug 04, 2026 8:12:11 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:11 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:11.815Z] Aug 04, 2026 8:12:11 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:11 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:12.018Z] Aug 04, 2026 8:12:12 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:12 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:12.060Z] Aug 04, 2026 8:12:12 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:12 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:12.074Z] Aug 04, 2026 8:12:12 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:12 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:12.081Z] Aug 04, 2026 8:12:12 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:12 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:15.221Z] Aug 04, 2026 8:12:15 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:15 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:15.240Z] Aug 04, 2026 8:12:15 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:15 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:15.264Z] Aug 04, 2026 8:12:15 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:15 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:15.274Z] Aug 04, 2026 8:12:15 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:15 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:15.288Z] Aug 04, 2026 8:12:15 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:15 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:15.338Z] Aug 04, 2026 8:12:15 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:15 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:15.356Z] Aug 04, 2026 8:12:15 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:15 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:15.442Z] Aug 04, 2026 8:12:15 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:15 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:15.465Z] Aug 04, 2026 8:12:15 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:15 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:15.510Z] Aug 04, 2026 8:12:15 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:15 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:15.523Z] Aug 04, 2026 8:12:15 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:15 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:15.528Z] Aug 04, 2026 8:12:15 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:15 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:25.972Z] Aug 04, 2026 8:12:25 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:25 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:25.998Z] Aug 04, 2026 8:12:25 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:25 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:26.021Z] Aug 04, 2026 8:12:26 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:26 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:26.027Z] Aug 04, 2026 8:12:26 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:26 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:26.040Z] Aug 04, 2026 8:12:26 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:26 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:26.087Z] Aug 04, 2026 8:12:26 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:26 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:26.114Z] Aug 04, 2026 8:12:26 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:26 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:26.175Z] Aug 04, 2026 8:12:26 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:26 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:26.356Z] Aug 04, 2026 8:12:26 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:26 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:26.405Z] Aug 04, 2026 8:12:26 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:26 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:26.411Z] Aug 04, 2026 8:12:26 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:26 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:30.153Z] Aug 04, 2026 8:12:30 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:30 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:30.178Z] Aug 04, 2026 8:12:30 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:30 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:30.208Z] Aug 04, 2026 8:12:30 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:30 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:30.216Z] Aug 04, 2026 8:12:30 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:30 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:30.228Z] Aug 04, 2026 8:12:30 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:30 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:30.299Z] Aug 04, 2026 8:12:30 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:30 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:30.334Z] Aug 04, 2026 8:12:30 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:30 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:30.421Z] Aug 04, 2026 8:12:30 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:30 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:30.451Z] Aug 04, 2026 8:12:30 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:30 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:30.460Z] Aug 04, 2026 8:12:30 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:30 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:30.482Z] Aug 04, 2026 8:12:30 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:30 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:30.492Z] Aug 04, 2026 8:12:30 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:30 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:38.458Z] Aug 04, 2026 8:12:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:38.502Z] Aug 04, 2026 8:12:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:38.519Z] Aug 04, 2026 8:12:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:38.524Z] Aug 04, 2026 8:12:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:38.533Z] Aug 04, 2026 8:12:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:38.567Z] Aug 04, 2026 8:12:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:38.587Z] Aug 04, 2026 8:12:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:38.671Z] Aug 04, 2026 8:12:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:38.858Z] Aug 04, 2026 8:12:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:38.888Z] Aug 04, 2026 8:12:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:38.899Z] Aug 04, 2026 8:12:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:38.909Z] Aug 04, 2026 8:12:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:12:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:12:46.661Z] File C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\src\stripeWebhook.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\functions\\src\\stripeWebhook.js changed, reloading triggers"}}
+[debug] [2026-08-04T23:12:47.667Z] Validating nodejs source
+[debug] [2026-08-04T23:12:48.881Z] > [functions] package.json contents: {
+  "name": "fivi360-functions",
+  "description": "Cloud Functions for FIVI360",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^7.3.2",
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
+  }
+}
+[debug] [2026-08-04T23:12:48.882Z] Building nodejs source
+[debug] [2026-08-04T23:12:48.882Z] Failed to find version of module node: reached end of search path C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\node_modules
+[info] +  functions: Using node@22 from host. 
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-08-04T23:12:48.885Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-08-04T23:12:48.890Z] Found firebase-functions binary at 'C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\node_modules\.bin\firebase-functions'
+[info] Serving at port 8179
+
+[debug] [2026-08-04T23:12:49.401Z] Got response from /__/functions.yaml {"endpoints":{"processEmailQueue":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"RESEND_API_KEY"}],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"emailQueue/{emailId}"},"retry":false},"entryPoint":"processEmailQueue"},"requestPasswordResetEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"requestPasswordResetEmail"},"completeEmailVerification":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"completeEmailVerification"},"createStripeCheckoutSession":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"createStripeCheckoutSession"},"cancelStripeSubscription":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"cancelStripeSubscription"},"stripeWebhook":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_WEBHOOK_SECRET"},{"key":"STRIPE_SECRET_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"stripeWebhook"},"syncPublicPortfolioAvailability":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"syncPublicPortfolioAvailability"},"repairUserWorkspaceFields":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"repairUserWorkspaceFields"},"getPublicEmbeddedProject":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"httpsTrigger":{},"entryPoint":"getPublicEmbeddedProject"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{},"params":[{"type":"secret","name":"RESEND_API_KEY"},{"type":"secret","name":"STRIPE_SECRET_KEY"},{"type":"secret","name":"STRIPE_WEBHOOK_SECRET"},{"name":"STRIPE_PRICE_PROFESSIONAL","type":"string"},{"name":"STRIPE_PRICE_STUDIO","type":"string","default":""}]}
+[debug] [2026-08-04T23:12:51.960Z] File C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\src\stripeWebhook.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\functions\\src\\stripeWebhook.js changed, reloading triggers"}}
+[debug] [2026-08-04T23:12:52.435Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
+[debug] [2026-08-04T23:12:52.435Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
+[info] +  functions: Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, completeEmailVerification, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook, syncPublicPortfolioAvailability, repairUserWorkspaceFields, getPublicEmbeddedProject. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, completeEmailVerification, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook, syncPublicPortfolioAvailability, repairUserWorkspaceFields, getPublicEmbeddedProject."}}
+[debug] [2026-08-04T23:12:52.965Z] Validating nodejs source
+[debug] [2026-08-04T23:12:53.592Z] > [functions] package.json contents: {
+  "name": "fivi360-functions",
+  "description": "Cloud Functions for FIVI360",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^7.3.2",
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
+  }
+}
+[debug] [2026-08-04T23:12:53.593Z] Building nodejs source
+[debug] [2026-08-04T23:12:53.593Z] Failed to find version of module node: reached end of search path C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\node_modules
+[info] +  functions: Using node@22 from host. 
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-08-04T23:12:53.596Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-08-04T23:12:53.603Z] Found firebase-functions binary at 'C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\node_modules\.bin\firebase-functions'
+[info] Serving at port 8667
+
+[debug] [2026-08-04T23:12:54.128Z] Got response from /__/functions.yaml {"endpoints":{"processEmailQueue":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"RESEND_API_KEY"}],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"emailQueue/{emailId}"},"retry":false},"entryPoint":"processEmailQueue"},"requestPasswordResetEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"requestPasswordResetEmail"},"completeEmailVerification":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"completeEmailVerification"},"createStripeCheckoutSession":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"createStripeCheckoutSession"},"cancelStripeSubscription":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"cancelStripeSubscription"},"stripeWebhook":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_WEBHOOK_SECRET"},{"key":"STRIPE_SECRET_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"stripeWebhook"},"syncPublicPortfolioAvailability":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"syncPublicPortfolioAvailability"},"repairUserWorkspaceFields":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"repairUserWorkspaceFields"},"getPublicEmbeddedProject":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"httpsTrigger":{},"entryPoint":"getPublicEmbeddedProject"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{},"params":[{"type":"secret","name":"RESEND_API_KEY"},{"type":"secret","name":"STRIPE_SECRET_KEY"},{"type":"secret","name":"STRIPE_WEBHOOK_SECRET"},{"name":"STRIPE_PRICE_PROFESSIONAL","type":"string"},{"name":"STRIPE_PRICE_STUDIO","type":"string","default":""}]}
+[debug] [2026-08-04T23:12:57.155Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
+[debug] [2026-08-04T23:12:57.156Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
+[info] +  functions: Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, completeEmailVerification, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook, syncPublicPortfolioAvailability, repairUserWorkspaceFields, getPublicEmbeddedProject. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, completeEmailVerification, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook, syncPublicPortfolioAvailability, repairUserWorkspaceFields, getPublicEmbeddedProject."}}
+[debug] [2026-08-04T23:12:59.895Z] File C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\src\stripeWebhook.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\functions\\src\\stripeWebhook.js changed, reloading triggers"}}
+[debug] [2026-08-04T23:13:00.906Z] Validating nodejs source
+[debug] [2026-08-04T23:13:01.539Z] > [functions] package.json contents: {
+  "name": "fivi360-functions",
+  "description": "Cloud Functions for FIVI360",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^7.3.2",
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
+  }
+}
+[debug] [2026-08-04T23:13:01.540Z] Building nodejs source
+[debug] [2026-08-04T23:13:01.540Z] Failed to find version of module node: reached end of search path C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\node_modules
+[info] +  functions: Using node@22 from host. 
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-08-04T23:13:01.541Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-08-04T23:13:01.544Z] Found firebase-functions binary at 'C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\node_modules\.bin\firebase-functions'
+[info] Serving at port 8246
+
+[debug] [2026-08-04T23:13:01.851Z] File C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\src\stripeWebhook.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\functions\\src\\stripeWebhook.js changed, reloading triggers"}}
+[debug] [2026-08-04T23:13:02.019Z] Got response from /__/functions.yaml {"endpoints":{"processEmailQueue":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"RESEND_API_KEY"}],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"emailQueue/{emailId}"},"retry":false},"entryPoint":"processEmailQueue"},"requestPasswordResetEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"requestPasswordResetEmail"},"completeEmailVerification":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"completeEmailVerification"},"createStripeCheckoutSession":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"createStripeCheckoutSession"},"cancelStripeSubscription":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"cancelStripeSubscription"},"stripeWebhook":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_WEBHOOK_SECRET"},{"key":"STRIPE_SECRET_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"stripeWebhook"},"syncPublicPortfolioAvailability":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"syncPublicPortfolioAvailability"},"repairUserWorkspaceFields":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"repairUserWorkspaceFields"},"getPublicEmbeddedProject":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"httpsTrigger":{},"entryPoint":"getPublicEmbeddedProject"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{},"params":[{"type":"secret","name":"RESEND_API_KEY"},{"type":"secret","name":"STRIPE_SECRET_KEY"},{"type":"secret","name":"STRIPE_WEBHOOK_SECRET"},{"name":"STRIPE_PRICE_PROFESSIONAL","type":"string"},{"name":"STRIPE_PRICE_STUDIO","type":"string","default":""}]}
+[debug] [2026-08-04T23:13:02.856Z] Validating nodejs source
+[debug] [2026-08-04T23:13:03.467Z] > [functions] package.json contents: {
+  "name": "fivi360-functions",
+  "description": "Cloud Functions for FIVI360",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^7.3.2",
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
+  }
+}
+[debug] [2026-08-04T23:13:03.467Z] Building nodejs source
+[debug] [2026-08-04T23:13:03.467Z] Failed to find version of module node: reached end of search path C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\node_modules
+[info] +  functions: Using node@22 from host. 
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-08-04T23:13:03.468Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-08-04T23:13:03.471Z] Found firebase-functions binary at 'C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\node_modules\.bin\firebase-functions'
+[info] Serving at port 8375
+
+[debug] [2026-08-04T23:13:04.027Z] Got response from /__/functions.yaml {"endpoints":{"processEmailQueue":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"RESEND_API_KEY"}],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"emailQueue/{emailId}"},"retry":false},"entryPoint":"processEmailQueue"},"requestPasswordResetEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"requestPasswordResetEmail"},"completeEmailVerification":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"completeEmailVerification"},"createStripeCheckoutSession":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"createStripeCheckoutSession"},"cancelStripeSubscription":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"cancelStripeSubscription"},"stripeWebhook":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_WEBHOOK_SECRET"},{"key":"STRIPE_SECRET_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"stripeWebhook"},"syncPublicPortfolioAvailability":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"syncPublicPortfolioAvailability"},"repairUserWorkspaceFields":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"repairUserWorkspaceFields"},"getPublicEmbeddedProject":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"httpsTrigger":{},"entryPoint":"getPublicEmbeddedProject"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{},"params":[{"type":"secret","name":"RESEND_API_KEY"},{"type":"secret","name":"STRIPE_SECRET_KEY"},{"type":"secret","name":"STRIPE_WEBHOOK_SECRET"},{"name":"STRIPE_PRICE_PROFESSIONAL","type":"string"},{"name":"STRIPE_PRICE_STUDIO","type":"string","default":""}]}
+[debug] [2026-08-04T23:13:04.371Z] File C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\src\stripeWebhook.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\functions\\src\\stripeWebhook.js changed, reloading triggers"}}
+[debug] [2026-08-04T23:13:04.832Z] File C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\src\stripeWebhook.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\functions\\src\\stripeWebhook.js changed, reloading triggers"}}
+[debug] [2026-08-04T23:13:05.056Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
+[debug] [2026-08-04T23:13:05.057Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
+[info] +  functions: Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, completeEmailVerification, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook, syncPublicPortfolioAvailability, repairUserWorkspaceFields, getPublicEmbeddedProject. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, completeEmailVerification, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook, syncPublicPortfolioAvailability, repairUserWorkspaceFields, getPublicEmbeddedProject."}}
+[debug] [2026-08-04T23:13:05.835Z] Validating nodejs source
+[debug] [2026-08-04T23:13:06.587Z] > [functions] package.json contents: {
+  "name": "fivi360-functions",
+  "description": "Cloud Functions for FIVI360",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^7.3.2",
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
+  }
+}
+[debug] [2026-08-04T23:13:06.587Z] Building nodejs source
+[debug] [2026-08-04T23:13:06.587Z] Failed to find version of module node: reached end of search path C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\node_modules
+[info] +  functions: Using node@22 from host. 
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-08-04T23:13:06.589Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-08-04T23:13:06.597Z] Found firebase-functions binary at 'C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\node_modules\.bin\firebase-functions'
+[info] Serving at port 8970
+
+[debug] [2026-08-04T23:13:07.070Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
+[debug] [2026-08-04T23:13:07.070Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
+[info] +  functions: Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, completeEmailVerification, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook, syncPublicPortfolioAvailability, repairUserWorkspaceFields, getPublicEmbeddedProject. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, completeEmailVerification, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook, syncPublicPortfolioAvailability, repairUserWorkspaceFields, getPublicEmbeddedProject."}}
+[debug] [2026-08-04T23:13:07.107Z] Got response from /__/functions.yaml {"endpoints":{"processEmailQueue":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"RESEND_API_KEY"}],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"emailQueue/{emailId}"},"retry":false},"entryPoint":"processEmailQueue"},"requestPasswordResetEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"requestPasswordResetEmail"},"completeEmailVerification":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"completeEmailVerification"},"createStripeCheckoutSession":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"createStripeCheckoutSession"},"cancelStripeSubscription":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"cancelStripeSubscription"},"stripeWebhook":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_WEBHOOK_SECRET"},{"key":"STRIPE_SECRET_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"stripeWebhook"},"syncPublicPortfolioAvailability":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"syncPublicPortfolioAvailability"},"repairUserWorkspaceFields":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"repairUserWorkspaceFields"},"getPublicEmbeddedProject":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"httpsTrigger":{},"entryPoint":"getPublicEmbeddedProject"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{},"params":[{"type":"secret","name":"RESEND_API_KEY"},{"type":"secret","name":"STRIPE_SECRET_KEY"},{"type":"secret","name":"STRIPE_WEBHOOK_SECRET"},{"name":"STRIPE_PRICE_PROFESSIONAL","type":"string"},{"name":"STRIPE_PRICE_STUDIO","type":"string","default":""}]}
+[debug] [2026-08-04T23:13:10.058Z] File C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\src\stripeWebhook.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\functions\\src\\stripeWebhook.js changed, reloading triggers"}}
+[debug] [2026-08-04T23:13:10.140Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
+[debug] [2026-08-04T23:13:10.141Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
+[info] +  functions: Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, completeEmailVerification, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook, syncPublicPortfolioAvailability, repairUserWorkspaceFields, getPublicEmbeddedProject. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, completeEmailVerification, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook, syncPublicPortfolioAvailability, repairUserWorkspaceFields, getPublicEmbeddedProject."}}
+[debug] [2026-08-04T23:13:11.063Z] Validating nodejs source
+[debug] [2026-08-04T23:13:11.674Z] > [functions] package.json contents: {
+  "name": "fivi360-functions",
+  "description": "Cloud Functions for FIVI360",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^7.3.2",
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
+  }
+}
+[debug] [2026-08-04T23:13:11.674Z] Building nodejs source
+[debug] [2026-08-04T23:13:11.674Z] Failed to find version of module node: reached end of search path C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\node_modules
+[info] +  functions: Using node@22 from host. 
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-08-04T23:13:11.676Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-08-04T23:13:11.679Z] Found firebase-functions binary at 'C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\node_modules\.bin\firebase-functions'
+[info] Serving at port 8068
+
+[debug] [2026-08-04T23:13:12.260Z] Got response from /__/functions.yaml {"endpoints":{"processEmailQueue":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"RESEND_API_KEY"}],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"emailQueue/{emailId}"},"retry":false},"entryPoint":"processEmailQueue"},"requestPasswordResetEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"requestPasswordResetEmail"},"completeEmailVerification":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"completeEmailVerification"},"createStripeCheckoutSession":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"createStripeCheckoutSession"},"cancelStripeSubscription":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"cancelStripeSubscription"},"stripeWebhook":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_WEBHOOK_SECRET"},{"key":"STRIPE_SECRET_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"stripeWebhook"},"syncPublicPortfolioAvailability":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"syncPublicPortfolioAvailability"},"repairUserWorkspaceFields":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"repairUserWorkspaceFields"},"getPublicEmbeddedProject":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"httpsTrigger":{},"entryPoint":"getPublicEmbeddedProject"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{},"params":[{"type":"secret","name":"RESEND_API_KEY"},{"type":"secret","name":"STRIPE_SECRET_KEY"},{"type":"secret","name":"STRIPE_WEBHOOK_SECRET"},{"name":"STRIPE_PRICE_PROFESSIONAL","type":"string"},{"name":"STRIPE_PRICE_STUDIO","type":"string","default":""}]}
+[debug] [2026-08-04T23:13:13.844Z] File C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\src\stripeWebhook.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\functions\\src\\stripeWebhook.js changed, reloading triggers"}}
+[debug] [2026-08-04T23:13:14.856Z] Validating nodejs source
+[debug] [2026-08-04T23:13:15.994Z] > [functions] package.json contents: {
+  "name": "fivi360-functions",
+  "description": "Cloud Functions for FIVI360",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^7.3.2",
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
+  }
+}
+[debug] [2026-08-04T23:13:15.994Z] Building nodejs source
+[debug] [2026-08-04T23:13:15.994Z] Failed to find version of module node: reached end of search path C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\node_modules
+[info] +  functions: Using node@22 from host. 
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-08-04T23:13:15.995Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-08-04T23:13:15.999Z] Found firebase-functions binary at 'C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\node_modules\.bin\firebase-functions'
+[debug] [2026-08-04T23:13:16.010Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
+[debug] [2026-08-04T23:13:16.011Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
+[info] +  functions: Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, completeEmailVerification, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook, syncPublicPortfolioAvailability, repairUserWorkspaceFields, getPublicEmbeddedProject. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, completeEmailVerification, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook, syncPublicPortfolioAvailability, repairUserWorkspaceFields, getPublicEmbeddedProject."}}
+[info] Serving at port 8558
+
+[debug] [2026-08-04T23:13:16.475Z] Got response from /__/functions.yaml {"endpoints":{"processEmailQueue":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"RESEND_API_KEY"}],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"emailQueue/{emailId}"},"retry":false},"entryPoint":"processEmailQueue"},"requestPasswordResetEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"requestPasswordResetEmail"},"completeEmailVerification":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"completeEmailVerification"},"createStripeCheckoutSession":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"createStripeCheckoutSession"},"cancelStripeSubscription":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"cancelStripeSubscription"},"stripeWebhook":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_WEBHOOK_SECRET"},{"key":"STRIPE_SECRET_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"stripeWebhook"},"syncPublicPortfolioAvailability":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"syncPublicPortfolioAvailability"},"repairUserWorkspaceFields":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"repairUserWorkspaceFields"},"getPublicEmbeddedProject":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"httpsTrigger":{},"entryPoint":"getPublicEmbeddedProject"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{},"params":[{"type":"secret","name":"RESEND_API_KEY"},{"type":"secret","name":"STRIPE_SECRET_KEY"},{"type":"secret","name":"STRIPE_WEBHOOK_SECRET"},{"name":"STRIPE_PRICE_PROFESSIONAL","type":"string"},{"name":"STRIPE_PRICE_STUDIO","type":"string","default":""}]}
+[debug] [2026-08-04T23:13:19.514Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
+[debug] [2026-08-04T23:13:19.516Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
+[info] +  functions: Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, completeEmailVerification, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook, syncPublicPortfolioAvailability, repairUserWorkspaceFields, getPublicEmbeddedProject. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, completeEmailVerification, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook, syncPublicPortfolioAvailability, repairUserWorkspaceFields, getPublicEmbeddedProject."}}
+[debug] [2026-08-04T23:13:20.390Z] File C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\src\stripeWebhook.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\functions\\src\\stripeWebhook.js changed, reloading triggers"}}
+[debug] [2026-08-04T23:13:21.406Z] Validating nodejs source
+[debug] [2026-08-04T23:13:22.004Z] > [functions] package.json contents: {
+  "name": "fivi360-functions",
+  "description": "Cloud Functions for FIVI360",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^7.3.2",
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
+  }
+}
+[debug] [2026-08-04T23:13:22.004Z] Building nodejs source
+[debug] [2026-08-04T23:13:22.005Z] Failed to find version of module node: reached end of search path C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\node_modules
+[info] +  functions: Using node@22 from host. 
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-08-04T23:13:22.006Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-08-04T23:13:22.008Z] Found firebase-functions binary at 'C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\node_modules\.bin\firebase-functions'
+[debug] [2026-08-04T23:13:22.011Z] File C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\src\stripeWebhook.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\functions\\src\\stripeWebhook.js changed, reloading triggers"}}
+[info] Serving at port 8677
+
+[debug] [2026-08-04T23:13:22.443Z] File C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\src\stripeWebhook.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\functions\\src\\stripeWebhook.js changed, reloading triggers"}}
+[debug] [2026-08-04T23:13:22.526Z] Got response from /__/functions.yaml {"endpoints":{"processEmailQueue":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"RESEND_API_KEY"}],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"emailQueue/{emailId}"},"retry":false},"entryPoint":"processEmailQueue"},"requestPasswordResetEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"requestPasswordResetEmail"},"completeEmailVerification":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"completeEmailVerification"},"createStripeCheckoutSession":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"createStripeCheckoutSession"},"cancelStripeSubscription":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"cancelStripeSubscription"},"stripeWebhook":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_WEBHOOK_SECRET"},{"key":"STRIPE_SECRET_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"stripeWebhook"},"syncPublicPortfolioAvailability":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"syncPublicPortfolioAvailability"},"repairUserWorkspaceFields":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"repairUserWorkspaceFields"},"getPublicEmbeddedProject":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"httpsTrigger":{},"entryPoint":"getPublicEmbeddedProject"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{},"params":[{"type":"secret","name":"RESEND_API_KEY"},{"type":"secret","name":"STRIPE_SECRET_KEY"},{"type":"secret","name":"STRIPE_WEBHOOK_SECRET"},{"name":"STRIPE_PRICE_PROFESSIONAL","type":"string"},{"name":"STRIPE_PRICE_STUDIO","type":"string","default":""}]}
+[debug] [2026-08-04T23:13:23.452Z] Validating nodejs source
+[debug] [2026-08-04T23:13:24.038Z] > [functions] package.json contents: {
+  "name": "fivi360-functions",
+  "description": "Cloud Functions for FIVI360",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^7.3.2",
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
+  }
+}
+[debug] [2026-08-04T23:13:24.038Z] Building nodejs source
+[debug] [2026-08-04T23:13:24.038Z] Failed to find version of module node: reached end of search path C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\node_modules
+[info] +  functions: Using node@22 from host. 
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-08-04T23:13:24.039Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-08-04T23:13:24.042Z] Found firebase-functions binary at 'C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\node_modules\.bin\firebase-functions'
+[info] Serving at port 8640
+
+[debug] [2026-08-04T23:13:24.532Z] Got response from /__/functions.yaml {"endpoints":{"processEmailQueue":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"RESEND_API_KEY"}],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"emailQueue/{emailId}"},"retry":false},"entryPoint":"processEmailQueue"},"requestPasswordResetEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"requestPasswordResetEmail"},"completeEmailVerification":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"completeEmailVerification"},"createStripeCheckoutSession":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"createStripeCheckoutSession"},"cancelStripeSubscription":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"cancelStripeSubscription"},"stripeWebhook":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_WEBHOOK_SECRET"},{"key":"STRIPE_SECRET_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"stripeWebhook"},"syncPublicPortfolioAvailability":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"syncPublicPortfolioAvailability"},"repairUserWorkspaceFields":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"repairUserWorkspaceFields"},"getPublicEmbeddedProject":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"httpsTrigger":{},"entryPoint":"getPublicEmbeddedProject"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{},"params":[{"type":"secret","name":"RESEND_API_KEY"},{"type":"secret","name":"STRIPE_SECRET_KEY"},{"type":"secret","name":"STRIPE_WEBHOOK_SECRET"},{"name":"STRIPE_PRICE_PROFESSIONAL","type":"string"},{"name":"STRIPE_PRICE_STUDIO","type":"string","default":""}]}
+[debug] [2026-08-04T23:13:25.044Z] File C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\src\cancelStripeSubscription.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\functions\\src\\cancelStripeSubscription.js changed, reloading triggers"}}
+[debug] [2026-08-04T23:13:25.560Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
+[debug] [2026-08-04T23:13:25.561Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
+[info] +  functions: Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, completeEmailVerification, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook, syncPublicPortfolioAvailability, repairUserWorkspaceFields, getPublicEmbeddedProject. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, completeEmailVerification, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook, syncPublicPortfolioAvailability, repairUserWorkspaceFields, getPublicEmbeddedProject."}}
+[debug] [2026-08-04T23:13:25.596Z] File C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\src\cancelStripeSubscription.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\functions\\src\\cancelStripeSubscription.js changed, reloading triggers"}}
+[debug] [2026-08-04T23:13:26.604Z] Validating nodejs source
+[debug] [2026-08-04T23:13:27.532Z] > [functions] package.json contents: {
+  "name": "fivi360-functions",
+  "description": "Cloud Functions for FIVI360",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^7.3.2",
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
+  }
+}
+[debug] [2026-08-04T23:13:27.532Z] Building nodejs source
+[debug] [2026-08-04T23:13:27.533Z] Failed to find version of module node: reached end of search path C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\node_modules
+[info] +  functions: Using node@22 from host. 
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-08-04T23:13:27.534Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-08-04T23:13:27.537Z] Found firebase-functions binary at 'C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\node_modules\.bin\firebase-functions'
+[debug] [2026-08-04T23:13:27.555Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
+[debug] [2026-08-04T23:13:27.556Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
+[info] +  functions: Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, completeEmailVerification, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook, syncPublicPortfolioAvailability, repairUserWorkspaceFields, getPublicEmbeddedProject. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, completeEmailVerification, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook, syncPublicPortfolioAvailability, repairUserWorkspaceFields, getPublicEmbeddedProject."}}
+[info] Serving at port 8043
+
+[debug] [2026-08-04T23:13:28.024Z] Got response from /__/functions.yaml {"endpoints":{"processEmailQueue":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"RESEND_API_KEY"}],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"emailQueue/{emailId}"},"retry":false},"entryPoint":"processEmailQueue"},"requestPasswordResetEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"requestPasswordResetEmail"},"completeEmailVerification":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"completeEmailVerification"},"createStripeCheckoutSession":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"createStripeCheckoutSession"},"cancelStripeSubscription":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"cancelStripeSubscription"},"stripeWebhook":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_WEBHOOK_SECRET"},{"key":"STRIPE_SECRET_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"stripeWebhook"},"syncPublicPortfolioAvailability":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"syncPublicPortfolioAvailability"},"repairUserWorkspaceFields":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"repairUserWorkspaceFields"},"getPublicEmbeddedProject":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"httpsTrigger":{},"entryPoint":"getPublicEmbeddedProject"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{},"params":[{"type":"secret","name":"RESEND_API_KEY"},{"type":"secret","name":"STRIPE_SECRET_KEY"},{"type":"secret","name":"STRIPE_WEBHOOK_SECRET"},{"name":"STRIPE_PRICE_PROFESSIONAL","type":"string"},{"name":"STRIPE_PRICE_STUDIO","type":"string","default":""}]}
+[debug] [2026-08-04T23:13:31.069Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
+[debug] [2026-08-04T23:13:31.069Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
+[info] +  functions: Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, completeEmailVerification, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook, syncPublicPortfolioAvailability, repairUserWorkspaceFields, getPublicEmbeddedProject. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, completeEmailVerification, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook, syncPublicPortfolioAvailability, repairUserWorkspaceFields, getPublicEmbeddedProject."}}
+[debug] [2026-08-04T23:13:31.845Z] File C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\src\stripeWebhook.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\functions\\src\\stripeWebhook.js changed, reloading triggers"}}
+[debug] [2026-08-04T23:13:32.233Z] File C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\src\stripeWebhook.js changed, reloading triggers {"metadata":{"emulator":{"name":"functions"},"message":"File C:\\Workspace\\01_Products\\FIVI360\\Software\\fivi360\\functions\\src\\stripeWebhook.js changed, reloading triggers"}}
+[debug] [2026-08-04T23:13:33.245Z] Validating nodejs source
+[debug] [2026-08-04T23:13:33.863Z] > [functions] package.json contents: {
+  "name": "fivi360-functions",
+  "description": "Cloud Functions for FIVI360",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0",
+    "firebase-functions": "^7.3.2",
+    "resend": "^4.5.1",
+    "stripe": "^22.2.1"
+  }
+}
+[debug] [2026-08-04T23:13:33.863Z] Building nodejs source
+[debug] [2026-08-04T23:13:33.863Z] Failed to find version of module node: reached end of search path C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\node_modules
+[info] +  functions: Using node@22 from host. 
+[info] i  functions: Loaded environment variables from .env, .env.local. 
+[debug] [2026-08-04T23:13:33.864Z] Could not find functions.yaml. Must use http discovery
+[debug] [2026-08-04T23:13:33.867Z] Found firebase-functions binary at 'C:\Workspace\01_Products\FIVI360\Software\fivi360\functions\node_modules\.bin\firebase-functions'
+[info] Serving at port 8089
+
+[debug] [2026-08-04T23:13:34.442Z] Got response from /__/functions.yaml {"endpoints":{"processEmailQueue":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"RESEND_API_KEY"}],"labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"emailQueue/{emailId}"},"retry":false},"entryPoint":"processEmailQueue"},"requestPasswordResetEmail":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"requestPasswordResetEmail"},"completeEmailVerification":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"completeEmailVerification"},"createStripeCheckoutSession":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"createStripeCheckoutSession"},"cancelStripeSubscription":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_SECRET_KEY"}],"labels":{},"callableTrigger":{},"entryPoint":"cancelStripeSubscription"},"stripeWebhook":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"secretEnvironmentVariables":[{"key":"STRIPE_WEBHOOK_SECRET"},{"key":"STRIPE_SECRET_KEY"}],"labels":{},"httpsTrigger":{},"entryPoint":"stripeWebhook"},"syncPublicPortfolioAvailability":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"syncPublicPortfolioAvailability"},"repairUserWorkspaceFields":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"callableTrigger":{},"entryPoint":"repairUserWorkspaceFields"},"getPublicEmbeddedProject":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","region":["southamerica-east1"],"labels":{},"httpsTrigger":{},"entryPoint":"getPublicEmbeddedProject"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{},"params":[{"type":"secret","name":"RESEND_API_KEY"},{"type":"secret","name":"STRIPE_SECRET_KEY"},{"type":"secret","name":"STRIPE_WEBHOOK_SECRET"},{"name":"STRIPE_PRICE_PROFESSIONAL","type":"string"},{"name":"STRIPE_PRICE_STUDIO","type":"string","default":""}]}
+[debug] [2026-08-04T23:13:37.476Z] defaultcredentials: writing to file C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json
+[debug] [2026-08-04T23:13:37.476Z] Setting GAC to C:\Users\Tiago Machado\AppData\Roaming\firebase\tiagomachadodev_gmail_com_application_default_credentials.json {"metadata":{"emulator":{"name":"functions"},"message":"Setting GAC to C:\\Users\\Tiago Machado\\AppData\\Roaming\\firebase\\tiagomachadodev_gmail_com_application_default_credentials.json"}}
+[info] +  functions: Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, completeEmailVerification, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook, syncPublicPortfolioAvailability, repairUserWorkspaceFields, getPublicEmbeddedProject. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: processEmailQueue, requestPasswordResetEmail, completeEmailVerification, createStripeCheckoutSession, cancelStripeSubscription, stripeWebhook, syncPublicPortfolioAvailability, repairUserWorkspaceFields, getPublicEmbeddedProject."}}
+[debug] [2026-08-04T23:13:38.921Z] Aug 04, 2026 8:13:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:13:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:13:39.001Z] Aug 04, 2026 8:13:39 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:13:39 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:13:39.003Z] Aug 04, 2026 8:13:39 PM com.google.cloud.datastore.emulator.firestore.webchannel.FirestoreV1WebChannelAdapter$FirestoreListenHandler onClose
+INFO: channel closed
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:13:39 PM com.google.cloud.datastore.emulator.firestore.webchannel.FirestoreV1WebChannelAdapter$FirestoreListenHandler onClose\r\nINFO: channel closed\r\n"}}
+[debug] [2026-08-04T23:14:07.247Z] Aug 04, 2026 8:14:07 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:07 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:07.270Z] Aug 04, 2026 8:14:07 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:07 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:07.278Z] Aug 04, 2026 8:14:07 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:07 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:07.287Z] Aug 04, 2026 8:14:07 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:07 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:07.303Z] Aug 04, 2026 8:14:07 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:07 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:07.310Z] Aug 04, 2026 8:14:07 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:07 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:07.332Z] Aug 04, 2026 8:14:07 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:07 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:27.383Z] Aug 04, 2026 8:14:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:27.396Z] Aug 04, 2026 8:14:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:27.415Z] Aug 04, 2026 8:14:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:27.423Z] Aug 04, 2026 8:14:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:27.458Z] Aug 04, 2026 8:14:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:27.469Z] Aug 04, 2026 8:14:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:27 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:28.513Z] Aug 04, 2026 8:14:28 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:28 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:28.529Z] Aug 04, 2026 8:14:28 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:28 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:28.544Z] Aug 04, 2026 8:14:28 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:28 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:28.575Z] Aug 04, 2026 8:14:28 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:28 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:28.602Z] Aug 04, 2026 8:14:28 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:28 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:28.608Z] Aug 04, 2026 8:14:28 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:28 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:32.135Z] Aug 04, 2026 8:14:32 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:32 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:32.148Z] Aug 04, 2026 8:14:32 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:32 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:32.162Z] Aug 04, 2026 8:14:32 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:32 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:32.173Z] Aug 04, 2026 8:14:32 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:32 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:32.197Z] Aug 04, 2026 8:14:32 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:32 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:32.204Z] Aug 04, 2026 8:14:32 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:32 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:32.901Z] Aug 04, 2026 8:14:32 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:32 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:32.912Z] Aug 04, 2026 8:14:32 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:32 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:32.930Z] Aug 04, 2026 8:14:32 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:32 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:32.942Z] Aug 04, 2026 8:14:32 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:32 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:32.963Z] Aug 04, 2026 8:14:32 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:32 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:32.968Z] Aug 04, 2026 8:14:32 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:32 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:33.545Z] Aug 04, 2026 8:14:33 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:33 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:33.559Z] Aug 04, 2026 8:14:33 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:33 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:33.581Z] Aug 04, 2026 8:14:33 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:33 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:33.588Z] Aug 04, 2026 8:14:33 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:33 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:33.618Z] Aug 04, 2026 8:14:33 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:33 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:33.630Z] Aug 04, 2026 8:14:33 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:33 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:33.652Z] Aug 04, 2026 8:14:33 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:33 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:33.675Z] Aug 04, 2026 8:14:33 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:33 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:33.715Z] Aug 04, 2026 8:14:33 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:33 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:33.722Z] Aug 04, 2026 8:14:33 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:33 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:38.100Z] Aug 04, 2026 8:14:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:38.112Z] Aug 04, 2026 8:14:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:38.128Z] Aug 04, 2026 8:14:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:38.135Z] Aug 04, 2026 8:14:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:38.151Z] Aug 04, 2026 8:14:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:38.158Z] Aug 04, 2026 8:14:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:14:38.172Z] Aug 04, 2026 8:14:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:14:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:15:08.190Z] Aug 04, 2026 8:15:08 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:15:08 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:15:38.995Z] Aug 04, 2026 8:15:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:15:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:15:38.997Z] Aug 04, 2026 8:15:38 PM com.google.cloud.datastore.emulator.firestore.webchannel.FirestoreV1WebChannelAdapter$FirestoreListenHandler onClose
+INFO: channel closed
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:15:38 PM com.google.cloud.datastore.emulator.firestore.webchannel.FirestoreV1WebChannelAdapter$FirestoreListenHandler onClose\r\nINFO: channel closed\r\n"}}
+[debug] [2026-08-04T23:17:41.577Z] Aug 04, 2026 8:17:41 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:17:41 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:17:41.600Z] Aug 04, 2026 8:17:41 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:17:41 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:17:41.609Z] Aug 04, 2026 8:17:41 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:17:41 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:17:41.616Z] Aug 04, 2026 8:17:41 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:17:41 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:17:41.635Z] Aug 04, 2026 8:17:41 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:17:41 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:17:41.649Z] Aug 04, 2026 8:17:41 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:17:41 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:17:41.662Z] Aug 04, 2026 8:17:41 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:17:41 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:17:41.667Z] Aug 04, 2026 8:17:41 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:17:41 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:17:41.764Z] Aug 04, 2026 8:17:41 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:17:41 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:17:41.771Z] Aug 04, 2026 8:17:41 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:17:41 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:17:42.890Z] Aug 04, 2026 8:17:42 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:17:42 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:17:42.899Z] Aug 04, 2026 8:17:42 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:17:42 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:17:42.912Z] Aug 04, 2026 8:17:42 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:17:42 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:17:42.919Z] Aug 04, 2026 8:17:42 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:17:42 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:17:42.936Z] Aug 04, 2026 8:17:42 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:17:42 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:17:42.946Z] Aug 04, 2026 8:17:42 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:17:42 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}
+[debug] [2026-08-04T23:17:42.957Z] Aug 04, 2026 8:17:42 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 04, 2026 8:17:42 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\r\nINFO: Detected non-HTTP/2 connection.\r\n"}}

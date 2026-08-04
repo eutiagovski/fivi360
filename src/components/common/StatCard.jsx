@@ -11,9 +11,12 @@ export const StatCard = ({
   current,
   limit,
   percentage,
+  unlimited = false,
 }) => {
   if (variant === "usage") {
-    const { valueClassName, barClassName } = getUsageVisualClasses(percentage);
+    const { valueClassName, barClassName } = unlimited
+      ? { valueClassName: "text-white", barClassName: "bg-white" }
+      : getUsageVisualClasses(percentage);
 
     return (
       <div
@@ -27,12 +30,14 @@ export const StatCard = ({
           </span>
           <span className="text-sm text-zinc-500">{limit}</span>
         </div>
-        <div className="mt-3 h-2 bg-zinc-800 rounded-full overflow-hidden">
-          <div
-            className={`h-full transition-all ${barClassName}`}
-            style={{ width: `${Math.min(100, percentage)}%` }}
-          />
-        </div>
+        {!unlimited && (
+          <div className="mt-3 h-2 bg-zinc-800 rounded-full overflow-hidden">
+            <div
+              className={`h-full transition-all ${barClassName}`}
+              style={{ width: `${Math.min(100, percentage ?? 0)}%` }}
+            />
+          </div>
+        )}
       </div>
     );
   }

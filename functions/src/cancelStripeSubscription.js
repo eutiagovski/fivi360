@@ -3,6 +3,7 @@ const { logger } = require("firebase-functions");
 const { initializeApp, getApps } = require("firebase-admin/app");
 const { getFirestore, FieldValue, Timestamp } = require("firebase-admin/firestore");
 const { STRIPE_SECRET_KEY, getStripeClient } = require("./stripe/client");
+const { extractSubscriptionPeriodUnix } = require("./stripe/subscriptionPeriod");
 const { EMAIL_TYPES } = require("./config/email");
 const { resolveUserEmail } = require("./email/sendBillingEmail");
 
@@ -179,11 +180,29 @@ exports.cancelStripeSubscription = onCall(
       const planId =
         typeof subscriptionData.planId === "string" ? subscriptionData.planId : null;
 
+      const periodUnix = extractSubscriptionPeriodUnix(stripeSubscription);
       const currentPeriodEnd =
-        toFirestoreTimestamp(stripeSubscription.current_period_end) ??
+        toFirestoreTimestamp(periodUnix.currentPeriodEnd) ??
         (subscriptionData.currentPeriodEnd instanceof Timestamp
           ? subscriptionData.currentPeriodEnd
           : null);
+
+      if (currentPeriodEnd) {
+        await subscriptionRef.set(
+          {
+            currentPeriodEnd,
+            nextBillingAt: currentPeriodEnd,
+            updatedAt,
+          },
+          { merge: true },
+        );
+
+        await db.collection("users").doc(uid).update({
+          "billing.currentPeriodEnd": currentPeriodEnd,
+          "billing.nextInvoiceDate": currentPeriodEnd,
+          "billing.cancelAtPeriodEnd": true,
+        });
+      }
 
       try {
         await enqueueSubscriptionCancellationScheduledEmail(db, {

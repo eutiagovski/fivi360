@@ -274,30 +274,36 @@ export async function assertProjectEmbedEnabled(userId) {
  * }}
  */
 export function buildUsageStats(limits, usage) {
-  const projectLimitLabel = isUnlimited(limits.maxProjects)
-    ? "ilimitado"
+  const projectsUnlimited = isUnlimited(limits.maxProjects);
+  const imagesUnlimited = isUnlimited(limits.maxTotalImages);
+
+  const projectLimitLabel = projectsUnlimited
+    ? "Ilimitado"
     : `/ ${limits.maxProjects}`;
 
-  const imageLimitLabel = isUnlimited(limits.maxTotalImages)
-    ? "ilimitado"
+  const imageLimitLabel = imagesUnlimited
+    ? "Ilimitado"
     : `/ ${limits.maxTotalImages}`;
 
   return {
     projects: {
       current: usage.projectCount,
       limit: limits.maxProjects,
+      unlimited: projectsUnlimited,
       percentage: usagePercentage(usage.projectCount, limits.maxProjects),
       limitLabel: projectLimitLabel,
     },
     images: {
       current: usage.imageCount,
       limit: limits.maxTotalImages,
+      unlimited: imagesUnlimited,
       percentage: usagePercentage(usage.imageCount, limits.maxTotalImages),
       limitLabel: imageLimitLabel,
     },
     storage: {
       current: usage.storageBytes,
       limit: limits.maxStorageBytes,
+      unlimited: false,
       percentage: usagePercentage(usage.storageBytes, limits.maxStorageBytes),
       currentLabel: formatStorageBytes(usage.storageBytes),
       limitLabel: formatStorageBytes(limits.maxStorageBytes),

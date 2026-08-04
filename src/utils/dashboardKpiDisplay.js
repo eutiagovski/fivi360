@@ -11,7 +11,7 @@ const GB = 1024 * 1024 * 1024;
  * @returns {string}
  */
 export function getDashboardCountLimitDisplay(max) {
-  return isUnlimited(max) ? "ilimitado" : String(max);
+  return isUnlimited(max) ? "Ilimitado" : String(max);
 }
 
 /**
