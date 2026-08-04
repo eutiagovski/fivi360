@@ -12,6 +12,7 @@ const SIZE_MAX_WIDTH = {
   sm: "max-w-sm sm:max-w-sm",
   md: "max-w-md sm:max-w-md",
   lg: "max-w-lg sm:max-w-lg",
+  xl: "max-w-2xl sm:max-w-2xl",
 };
 
 /** Largura, margem mobile, padding e radius — referência: EditImageDialog / UploadImageDialog */

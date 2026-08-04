@@ -1,8 +1,16 @@
-import { useEffect, useMemo, useState } from "react";
-import { Check, Copy, ExternalLink, Loader2 } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  Check,
+  Copy,
+  ExternalLink,
+  Info,
+  Loader2,
+} from "lucide-react";
 import { Link } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
+import { useAuth } from "@/hooks/useAuth";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { toast } from "@/hooks/use-toast";
 import { updateProjectEmbedSettings } from "@/services/projects/projectService";
@@ -12,7 +20,6 @@ import {
   buildEmbedProjectUrl,
   buildEmbedSnippet,
 } from "@/utils/embed";
-import { useAuth } from "@/hooks/useAuth";
 
 /**
  * Seção “Incorporar no website” dentro do compartilhamento do projeto.
@@ -21,12 +28,14 @@ import { useAuth } from "@/hooks/useAuth";
  *   project: import("@/services/projects/projectService").Project,
  *   images?: import("@/services/images/imageService").Image[],
  *   onEmbedSaved?: () => void | Promise<void>,
+ *   modalOpen?: boolean,
  * }} props
  */
 export function ProjectEmbedSettingsSection({
   project,
   images = [],
   onEmbedSaved,
+  modalOpen = true,
 }) {
   const { user } = useAuth();
   const { projectEmbedEnabled, loading: planLoading } = usePlanLimits();
@@ -34,12 +43,36 @@ export function ProjectEmbedSettingsSection({
     () => project.embedSettings ?? { ...DEFAULT_EMBED_SETTINGS },
   );
   const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState(
+    /** @type {'idle' | 'saving' | 'saved' | 'error'} */ ("idle"),
+  );
   const [copied, setCopied] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [previewStatus, setPreviewStatus] = useState(
+    /** @type {'idle' | 'loading' | 'loaded' | 'error'} */ ("idle"),
+  );
+  const [previewNonce, setPreviewNonce] = useState(0);
+  const snippetRef = useRef(/** @type {HTMLTextAreaElement | null} */ (null));
+  const savedFeedbackTimer = useRef(/** @type {number | null} */ (null));
 
   useEffect(() => {
     setSettings(project.embedSettings ?? { ...DEFAULT_EMBED_SETTINGS });
   }, [project]);
+
+  useEffect(() => {
+    if (!settings.enabled || !modalOpen) {
+      setShowPreview(false);
+      setPreviewStatus("idle");
+    }
+  }, [settings.enabled, modalOpen]);
+
+  useEffect(() => {
+    return () => {
+      if (savedFeedbackTimer.current != null) {
+        window.clearTimeout(savedFeedbackTimer.current);
+      }
+    };
+  }, []);
 
   const validImages = useMemo(
     () =>
@@ -53,6 +86,39 @@ export function ProjectEmbedSettingsSection({
   const snippet = buildEmbedSnippet(project.id, {
     projectName: project.title,
   });
+  const previewUrl = embedUrl;
+  const canShowPreview = Boolean(previewUrl && settings.enabled);
+
+  const openPreview = () => {
+    if (!previewUrl) {
+      return;
+    }
+    setShowPreview(true);
+    setPreviewStatus("loading");
+  };
+
+  const hidePreview = () => {
+    setShowPreview(false);
+    setPreviewStatus("idle");
+  };
+
+  const retryPreview = () => {
+    if (!previewUrl) {
+      return;
+    }
+    setPreviewStatus("loading");
+    setPreviewNonce((value) => value + 1);
+  };
+
+  const markSaved = () => {
+    setSaveStatus("saved");
+    if (savedFeedbackTimer.current != null) {
+      window.clearTimeout(savedFeedbackTimer.current);
+    }
+    savedFeedbackTimer.current = window.setTimeout(() => {
+      setSaveStatus("idle");
+    }, 2000);
+  };
 
   const persist = async (patch) => {
     if (!user?.uid || !projectEmbedEnabled) {
@@ -60,6 +126,7 @@ export function ProjectEmbedSettingsSection({
     }
 
     setIsSaving(true);
+    setSaveStatus("saving");
 
     try {
       const next = await updateProjectEmbedSettings(
@@ -76,8 +143,12 @@ export function ProjectEmbedSettingsSection({
           description:
             "A incorporação foi desativada. Os websites que utilizam este código deixarão de exibir o projeto.",
         });
+        setSaveStatus("idle");
+      } else {
+        markSaved();
       }
     } catch (error) {
+      setSaveStatus("error");
       if (!showPlanLimitToast(error, toast)) {
         toast({
           title: "Erro ao salvar",
@@ -101,6 +172,11 @@ export function ProjectEmbedSettingsSection({
       });
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
+      const field = snippetRef.current;
+      if (field) {
+        field.focus();
+        field.select();
+      }
       toast({
         title: "Copie o código manualmente",
         description:
@@ -110,18 +186,30 @@ export function ProjectEmbedSettingsSection({
   };
 
   return (
-    <div
-      className="space-y-4 border-t border-zinc-800 pt-5"
-      data-testid="embed-settings-section"
-    >
-      <div>
-        <h3 className="text-sm font-medium text-white">
-          Incorporar no website
-        </h3>
-        <p className="text-xs text-zinc-500 mt-1">
-          Permite adicionar a visualização do projeto dentro de um website
-          existente.
-        </p>
+    <div className="space-y-4" data-testid="embed-settings-section">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-sm font-medium text-white">
+              Incorporar no website
+            </h3>
+            <Badge
+              variant="outline"
+              className="rounded-md border-zinc-600 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-zinc-300"
+              data-testid="embed-professional-badge"
+            >
+              Professional+
+            </Badge>
+          </div>
+          <p className="mt-1.5 text-sm leading-relaxed text-zinc-400">
+            Incorpore este projeto diretamente no website do seu escritório. Os
+            visitantes poderão explorar os ambientes sem sair da página.
+          </p>
+          <p className="mt-1 text-xs text-zinc-500">
+            Permite adicionar a visualização do projeto dentro de um website
+            existente.
+          </p>
+        </div>
       </div>
 
       {planLoading ? (
@@ -131,9 +219,12 @@ export function ProjectEmbedSettingsSection({
         </div>
       ) : !projectEmbedEnabled ? (
         <div
-          className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 space-y-2"
+          className="space-y-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-4"
           data-testid="embed-plan-locked"
         >
+          <p className="text-sm font-medium text-amber-50">
+            Adicione a visualização 360° ao website do seu escritório.
+          </p>
           {settings.enabled ? (
             <p className="text-sm text-amber-100/90">
               Seu código de incorporação está temporariamente indisponível. Este
@@ -146,7 +237,7 @@ export function ProjectEmbedSettingsSection({
           )}
           <Link
             to="/plan"
-            className="inline-block text-sm font-medium text-white underline-offset-4 hover:underline"
+            className="inline-flex items-center rounded-xl bg-white px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-zinc-200"
             data-testid="embed-upgrade-cta"
           >
             Conhecer o Professional
@@ -154,167 +245,329 @@ export function ProjectEmbedSettingsSection({
         </div>
       ) : (
         <>
-          <div className="flex items-center justify-between gap-3">
-            <label
-              htmlFor="embed-enabled"
-              className="text-sm text-zinc-200"
-            >
-              Ativar incorporação
-            </label>
-            <Switch
-              id="embed-enabled"
-              checked={settings.enabled === true}
-              disabled={isSaving}
-              onCheckedChange={(checked) => {
-                const enabled = checked === true;
-                const patch = { enabled };
-                if (
-                  enabled &&
-                  !settings.initialImageId &&
-                  validImages[0]?.id
-                ) {
-                  patch.initialImageId = validImages[0].id;
-                }
-                void persist(patch);
-              }}
-              data-testid="embed-enabled-switch"
-              aria-label="Ativar incorporação"
-            />
+          <div
+            className="rounded-xl border border-zinc-700 bg-zinc-800/40 p-4"
+            data-testid="embed-activation-card"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <label
+                  htmlFor="embed-enabled"
+                  className="text-sm font-medium text-white"
+                >
+                  Ativar incorporação
+                </label>
+                <p className="mt-1 text-xs leading-relaxed text-zinc-500">
+                  Gere um código para exibir este projeto em websites externos.
+                </p>
+              </div>
+              <Switch
+                id="embed-enabled"
+                checked={settings.enabled === true}
+                disabled={isSaving}
+                onCheckedChange={(checked) => {
+                  const enabled = checked === true;
+                  const patch = { enabled };
+                  if (
+                    enabled &&
+                    !settings.initialImageId &&
+                    validImages[0]?.id
+                  ) {
+                    patch.initialImageId = validImages[0].id;
+                  }
+                  void persist(patch);
+                }}
+                data-testid="embed-enabled-switch"
+                aria-label="Ativar incorporação"
+                className="mt-0.5"
+              />
+            </div>
+
+            {!settings.enabled ? (
+              <p className="mt-3 text-xs text-zinc-500">
+                Ative a incorporação para configurar a visualização e gerar o
+                código HTML.
+              </p>
+            ) : null}
           </div>
 
-          {!settings.enabled ? (
-            <p className="text-xs text-zinc-500">
-              Ative a incorporação para gerar um código que poderá ser
-              adicionado ao website do seu escritório.
-            </p>
-          ) : (
-            <div className="space-y-4">
-              <div>
-                <label
-                  htmlFor="embed-initial-image"
-                  className="text-xs text-zinc-500 mb-2 block"
-                >
-                  Imagem inicial
-                </label>
-                <select
-                  id="embed-initial-image"
-                  data-testid="embed-initial-image"
-                  className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-xl text-sm text-zinc-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
-                  value={settings.initialImageId ?? ""}
-                  disabled={isSaving || validImages.length === 0}
-                  onChange={(event) => {
-                    const value = event.target.value || null;
-                    void persist({ initialImageId: value });
-                  }}
-                >
-                  {validImages.length === 0 ? (
-                    <option value="">Nenhuma imagem disponível</option>
-                  ) : (
-                    validImages.map((image) => (
-                      <option key={image.id} value={image.id}>
-                        {image.title || "Sem título"}
-                      </option>
-                    ))
-                  )}
-                </select>
-              </div>
-
-              <label className="flex items-center gap-3 text-sm text-zinc-300 cursor-pointer">
-                <Checkbox
-                  checked={settings.allowFullscreen !== false}
-                  disabled={isSaving}
-                  onCheckedChange={(checked) => {
-                    void persist({ allowFullscreen: checked === true });
-                  }}
-                  data-testid="embed-allow-fullscreen"
-                  aria-label="Permitir visualização em tela cheia"
-                />
-                Permitir visualização em tela cheia
-              </label>
-
-              <label className="flex items-center gap-3 text-sm text-zinc-300 cursor-pointer">
-                <Checkbox
-                  checked={settings.allowNavigation !== false}
-                  disabled={isSaving}
-                  onCheckedChange={(checked) => {
-                    void persist({ allowNavigation: checked === true });
-                  }}
-                  data-testid="embed-allow-navigation"
-                  aria-label="Permitir navegação entre ambientes"
-                />
-                Permitir navegação entre ambientes
-              </label>
-
-              <p className="text-xs text-zinc-500">
-                Qualquer pessoa com acesso ao código ou ao link de
-                incorporação poderá visualizar o projeto.
-              </p>
-
-              <div>
-                <p className="text-xs text-zinc-500 mb-2">
-                  Copie e cole este código na área desejada do seu website.
-                </p>
-                <textarea
-                  readOnly
-                  value={snippet}
-                  data-testid="embed-snippet"
-                  className="w-full min-h-[120px] px-3 py-2 bg-zinc-900 border border-zinc-700 rounded-xl text-xs text-zinc-300 font-mono focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
-                  onFocus={(event) => event.target.select()}
-                />
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={handleCopyCode}
-                    data-testid="embed-copy-code"
-                    className="flex items-center gap-2 px-4 py-2 bg-white text-black rounded-xl text-sm font-medium hover:bg-zinc-200 transition-colors"
+          <div
+            className={`grid transition-[grid-template-rows,opacity] duration-200 ease-out ${
+              settings.enabled
+                ? "grid-rows-[1fr] opacity-100"
+                : "grid-rows-[0fr] opacity-0"
+            }`}
+            aria-hidden={!settings.enabled}
+          >
+            <div className="min-h-0 overflow-hidden">
+              {settings.enabled ? (
+                <div className="space-y-4 pt-0">
+                  <div
+                    className="space-y-4 rounded-xl border border-zinc-700 bg-zinc-800/30 p-4"
+                    data-testid="embed-settings-card"
                   >
-                    {copied ? <Check size={16} /> : <Copy size={16} />}
-                    {copied ? "Código copiado" : "Copiar código"}
-                  </button>
-                  <a
-                    href={embedUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    data-testid="embed-open-preview"
-                    className="flex items-center gap-2 px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-xl text-sm text-white hover:bg-zinc-700 transition-colors"
-                  >
-                    <ExternalLink size={16} />
-                    Abrir visualização
-                  </a>
-                  <button
-                    type="button"
-                    onClick={() => setShowPreview((value) => !value)}
-                    data-testid="embed-toggle-preview"
-                    className="flex items-center gap-2 px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-xl text-sm text-white hover:bg-zinc-700 transition-colors"
-                  >
-                    {showPreview ? "Ocultar preview" : "Mostrar preview"}
-                  </button>
-                </div>
-              </div>
+                    <div>
+                      <h4 className="text-sm font-medium text-white">
+                        Configurações da visualização
+                      </h4>
+                      <p className="mt-1 text-xs text-zinc-500">
+                        Defina como a experiência aparece no website.
+                      </p>
+                    </div>
 
-              {showPreview ? (
-                <div
-                  className="relative w-full overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900"
-                  style={{ aspectRatio: "16 / 9" }}
-                  data-testid="embed-preview"
-                >
-                  <iframe
-                    src={embedUrl}
-                    title={`Preview — ${project.title || "projeto"}`}
-                    className="absolute inset-0 h-full w-full border-0"
-                    loading="lazy"
-                    allow="fullscreen"
-                    allowFullScreen
-                  />
+                    <div>
+                      <label
+                        htmlFor="embed-initial-image"
+                        className="mb-1.5 block text-sm text-zinc-200"
+                      >
+                        Ambiente inicial
+                      </label>
+                      <p className="mb-2 text-xs text-zinc-500">
+                        Escolha o primeiro ambiente exibido ao carregar a
+                        visualização.
+                      </p>
+                      <select
+                        id="embed-initial-image"
+                        data-testid="embed-initial-image"
+                        className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30 disabled:opacity-50"
+                        value={settings.initialImageId ?? ""}
+                        disabled={isSaving || validImages.length === 0}
+                        onChange={(event) => {
+                          const value = event.target.value || null;
+                          void persist({ initialImageId: value });
+                        }}
+                      >
+                        {validImages.length === 0 ? (
+                          <option value="">Nenhuma imagem disponível</option>
+                        ) : (
+                          validImages.map((image) => (
+                            <option key={image.id} value={image.id}>
+                              {image.title || "Sem título"}
+                            </option>
+                          ))
+                        )}
+                      </select>
+                    </div>
+
+                    <div className="space-y-3 border-t border-zinc-800 pt-3">
+                      <label className="flex cursor-pointer items-start gap-3 text-sm text-zinc-300">
+                        <Checkbox
+                          checked={settings.allowFullscreen !== false}
+                          disabled={isSaving}
+                          onCheckedChange={(checked) => {
+                            void persist({ allowFullscreen: checked === true });
+                          }}
+                          data-testid="embed-allow-fullscreen"
+                          aria-label="Permitir visualização em tela cheia"
+                          className="mt-0.5"
+                        />
+                        <span className="min-w-0">
+                          <span className="block text-zinc-200">
+                            Permitir visualização em tela cheia
+                          </span>
+                          <span className="mt-0.5 block text-xs text-zinc-500">
+                            O visitante poderá expandir a experiência para
+                            ocupar toda a tela.
+                          </span>
+                        </span>
+                      </label>
+
+                      <label className="flex cursor-pointer items-start gap-3 text-sm text-zinc-300">
+                        <Checkbox
+                          checked={settings.allowNavigation !== false}
+                          disabled={isSaving}
+                          onCheckedChange={(checked) => {
+                            void persist({ allowNavigation: checked === true });
+                          }}
+                          data-testid="embed-allow-navigation"
+                          aria-label="Permitir navegação entre ambientes"
+                          className="mt-0.5"
+                        />
+                        <span className="min-w-0">
+                          <span className="block text-zinc-200">
+                            Permitir navegação entre ambientes
+                          </span>
+                          <span className="mt-0.5 block text-xs text-zinc-500">
+                            O visitante poderá acessar outros ambientes
+                            disponíveis no projeto.
+                          </span>
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div
+                    className="flex gap-3 rounded-xl border border-zinc-700/80 bg-zinc-900/60 px-3 py-3"
+                    data-testid="embed-access-notice"
+                    role="note"
+                  >
+                    <Info
+                      size={16}
+                      className="mt-0.5 shrink-0 text-zinc-400"
+                      aria-hidden="true"
+                    />
+                    <p className="text-xs leading-relaxed text-zinc-400">
+                      Qualquer pessoa com acesso ao código ou ao link de
+                      incorporação poderá visualizar o projeto.
+                    </p>
+                  </div>
+
+                  <div
+                    className="space-y-3 rounded-xl border border-zinc-700 bg-zinc-800/30 p-4"
+                    data-testid="embed-preview-section"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <h4 className="text-sm font-medium text-white">
+                          Prévia
+                        </h4>
+                        <p className="mt-1 text-xs text-zinc-500">
+                          Veja como a visualização será exibida no website.
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (showPreview) {
+                              hidePreview();
+                            } else {
+                              openPreview();
+                            }
+                          }}
+                          disabled={!canShowPreview && !showPreview}
+                          data-testid="embed-toggle-preview"
+                          className="rounded-xl border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-sm text-white transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {showPreview ? "Ocultar prévia" : "Abrir prévia"}
+                        </button>
+                        {previewUrl ? (
+                          <a
+                            href={previewUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            data-testid="embed-open-preview"
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-sm text-white transition-colors hover:bg-zinc-700"
+                          >
+                            <ExternalLink size={14} aria-hidden="true" />
+                            Abrir em nova aba
+                          </a>
+                        ) : null}
+                      </div>
+                    </div>
+
+                    {showPreview && previewUrl ? (
+                      <div
+                        className="relative w-full overflow-hidden rounded-xl border border-zinc-700 bg-zinc-950"
+                        style={{ aspectRatio: "16 / 9" }}
+                        data-testid="embed-preview"
+                      >
+                        {previewStatus === "loading" ? (
+                          <div
+                            className="absolute inset-0 z-10 flex items-center justify-center gap-2 bg-zinc-950/80 text-sm text-zinc-400"
+                            data-testid="embed-preview-loading"
+                          >
+                            <Loader2 size={16} className="animate-spin" />
+                            Carregando prévia...
+                          </div>
+                        ) : null}
+                        {previewStatus === "error" ? (
+                          <div
+                            className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-zinc-950 px-4 text-center"
+                            data-testid="embed-preview-error"
+                          >
+                            <p className="text-sm text-zinc-300">
+                              Não foi possível carregar a prévia.
+                            </p>
+                            <button
+                              type="button"
+                              onClick={retryPreview}
+                              data-testid="embed-preview-retry"
+                              className="rounded-xl border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-sm text-white transition-colors hover:bg-zinc-700"
+                            >
+                              Tentar novamente
+                            </button>
+                          </div>
+                        ) : null}
+                        <iframe
+                          key={`${previewUrl}:${previewNonce}`}
+                          src={previewUrl}
+                          title={`Prévia da visualização 360° — ${project.title || "projeto"}`}
+                          className="absolute inset-0 h-full w-full border-0"
+                          allow="fullscreen"
+                          allowFullScreen
+                          onLoad={() => setPreviewStatus("loaded")}
+                          onError={() => setPreviewStatus("error")}
+                        />
+                      </div>
+                    ) : (
+                      <div
+                        className="flex aspect-video w-full items-center justify-center rounded-xl border border-dashed border-zinc-700 bg-zinc-950/80 px-4 text-center"
+                        data-testid="embed-preview-placeholder"
+                      >
+                        <p className="text-xs text-zinc-500">
+                          {!previewUrl
+                            ? "URL de prévia indisponível para este projeto."
+                            : "A prévia carrega sob demanda para manter o modal leve."}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div
+                    className="space-y-3 rounded-xl border border-zinc-600/80 bg-zinc-900/80 p-4"
+                    data-testid="embed-code-section"
+                  >
+                    <div>
+                      <h4 className="text-sm font-medium text-white">
+                        Código de incorporação
+                      </h4>
+                      <p className="mt-1 text-xs text-zinc-500">
+                        Copie e cole este código na área desejada do seu
+                        website.
+                      </p>
+                    </div>
+                    <textarea
+                      ref={snippetRef}
+                      readOnly
+                      value={snippet}
+                      data-testid="embed-snippet"
+                      aria-label="Código HTML de incorporação"
+                      rows={6}
+                      className="max-h-40 w-full resize-none overflow-auto whitespace-pre rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-2 font-mono text-xs leading-relaxed text-zinc-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                      onFocus={(event) => event.target.select()}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleCopyCode}
+                      data-testid="embed-copy-code"
+                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-medium text-black transition-colors hover:bg-zinc-200 sm:w-auto"
+                    >
+                      {copied ? <Check size={16} /> : <Copy size={16} />}
+                      {copied ? "Código copiado" : "Copiar código"}
+                    </button>
+                  </div>
                 </div>
               ) : null}
             </div>
-          )}
+          </div>
 
-          {isSaving ? (
-            <p className="text-xs text-zinc-500 flex items-center gap-2">
+          {saveStatus === "saving" || isSaving ? (
+            <p
+              className="flex items-center gap-2 text-xs text-zinc-500"
+              data-testid="embed-save-status"
+              aria-live="polite"
+            >
               <Loader2 size={14} className="animate-spin" />
               Salvando...
+            </p>
+          ) : saveStatus === "saved" ? (
+            <p
+              className="text-xs text-zinc-500"
+              data-testid="embed-save-status"
+              aria-live="polite"
+            >
+              Alterações salvas.
             </p>
           ) : null}
         </>

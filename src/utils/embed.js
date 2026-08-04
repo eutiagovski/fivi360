@@ -1,24 +1,27 @@
 /**
- * URL base da aplicação (links públicos, código de incorporação).
- * Preferência: REACT_APP_APP_BASE_URL → REACT_APP_PUBLIC_URL → origin.
+ * URL base do aplicativo (rotas /embed, prévia e snippet de incorporação).
+ *
+ * Preferência:
+ * 1. REACT_APP_APP_BASE_URL (produção / override explícito)
+ * 2. window.location.origin (desenvolvimento, preview, homologação)
+ *
+ * Não usa REACT_APP_PUBLIC_URL — essa variável é do site/marketing e
+ * quebrava a prévia local apontando para o domínio público.
  *
  * @returns {string}
  */
 export function getAppBaseUrl() {
-  const configured =
-    process.env.REACT_APP_APP_BASE_URL?.trim() ||
-    process.env.REACT_APP_PUBLIC_URL?.trim() ||
-    "";
+  const configured = process.env.REACT_APP_APP_BASE_URL?.trim() || "";
 
   if (configured) {
-    return configured.replace(/\/$/, "");
+    return configured.replace(/\/+$/, "");
   }
 
   if (typeof window !== "undefined" && window.location?.origin) {
-    return window.location.origin.replace(/\/$/, "");
+    return window.location.origin.replace(/\/+$/, "");
   }
 
-  return "http://localhost:3000";
+  return "";
 }
 
 /**
@@ -43,7 +46,15 @@ export function getMarketingArchitectsUrl() {
  * @returns {string}
  */
 export function buildEmbedProjectUrl(projectId, options = {}) {
+  if (!projectId) {
+    return "";
+  }
+
   const base = getAppBaseUrl();
+  if (!base) {
+    return "";
+  }
+
   const id = encodeURIComponent(projectId);
 
   if (options.imageId) {
@@ -69,6 +80,7 @@ export function escapeHtmlAttribute(value) {
 
 /**
  * Gera o snippet responsivo de incorporação.
+ * Usa a mesma origem de `buildEmbedProjectUrl` (ambiente atual).
  *
  * @param {string} projectId
  * @param {{ projectName?: string | null }} [options]
@@ -76,6 +88,10 @@ export function escapeHtmlAttribute(value) {
  */
 export function buildEmbedSnippet(projectId, options = {}) {
   const src = buildEmbedProjectUrl(projectId);
+  if (!src) {
+    return "";
+  }
+
   const name =
     typeof options.projectName === "string" && options.projectName.trim()
       ? options.projectName.trim()

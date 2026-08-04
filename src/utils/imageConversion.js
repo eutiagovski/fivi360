@@ -1,4 +1,4 @@
-const WEBP_QUALITY = 0.95;
+const WEBP_QUALITY = 0.99;
 
 /**
  * Converte um arquivo de imagem para WEBP via Canvas API.
