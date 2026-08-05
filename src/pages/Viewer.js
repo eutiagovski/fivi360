@@ -35,8 +35,8 @@ import {
 } from "@/utils/sceneHotspotTarget";
 
 const ERROR_MESSAGES = {
-  not_found: "Imagem não encontrada.",
-  unauthorized: "Acesso não autorizado.",
+  not_found: "Imagem não encontrada ou você não tem acesso.",
+  unauthorized: "Imagem não encontrada ou você não tem acesso.",
   load_failed: "Não foi possível carregar o panorama.",
 };
 
@@ -62,8 +62,11 @@ export const Viewer = () => {
     loading,
     error,
   } = useViewerImage(imageId);
+  // Hotspots só após imagem autorizada no viewer interno.
+  const authorizedImageId =
+    !loading && !error && image ? imageId : undefined;
   const { hotspots, loading: hotspotsLoading, refresh: refreshHotspots } =
-    useHotspots(imageId);
+    useHotspots(authorizedImageId);
 
   const [manageMode, setManageMode] = useState(false);
   const [placingMode, setPlacingMode] = useState(false);

@@ -45,9 +45,105 @@ jest.mock("../workspaces/workspaceService", () => ({
 
 import { getDoc, getDocs, startAfter } from "firebase/firestore";
 import {
+  getOwnedOrAccessibleProject,
   getProjectsPageByUserId,
+  getPublicSharedProject,
   mapProjectToCard,
 } from "./projectService";
+
+function makeProjectSnap(id, data) {
+  return {
+    exists: () => true,
+    id,
+    data: () => ({
+      userId: "user-1",
+      title: "Projeto",
+      description: "",
+      clientName: "",
+      visibility: "private",
+      coverImage: "",
+      imageCount: 0,
+      workspaceId: "user-1",
+      ...data,
+    }),
+  };
+}
+
+describe("getOwnedOrAccessibleProject — RC-SEC-PROJECT-PRIVATE-ROUTE-1", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("returns project for owner even when public", async () => {
+    getDoc.mockResolvedValue(
+      makeProjectSnap("p1", { userId: "owner", visibility: "public" }),
+    );
+
+    const project = await getOwnedOrAccessibleProject("p1", "owner");
+
+    expect(project).toMatchObject({
+      id: "p1",
+      userId: "owner",
+      visibility: "public",
+    });
+  });
+
+  it("returns null for foreign public project (no public fallback)", async () => {
+    getDoc.mockResolvedValue(
+      makeProjectSnap("p-public", {
+        userId: "owner-a",
+        visibility: "public",
+        title: "Segredo",
+      }),
+    );
+
+    const project = await getOwnedOrAccessibleProject("p-public", "user-b");
+
+    expect(project).toBeNull();
+  });
+
+  it("returns null for foreign shared project", async () => {
+    getDoc.mockResolvedValue(
+      makeProjectSnap("p-shared", {
+        userId: "owner-a",
+        visibility: "shared",
+      }),
+    );
+
+    await expect(
+      getOwnedOrAccessibleProject("p-shared", "user-b"),
+    ).resolves.toBeNull();
+  });
+
+  it("returns null when missing ids", async () => {
+    await expect(getOwnedOrAccessibleProject("", "u1")).resolves.toBeNull();
+    await expect(getOwnedOrAccessibleProject("p1", "")).resolves.toBeNull();
+    expect(getDoc).not.toHaveBeenCalled();
+  });
+});
+
+describe("getPublicSharedProject — RC-SEC-PROJECT-PRIVATE-ROUTE-1", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("returns shared project for public context", async () => {
+    getDoc.mockResolvedValue(
+      makeProjectSnap("p1", { visibility: "shared", userId: "owner" }),
+    );
+
+    const project = await getPublicSharedProject("p1");
+    expect(project).toMatchObject({ id: "p1", visibility: "shared" });
+  });
+
+  it("returns null for private project", async () => {
+    getDoc.mockResolvedValue(
+      makeProjectSnap("p1", { visibility: "private", userId: "owner" }),
+    );
+
+    await expect(getPublicSharedProject("p1")).resolves.toBeNull();
+  });
+});
 
 describe("mapProjectToCard", () => {
   it("maps imageCount from project document to card images field", () => {

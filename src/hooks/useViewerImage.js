@@ -5,7 +5,8 @@ import {
   getImagesByProjectId,
   getLooseImagesByUserId,
 } from "@/services/images/imageService";
-import { getProjectById } from "@/services/projects/projectService";
+import { getOwnedOrAccessibleProject } from "@/services/projects/projectService";
+import { logInternalProjectAccessDenied } from "@/utils/projectAccess";
 
 /**
  * @typedef {'not_found' | 'unauthorized' | 'load_failed'} ViewerImageError
@@ -13,6 +14,7 @@ import { getProjectById } from "@/services/projects/projectService";
 
 /**
  * Carrega imagem e projeto para o viewer privado, validando ownership.
+ * Projeto público de terceiro NÃO concede acesso ao viewer interno.
  *
  * @param {string | undefined} imageId
  * @returns {{
@@ -42,7 +44,8 @@ export function useViewerImage(imageId) {
           setImage(null);
           setProject(null);
           setProjectImages([]);
-          setLoading(false);
+          setLoading(Boolean(imageId) && !user?.uid);
+          setError(null);
         }
         return;
       }
@@ -65,21 +68,40 @@ export function useViewerImage(imageId) {
           return;
         }
 
+        // Acesso interno exige ownership da imagem — não revelar existência.
         if (imageData.userId !== user.uid) {
-          setError("unauthorized");
+          logInternalProjectAccessDenied(
+            imageData.projectId || imageId,
+            "foreign_image",
+          );
+          setError("not_found");
           return;
         }
 
-        const [projectData, imagesInContext] = await Promise.all([
-          imageData.projectId
-            ? getProjectById(imageData.projectId)
-            : Promise.resolve(null),
-          imageData.projectId
-            ? getImagesByProjectId(imageData.projectId, user.uid)
-            : getLooseImagesByUserId(user.uid).then((looseImages) =>
-                [...looseImages].reverse(),
-              ),
-        ]);
+        let projectData = null;
+
+        if (imageData.projectId) {
+          projectData = await getOwnedOrAccessibleProject(
+            imageData.projectId,
+            user.uid,
+          );
+
+          if (cancelled) {
+            return;
+          }
+
+          // Imagem própria mas projeto inacessível no contexto interno.
+          if (!projectData) {
+            setError("not_found");
+            return;
+          }
+        }
+
+        const imagesInContext = imageData.projectId
+          ? await getImagesByProjectId(imageData.projectId, user.uid)
+          : await getLooseImagesByUserId(user.uid).then((looseImages) =>
+              [...looseImages].reverse(),
+            );
 
         if (cancelled) {
           return;
@@ -97,7 +119,8 @@ export function useViewerImage(imageId) {
           err?.code === "permission-denied" ||
           err?.code === "unauthenticated"
         ) {
-          setError("unauthorized");
+          // Preferência de não enumeração: trata como não encontrado.
+          setError("not_found");
         } else {
           setError("load_failed");
         }

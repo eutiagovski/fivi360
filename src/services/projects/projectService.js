@@ -55,6 +55,11 @@ import {
 } from "@/services/projects/embedSettings";
 import { sortByRecency } from "@/utils/recencySort";
 import { visibilityToLabel } from "@/utils/visibility";
+import { canAccessSharedProject } from "@/utils/publicAccess";
+import {
+  canUserAccessProjectInternally,
+  logInternalProjectAccessDenied,
+} from "@/utils/projectAccess";
 
 /**
  * @typedef {Object} Project
@@ -181,7 +186,11 @@ export async function getProjectsPageByUserId(
 }
 
 /**
- * Carrega um projeto pelo ID.
+ * Carrega um projeto pelo ID (sem filtro de ownership/visibilidade).
+ *
+ * Preferir:
+ * - {@link getOwnedOrAccessibleProject} na rota interna `/projects/:id`
+ * - {@link getPublicSharedProject} (ou `canAccessSharedProject`) nas rotas públicas
  *
  * @param {string} projectId
  * @returns {Promise<Project | null>}
@@ -194,6 +203,73 @@ export async function getProjectById(projectId) {
   }
 
   return mapProjectDoc(snapshot.id, snapshot.data());
+}
+
+/**
+ * Projeto acessível no contexto privado/autenticado.
+ * Visibilidade pública NÃO concede acesso.
+ *
+ * @param {string} projectId
+ * @param {string} userId
+ * @param {{
+ *   membership?: {
+ *     userId?: string,
+ *     workspaceId?: string,
+ *     role?: string,
+ *   } | null,
+ *   activeWorkspaceId?: string | null,
+ * }} [options]
+ * @returns {Promise<Project | null>}
+ */
+export async function getOwnedOrAccessibleProject(
+  projectId,
+  userId,
+  options = {},
+) {
+  if (!projectId || !userId) {
+    return null;
+  }
+
+  const project = await getProjectById(projectId);
+
+  if (!project) {
+    return null;
+  }
+
+  const allowed = canUserAccessProjectInternally({
+    userId,
+    project,
+    membership: options.membership ?? null,
+    activeWorkspaceId: options.activeWorkspaceId ?? null,
+  });
+
+  if (!allowed) {
+    logInternalProjectAccessDenied(projectId, "not_owner_or_member");
+    return null;
+  }
+
+  return project;
+}
+
+/**
+ * Projeto acessível via link público compartilhado (`shared` | `public`).
+ * Não usar na rota interna `/projects/:id`.
+ *
+ * @param {string} projectId
+ * @returns {Promise<Project | null>}
+ */
+export async function getPublicSharedProject(projectId) {
+  if (!projectId) {
+    return null;
+  }
+
+  const project = await getProjectById(projectId);
+
+  if (!project || !canAccessSharedProject(project)) {
+    return null;
+  }
+
+  return project;
 }
 
 /**

@@ -181,11 +181,11 @@ export const Plan = () => {
         </aside>
       )}
 
-      <CurrentPlanBanner
+      {/* <CurrentPlanBanner
         planId={planId}
         onViewProBenefits={() => openUpgradeModal()}
         className="mb-12"
-      />
+      /> */}
 
       <SectionHeader title="Seu consumo atual" dataTestId="usage-title" />
       <p className="text-sm text-zinc-500 mb-6 -mt-4">

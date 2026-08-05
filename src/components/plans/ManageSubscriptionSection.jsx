@@ -96,12 +96,12 @@ function StarterSubscriptionView({ onUpgrade, onManageSubscription }) {
           Fazer upgrade
         </button>
       </div>
-      <div className="flex flex-col sm:flex-row gap-3">
+      {/* <div className="flex flex-col sm:flex-row gap-3">
         <ManageSubscriptionButton onClick={onManageSubscription} />
         <p className="text-xs text-zinc-500 self-center sm:ml-1">
           {BILLING_PORTAL_COMING_SOON_MESSAGE}
         </p>
-      </div>
+      </div> */}
     </div>
   );
 }
@@ -150,12 +150,12 @@ function PaidSubscriptionView({ limits, planId, billing, onManageSubscription })
         </p>
       ) : null}
 
-      <div className="flex flex-col sm:flex-row flex-wrap gap-3 items-start sm:items-center">
+      {/* <div className="flex flex-col sm:flex-row flex-wrap gap-3 items-start sm:items-center">
         <ManageSubscriptionButton onClick={onManageSubscription} />
         <span className="text-xs text-zinc-500 hidden sm:inline">
           {BILLING_PORTAL_COMING_SOON_MESSAGE}
         </span>
-      </div>
+      </div> */}
     </div>
   );
 }

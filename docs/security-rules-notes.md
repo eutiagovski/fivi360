@@ -129,6 +129,24 @@ Validação de destino via Rules com `get()` **não** foi adicionada nesta sprin
 
 ---
 
+## Rota interna `/projects/:id` (RC-SEC-PROJECT-PRIVATE-ROUTE-1)
+
+### Comportamento das Rules (inalterado)
+
+`projects/{id}` permite `get` se owner **ou** `visibility ∈ {shared, public}`. Isso é necessário para `/share/*` e portfólio anônimo.
+
+### Defesa na aplicação
+
+A rota privada **não** trata `get` bem-sucedido como autorização interna:
+
+- `getOwnedOrAccessibleProject(projectId, uid)` — exige ownership/membership
+- `canUserAccessProjectInternally` — **não** inclui `OR visibility public`
+- Viewer interno (`useViewerImage`) exige ownership da imagem + projeto interno
+
+Risco residual: cliente autenticado ainda pode `getDoc` direto em projeto shared/public via SDK (dados no documento principal). Mitigações futuras: projeção pública separada (Opção A) ou endpoint Admin (Opção B, já usado no Embed).
+
+---
+
 ## Publicar rules
 
 ```bash

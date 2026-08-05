@@ -1,19 +1,21 @@
 import { useCallback, useEffect, useState } from "react";
-import { getProjectById } from "@/services/projects/projectService";
+import { getOwnedOrAccessibleProject } from "@/services/projects/projectService";
 
 /**
- * Carrega um projeto pelo ID da rota.
+ * Carrega um projeto pelo ID da rota interna, com validação de ownership/membership.
+ * Visibilidade pública não concede acesso.
  *
  * @param {string | undefined} projectId
+ * @param {string | undefined} userId
  */
-export function useProject(projectId) {
+export function useProject(projectId, userId) {
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [notFound, setNotFound] = useState(false);
 
   const refetch = useCallback(async () => {
-    if (!projectId) {
+    if (!projectId || !userId) {
       setProject(null);
       setNotFound(true);
       setLoading(false);
@@ -25,7 +27,7 @@ export function useProject(projectId) {
     setError(null);
 
     try {
-      const data = await getProjectById(projectId);
+      const data = await getOwnedOrAccessibleProject(projectId, userId);
 
       if (!data) {
         setProject(null);
@@ -38,17 +40,21 @@ export function useProject(projectId) {
       setError(err);
       setProject(null);
     }
-  }, [projectId]);
+  }, [projectId, userId]);
 
   useEffect(() => {
     let cancelled = false;
 
     async function load() {
-      if (!projectId) {
+      if (!projectId || !userId) {
         if (!cancelled) {
           setProject(null);
-          setNotFound(true);
-          setLoading(false);
+          // Sem userId: aguarda auth (ProtectedRoute). Sem projectId: not found.
+          setNotFound(!projectId);
+          setLoading(Boolean(projectId) && !userId);
+          if (!projectId) {
+            setLoading(false);
+          }
         }
         return;
       }
@@ -57,10 +63,12 @@ export function useProject(projectId) {
         setLoading(true);
         setError(null);
         setNotFound(false);
+        // Evita flash de dados de um projeto anterior ao trocar o ID.
+        setProject(null);
       }
 
       try {
-        const data = await getProjectById(projectId);
+        const data = await getOwnedOrAccessibleProject(projectId, userId);
 
         if (cancelled) {
           return;
@@ -71,11 +79,13 @@ export function useProject(projectId) {
           setNotFound(true);
         } else {
           setProject(data);
+          setNotFound(false);
         }
       } catch (err) {
         if (!cancelled) {
           setError(err);
           setProject(null);
+          setNotFound(false);
         }
       } finally {
         if (!cancelled) {
@@ -89,7 +99,7 @@ export function useProject(projectId) {
     return () => {
       cancelled = true;
     };
-  }, [projectId]);
+  }, [projectId, userId]);
 
   const patchProject = useCallback((updates) => {
     setProject((current) => (current ? { ...current, ...updates } : current));

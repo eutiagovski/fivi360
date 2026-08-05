@@ -73,7 +73,12 @@ export const ProjectDetail = () => {
     refreshUsage,
     applyUsageDelta,
   } = usePlanLimits();
-  const { project, loading, notFound, refetch, patchProject } = useProject(id);
+  const { project, loading, notFound, refetch, patchProject } = useProject(
+    id,
+    user?.uid,
+  );
+  // Só lista imagens após acesso interno confirmado — evita consulta cruzada.
+  const authorizedProjectId = project && !notFound ? id : undefined;
   const {
     cardImages,
     images,
@@ -81,7 +86,7 @@ export const ProjectDetail = () => {
     addImage,
     updateImage,
     removeImage,
-  } = useProjectImages(id);
+  } = useProjectImages(authorizedProjectId);
   const fileInputRef = useRef(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -441,7 +446,9 @@ export const ProjectDetail = () => {
         <h1 className="text-2xl font-light text-white mb-2" data-testid="project-not-found">
           Projeto não encontrado
         </h1>
-        <p className="text-zinc-400">Este projeto não existe ou você não tem acesso.</p>
+        <p className="text-zinc-400">
+          Projeto não encontrado ou você não possui acesso.
+        </p>
       </div>
     );
   }
