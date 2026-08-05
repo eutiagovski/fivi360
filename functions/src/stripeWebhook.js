@@ -4,6 +4,7 @@ const { initializeApp, getApps } = require("firebase-admin/app");
 const { getFirestore, FieldValue, Timestamp } = require("firebase-admin/firestore");
 const Stripe = require("stripe");
 const { STRIPE_WEBHOOK_SECRET, STRIPE_SECRET_KEY, getStripeClient } = require("./stripe/client");
+const { requireConfiguredSecret } = require("./config/requireConfiguredSecret");
 const { extractSubscriptionPeriodUnix } = require("./stripe/subscriptionPeriod");
 const { resolvePlanIdFromStripePriceId } = require("./config/stripeBilling");
 const { createGetPlanIdFromInvoiceLines } = require("./billing/resolvePlanFromInvoiceLines");
@@ -1526,8 +1527,13 @@ exports.stripeWebhook = onRequest(
       return;
     }
 
-    const webhookSecret = STRIPE_WEBHOOK_SECRET.value();
-    if (!webhookSecret) {
+    let webhookSecret;
+    try {
+      webhookSecret = requireConfiguredSecret(
+        STRIPE_WEBHOOK_SECRET,
+        "STRIPE_WEBHOOK_SECRET",
+      );
+    } catch {
       logger.error("stripeWebhook: STRIPE_WEBHOOK_SECRET not configured");
       res.status(500).send("Stripe webhook not configured");
       return;

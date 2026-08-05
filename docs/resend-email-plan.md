@@ -64,18 +64,25 @@ firebase deploy --only functions
 
 ### Desenvolvimento local (emulador)
 
-```bash
+Secrets com `defineSecret` **devem** ir em `functions/.secret.local` (o Emulator não lê secrets de `.env.local`).
+
+```powershell
 # Na pasta functions/
-echo "RESEND_API_KEY=re_sua_chave_de_dev" > .secret.local
-# .secret.local está no .gitignore — não commitar
+# Criar/editar .secret.local (gitignored) com:
+# RESEND_API_KEY=re_sua_chave_de_dev
+# STRIPE_SECRET_KEY=sk_test_...
+# STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 
-Ou exporte antes de rodar o emulador:
+Remetente não sensível (opcional) em `.env` / `.env.local`:
 
-```bash
-export RESEND_API_KEY=re_sua_chave_de_dev
-firebase emulators:start --only functions,firestore
+```env
+RESEND_FROM_EMAIL=FIVI360 <onboarding@emails.fivi360.com.br>
 ```
+
+Reinicie o Functions Emulator após alterar `.secret.local` ou `.env*`.
+
+Guia unificado: [RC-FUNCTIONS-ENV-CLEANUP-1.md](./RC-FUNCTIONS-ENV-CLEANUP-1.md).
 
 ---
 

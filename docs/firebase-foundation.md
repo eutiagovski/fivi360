@@ -116,6 +116,28 @@ Copie `.env.example` para `.env.local` e preencha com as credenciais do Console 
 cp .env.example .env.local
 ```
 
+### Configuração local das Cloud Functions
+
+As Functions usam arquivos **separados** do frontend (pasta `functions/`):
+
+| Arquivo | Papel | Versionado? |
+|---------|-------|-------------|
+| `functions/.env` | Config não sensível compartilhada | Sim |
+| `functions/.env.local` | Overrides locais (Price IDs, `APP_BASE_URL`) | Não |
+| `functions/.secret.local` | Secrets para `defineSecret` (Stripe, Resend) | Não |
+| `functions/.env.example` | Template documentado | Sim |
+
+```powershell
+cd functions
+npm install
+Copy-Item .env.example .env.local
+# Preencher Stripe Price IDs / APP_BASE_URL em .env.local
+# Criar .secret.local com STRIPE_* e RESEND_API_KEY de teste
+```
+
+Reinicie o emulador após mudanças de ambiente. Detalhes: [RC-FUNCTIONS-ENV-CLEANUP-1.md](./RC-FUNCTIONS-ENV-CLEANUP-1.md) e [stripe-local-setup.md](./stripe-local-setup.md).
+
+
 | Variável | Descrição |
 |----------|-----------|
 | `REACT_APP_FIREBASE_API_KEY` | API Key do projeto |

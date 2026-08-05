@@ -1,5 +1,6 @@
 const { defineSecret } = require("firebase-functions/params");
 const Stripe = require("stripe");
+const { requireConfiguredSecret } = require("../config/requireConfiguredSecret");
 
 const STRIPE_SECRET_KEY = defineSecret("STRIPE_SECRET_KEY");
 const STRIPE_WEBHOOK_SECRET = defineSecret("STRIPE_WEBHOOK_SECRET");
@@ -9,13 +10,16 @@ let stripeClient = null;
 
 /**
  * Retorna cliente Stripe inicializado com a secret configurada.
- * Não inicializa se STRIPE_SECRET_KEY estiver ausente.
+ * Não inicializa se STRIPE_SECRET_KEY estiver ausente (retorna null).
+ * Validação é lazy — não roda no import do módulo.
  *
  * @returns {Stripe | null}
  */
 function getStripeClient() {
-  const secretKey = STRIPE_SECRET_KEY.value();
-  if (!secretKey) {
+  let secretKey;
+  try {
+    secretKey = requireConfiguredSecret(STRIPE_SECRET_KEY, "STRIPE_SECRET_KEY");
+  } catch {
     return null;
   }
 

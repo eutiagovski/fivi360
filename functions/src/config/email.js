@@ -4,7 +4,10 @@
  * @see docs/resend-email-plan.md
  */
 
-/** Remetente padrão — requer domínio verificado no Resend. */
+/**
+ * Remetente padrão — requer domínio verificado no Resend.
+ * Env: RESEND_FROM_EMAIL (.env / .env.local). Não é secret.
+ */
 const DEFAULT_FROM =
   process.env.RESEND_FROM_EMAIL || "FIVI360 <onboarding@emails.fivi360.com.br>";
 

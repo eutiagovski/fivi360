@@ -1,5 +1,10 @@
 node_modules/
-.secret.local
 *.log
-.env
-.env.*
+
+# Local overrides and secrets — never commit
+.secret.local
+.secret
+.env.local
+.env.*.local
+
+# .env and .env.example are tracked (non-sensitive shared config / template only)

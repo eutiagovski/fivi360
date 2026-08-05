@@ -133,12 +133,25 @@ Primary Foreground: #000000
     └── server.py
 ```
 
+## ⚙️ Configuração local das Cloud Functions
+
+1. Instalar **Node 22**.
+2. `cd functions` → `npm install`.
+3. `Copy-Item .env.example .env.local` e preencher Price IDs / `APP_BASE_URL`.
+4. Criar `functions/.secret.local` com secrets de teste (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`).
+5. Na raiz: `npm run emulators` — confirmar Functions registradas e log `Loaded environment variables from .env, .env.local`.
+6. Iniciar Stripe CLI com o webhook secret atual (copiar `whsec_...` para `.secret.local`).
+7. **Reiniciar** o Emulator após qualquer mudança em `.env`, `.env.local` ou `.secret.local`.
+
+Documentação: [docs/RC-FUNCTIONS-ENV-CLEANUP-1.md](docs/RC-FUNCTIONS-ENV-CLEANUP-1.md) · [docs/stripe-local-setup.md](docs/stripe-local-setup.md).
+
 ## 📝 Notas de Implementação
 
 - **Dados Mockados**: Todos os dados são mockados para demonstração visual
 - **Data-testid**: Todos os elementos interativos possuem data-testid para testes
 - **Microinterações**: Hover states, transitions e animações sutis
 - **Acessibilidade**: Navegação por teclado e estrutura semântica
+
 
 ## 🎯 Objetivo
 

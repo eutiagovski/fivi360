@@ -2,69 +2,75 @@
 
 Guia curto para variáveis usadas por `createStripeCheckoutSession` no emulador de Cloud Functions.
 
+> Estrutura completa e matriz de variáveis: [RC-FUNCTIONS-ENV-CLEANUP-1.md](./RC-FUNCTIONS-ENV-CLEANUP-1.md)
+
 ## Mapa de variáveis
 
 | Variável | Mecanismo no código | Arquivo local | Secret? |
 |----------|---------------------|---------------|---------|
 | `STRIPE_SECRET_KEY` | `defineSecret` → `secrets: [...]` | `functions/.secret.local` | Sim |
-| `STRIPE_PRICE_PROFESSIONAL` | `defineString` → `params: [...]` | `functions/.env` ou `functions/.env.local` | Não |
-| `STRIPE_PRICE_STUDIO` | `defineString` → `params: [...]` | `functions/.env` ou `functions/.env.local` | Não (obrigatório para checkout Studio no Beta) |
-| `APP_BASE_URL` | `process.env.APP_BASE_URL` (sem `defineString`) | `functions/.env` ou `functions/.env.local` | Não |
+| `STRIPE_WEBHOOK_SECRET` | `defineSecret` → `secrets: [...]` | `functions/.secret.local` | Sim |
+| `STRIPE_PRICE_PROFESSIONAL` | `defineString` → `params: [...]` | `functions/.env` ou `.env.local` | Não |
+| `STRIPE_PRICE_STUDIO` | `defineString` → `params: [...]` | `functions/.env` ou `.env.local` | Não |
+| `APP_BASE_URL` | `process.env.APP_BASE_URL` | `functions/.env` ou `.env.local` | Não |
 
 Referências no código:
 
 - `functions/src/stripe/client.js` — `defineSecret("STRIPE_SECRET_KEY")`, `getStripeClient()`
-- `functions/src/config/stripeBilling.js` — `defineString("STRIPE_PRICE_PROFESSIONAL")`
+- `functions/src/config/stripeBilling.js` — `defineString("STRIPE_PRICE_PROFESSIONAL")` / `STRIPE_PRICE_STUDIO`
 - `functions/src/config/app.js` — `process.env.APP_BASE_URL` (fallback: `http://localhost:3000`)
 - `functions/src/createStripeCheckoutSession.js` — `secrets: [STRIPE_SECRET_KEY]`, `params: STRIPE_BILLING_PARAMS`
 
 ---
 
-## 1. Onde colocar `STRIPE_SECRET_KEY`
+## Setup rápido (novo notebook)
 
-**Arquivo:** `functions/.secret.local`
+```powershell
+cd functions
+npm install
+Copy-Item .env.example .env.local
+# Preencher Price IDs e APP_BASE_URL em .env.local
+# Criar .secret.local com STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET (e RESEND_API_KEY se for testar e-mail)
+```
+
+Reinicie o emulador após qualquer alteração em `.env`, `.env.local` ou `.secret.local`.
+
+---
+
+## 1. Onde colocar `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET`
+
+**Arquivo:** `functions/.secret.local` (obrigatório para `defineSecret` no Emulator)
 
 ```bash
 STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 
-- Declarada com `defineSecret("STRIPE_SECRET_KEY")`.
-- Injetada na function via `secrets: [STRIPE_SECRET_KEY]`.
-- Lida em runtime com `STRIPE_SECRET_KEY.value()` dentro de `getStripeClient()`.
-- **Não** coloque em `functions/.env` — secrets ficam só em Secret Manager (produção) ou `.secret.local` (emulador).
+- Declarada com `defineSecret(...)`.
+- Injetada na function via `secrets: [...]`.
+- **Não** coloque secrets em `functions/.env` nem `.env.local` — o Firebase CLI só sobrescreve secrets via `.secret.local` (ou Secret Manager).
 - O arquivo está no `functions/.gitignore`; não commitar.
 
 Chave de teste: [Stripe Dashboard → Developers → API keys](https://dashboard.stripe.com/test/apikeys) (`sk_test_...`).
 
+Webhook local: use o Stripe CLI (`stripe listen --forward-to ...`) e copie o `whsec_...` exibido para `.secret.local`.
+
 ---
 
-## 2. Onde colocar `STRIPE_PRICE_PROFESSIONAL`
+## 2. Onde colocar Price IDs e `APP_BASE_URL`
 
-**Arquivo:** `functions/.env` (base) ou `functions/.env.local` (override local)
+**Arquivo:** `functions/.env` (base compartilhada) ou `functions/.env.local` (override local)
 
 ```bash
 STRIPE_PRICE_PROFESSIONAL=price_...
-```
-
-- Declarada com `defineString("STRIPE_PRICE_PROFESSIONAL")`.
-- Declarada na function via `params: STRIPE_BILLING_PARAMS`.
-- `.env.local` tem precedência sobre `.env` no emulador.
-
-Price ID de teste: Stripe Dashboard → Products → preço recorrente (`price_...`).
-
-### `APP_BASE_URL` (mesmo padrão de env, não é secret)
-
-Usada nos `success_url` / `cancel_url` do Checkout. Também lida de `process.env` (não usa `defineString`).
-
-Para desenvolvimento local com React em `localhost:3000`:
-
-```bash
-# functions/.env.local
+STRIPE_PRICE_STUDIO=price_...
 APP_BASE_URL=http://localhost:3000
-STRIPE_PRICE_PROFESSIONAL=price_...
 ```
 
-Se `APP_BASE_URL` estiver ausente, o fallback em `app.js` é `http://localhost:3000`. Se existir em `functions/.env` apontando para produção, o emulador carrega esse valor — use `.env.local` para sobrescrever.
+- `.env.local` tem precedência sobre `.env` no emulador.
+- Price IDs não são secrets, mas são específicos da conta Stripe — preferir `.env.local` localmente.
+
+Se `APP_BASE_URL` estiver ausente, o fallback em `app.js` é `http://localhost:3000`.
 
 ---
 
@@ -89,7 +95,7 @@ npm run serve
 Ao subir, confira no log:
 
 ```
-i  functions: Loaded environment variables from .env.
+i  functions: Loaded environment variables from .env, .env.local
 ```
 
 ---
@@ -101,7 +107,7 @@ i  functions: Loaded environment variables from .env.
 1. `functions/.secret.local` contém `STRIPE_SECRET_KEY=sk_test_...`
 2. `functions/.env` ou `.env.local` contém `STRIPE_PRICE_PROFESSIONAL=price_...`
 3. Emuladores reiniciados após editar esses arquivos
-4. Frontend com `REACT_APP_USE_FIREBASE_EMULATORS=true` (`.env` da raiz)
+4. Frontend com `REACT_APP_USE_FIREBASE_EMULATORS=true` (`.env.local` da raiz)
 
 ### Teste via app (callable autenticada)
 
@@ -111,33 +117,10 @@ i  functions: Loaded environment variables from .env.
 4. **Secret ausente ou inválida:** erro `failed-precondition` — *"Stripe não configurado."* (`getStripeClient()` retorna `null`).
 5. **Price ausente:** erro `failed-precondition` — *"Preço Stripe não configurado."*
 
-### Teste direto no emulador (curl)
-
-Com usuário autenticado no Auth Emulator, obtenha um ID token e chame:
-
-```bash
-curl -X POST "http://127.0.0.1:5001/fivi360/southamerica-east1/createStripeCheckoutSession" \
-  -H "Content-Type: application/json" \
-  -d '{"data":{"planId":"professional"}}'
-```
-
-(Callable exige header `Authorization: Bearer <ID_TOKEN>` — mais simples validar pelo app.)
-
 ### O que observar nos logs
 
 - Sucesso: `createStripeCheckoutSession: session created` com `sessionId`.
 - Falha Stripe/API: `createStripeCheckoutSession: failed` com mensagem de erro.
 - Secret Manager sem credencial (sem `.secret.local`): aviso do emulador pedindo override em `functions/.secret.local`.
-
----
-
-## Estado atual do repositório (auditoria)
-
-| Item | Status |
-|------|--------|
-| `STRIPE_SECRET_KEY` em `functions/.secret.local` | OK |
-| `STRIPE_PRICE_PROFESSIONAL` em `functions/.env` / `.env.local` | OK |
-| `APP_BASE_URL` em `functions/.env` | Aponta para `https://fivi360.web.app` — sobrescreva com `.env.local` se quiser redirects locais |
-| `functions/.gitignore` ignora `.secret.local` e `.env*` | OK |
 
 Ver também: [resend-email-plan.md](./resend-email-plan.md) (mesmo padrão de `.secret.local` para `RESEND_API_KEY`).

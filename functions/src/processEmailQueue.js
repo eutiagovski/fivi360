@@ -3,6 +3,7 @@ const { logger } = require("firebase-functions");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const { EMAIL_TYPES } = require("./config/email");
+const { requireConfiguredSecret } = require("./config/requireConfiguredSecret");
 const { resendApiKey, sendTransactionalEmail } = require("./email/resendClient");
 const { IMPLEMENTED_EMAIL_TYPES, resolveEmailTemplate } = require("./emailTemplates");
 const { generateVerificationLink } = require("./services/verificationLink");
@@ -83,7 +84,7 @@ exports.processEmailQueue = onDocumentCreated(
       }
 
       const template = resolveEmailTemplate(type, templatePayload);
-      const apiKey = resendApiKey.value();
+      const apiKey = requireConfiguredSecret(resendApiKey, "RESEND_API_KEY");
 
       const { id: resendId } = await sendTransactionalEmail({
         apiKey,
