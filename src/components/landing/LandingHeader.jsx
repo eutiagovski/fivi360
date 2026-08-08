@@ -10,7 +10,9 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
 import { trackEvent } from "@/services/analytics/analyticsService";
+import { BrandLogo } from "@/components/common/BrandLogo";
 
 const NAV_LINKS = [
   { label: "Recursos", href: "#recursos" },
@@ -43,7 +45,7 @@ function NavLinks({ className, onNavigate }) {
   );
 }
 
-function AuthButtons({ className, onNavigate }) {
+function GuestAuthButtons({ className, onNavigate }) {
   return (
     <div className={cn("flex items-center gap-3", className)}>
       <Button variant="outline" className={secondaryBtnClass} asChild>
@@ -67,7 +69,35 @@ function AuthButtons({ className, onNavigate }) {
   );
 }
 
+function AuthenticatedAuthButtons({ className, onNavigate }) {
+  return (
+    <div className={cn("flex items-center gap-3", className)}>
+      <Button className={primaryBtnClass} asChild>
+        <Link
+          to="/dashboard"
+          onClick={onNavigate}
+          data-testid="landing-header-dashboard-btn"
+        >
+          Ir para o Dashboard
+        </Link>
+      </Button>
+    </div>
+  );
+}
+
+function AuthButtons({ className, onNavigate, isAuthenticated }) {
+  if (isAuthenticated) {
+    return (
+      <AuthenticatedAuthButtons className={className} onNavigate={onNavigate} />
+    );
+  }
+
+  return <GuestAuthButtons className={className} onNavigate={onNavigate} />;
+}
+
 export function LandingHeader({ fixed = false }) {
+  const { user } = useAuth();
+  const isAuthenticated = Boolean(user);
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -93,16 +123,16 @@ export function LandingHeader({ fixed = false }) {
       <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 h-16 flex items-center justify-between gap-4">
         <Link
           to="/"
-          className="text-xl font-light tracking-tighter text-white shrink-0"
+          className="inline-flex items-center shrink-0"
           data-testid="landing-logo"
         >
-          FIVI<span className="font-medium">360</span>
+          <BrandLogo className="h-4" />
         </Link>
 
         <NavLinks className="hidden lg:flex" />
 
         <div className="hidden lg:flex">
-          <AuthButtons />
+          <AuthButtons isAuthenticated={isAuthenticated} />
         </div>
 
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -124,13 +154,17 @@ export function LandingHeader({ fixed = false }) {
             aria-label="Menu de navegação"
           >
             <SheetHeader>
-              <SheetTitle className="text-left text-white font-light tracking-tighter">
-                FIVI<span className="font-medium">360</span>
+              <SheetTitle className="text-left">
+                <BrandLogo className="h-7" />
               </SheetTitle>
             </SheetHeader>
             <div className="mt-8 flex flex-col gap-6">
               <NavLinks className="flex-col items-start gap-4" onNavigate={closeMobile} />
-              <AuthButtons className="flex-col w-full gap-3" onNavigate={closeMobile} />
+              <AuthButtons
+                className="flex-col w-full gap-3"
+                onNavigate={closeMobile}
+                isAuthenticated={isAuthenticated}
+              />
             </div>
           </SheetContent>
         </Sheet>

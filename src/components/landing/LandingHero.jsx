@@ -20,7 +20,7 @@ export function LandingHero() {
               variant="outline"
               className="mb-6 border-zinc-700 text-zinc-300 rounded-full px-4 py-1.5 font-normal"
             >
-              Plano Starter gratuito — sem cartão
+              Começe gratuitamente — sem cartão
             </Badge>
 
             <h1

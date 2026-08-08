@@ -11,6 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { BrandLogo } from '@/components/common/BrandLogo';
 
 function getNameInitial(name) {
   const trimmed = (name || '').trim();
@@ -110,10 +111,10 @@ export const AppHeader = ({ onMenuClick, isMenuOpen = false }) => {
       <div className="lg:hidden min-w-0">
         <Link
           to="/dashboard"
-          className="text-xl font-light tracking-tighter text-white"
+          className="inline-flex items-center"
           data-testid="app-header-logo"
         >
-          FIVI<span className="font-medium">360</span>
+          <BrandLogo className="h-7" />
         </Link>
       </div>
 

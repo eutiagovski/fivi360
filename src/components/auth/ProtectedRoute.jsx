@@ -19,9 +19,11 @@ export function AuthLoadingScreen() {
 }
 
 /**
- * Wrapper para rotas que exigem sessão autenticada.
- * Redireciona para /login enquanto carrega ou quando não há usuário.
+ * PRIVATE — rotas exclusivas da aplicação autenticada.
+ * Redireciona para /login quando não há usuário; aplica LegalConsentGate.
  * Durante `signUpInProgress`, mantém loading para evitar flash /verify-email.
+ *
+ * Não usar em Home, Landing Pages, Share, Embed ou Portfólio (PUBLIC_ALWAYS).
  */
 export function ProtectedRoute({ children }) {
   const { user, loading, signUpInProgress } = useAuth();

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { BrandLogo } from "@/components/common/BrandLogo";
 
 export const NotFound = () => {
   const { user, loading } = useAuth();
@@ -23,12 +24,9 @@ export const NotFound = () => {
       data-testid="not-found-page"
     >
       <div className="w-full max-w-lg text-center">
-        <h1
-          className="text-2xl font-light tracking-tighter text-white mb-10"
-          data-testid="not-found-logo"
-        >
-          FIVI<span className="font-medium">360</span>
-        </h1>
+        <div className="mb-10 flex justify-center">
+          <BrandLogo testId="not-found-logo" className="h-8" />
+        </div>
 
         <p className="text-5xl font-light text-zinc-700 mb-6" aria-hidden="true">
           404

@@ -1,18 +1,12 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { BrandLogo } from "@/components/common/BrandLogo";
 
 const BACK_BUTTON =
   "flex-shrink-0 flex items-center justify-center p-2 md:px-4 md:py-2 bg-black/60 backdrop-blur-xl border border-white/10 rounded-xl text-white hover:bg-black/80 transition-colors";
 
 function FiviLogo({ className, testId = "public-logo" }) {
-  return (
-    <h1
-      className={`flex-shrink-0 font-light tracking-tighter text-white ${className}`}
-      data-testid={testId}
-    >
-      FIVI<span className="font-medium">360</span>
-    </h1>
-  );
+  return <BrandLogo className={className} testId={testId} />;
 }
 
 /**
@@ -42,7 +36,7 @@ export function ViewerPageHeader({
       <span className="hidden md:inline">{backLabel}</span>
     </Link>
   ) : (
-    <FiviLogo className="text-base md:text-xl" />
+    <FiviLogo className="h-5 md:h-7" />
   );
 
   return (

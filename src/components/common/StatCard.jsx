@@ -85,6 +85,7 @@ export const StatCard = ({
           <span className="text-xl text-zinc-400 ml-2">{suffix}</span>
         )}
       </div>
+      
     </div>
   );
 };

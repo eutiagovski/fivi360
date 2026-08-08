@@ -3,6 +3,7 @@ import { LayoutDashboard, FolderOpen, Image, CreditCard, Settings, LogOut } from
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { AppHeader } from '@/components/layout/AppHeader';
+import { BrandLogo } from '@/components/common/BrandLogo';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
 export const Layout = ({ children }) => {
@@ -50,9 +51,7 @@ export const Layout = ({ children }) => {
         <div className="h-full flex flex-col p-6">
           {/* Logo */}
           <div className="mb-12 flex-shrink-0">
-            <h1 className="text-xl font-light tracking-tighter text-white" data-testid="app-logo">
-              FIVI<span className="font-medium">360</span>
-            </h1>
+            <BrandLogo testId="app-logo" className="h-7" />
           </div>
 
           {/* Navigation */}

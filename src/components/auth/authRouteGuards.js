@@ -1,8 +1,22 @@
 /**
- * Decisões das auth route guards — RC-BUG-001
+ * Decisões das auth route guards — RC-BUG-001 / RC-LP-ROUTING-1
  *
- * Lógica pura (sem Firebase) usada por PublicRoute / ProtectedRoute / VerifyEmailRoute.
- * A regra de verificação espelha `needsEmailVerification` em authService.
+ * Três conceitos explícitos de rota:
+ *
+ * - PUBLIC_ALWAYS (`resolvePublicAlwaysRoute`):
+ *   Acessível autenticado ou não. Nunca redireciona por sessão.
+ *   Exemplos: /, /lp/*, /share/*, /embed/*, /u/*, /termos, /privacidade
+ *
+ * - GUEST_ONLY (`resolveGuestRoute` / `resolvePublicRoute`):
+ *   Páginas de autenticação. Autenticado → /dashboard.
+ *   Exemplos: /login, /register, /forgot-password
+ *
+ * - PRIVATE (`resolveProtectedRoute`):
+ *   Exige sessão (+ e-mail verificado quando aplicável).
+ *   Exemplos: /dashboard, /projects/*, /settings, /plan
+ *
+ * Lógica pura (sem Firebase). A regra de verificação espelha
+ * `needsEmailVerification` em authService.
  */
 
 /**
@@ -13,10 +27,23 @@ function needsEmailVerification(user) {
 }
 
 /**
+ * PUBLIC_ALWAYS — sempre renderiza o conteúdo.
+ * Não depende de loading de auth nem de perfil Firestore.
+ *
+ * @param {{ user?: unknown, loading?: boolean, signUpInProgress?: boolean }} [_state]
+ * @returns {"children"}
+ */
+export function resolvePublicAlwaysRoute(_state) {
+  return "children";
+}
+
+/**
+ * GUEST_ONLY — visitantes veem a página; autenticados vão ao dashboard.
+ *
  * @param {{ user: unknown, loading: boolean, signUpInProgress?: boolean }} state
  * @returns {"loading" | "dashboard" | "children"}
  */
-export function resolvePublicRoute(state) {
+export function resolveGuestRoute(state) {
   if (state.loading) {
     return "loading";
   }
@@ -29,6 +56,17 @@ export function resolvePublicRoute(state) {
 }
 
 /**
+ * @deprecated Preferir `resolveGuestRoute` (GUEST_ONLY). Mantido por compatibilidade.
+ * @param {{ user: unknown, loading: boolean, signUpInProgress?: boolean }} state
+ * @returns {"loading" | "dashboard" | "children"}
+ */
+export function resolvePublicRoute(state) {
+  return resolveGuestRoute(state);
+}
+
+/**
+ * PRIVATE — exige autenticação (e verificação de e-mail quando aplicável).
+ *
  * @param {{
  *   user: { usesPasswordAuth?: boolean, emailVerified?: boolean } | null,
  *   loading: boolean,

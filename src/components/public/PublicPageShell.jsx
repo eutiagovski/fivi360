@@ -1,16 +1,12 @@
 import { PublicPortfolioHeader } from "@/components/public/PublicPortfolioHeader";
 import { PublicPoweredByFooter } from "@/components/public/PublicPoweredByFooter";
+import { BrandLogo } from "@/components/common/BrandLogo";
 
 function PublicPlatformHeader() {
   return (
     <header className="border-b border-zinc-800 p-6">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <h1
-          className="text-xl font-light tracking-tighter text-white"
-          data-testid="public-logo"
-        >
-          FIVI<span className="font-medium">360</span>
-        </h1>
+        <BrandLogo testId="public-logo" className="h-7" />
       </div>
     </header>
   );

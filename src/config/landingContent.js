@@ -61,6 +61,12 @@ export const LANDING_FEATURES = [
     title: "Dashboard completo",
     description: "Métricas de projetos, imagens, links e armazenamento.",
   },
+  {
+    icon: "Code2",
+    title: "Embed em websites",
+    description:
+      "Incorpore o viewer 360° no seu site com um snippet iframe pronto.",
+  },
 ];
 
 export const LANDING_SHOWCASE = {

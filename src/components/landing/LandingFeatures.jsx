@@ -1,5 +1,6 @@
 import {
   Briefcase,
+  Code2,
   Eye,
   FolderKanban,
   LayoutDashboard,
@@ -23,11 +24,12 @@ const ICON_MAP = {
   Eye,
   Upload,
   LayoutDashboard,
+  Code2,
 };
 
 export function LandingFeatures() {
   return (
-    <section id="recursos" className="scroll-mt-20 py-16 md:py-24">
+    <section id="recursos" className="scroll-mt-20 py-16 md:py-24 bg-zinc-900/50">
       <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16">
         <div className="text-center mb-12">
           <SectionHeader

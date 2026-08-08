@@ -4,7 +4,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { AnalyticsRouteTracker } from "@/components/analytics/AnalyticsRouteTracker";
 import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
-import { PublicRoute } from './components/auth/PublicRoute';
+import { GuestRoute } from './components/auth/GuestRoute';
+import { PublicAlwaysRoute } from './components/auth/PublicAlwaysRoute';
 import { Dashboard } from './pages/Dashboard';
 import { Projects } from './pages/Projects';
 import { ProjectDetail } from './pages/ProjectDetail';
@@ -30,12 +31,19 @@ import { VerifyEmailAction } from './pages/VerifyEmailAction';
 import { ResetPasswordAction } from './pages/ResetPasswordAction';
 import { VerifyEmailRoute } from './components/auth/VerifyEmailRoute';
 import { Landing } from './pages/Landing';
-import { LandingRoute } from './components/auth/LandingRoute';
 import { TermsOfUse } from './pages/TermsOfUse';
 import { PrivacyPolicy } from './pages/PrivacyPolicy';
 import { NotFound } from './pages/NotFound';
 import { EmbedProjectPage } from './pages/EmbedProject';
+import { AccessEarlyLandingPage } from './landing-pages/access-early';
+import { AccessEarlySuccessPage } from './landing-pages/access-early/AccessEarlySuccessPage';
 
+/**
+ * Classificação de rotas (RC-LP-ROUTING-1):
+ * - PUBLIC_ALWAYS: autenticado ou não; sem redirect por sessão; sem LegalConsentGate
+ * - GUEST_ONLY: visitantes; autenticado → /dashboard
+ * - PRIVATE: ProtectedRoute + LegalConsentGate
+ */
 function App() {
   return (
     <div className="App">
@@ -43,37 +51,56 @@ function App() {
       <BrowserRouter>
         <AnalyticsRouteTracker />
         <Routes>
-          {/* Public Routes - No Sidebar */}
-          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-          <Route path="/register" element={<PublicRoute><SignUp /></PublicRoute>} />
-          <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
+          {/* GUEST_ONLY — auth pages */}
+          <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
+          <Route path="/register" element={<GuestRoute><SignUp /></GuestRoute>} />
+          <Route path="/forgot-password" element={<GuestRoute><ForgotPassword /></GuestRoute>} />
           <Route path="/verify-email" element={<VerifyEmailRoute><VerifyEmail /></VerifyEmailRoute>} />
           <Route path="/verify-email-sent" element={<VerifyEmailSent />} />
           <Route path="/verify-email/action" element={<VerifyEmailAction />} />
           <Route path="/reset-password/action" element={<ResetPasswordAction />} />
 
-          {/* Embed público (iframe) */}
+          {/* PUBLIC_ALWAYS — embed */}
           <Route path="/embed/:projectId" element={<EmbedProjectPage />} />
           <Route path="/embed/:projectId/image/:imageId" element={<EmbedProjectPage />} />
 
-          {/* Portfólio público */}
+          {/* PUBLIC_ALWAYS — portfólio */}
           <Route path="/u/:slug" element={<PublicPortfolio />} />
           <Route path="/u/:slug/project/:projectId" element={<PublicPortfolioProject />} />
           <Route path="/u/:slug/project/:projectId/image/:imageId" element={<PublicPortfolioImage />} />
 
-          {/* Compartilhamento direto */}
+          {/* PUBLIC_ALWAYS — compartilhamento */}
           <Route path="/share/project/:projectId" element={<PublicSharedProject />} />
           <Route path="/share/project/:projectId/image/:imageId" element={<PublicSharedProjectImage />} />
           <Route path="/share/standalone/:imageId" element={<PublicStandaloneImage />} />
-
-          {/* Compatibilidade com rotas antigas */}
           <Route path="/share/image/:imageId" element={<LegacyShareImageRedirect />} />
 
+          {/* PUBLIC_ALWAYS — legais */}
           <Route path="/termos" element={<TermsOfUse />} />
           <Route path="/privacidade" element={<PrivacyPolicy />} />
-          <Route path="/" element={<LandingRoute><Landing /></LandingRoute>} />
 
-          {/* Private Routes - With Sidebar */}
+          {/* PUBLIC_ALWAYS — Home institucional */}
+          <Route path="/" element={<PublicAlwaysRoute><Landing /></PublicAlwaysRoute>} />
+
+          {/* PUBLIC_ALWAYS — Landing Pages de campanha (/lp/*) */}
+          <Route
+            path="/lp/acesso-antecipado"
+            element={
+              <PublicAlwaysRoute>
+                <AccessEarlyLandingPage />
+              </PublicAlwaysRoute>
+            }
+          />
+          <Route
+            path="/lp/acesso-antecipado/sucesso"
+            element={
+              <PublicAlwaysRoute>
+                <AccessEarlySuccessPage />
+              </PublicAlwaysRoute>
+            }
+          />
+
+          {/* PRIVATE — app autenticado */}
           <Route path="/dashboard" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
           <Route path="/projects" element={<ProtectedRoute><Layout><Projects /></Layout></ProtectedRoute>} />
           <Route path="/projects/new" element={<ProtectedRoute><Layout><NewProject /></Layout></ProtectedRoute>} />

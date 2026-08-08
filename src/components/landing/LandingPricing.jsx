@@ -66,7 +66,7 @@ export function LandingPricing() {
   const { user } = useAuth();
 
   return (
-    <section id="precos" className="scroll-mt-20 py-16 md:py-24">
+    <section id="precos" className="scroll-mt-20 py-16 md:py-24 bg-zinc-900/50">
       <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16">
         <div className="text-center mb-12">
           <SectionHeader

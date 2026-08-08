@@ -879,3 +879,87 @@ describe("projects.embedSettings — RC-PROJECT-EMBED-1", () => {
     await assertSucceeds(getDoc(doc(db, "projects", "proj-embed")));
   });
 });
+
+describe("prelaunchLeads/{leadId} — RC-LP-PRELAUNCH-DATA-1", () => {
+  const leadId = "a".repeat(64);
+  const leadDoc = {
+    name: "Ana",
+    email: "ana@example.com",
+    emailNormalized: "ana@example.com",
+    phone: "21999999999",
+    phoneNormalized: "5521999999999",
+    profession: "Arquiteto(a)",
+    marketingConsent: false,
+    campaignId: "prelaunch_2026",
+    attribution: {
+      source: "instagram",
+      medium: "stories",
+      utmCampaign: "prelaunch_2026",
+      content: "editorial_01",
+      term: null,
+      referrer: null,
+      landingPath: "/lp/acesso-antecipado",
+    },
+    status: "waiting",
+    createdAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+  };
+
+  test("anonymous cannot read", async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await setDoc(doc(context.firestore(), "prelaunchLeads", leadId), leadDoc);
+    });
+
+    const db = unauthContext().firestore();
+    await assertFails(getDoc(doc(db, "prelaunchLeads", leadId)));
+  });
+
+  test("authenticated cannot read", async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await setDoc(doc(context.firestore(), "prelaunchLeads", leadId), leadDoc);
+    });
+
+    const db = authContext("user-a").firestore();
+    await assertFails(getDoc(doc(db, "prelaunchLeads", leadId)));
+  });
+
+  test("anonymous cannot create", async () => {
+    const db = unauthContext().firestore();
+    await assertFails(setDoc(doc(db, "prelaunchLeads", "client-create"), leadDoc));
+  });
+
+  test("authenticated cannot create", async () => {
+    const db = authContext("user-a").firestore();
+    await assertFails(setDoc(doc(db, "prelaunchLeads", "client-create-auth"), leadDoc));
+  });
+
+  test("client cannot update", async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await setDoc(doc(context.firestore(), "prelaunchLeads", leadId), leadDoc);
+    });
+
+    const db = authContext("user-a").firestore();
+    await assertFails(
+      updateDoc(doc(db, "prelaunchLeads", leadId), { name: "Hack" }),
+    );
+  });
+
+  test("client cannot delete", async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await setDoc(doc(context.firestore(), "prelaunchLeads", leadId), leadDoc);
+    });
+
+    const db = authContext("user-a").firestore();
+    await assertFails(deleteDoc(doc(db, "prelaunchLeads", leadId)));
+  });
+
+  test("Admin SDK bypass can write prelaunchLeads", async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await setDoc(doc(db, "prelaunchLeads", "admin-lead"), leadDoc);
+      const snap = await getDoc(doc(db, "prelaunchLeads", "admin-lead"));
+      expect(snap.exists()).toBe(true);
+      expect(snap.data().campaignId).toBe("prelaunch_2026");
+    });
+  });
+});

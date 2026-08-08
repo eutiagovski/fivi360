@@ -13,6 +13,7 @@ const { stripeWebhook } = require("./stripeWebhook");
 const { syncPublicPortfolioAvailability } = require("./syncPublicPortfolioAvailability");
 const { repairUserWorkspaceFields } = require("./repairUserWorkspaceFields");
 const { getPublicEmbeddedProject } = require("./embed/getPublicEmbeddedProject");
+const { submitPrelaunchLead } = require("./submitPrelaunchLead");
 
 exports.processEmailQueue = processEmailQueue;
 exports.requestPasswordResetEmail = requestPasswordResetEmail;
@@ -23,3 +24,4 @@ exports.stripeWebhook = stripeWebhook;
 exports.syncPublicPortfolioAvailability = syncPublicPortfolioAvailability;
 exports.repairUserWorkspaceFields = repairUserWorkspaceFields;
 exports.getPublicEmbeddedProject = getPublicEmbeddedProject;
+exports.submitPrelaunchLead = submitPrelaunchLead;

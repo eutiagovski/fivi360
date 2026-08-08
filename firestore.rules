@@ -17,6 +17,7 @@ rules_version = '2';
 //   stats/{userId}/images/{imageId}     — contadores de imagem 360 pública
 //   invoices/{invoiceId}          — faturas Stripe (escrita via webhook / Admin SDK)
 //   emailQueue/{emailId}          — fila de e-mails transacionais (Resend)
+//   prelaunchLeads/{leadId}       — leads de pré-lançamento (somente Admin SDK / Functions)
 //
 // Admin SDK / Cloud Functions ignoram estas rules e continuam gravando
 // plan, billing, portfolioAvailable, emailVerified*, etc.
@@ -541,6 +542,14 @@ service cloud.firestore {
       allow create: if isSignedIn() && isValidEmailQueueCreate();
 
       allow update, delete: if false;
+    }
+
+    // ---------- prelaunchLeads (pré-lançamento — RC-LP-PRELAUNCH-DATA-1) ----------
+    // Captação apenas via Cloud Function submitPrelaunchLead (Admin SDK).
+    // Cliente nunca lê nem escreve diretamente.
+
+    match /prelaunchLeads/{leadId} {
+      allow read, write: if false;
     }
 
     // ---------- slugs ----------
