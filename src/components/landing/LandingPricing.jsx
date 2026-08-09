@@ -7,7 +7,7 @@ import {
   LANDING_PRICING_SECTION,
 } from "@/config/landingContent";
 import { PLAN_IDS, PLAN_LIMITS, PLAN_ORDER } from "@/config/planLimits";
-import { isStudioCheckoutConfigured } from "@/config/billing";
+import { isCheckoutEnabledPlan, isStudioCheckoutConfigured } from "@/config/billing";
 import { useAuth } from "@/hooks/useAuth";
 import {
   getPlanUpgradePath,
@@ -37,7 +37,7 @@ function getPlanCta(planId, isAuthenticated) {
     return { href: marketing.ctaTo, disabled: false };
   }
 
-  if (planId === PLAN_IDS.STUDIO && !isStudioCheckoutConfigured()) {
+  if (!isCheckoutEnabledPlan(planId)) {
     return { href: "#", disabled: true };
   }
 
@@ -55,6 +55,14 @@ function getPlanCta(planId, isAuthenticated) {
 function getCtaLabel(planId) {
   const marketing = LANDING_PRICING_MARKETING[planId];
 
+  if (
+    (planId === PLAN_IDS.PROFESSIONAL || planId === PLAN_IDS.STUDIO)
+    && !isCheckoutEnabledPlan(planId)
+  ) {
+    return "Em breve";
+  }
+
+  // Opt-out fino de Studio (mantém label Em breve se só Studio estiver off).
   if (planId === PLAN_IDS.STUDIO && !isStudioCheckoutConfigured()) {
     return "Em breve";
   }

@@ -1,4 +1,9 @@
-const { APP_URL, buildPlainText, wrapEmailHtml } = require("./shared");
+const {
+  APP_URL,
+  buildPlainText,
+  escapeHtml,
+  wrapEmailHtml,
+} = require("./shared");
 
 /**
  * Confirmação de solicitação de upgrade (checkout ainda não ativo).
@@ -8,13 +13,15 @@ const { APP_URL, buildPlainText, wrapEmailHtml } = require("./shared");
  */
 function upgradeRequestedEmail(payload = {}) {
   const name = (payload.name || "").trim();
-  const planName = payload.planName || payload.planId || "Professional";
-  const greeting = name ? `Olá, ${name}!` : "Olá!";
+  const planNameRaw = payload.planName || payload.planId || "Professional";
+  const planName = String(planNameRaw);
+  const greeting = name ? `Olá, ${escapeHtml(name)}.` : "Olá.";
+  const greetingText = name ? `Olá, ${name}.` : "Olá.";
 
   const bodyHtml = `
     <p style="margin: 0 0 16px; color: #333333;">${greeting}</p>
     <p style="margin: 0 0 16px; color: #333333;">
-      Recebemos sua solicitação de upgrade para o plano <strong>${planName}</strong>.
+      Recebemos sua solicitação de upgrade para o plano <strong>${escapeHtml(planName)}</strong>.
     </p>
     <p style="margin: 0 0 16px; color: #555555; font-size: 15px;">
       Nossa equipe está preparando a cobrança online. Em breve você poderá concluir a assinatura diretamente pelo painel.
@@ -33,11 +40,12 @@ function upgradeRequestedEmail(payload = {}) {
       bodyHtml,
       ctaLabel: "Ver planos",
       ctaUrl: `${APP_URL}/plan`,
+      status: "neutral",
     }),
     text: buildPlainText(
       subject,
       [
-        greeting,
+        greetingText,
         `Recebemos sua solicitação de upgrade para o plano ${planName}.`,
         "Nossa equipe está preparando a cobrança online.",
         "Em breve você poderá concluir a assinatura diretamente pelo painel.",

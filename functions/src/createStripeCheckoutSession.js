@@ -8,6 +8,8 @@ const {
   STRIPE_BILLING_PARAMS,
   getAllowedCheckoutPlanIds,
   getStripePriceId,
+  isPaidCheckoutEnabled,
+  PAYMENTS_COMING_SOON_MESSAGE,
 } = require("./config/stripeBilling");
 const {
   buildCheckoutSuccessUrl,
@@ -178,6 +180,11 @@ exports.createStripeCheckoutSession = onCall(
     }
 
     const uid = request.auth.uid;
+
+    // RC-MANUAL-PLAN-AND-PAYMENTS-GATE-1 — gate global antes de Stripe / prices.
+    if (!isPaidCheckoutEnabled()) {
+      throw new HttpsError("failed-precondition", PAYMENTS_COMING_SOON_MESSAGE);
+    }
 
     // priceId do cliente é ignorado — resolução apenas no backend.
     const checkoutPlan = resolveCheckoutPlanFromRequest(request.data ?? {}, {

@@ -18,6 +18,7 @@ export function usePlanLimits() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [planId, setPlanId] = useState("starter");
+  const [planSource, setPlanSource] = useState("");
   const [limits, setLimits] = useState(() => getPlanLimits("starter"));
   const [usage, setUsage] = useState({
     projectCount: 0,
@@ -28,6 +29,7 @@ export function usePlanLimits() {
 
   const applyContext = useCallback((context) => {
     setPlanId(context.planId);
+    setPlanSource(context.planSource ?? "");
     setLimits(context.limits);
     setUsage(context.usage);
     setBilling(context.billing);
@@ -55,6 +57,7 @@ export function usePlanLimits() {
         );
         const fallbackLimits = getPlanLimits(fallbackPlanId);
         setPlanId(fallbackPlanId);
+        setPlanSource(profile?.planSource ?? "");
         setLimits(fallbackLimits);
         setBilling(profile?.billing ?? normalizeBilling(null));
       } catch {
@@ -117,6 +120,7 @@ export function usePlanLimits() {
     loading,
     error,
     planId,
+    planSource,
     limits,
     usage,
     billing,

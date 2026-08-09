@@ -8,3 +8,6 @@ node_modules/
 .env.*.local
 
 # .env and .env.example are tracked (non-sensitive shared config / template only)
+
+# Generated local email HTML previews (see scripts/preview-emails.js)
+email-previews/

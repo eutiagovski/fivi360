@@ -1,11 +1,18 @@
-const { buildPlainText, wrapEmailHtml } = require("../../emailTemplates/shared");
-const { APP_BASE_URL } = require("../../config/app");
+const {
+  buildPlainText,
+  buildSummaryCard,
+  escapeHtml,
+  wrapEmailHtml,
+} = require("../../emailTemplates/shared");
+const { getAppBaseUrl } = require("../../config/app");
 const {
   formatAmount,
   resolvePlanDisplayName,
 } = require("./paymentSuccess");
 
-const SUBSCRIPTION_SETTINGS_URL = `${APP_BASE_URL}/plan`;
+function getSubscriptionSettingsUrl() {
+  return `${getAppBaseUrl()}/plan`;
+}
 
 /**
  * @param {unknown} value
@@ -70,31 +77,22 @@ function buildPaymentFailedEmail(payload = {}) {
   const nextRetryLabel = formatBillingDate(payload.nextPaymentAttempt, { includeTime: true });
   const currentPeriodEndLabel = formatBillingDate(payload.currentPeriodEnd);
   const name = (payload.name || "").trim();
-  const greeting = name ? `Olá, ${name}!` : "Olá!";
+  const greeting = name ? `Olá, ${escapeHtml(name)}.` : "Olá.";
+  const greetingText = name ? `Olá, ${name}.` : "Olá.";
+
+  const summaryRows = [
+    { label: "Plano", value: planDisplayName },
+    { label: "Valor", value: amountLabel },
+    { label: "Próxima tentativa", value: nextRetryLabel },
+    { label: "Validade da assinatura", value: currentPeriodEndLabel },
+  ];
 
   const bodyHtml = `
     <p style="margin: 0 0 16px; color: #333333;">${greeting}</p>
-    <p style="margin: 0 0 16px; color: #333333;">
-      Não foi possível processar a cobrança da sua assinatura <strong>${planDisplayName}</strong>.
+    <p style="margin: 0 0 24px; color: #333333;">
+      Não foi possível processar a cobrança da sua assinatura <strong>${escapeHtml(planDisplayName)}</strong>.
     </p>
-    <table role="presentation" cellspacing="0" cellpadding="0" style="width: 100%; margin: 0 0 20px; border: 1px solid #e8e8e8; border-radius: 8px; overflow: hidden;">
-      <tr>
-        <td style="padding: 12px 16px; background-color: #f7f7f7; font-size: 13px; color: #666666; width: 40%;">Valor</td>
-        <td style="padding: 12px 16px; font-size: 15px; color: #1a1a1a; font-weight: 600;">${amountLabel}</td>
-      </tr>
-      <tr>
-        <td style="padding: 12px 16px; background-color: #f7f7f7; font-size: 13px; color: #666666;">Plano</td>
-        <td style="padding: 12px 16px; font-size: 15px; color: #1a1a1a;">${planDisplayName}</td>
-      </tr>
-      <tr>
-        <td style="padding: 12px 16px; background-color: #f7f7f7; font-size: 13px; color: #666666;">Próxima tentativa</td>
-        <td style="padding: 12px 16px; font-size: 15px; color: #1a1a1a;">${nextRetryLabel}</td>
-      </tr>
-      <tr>
-        <td style="padding: 12px 16px; background-color: #f7f7f7; font-size: 13px; color: #666666;">Validade da assinatura</td>
-        <td style="padding: 12px 16px; font-size: 15px; color: #1a1a1a;">${currentPeriodEndLabel}</td>
-      </tr>
-    </table>
+    ${buildSummaryCard("Detalhes da cobrança", summaryRows)}
     <p style="margin: 0 0 16px; color: #555555; font-size: 15px;">
       <strong>Seu acesso não foi interrompido neste momento.</strong> A Stripe poderá realizar novas tentativas de cobrança automaticamente.
     </p>
@@ -109,23 +107,28 @@ function buildPaymentFailedEmail(payload = {}) {
     html: wrapEmailHtml({
       preheader: `Não foi possível processar a cobrança de ${amountLabel} do plano ${planDisplayName}.`,
       title: "Falha na cobrança",
+      subtitle: "Atualize sua forma de pagamento.",
       bodyHtml,
       ctaLabel: "Atualizar forma de pagamento",
-      ctaUrl: SUBSCRIPTION_SETTINGS_URL,
+      ctaUrl: getSubscriptionSettingsUrl(),
+      status: "warning",
     }),
     text: buildPlainText(
       subject,
       [
-        greeting,
+        greetingText,
         `Não foi possível processar a cobrança da sua assinatura ${planDisplayName}.`,
-        `Valor: ${amountLabel}`,
+        "",
+        "Detalhes da cobrança",
         `Plano: ${planDisplayName}`,
+        `Valor: ${amountLabel}`,
         `Próxima tentativa: ${nextRetryLabel}`,
         `Validade da assinatura: ${currentPeriodEndLabel}`,
+        "",
         "Seu acesso não foi interrompido neste momento. A Stripe poderá realizar novas tentativas de cobrança automaticamente.",
         "Atualize sua forma de pagamento para evitar interrupções futuras.",
       ],
-      { label: "Atualizar forma de pagamento", url: SUBSCRIPTION_SETTINGS_URL },
+      { label: "Atualizar forma de pagamento", url: getSubscriptionSettingsUrl() },
     ),
   };
 }

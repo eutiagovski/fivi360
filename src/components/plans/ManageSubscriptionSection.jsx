@@ -1,4 +1,4 @@
-import { PLAN_IDS } from "@/config/planLimits";
+import { PLAN_IDS, isManualPlanSource } from "@/config/planLimits";
 import {
   BILLING_PORTAL_COMING_SOON_MESSAGE,
   formatBillingDate,
@@ -6,14 +6,16 @@ import {
   getPlanMonthlyPriceLabel,
   getSubscriptionPeriodDisplay,
   getSubscriptionStatusLabel,
+  MANUAL_PLAN_ACCESS_STATUS_LABEL,
 } from "@/config/billing";
 import { useToast } from "@/hooks/use-toast";
 
 /**
- * Seção Gerenciar assinatura (Starter vs planos pagos).
+ * Seção Gerenciar assinatura (Starter vs planos pagos vs grant manual).
  *
  * @param {{
  *   planId: import("@/config/planLimits").PlanId,
+ *   planSource?: string,
  *   limits: import("@/config/planLimits").PlanLimits,
  *   billing: import("@/config/billing").UserBilling,
  *   onUpgrade: () => void,
@@ -21,12 +23,14 @@ import { useToast } from "@/hooks/use-toast";
  */
 export function ManageSubscriptionSection({
   planId,
+  planSource = "",
   limits,
   billing,
   onUpgrade,
 }) {
   const { toast } = useToast();
   const isStarter = planId === PLAN_IDS.STARTER;
+  const isManualGrant = !isStarter && isManualPlanSource(planSource);
 
   const handleManageSubscription = () => {
     toast({
@@ -45,6 +49,8 @@ export function ManageSubscriptionSection({
           onUpgrade={onUpgrade}
           onManageSubscription={handleManageSubscription}
         />
+      ) : isManualGrant ? (
+        <ManualAccessView limits={limits} />
       ) : (
         <PaidSubscriptionView
           limits={limits}
@@ -102,6 +108,36 @@ function StarterSubscriptionView({ onUpgrade, onManageSubscription }) {
           {BILLING_PORTAL_COMING_SOON_MESSAGE}
         </p>
       </div> */}
+    </div>
+  );
+}
+
+/**
+ * Plano pago concedido sem assinatura Stripe (source=manual).
+ * Sem próxima cobrança, preço cobrado ou ações de assinatura.
+ */
+function ManualAccessView({ limits }) {
+  return (
+    <div className="space-y-6" data-testid="manage-subscription-manual-view">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <SubscriptionInfoItem
+          label="Plano atual"
+          value={`Plano ${limits.displayName}`}
+          dataTestId="manage-subscription-current-plan"
+        />
+        <SubscriptionInfoItem
+          label="Status"
+          value={MANUAL_PLAN_ACCESS_STATUS_LABEL}
+          dataTestId="manage-subscription-status"
+        />
+      </div>
+      <p
+        className="text-sm text-zinc-500 leading-relaxed max-w-2xl"
+        data-testid="manage-subscription-manual-note"
+      >
+        Este acesso foi concedido à sua conta. Não há assinatura Stripe nem
+        cobrança recorrente associada.
+      </p>
     </div>
   );
 }

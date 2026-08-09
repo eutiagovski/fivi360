@@ -132,6 +132,7 @@ export async function getUserPlanContext(userId) {
 
   return {
     planId,
+    planSource: profile?.planSource ?? "",
     limits,
     usage,
     billing: profile?.billing ?? normalizeBilling(null),

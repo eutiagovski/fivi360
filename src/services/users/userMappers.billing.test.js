@@ -77,7 +77,61 @@ describe("current billing / plan mapping", () => {
     );
 
     expect(profile.planId).toBe("studio");
+    expect(profile.planSource).toBe("stripe");
     expect(profile.billing.planId).toBe("studio");
+    expect(profile.billing.subscriptionStatus).toBe("active");
+    expect(profile.billing.subscriptionId).toBe("sub_s");
+  });
+
+  test("RC-MANUAL — Studio manual: entitlement Studio, billing permanece free", () => {
+    const profile = mapUserDoc(
+      "uid-manual-studio",
+      {
+        plan: { id: "studio", status: "active", source: "manual" },
+        billing: {
+          provider: "stripe",
+          subscriptionStatus: "free",
+        },
+      },
+      null,
+    );
+
+    expect(normalizeUserPlan(profile.plan)).toBe("studio");
+    expect(profile.planId).toBe("studio");
+    expect(profile.planSource).toBe("manual");
+    expect(profile.billing.subscriptionStatus).toBe("free");
+    expect(profile.billing.customerId).toBe("");
+    expect(profile.billing.subscriptionId).toBe("");
+    expect(profile.billing.cancelAtPeriodEnd).toBe(false);
+  });
+
+  test("RC-MANUAL — Professional manual: entitlement Professional, sem assinatura", () => {
+    const profile = mapUserDoc(
+      "uid-manual-pro",
+      {
+        plan: { id: "professional", status: "active", source: "manual" },
+        billing: { provider: "stripe", subscriptionStatus: "free" },
+      },
+      null,
+    );
+
+    expect(profile.planId).toBe("professional");
+    expect(profile.planSource).toBe("manual");
+    expect(profile.billing.subscriptionStatus).toBe("free");
+  });
+
+  test("RC-MANUAL — plan.status active + source manual não contamina subscriptionStatus", () => {
+    const profile = mapUserDoc(
+      "uid-no-contaminate",
+      {
+        plan: { id: "studio", status: "active", source: "manual" },
+        billing: { provider: "stripe", subscriptionStatus: "free" },
+      },
+      null,
+    );
+
+    expect(profile.billing.subscriptionStatus).not.toBe("active");
+    expect(profile.billing.subscriptionStatus).toBe("free");
   });
 
   test("Enterprise reconhecido internamente", () => {

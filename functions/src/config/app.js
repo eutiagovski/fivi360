@@ -8,8 +8,22 @@
  * @see docs/RC-FUNCTIONS-ENV-CLEANUP-1.md
  */
 
-const APP_BASE_URL = process.env.APP_BASE_URL || "http://localhost:3000";
+/**
+ * Resolve at call time so templates/tests always see the current env.
+ * @returns {string}
+ */
+function getAppBaseUrl() {
+  const value = process.env.APP_BASE_URL;
+  if (typeof value === "string" && value.trim()) {
+    return value.trim().replace(/\/$/, "");
+  }
+  return "http://localhost:3000";
+}
+
+/** Snapshot at module load (existing callers). Prefer getAppBaseUrl() for CTAs. */
+const APP_BASE_URL = getAppBaseUrl();
 
 module.exports = {
   APP_BASE_URL,
+  getAppBaseUrl,
 };

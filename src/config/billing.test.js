@@ -5,12 +5,16 @@
 import {
   BILLING_PROVIDER,
   DEFAULT_BILLING,
+  canCancelStripeSubscription,
+  canStartStripeCheckoutForPlan,
   doesPlanSatisfyRequestedPlan,
   getStripeCheckoutPlanIds,
+  getUpgradePlanButtonState,
   isActiveStripeBillingProvider,
   isActiveSubscriptionStatus,
   isCheckoutEnabledPlan,
   isCheckoutSuccessConfirmed,
+  isPaidCheckoutEnabled,
   isPaidPlan,
   isStudioCheckoutConfigured,
   normalizeBilling,
@@ -32,22 +36,31 @@ describe("DEFAULT_BILLING bootstrap", () => {
 });
 
 describe("plan checkout configuration", () => {
-  const originalEnv = process.env.REACT_APP_STRIPE_STUDIO_CHECKOUT;
+  const originalStudio = process.env.REACT_APP_STRIPE_STUDIO_CHECKOUT;
+  const originalPaid = process.env.REACT_APP_PAID_CHECKOUT_ENABLED;
 
   afterEach(() => {
-    if (originalEnv === undefined) {
+    if (originalStudio === undefined) {
       delete process.env.REACT_APP_STRIPE_STUDIO_CHECKOUT;
     } else {
-      process.env.REACT_APP_STRIPE_STUDIO_CHECKOUT = originalEnv;
+      process.env.REACT_APP_STRIPE_STUDIO_CHECKOUT = originalStudio;
+    }
+
+    if (originalPaid === undefined) {
+      delete process.env.REACT_APP_PAID_CHECKOUT_ENABLED;
+    } else {
+      process.env.REACT_APP_PAID_CHECKOUT_ENABLED = originalPaid;
     }
   });
 
   test("Professional possui checkout ativo", () => {
+    delete process.env.REACT_APP_PAID_CHECKOUT_ENABLED;
     expect(isCheckoutEnabledPlan(PLAN_IDS.PROFESSIONAL)).toBe(true);
   });
 
   test("Studio possui checkout ativo no Beta (default)", () => {
     delete process.env.REACT_APP_STRIPE_STUDIO_CHECKOUT;
+    delete process.env.REACT_APP_PAID_CHECKOUT_ENABLED;
     expect(isStudioCheckoutConfigured()).toBe(true);
     expect(isCheckoutEnabledPlan(PLAN_IDS.STUDIO)).toBe(true);
     expect(getStripeCheckoutPlanIds().has(PLAN_IDS.STUDIO)).toBe(true);
@@ -64,9 +77,73 @@ describe("plan checkout configuration", () => {
   });
 
   test("Studio pode ser desabilitado com opt-out explícito", () => {
+    delete process.env.REACT_APP_PAID_CHECKOUT_ENABLED;
     process.env.REACT_APP_STRIPE_STUDIO_CHECKOUT = "false";
     expect(isStudioCheckoutConfigured()).toBe(false);
     expect(isCheckoutEnabledPlan(PLAN_IDS.STUDIO)).toBe(false);
+  });
+
+  test("RC-MANUAL — PAID_CHECKOUT off: Professional e Studio Em breve / sem checkout", () => {
+    process.env.REACT_APP_PAID_CHECKOUT_ENABLED = "false";
+    delete process.env.REACT_APP_STRIPE_STUDIO_CHECKOUT;
+
+    expect(isPaidCheckoutEnabled()).toBe(false);
+    expect(getStripeCheckoutPlanIds().size).toBe(0);
+    expect(isCheckoutEnabledPlan(PLAN_IDS.PROFESSIONAL)).toBe(false);
+    expect(isCheckoutEnabledPlan(PLAN_IDS.STUDIO)).toBe(false);
+    expect(
+      getUpgradePlanButtonState(PLAN_IDS.PROFESSIONAL, PLAN_IDS.STARTER),
+    ).toEqual({ disabled: true, label: "Em breve" });
+    expect(
+      getUpgradePlanButtonState(PLAN_IDS.STUDIO, PLAN_IDS.STARTER),
+    ).toEqual({ disabled: true, label: "Em breve" });
+    expect(
+      canStartStripeCheckoutForPlan(PLAN_IDS.PROFESSIONAL, PLAN_IDS.STARTER),
+    ).toBe(false);
+    expect(
+      canStartStripeCheckoutForPlan(PLAN_IDS.STUDIO, PLAN_IDS.STARTER),
+    ).toBe(false);
+  });
+});
+
+describe("canCancelStripeSubscription — RC-MANUAL", () => {
+  test("Studio manual sem subscriptionId → não cancela", () => {
+    expect(
+      canCancelStripeSubscription(
+        {
+          provider: "stripe",
+          subscriptionStatus: "free",
+          subscriptionId: "",
+          cancelAtPeriodEnd: false,
+        },
+        { planSource: "manual" },
+      ),
+    ).toBe(false);
+  });
+
+  test("plan.status active sem subscriptionId → não cancela", () => {
+    expect(
+      canCancelStripeSubscription({
+        provider: "stripe",
+        subscriptionStatus: "active",
+        subscriptionId: "",
+        cancelAtPeriodEnd: false,
+      }),
+    ).toBe(false);
+  });
+
+  test("Studio Stripe com subscriptionId → cancela", () => {
+    expect(
+      canCancelStripeSubscription(
+        {
+          provider: "stripe",
+          subscriptionStatus: "active",
+          subscriptionId: "sub_123",
+          cancelAtPeriodEnd: false,
+        },
+        { planSource: "stripe" },
+      ),
+    ).toBe(true);
   });
 });
 

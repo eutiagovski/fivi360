@@ -4,10 +4,13 @@
  *
  * Formato persistido em `users.plan`:
  *   - Bootstrap Starter: `"starter"`
- *   - Assinatura Stripe / sistema: `{ id, status, source, ... }`
+ *   - Assinatura Stripe / sistema / manual: `{ id, status, source, ... }`
  *
  * IDs reconhecidos: starter | professional | studio | enterprise.
  * Valores desconhecidos → Starter (sem entitlement pago).
+ *
+ * `source` NÃO altera entitlement (ver `normalizeUserPlan`).
+ * Valores canônicos: stripe | system | manual.
  *
  * Estimativa de imagens: ~5 MB por panorama. Quantidade aproximada;
  * consumo real varia com resolução, formato e compressão.
@@ -20,7 +23,21 @@ export const PLAN_IDS = {
   ENTERPRISE: "enterprise",
 };
 
+/**
+ * Origem do plano em `users.plan.source` (metadado; não é entitlement).
+ * - stripe: Checkout / assinatura Stripe
+ * - system: downgrade automático (ex.: subscription.deleted)
+ * - manual: concessão Admin (sem assinatura Stripe)
+ */
+export const PLAN_SOURCES = {
+  STRIPE: "stripe",
+  SYSTEM: "system",
+  MANUAL: "manual",
+};
+
 /** @typedef {'starter' | 'professional' | 'studio' | 'enterprise'} PlanId */
+
+/** @typedef {'stripe' | 'system' | 'manual' | string} PlanSource */
 
 /**
  * @typedef {Object} UserPlan
@@ -299,6 +316,28 @@ const RECOGNIZED_PLAN_IDS = {
 
 /** Statuses que mantêm os limites do plano pago (objeto `users.plan`). */
 export const ACTIVE_PLAN_STATUSES = new Set(["active", "trialing"]);
+
+/**
+ * Extrai `users.plan.source` (metadado). String root / ausente → "".
+ *
+ * @param {UserPlanRaw} raw
+ * @returns {string}
+ */
+export function getPlanSource(raw) {
+  if (raw && typeof raw === "object" && typeof raw.source === "string") {
+    return raw.source.toLowerCase().trim();
+  }
+
+  return "";
+}
+
+/**
+ * @param {string | null | undefined} source
+ * @returns {boolean}
+ */
+export function isManualPlanSource(source) {
+  return (source ?? "").toLowerCase().trim() === PLAN_SOURCES.MANUAL;
+}
 
 /**
  * Normaliza um ID de plano bruto (string).

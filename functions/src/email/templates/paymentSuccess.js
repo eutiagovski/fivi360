@@ -1,5 +1,10 @@
-const { buildPlainText, wrapEmailHtml } = require("../../emailTemplates/shared");
-const { APP_BASE_URL } = require("../../config/app");
+const {
+  buildPlainText,
+  buildSummaryCard,
+  escapeHtml,
+  wrapEmailHtml,
+} = require("../../emailTemplates/shared");
+const { getAppBaseUrl } = require("../../config/app");
 const { normalizeToDate, formatBillingDatePtBr } = require("../dateUtils");
 
 const PLAN_DISPLAY_NAMES = {
@@ -9,7 +14,9 @@ const PLAN_DISPLAY_NAMES = {
   starter: "Starter",
 };
 
-const SUBSCRIPTION_SETTINGS_URL = `${APP_BASE_URL}/plan`;
+function getSubscriptionSettingsUrl() {
+  return `${getAppBaseUrl()}/plan`;
+}
 
 /**
  * @param {string | null | undefined} planId
@@ -60,19 +67,6 @@ function formatPaymentDate(unixSeconds) {
 }
 
 /**
- * @param {string} label
- * @param {string} value
- * @returns {string}
- */
-function buildDetailRow(label, value) {
-  return `
-      <tr>
-        <td style="padding: 12px 16px; background-color: #f7f7f7; font-size: 13px; color: #666666; width: 40%;">${label}</td>
-        <td style="padding: 12px 16px; font-size: 15px; color: #1a1a1a;">${value}</td>
-      </tr>`;
-}
-
-/**
  * E-mail de confirmação de pagamento (invoice.paid).
  *
  * @param {{
@@ -106,39 +100,53 @@ function buildPaymentSuccessEmail(payload = {}) {
     : null;
 
   const name = (payload.name || "").trim();
-  const greeting = name ? `Olá, ${name}!` : "Olá!";
+  const greeting = name ? `Olá, ${escapeHtml(name)}.` : "Olá.";
+  const greetingText = name ? `Olá, ${name}.` : "Olá.";
 
-  const optionalRows = [
-    currentPeriodEndLabel
-      ? buildDetailRow("Validade da assinatura", currentPeriodEndLabel)
-      : "",
-    nextBillingAtLabel ? buildDetailRow("Próxima cobrança", nextBillingAtLabel) : "",
-  ].join("");
+  const summaryRows = [
+    { label: "Plano", value: planDisplayName },
+    { label: "Valor", value: amountLabel },
+    { label: "Data", value: paidAtLabel },
+  ];
+
+  if (currentPeriodEndLabel) {
+    summaryRows.push({
+      label: "Validade da assinatura",
+      value: currentPeriodEndLabel,
+    });
+  }
+
+  if (nextBillingAtLabel) {
+    summaryRows.push({
+      label: "Próxima cobrança",
+      value: nextBillingAtLabel,
+    });
+  }
 
   const bodyHtml = `
     <p style="margin: 0 0 16px; color: #333333;">${greeting}</p>
     <p style="margin: 0 0 16px; color: #333333;">
-      Confirmamos o recebimento do seu pagamento. Sua assinatura <strong>${planDisplayName}</strong> está ativa.
+      Seu pagamento foi confirmado e sua assinatura FIVI360 <strong>${escapeHtml(planDisplayName)}</strong> está ativa.
     </p>
-    <table role="presentation" cellspacing="0" cellpadding="0" style="width: 100%; margin: 0 0 20px; border: 1px solid #e8e8e8; border-radius: 8px; overflow: hidden;">
-      ${buildDetailRow("Valor", amountLabel)}
-      ${buildDetailRow("Data", paidAtLabel)}
-      ${buildDetailRow("Plano", planDisplayName)}
-      ${optionalRows}
-    </table>
+    <p style="margin: 0 0 24px; color: #555555; font-size: 15px;">
+      Você pode continuar criando, apresentando e compartilhando suas experiências 360° normalmente.
+    </p>
+    ${buildSummaryCard("Resumo da cobrança", summaryRows)}
     <p style="margin: 0; color: #555555; font-size: 15px;">
-      Obrigado por confiar no FIVI360. Você pode consultar detalhes da assinatura em
-      <strong>Configurações → Assinatura</strong> no painel.
+      Você pode consultar suas cobranças e gerenciar sua assinatura a qualquer momento.
     </p>`;
 
   const subject = `Pagamento confirmado — FIVI360 ${planDisplayName}`;
 
   const textLines = [
-    greeting,
-    "Confirmamos o recebimento do seu pagamento.",
+    greetingText,
+    `Seu pagamento foi confirmado e sua assinatura FIVI360 ${planDisplayName} está ativa.`,
+    "Você pode continuar criando, apresentando e compartilhando suas experiências 360° normalmente.",
+    "",
+    "Resumo da cobrança",
+    `Plano: ${planDisplayName}`,
     `Valor: ${amountLabel}`,
     `Data: ${paidAtLabel}`,
-    `Plano: ${planDisplayName}`,
   ];
 
   if (currentPeriodEndLabel) {
@@ -150,8 +158,8 @@ function buildPaymentSuccessEmail(payload = {}) {
   }
 
   textLines.push(
-    "Obrigado por confiar no FIVI360.",
-    "Consulte detalhes da assinatura em Configurações → Assinatura no painel.",
+    "",
+    "Você pode consultar suas cobranças e gerenciar sua assinatura a qualquer momento.",
   );
 
   return {
@@ -159,13 +167,15 @@ function buildPaymentSuccessEmail(payload = {}) {
     html: wrapEmailHtml({
       preheader: `Pagamento de ${amountLabel} confirmado para o plano ${planDisplayName}.`,
       title: "Pagamento confirmado",
+      subtitle: "Sua assinatura está ativa.",
       bodyHtml,
       ctaLabel: "Gerenciar assinatura",
-      ctaUrl: SUBSCRIPTION_SETTINGS_URL,
+      ctaUrl: getSubscriptionSettingsUrl(),
+      status: "success",
     }),
     text: buildPlainText(subject, textLines, {
       label: "Gerenciar assinatura",
-      url: SUBSCRIPTION_SETTINGS_URL,
+      url: getSubscriptionSettingsUrl(),
     }),
   };
 }

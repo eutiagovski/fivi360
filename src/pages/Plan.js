@@ -44,6 +44,7 @@ export const Plan = () => {
   const {
     loading,
     planId,
+    planSource,
     limits,
     usageStats,
     billing,
@@ -86,7 +87,9 @@ export const Plan = () => {
 
   const isStarter = planId === PLAN_IDS.STARTER;
   const canOpenUpgrade = planId !== PLAN_IDS.ENTERPRISE;
-  const showCancelSubscriptionButton = canCancelStripeSubscription(billing);
+  const showCancelSubscriptionButton = canCancelStripeSubscription(billing, {
+    planSource,
+  });
 
   const sharedLinksCount = projects.filter(
     (p) => p.visibility !== 'private',
@@ -259,6 +262,7 @@ export const Plan = () => {
         />
         <ManageSubscriptionSection
           planId={planId}
+          planSource={planSource}
           limits={limits}
           billing={billing}
           onUpgrade={() => openUpgradeModal()}

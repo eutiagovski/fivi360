@@ -1,4 +1,4 @@
-const { buildPlainText, wrapEmailHtml } = require("./shared");
+const { buildPlainText, escapeHtml, wrapEmailHtml } = require("./shared");
 
 /**
  * E-mail de confirmação de cadastro (verificação de e-mail).
@@ -8,7 +8,8 @@ const { buildPlainText, wrapEmailHtml } = require("./shared");
  */
 function verifyEmail(payload = {}) {
   const name = (payload.name || "").trim();
-  const greeting = name ? `Olá, ${name}!` : "Olá!";
+  const greeting = name ? `Olá, ${escapeHtml(name)}.` : "Olá.";
+  const greetingText = name ? `Olá, ${name}.` : "Olá.";
   const verificationLink = (payload.verificationLink || "").trim();
 
   if (!verificationLink) {
@@ -34,11 +35,12 @@ function verifyEmail(payload = {}) {
       bodyHtml,
       ctaLabel: "Confirmar e-mail",
       ctaUrl: verificationLink,
+      status: "neutral",
     }),
     text: buildPlainText(
       subject,
       [
-        greeting,
+        greetingText,
         "Obrigado por se cadastrar no FIVI360. Para ativar sua conta, confirme seu endereço de e-mail.",
         "Se você não criou uma conta no FIVI360, ignore este e-mail.",
       ],

@@ -1,4 +1,9 @@
-const { APP_URL, buildPlainText, wrapEmailHtml } = require("./shared");
+const {
+  APP_URL,
+  buildPlainText,
+  escapeHtml,
+  wrapEmailHtml,
+} = require("./shared");
 
 /**
  * E-mail de boas-vindas após cadastro.
@@ -8,9 +13,12 @@ const { APP_URL, buildPlainText, wrapEmailHtml } = require("./shared");
  */
 function welcomeEmail(payload = {}) {
   const name = (payload.name || "").trim();
-  const greeting = name ? `Olá, ${name}!` : "Olá!";
-  const companyLine = payload.companyName
-    ? `<p style="margin: 0 0 16px; color: #333333;">Sua conta para <strong>${payload.companyName}</strong> está pronta.</p>`
+  const companyName =
+    typeof payload.companyName === "string" ? payload.companyName.trim() : "";
+  const greeting = name ? `Olá, ${escapeHtml(name)}.` : "Olá.";
+  const greetingText = name ? `Olá, ${name}.` : "Olá.";
+  const companyLine = companyName
+    ? `<p style="margin: 0 0 16px; color: #333333;">Sua conta para <strong>${escapeHtml(companyName)}</strong> está pronta.</p>`
     : "";
 
   const bodyHtml = `
@@ -30,16 +38,18 @@ function welcomeEmail(payload = {}) {
     html: wrapEmailHtml({
       preheader: "Sua conta FIVI360 está pronta. Comece seu primeiro projeto.",
       title: "Bem-vindo ao FIVI360",
+      subtitle: "Sua conta está pronta.",
       bodyHtml,
       ctaLabel: "Acessar meu painel",
       ctaUrl: `${APP_URL}/dashboard`,
+      status: "success",
     }),
     text: buildPlainText(
       subject,
       [
-        greeting,
-        payload.companyName
-          ? `Sua conta para ${payload.companyName} está pronta.`
+        greetingText,
+        companyName
+          ? `Sua conta para ${companyName} está pronta.`
           : "Sua conta está pronta.",
         "Bem-vindo ao FIVI360 — apresente projetos imobiliários em 360°.",
         "Crie seu primeiro projeto e compartilhe experiências imersivas com clientes.",

@@ -90,6 +90,7 @@ function isFirestorePermissionDenied(error) {
  * @property {string} bio
  * @property {import("@/config/planLimits").UserPlanRaw} plan
  * @property {import("@/config/planLimits").PlanId} planId — plano efetivo (limites/UI)
+ * @property {string} planSource — users.plan.source (metadado; não é entitlement)
  * @property {string} publicSlug
  * @property {boolean} portfolioEnabled
  * @property {SocialLinks} socialLinks

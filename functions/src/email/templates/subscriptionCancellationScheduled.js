@@ -1,8 +1,14 @@
-const { buildPlainText, wrapEmailHtml } = require("../../emailTemplates/shared");
-const { APP_BASE_URL } = require("../../config/app");
+const {
+  buildPlainText,
+  escapeHtml,
+  wrapEmailHtml,
+} = require("../../emailTemplates/shared");
+const { getAppBaseUrl } = require("../../config/app");
 const { resolvePlanDisplayName } = require("./paymentSuccess");
 
-const SUBSCRIPTION_SETTINGS_URL = `${APP_BASE_URL}/plan`;
+function getSubscriptionSettingsUrl() {
+  return `${getAppBaseUrl()}/plan`;
+}
 
 /**
  * @param {unknown} value
@@ -59,24 +65,25 @@ function buildSubscriptionCancellationScheduledEmail(payload = {}) {
   const planDisplayName = resolvePlanDisplayName(payload.planId);
   const currentPeriodEndLabel = formatPeriodEndDate(payload.currentPeriodEnd);
   const name = (payload.name || "").trim();
-  const greeting = name ? `Olá, ${name}.` : "Olá.";
+  const greeting = name ? `Olá, ${escapeHtml(name)}.` : "Olá.";
+  const greetingText = name ? `Olá, ${name}.` : "Olá.";
 
   const bodyHtml = `
     <p style="margin: 0 0 16px; color: #333333;">${greeting}</p>
     <p style="margin: 0 0 16px; color: #333333;">
-      Recebemos sua solicitação de cancelamento da assinatura FIVI360 <strong>${planDisplayName}</strong>.
+      Recebemos sua solicitação de cancelamento da assinatura FIVI360 <strong>${escapeHtml(planDisplayName)}</strong>.
     </p>
     <p style="margin: 0 0 8px; color: #333333;">
       Sua assinatura continuará ativa normalmente até:
     </p>
     <p style="margin: 0 0 20px; color: #1a1a1a; font-size: 18px; font-weight: 600;">
-      ${currentPeriodEndLabel}
+      ${escapeHtml(currentPeriodEndLabel)}
     </p>
     <p style="margin: 0 0 8px; color: #333333; font-weight: 600;">Até essa data você continuará tendo acesso a:</p>
     <ul style="margin: 0 0 20px; padding-left: 20px; color: #333333;">
       <li style="margin-bottom: 6px;">Hotspots</li>
       <li style="margin-bottom: 6px;">Portfólio público</li>
-      <li style="margin-bottom: 0;">Recursos ${planDisplayName}</li>
+      <li style="margin-bottom: 0;">Recursos ${escapeHtml(planDisplayName)}</li>
     </ul>
     <p style="margin: 0 0 8px; color: #333333; font-weight: 600;">Após essa data:</p>
     <ul style="margin: 0 0 20px; padding-left: 20px; color: #555555;">
@@ -95,14 +102,16 @@ function buildSubscriptionCancellationScheduledEmail(payload = {}) {
     html: wrapEmailHtml({
       preheader: `Cancelamento agendado. Acesso ${planDisplayName} até ${currentPeriodEndLabel}.`,
       title: "Cancelamento agendado",
+      subtitle: "Seu acesso continua até o fim do período.",
       bodyHtml,
       ctaLabel: "Gerenciar assinatura",
-      ctaUrl: SUBSCRIPTION_SETTINGS_URL,
+      ctaUrl: getSubscriptionSettingsUrl(),
+      status: "neutral",
     }),
     text: buildPlainText(
       subject,
       [
-        greeting,
+        greetingText,
         `Recebemos sua solicitação de cancelamento da assinatura FIVI360 ${planDisplayName}.`,
         "Sua assinatura continuará ativa normalmente até:",
         currentPeriodEndLabel,
@@ -119,7 +128,7 @@ function buildSubscriptionCancellationScheduledEmail(payload = {}) {
         "",
         "Se mudar de ideia antes do encerramento, você poderá reativar sua assinatura a qualquer momento.",
       ],
-      { label: "Gerenciar assinatura", url: SUBSCRIPTION_SETTINGS_URL },
+      { label: "Gerenciar assinatura", url: getSubscriptionSettingsUrl() },
     ),
   };
 }

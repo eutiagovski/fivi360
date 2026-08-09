@@ -5,9 +5,11 @@
  */
 
 import {
+  isManualPlanSource,
   isPlanAtOrAbove,
   PLAN_IDS,
   PLAN_LIMITS,
+  PLAN_SOURCES,
 } from "@/config/planLimits";
 import { toAppDate } from "@/services/firebase/dates";
 
@@ -140,9 +142,15 @@ export const ENTERPRISE_PLAN_UNAVAILABLE_LABEL = "Em breve";
 
 export const ENTERPRISE_CONTACT_LABEL = "Fale conosco";
 
-export const STUDIO_PLAN_UNAVAILABLE_LABEL = "Em breve";
+/** CTA quando checkout pago está desabilitado (Professional / Studio). */
+export const PAID_PLAN_UNAVAILABLE_LABEL = "Em breve";
+
+/** @deprecated Use PAID_PLAN_UNAVAILABLE_LABEL — mantido por compatibilidade. */
+export const STUDIO_PLAN_UNAVAILABLE_LABEL = PAID_PLAN_UNAVAILABLE_LABEL;
 
 export const BILLING_PORTAL_COMING_SOON_MESSAGE = "Disponível em breve.";
+
+export const MANUAL_PLAN_ACCESS_STATUS_LABEL = "Acesso concedido";
 
 export const CANCEL_AT_PERIOD_END_MESSAGE =
   "Sua assinatura está programada para cancelamento ao fim do período atual.";
@@ -198,13 +206,23 @@ export function isActiveSubscriptionStatus(status) {
 }
 
 /**
- * Studio no Beta: habilitado no frontend por padrão.
+ * Studio no Beta: habilitado no frontend por padrão (quando pagamentos globais on).
  * Opt-out explícito: `REACT_APP_STRIPE_STUDIO_CHECKOUT=false` (ex.: ambiente sem
  * `STRIPE_PRICE_STUDIO` no backend). Fonte de verdade do preço continua no backend.
  * @returns {boolean}
  */
 export function isStudioCheckoutConfigured() {
   return process.env.REACT_APP_STRIPE_STUDIO_CHECKOUT !== "false";
+}
+
+/**
+ * Gate global de checkout pago (Professional / Studio).
+ * Opt-out: `REACT_APP_PAID_CHECKOUT_ENABLED=false` (go-live inicial).
+ * Backend `PAID_CHECKOUT_ENABLED` é a autoridade — não confiar só no frontend.
+ * @returns {boolean}
+ */
+export function isPaidCheckoutEnabled() {
+  return process.env.REACT_APP_PAID_CHECKOUT_ENABLED !== "false";
 }
 
 /**
@@ -217,10 +235,31 @@ export function isActiveStripeBillingProvider(provider) {
 
 /**
  * Indica se o usuário pode cancelar uma assinatura Stripe ativa.
+ * Exige evidência real de assinatura (subscriptionId) e source stripe quando conhecido.
+ * Plano manual / sem subscriptionId → nunca.
+ *
  * @param {UserBilling} billing
+ * @param {{ planSource?: string | null }} [options]
  * @returns {boolean}
  */
-export function canCancelStripeSubscription(billing) {
+export function canCancelStripeSubscription(billing, options = {}) {
+  const planSource = (options.planSource ?? "").toLowerCase().trim();
+
+  if (isManualPlanSource(planSource) || planSource === PLAN_SOURCES.SYSTEM) {
+    return false;
+  }
+
+  const subscriptionId =
+    typeof billing?.subscriptionId === "string" ? billing.subscriptionId.trim() : "";
+
+  if (!subscriptionId) {
+    return false;
+  }
+
+  if (planSource && planSource !== PLAN_SOURCES.STRIPE) {
+    return false;
+  }
+
   const status = (billing.subscriptionStatus ?? "").toLowerCase();
 
   return (
@@ -244,10 +283,14 @@ export const PAYMENTS_COMING_SOON_MESSAGE =
 
 /**
  * Planos com checkout Stripe habilitado no frontend.
- * Backend rejeita se o priceId correspondente não estiver configurado.
+ * Backend rejeita se flag off ou priceId correspondente não estiver configurado.
  * @returns {Set<import("@/config/planLimits").PlanId>}
  */
 export function getStripeCheckoutPlanIds() {
+  if (!isPaidCheckoutEnabled()) {
+    return new Set();
+  }
+
   const ids = new Set([PLAN_IDS.PROFESSIONAL]);
 
   if (isStudioCheckoutConfigured()) {
@@ -449,8 +492,8 @@ export function getUpgradePlanButtonState(targetPlanId, currentPlanId) {
       return { disabled: true, label: "Incluído no seu plano" };
     }
 
-    if (!isStudioCheckoutConfigured()) {
-      return { disabled: true, label: STUDIO_PLAN_UNAVAILABLE_LABEL };
+    if (!isPaidCheckoutEnabled() || !isStudioCheckoutConfigured()) {
+      return { disabled: true, label: PAID_PLAN_UNAVAILABLE_LABEL };
     }
 
     return { disabled: false, label: "Assinar Studio" };
@@ -463,6 +506,10 @@ export function getUpgradePlanButtonState(targetPlanId, currentPlanId) {
 
     if (isPlanAtOrAbove(currentPlanId, PLAN_IDS.PROFESSIONAL)) {
       return { disabled: true, label: "Incluído no seu plano" };
+    }
+
+    if (!isPaidCheckoutEnabled()) {
+      return { disabled: true, label: PAID_PLAN_UNAVAILABLE_LABEL };
     }
 
     return { disabled: false, label: "Assinar Professional" };

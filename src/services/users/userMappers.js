@@ -1,5 +1,10 @@
 import { normalizeBilling } from "@/config/billing";
-import { normalizeUserPlan } from "@/config/planLimits";
+import {
+  getPlanSource,
+  isManualPlanSource,
+  normalizeUserPlan,
+  PLAN_SOURCES,
+} from "@/config/planLimits";
 import { mapMarketingPreferences } from "@/services/users/marketingPreferences";
 import { getPersonalWorkspaceId } from "@/utils/workspace";
 
@@ -32,6 +37,10 @@ export function normalizeSocialLinks(raw) {
  * status/plano de `users.plan` (objeto). Provider inválido é normalizado para Stripe.
  * Entitlement continua em `users.plan` via `normalizeUserPlan`.
  *
+ * RC-MANUAL-PLAN-AND-PAYMENTS-GATE-1:
+ * `plan.source === "manual"` NÃO copia `plan.status` → `subscriptionStatus`
+ * (entitlement ativo ≠ assinatura Stripe).
+ *
  * @param {import("@/config/billing").UserBilling} billing
  * @param {import("firebase/firestore").DocumentData} data
  * @returns {import("@/config/billing").UserBilling}
@@ -63,20 +72,25 @@ function enrichBillingFromUserDoc(billing, data) {
 
   const plan = data.plan;
   if (plan && typeof plan === "object") {
-    if (plan.source === "stripe") {
-      result.provider = "stripe";
-    }
+    const planSource = getPlanSource(plan);
 
-    if (typeof plan.status === "string") {
-      result.subscriptionStatus = plan.status;
+    if (planSource === PLAN_SOURCES.STRIPE) {
+      result.provider = "stripe";
     }
 
     if (typeof plan.id === "string") {
       result.planId = plan.id;
     }
 
-    if ("cancelAtPeriodEnd" in plan) {
-      result.cancelAtPeriodEnd = Boolean(plan.cancelAtPeriodEnd);
+    // Manual: entitlement status ≠ subscription status — preservar billing.free.
+    if (!isManualPlanSource(planSource)) {
+      if (typeof plan.status === "string") {
+        result.subscriptionStatus = plan.status;
+      }
+
+      if ("cancelAtPeriodEnd" in plan) {
+        result.cancelAtPeriodEnd = Boolean(plan.cancelAtPeriodEnd);
+      }
     }
   }
 
@@ -103,6 +117,7 @@ export function mapUserDoc(userId, userData, publicProfileData = null) {
     bio: publicData.bio ?? "",
     plan: userData.plan ?? "starter",
     planId: normalizeUserPlan(userData.plan),
+    planSource: getPlanSource(userData.plan),
     publicSlug: publicData.slug ?? "",
     portfolioEnabled: publicData.portfolioEnabled ?? false,
     socialLinks: normalizeSocialLinks(publicData),

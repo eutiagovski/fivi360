@@ -1,8 +1,14 @@
-const { buildPlainText, wrapEmailHtml } = require("../../emailTemplates/shared");
-const { APP_BASE_URL } = require("../../config/app");
+const {
+  buildPlainText,
+  escapeHtml,
+  wrapEmailHtml,
+} = require("../../emailTemplates/shared");
+const { getAppBaseUrl } = require("../../config/app");
 const { resolvePlanDisplayName } = require("./paymentSuccess");
 
-const REACTIVATE_SUBSCRIPTION_URL = `${APP_BASE_URL}/plan`;
+function getReactivateSubscriptionUrl() {
+  return `${getAppBaseUrl()}/plan`;
+}
 
 /**
  * @param {unknown} value
@@ -60,12 +66,13 @@ function buildSubscriptionCanceledEmail(payload = {}) {
   const planDisplayName = resolvePlanDisplayName(payload.planIdAnterior);
   const canceledAtLabel = formatCanceledDate(payload.canceledAt);
   const name = (payload.name || "").trim();
-  const greeting = name ? `Olá, ${name}!` : "Olá!";
+  const greeting = name ? `Olá, ${escapeHtml(name)}.` : "Olá.";
+  const greetingText = name ? `Olá, ${name}.` : "Olá.";
 
   const bodyHtml = `
     <p style="margin: 0 0 16px; color: #333333;">${greeting}</p>
     <p style="margin: 0 0 16px; color: #333333;">
-      Sua assinatura <strong>${planDisplayName}</strong> foi encerrada em <strong>${canceledAtLabel}</strong>.
+      Sua assinatura <strong>${escapeHtml(planDisplayName)}</strong> foi encerrada em <strong>${escapeHtml(canceledAtLabel)}</strong>.
     </p>
     <p style="margin: 0 0 16px; color: #333333;">
       Seu plano voltou para <strong>Starter</strong>.
@@ -92,14 +99,16 @@ function buildSubscriptionCanceledEmail(payload = {}) {
     html: wrapEmailHtml({
       preheader: `Sua assinatura ${planDisplayName} foi encerrada. Seu plano voltou para Starter.`,
       title: "Assinatura encerrada",
+      subtitle: "Seu plano voltou para Starter.",
       bodyHtml,
       ctaLabel: "Reativar assinatura",
-      ctaUrl: REACTIVATE_SUBSCRIPTION_URL,
+      ctaUrl: getReactivateSubscriptionUrl(),
+      status: "neutral",
     }),
     text: buildPlainText(
       subject,
       [
-        greeting,
+        greetingText,
         `Sua assinatura ${planDisplayName} foi encerrada em ${canceledAtLabel}.`,
         "Seu plano voltou para Starter.",
         "",
@@ -114,7 +123,7 @@ function buildSubscriptionCanceledEmail(payload = {}) {
         "",
         "Você pode reativar sua assinatura a qualquer momento para recuperar todos os recursos do plano pago.",
       ],
-      { label: "Reativar assinatura", url: REACTIVATE_SUBSCRIPTION_URL },
+      { label: "Reativar assinatura", url: getReactivateSubscriptionUrl() },
     ),
   };
 }

@@ -14,7 +14,7 @@ function passwordResetEmail(payload = {}) {
   }
 
   const bodyHtml = `
-    <p style="margin: 0 0 16px; color: #333333;">Olá!</p>
+    <p style="margin: 0 0 16px; color: #333333;">Olá.</p>
     <p style="margin: 0 0 16px; color: #333333;">
       Recebemos uma solicitação para redefinir a senha da sua conta.
     </p>
@@ -32,11 +32,12 @@ function passwordResetEmail(payload = {}) {
       bodyHtml,
       ctaLabel: "Redefinir senha",
       ctaUrl: resetLink,
+      status: "neutral",
     }),
     text: buildPlainText(
       subject,
       [
-        "Olá!",
+        "Olá.",
         "Recebemos uma solicitação para redefinir a senha da sua conta.",
         "Se você não solicitou esta alteração, ignore este e-mail.",
       ],
