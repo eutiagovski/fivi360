@@ -1,4 +1,4 @@
-const WEBP_QUALITY = 0.99;
+const WEBP_QUALITY = 0.90;
 
 /**
  * Processa o arquivo com o pipeline local atual (Canvas → WebP)

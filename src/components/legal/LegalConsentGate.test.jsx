@@ -80,6 +80,7 @@ const { LegalConsentGate } = require("./LegalConsentGate");
 const { LEGAL_VERSIONS } = require("@/config/legal");
 const {
   createUserProfile,
+  getUserFirestoreData,
   saveLegalConsent,
 } = require("@/services/users/userService");
 
@@ -416,6 +417,88 @@ describe("LegalConsentGate — RC-MARKETING-CONSENT-GOOGLE-1", () => {
     const mounted = mountGate(googleUser);
     await flushMicrotasks();
 
+    expect(mounted.container.querySelector('[data-testid="legal-consent-modal"]')).toBeNull();
+    expect(mounted.container.querySelector('[data-testid="dashboard-child"]')).toBeTruthy();
+    mounted.unmount();
+  });
+});
+
+describe("LegalConsentGate — RC-LEGAL-DOCS-GOLIVE-1 version bump", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    global.IS_REACT_ACT_ENVIRONMENT = true;
+    saveLegalConsent.mockResolvedValue(undefined);
+    getUserFirestoreData.mockResolvedValue(null);
+  });
+
+  it("treats consent 1.0 as outdated and shows the modal", async () => {
+    mockEnsureUserStructure.mockResolvedValue({
+      profile: {
+        ...verifiedProfile,
+        legalConsent: {
+          ...verifiedProfile.legalConsent,
+          termsVersion: "1.0",
+          privacyVersion: "1.0",
+        },
+      },
+      gaps: {},
+      repaired: [],
+    });
+
+    const mounted = mountGate(authUser);
+    await flushMicrotasks();
+
+    expect(mounted.container.querySelector('[data-testid="legal-consent-modal"]')).toBeTruthy();
+    expect(mounted.container.querySelector('[data-testid="dashboard-child"]')).toBeNull();
+    mounted.unmount();
+  });
+
+  it("treats consent 1.1 as current and renders children", async () => {
+    expect(LEGAL_VERSIONS.termsVersion).toBe("1.1");
+    expect(LEGAL_VERSIONS.privacyVersion).toBe("1.1");
+
+    mockEnsureUserStructure.mockResolvedValue({
+      profile: verifiedProfile,
+      gaps: {},
+      repaired: [],
+    });
+
+    const mounted = mountGate(authUser);
+    await flushMicrotasks();
+
+    expect(mounted.container.querySelector('[data-testid="legal-consent-modal"]')).toBeNull();
+    expect(mounted.container.querySelector('[data-testid="dashboard-child"]')).toBeTruthy();
+    mounted.unmount();
+  });
+
+  it("accepting 1.1 unlocks the app", async () => {
+    mockEnsureUserStructure.mockResolvedValue({
+      profile: {
+        ...verifiedProfile,
+        legalConsent: {
+          ...verifiedProfile.legalConsent,
+          termsVersion: "1.0",
+          privacyVersion: "1.0",
+        },
+      },
+      gaps: {},
+      repaired: [],
+    });
+
+    const mounted = mountGate(authUser);
+    await flushMicrotasks();
+
+    await act(async () => {
+      mounted.container
+        .querySelector('[data-testid="legal-consent-accept-btn"]')
+        .dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    expect(saveLegalConsent).toHaveBeenCalledWith(
+      "uid-1",
+      "modal_existing_user",
+      {},
+    );
     expect(mounted.container.querySelector('[data-testid="legal-consent-modal"]')).toBeNull();
     expect(mounted.container.querySelector('[data-testid="dashboard-child"]')).toBeTruthy();
     mounted.unmount();

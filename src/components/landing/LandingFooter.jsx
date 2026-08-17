@@ -14,7 +14,7 @@ const NAV_LINKS = [
 const LEGAL_LINKS = [
   { label: "Termos de Uso", to: "/termos" },
   { label: "Política de Privacidade", to: "/privacidade" },
-  { label: "Ajuda", to: "/help" },
+  { label: "Ajuda", to: "/ajuda" },
 ];
 
 /** URLs sociais compartilhadas com a LP de acesso antecipado (vazias → ícones disabled). */

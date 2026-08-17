@@ -114,7 +114,7 @@ export const AppHeader = ({ onMenuClick, isMenuOpen = false }) => {
           className="inline-flex items-center"
           data-testid="app-header-logo"
         >
-          <BrandLogo className="h-7" />
+          <BrandLogo className="h-4 md:h-5" />
         </Link>
       </div>
 
@@ -168,7 +168,7 @@ export const AppHeader = ({ onMenuClick, isMenuOpen = false }) => {
               asChild
               className="rounded-lg cursor-pointer focus:bg-zinc-900 focus:text-white"
             >
-              <Link to="/help" data-testid="app-header-menu-help">
+              <Link to="/ajuda" data-testid="app-header-menu-help">
                 <HelpCircle className="mr-2 h-4 w-4" />
                 Ajuda
               </Link>

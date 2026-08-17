@@ -66,4 +66,12 @@ describe("validateAccessEarlyForm — RC-LP-PRELAUNCH-FORM-1", () => {
     expect(result.valid).toBe(true);
     expect(result.profession).toBe("Fotógrafo");
   });
+
+  it("maps estudante to the architecture/design student label", () => {
+    const result = validateAccessEarlyForm(base({ professionId: "estudante" }));
+    expect(result.valid).toBe(true);
+    expect(result.profession).toBe(
+      "Estudante de Arquitetura, Design ou curso superior relacionado",
+    );
+  });
 });

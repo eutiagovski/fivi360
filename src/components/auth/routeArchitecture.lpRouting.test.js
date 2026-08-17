@@ -36,6 +36,14 @@ describe("App routing architecture — RC-LP-ROUTING-1", () => {
     );
   });
 
+  it("/ajuda is PUBLIC_ALWAYS", () => {
+    expect(appSource).toMatch(/path="\/ajuda\/\*"/);
+    expect(appSource).toMatch(/HelpCenterApp/);
+    expect(appSource).toMatch(
+      /PublicAlwaysRoute>\s*\n?\s*<HelpCenterApp/,
+    );
+  });
+
   it("/login and /register remain GUEST_ONLY", () => {
     expect(appSource).toMatch(
       /path="\/login"\s+element=\{<GuestRoute><Login/,

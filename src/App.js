@@ -13,7 +13,6 @@ import { NewProject } from './pages/NewProject';
 import { Viewer } from './pages/Viewer';
 import { Settings } from './pages/Settings';
 import { Plan } from './pages/Plan';
-import { Help } from './pages/Help';
 import { Images } from './pages/Images';
 import { PublicSharedProject } from './pages/PublicSharedProject';
 import { PublicSharedProjectImage } from './pages/PublicSharedProjectImage';
@@ -37,6 +36,7 @@ import { NotFound } from './pages/NotFound';
 import { EmbedProjectPage } from './pages/EmbedProject';
 import { AccessEarlyLandingPage } from './landing-pages/access-early';
 import { AccessEarlySuccessPage } from './landing-pages/access-early/AccessEarlySuccessPage';
+import { HelpCenterApp } from './help';
 
 /**
  * Classificação de rotas (RC-LP-ROUTING-1):
@@ -79,6 +79,18 @@ function App() {
           <Route path="/termos" element={<TermsOfUse />} />
           <Route path="/privacidade" element={<PrivacyPolicy />} />
 
+          {/* PUBLIC_ALWAYS — Central de Ajuda */}
+          <Route
+            path="/ajuda/*"
+            element={
+              <PublicAlwaysRoute>
+                <HelpCenterApp />
+              </PublicAlwaysRoute>
+            }
+          />
+          <Route path="/help" element={<Navigate to="/ajuda" replace />} />
+          <Route path="/help/*" element={<Navigate to="/ajuda" replace />} />
+
           {/* PUBLIC_ALWAYS — Home institucional */}
           <Route path="/" element={<PublicAlwaysRoute><Landing /></PublicAlwaysRoute>} />
 
@@ -110,7 +122,6 @@ function App() {
           <Route path="/plan" element={<ProtectedRoute><Layout><Plan /></Layout></ProtectedRoute>} />
           <Route path="/pricing" element={<Navigate to="/plan" replace />} />
           <Route path="/settings" element={<ProtectedRoute><Layout><Settings /></Layout></ProtectedRoute>} />
-          <Route path="/help" element={<ProtectedRoute><Layout><Help /></Layout></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

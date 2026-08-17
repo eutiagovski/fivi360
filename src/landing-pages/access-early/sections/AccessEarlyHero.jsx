@@ -13,7 +13,7 @@ export function AccessEarlyHero() {
   return (
     <section
       id="topo"
-      className="relative overflow-hidden pt-16 md:pt-24 pb-16 md:pb-20 min-h-[50vh] flex items-center"
+      className="relative overflow-hidden pt-16 md:pt-24 pb-16 md:pb-20 min-h-[80vh] flex items-center"
       data-testid="access-early-hero"
     >
       <div

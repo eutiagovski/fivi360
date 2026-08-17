@@ -43,6 +43,20 @@ describe("decideConsentStatusAfterLoad", () => {
       }),
     ).toBe(LEGAL_CONSENT_GATE_STATUS.CONSENT_REQUIRED);
   });
+
+  it("returns consent_required for legalConsent 1.0 after 1.1 bump", () => {
+    expect(LEGAL_VERSIONS.termsVersion).toBe("1.1");
+    expect(
+      decideConsentStatusAfterLoad({
+        legalConsent: {
+          termsAccepted: true,
+          privacyAccepted: true,
+          termsVersion: "1.0",
+          privacyVersion: "1.0",
+        },
+      }),
+    ).toBe(LEGAL_CONSENT_GATE_STATUS.CONSENT_REQUIRED);
+  });
 });
 
 describe("legalConsentGateReducer", () => {

@@ -30,7 +30,7 @@ export const ACCESS_EARLY_PROFESSIONS = Object.freeze([
   { id: "designer_interiores", label: "Designer de interiores" },
   { id: "escritorio", label: "Escritório de arquitetura" },
   { id: "renderista", label: "Renderista / Artista 3D" },
-  { id: "estudante", label: "Estudante" },
+  { id: "estudante", label: "Estudante de Arquitetura, Design ou curso superior relacionado" },
   { id: "outro", label: "Outro" },
 ]);
 

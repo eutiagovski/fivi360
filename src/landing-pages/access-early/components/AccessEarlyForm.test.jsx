@@ -312,4 +312,35 @@ describe("AccessEarlyForm — RC-LP-PRELAUNCH-SUCCESS-1", () => {
     expect(sources).not.toMatch(/createUserWithEmailAndPassword/);
     expect(sources).not.toMatch(/createUserProfile/);
   });
+
+  it("shows architecture/design student option and submits it as profession", async () => {
+    const mounted = mount();
+    const select = mounted.container.querySelector(
+      '[data-testid="access-early-profession-select"]',
+    );
+    const option = [...select.querySelectorAll("option")].find((el) =>
+      el.textContent.includes(
+        "Estudante de Arquitetura, Design ou curso superior relacionado",
+      ),
+    );
+
+    expect(option).toBeTruthy();
+    expect(option.value).toBe("estudante");
+
+    fillValid(mounted.container, { professionId: "estudante" });
+
+    await act(async () => {
+      mounted.container
+        .querySelector('[data-testid="access-early-form"]')
+        .dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+    });
+    await flush();
+
+    expect(mockSubmitPrelaunchLead).toHaveBeenCalledWith(
+      expect.objectContaining({
+        profession: "Estudante de Arquitetura, Design ou curso superior relacionado",
+      }),
+    );
+    mounted.unmount();
+  });
 });

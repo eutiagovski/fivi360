@@ -62,7 +62,7 @@ export function LegalSection({ id, title, children }) {
  * Layout de leitura focada para páginas legais (termos, privacidade).
  * Header e cabeçalho da página fixos; apenas o artigo com os tópicos rola.
  */
-export function LegalPageLayout({ title, sections, children, lastUpdated }) {
+export function LegalPageLayout({ title, sections, children, lastUpdated, version }) {
   const { user } = useAuth();
   const contentRef = useRef(null);
   const [activeId, setActiveId] = useState(sections[0]?.id ?? "");
@@ -158,9 +158,15 @@ export function LegalPageLayout({ title, sections, children, lastUpdated }) {
               <h1 className="text-2xl sm:text-3xl font-light text-white tracking-tight mb-2 sm:mb-3">
                 {title}
               </h1>
-              {lastUpdated && (
+              {(lastUpdated || version) && (
                 <p className="text-sm text-zinc-500">
-                  Última atualização: {lastUpdated}
+                  {lastUpdated ? `Última atualização: ${lastUpdated}` : null}
+                  {lastUpdated && version ? (
+                    <span className="text-zinc-600"> · </span>
+                  ) : null}
+                  {version ? (
+                    <span data-testid="legal-page-version">Versão {version}</span>
+                  ) : null}
                 </p>
               )}
             </header>
